@@ -1,0 +1,6 @@
+include README.rst
+include LICENSE
+include requirements.txt
+recursive-include ckanext/data_gov_gr *.html *.json *.js *.less *.css *.mo *.yml
+recursive-include ckanext/data_gov_gr/migration *.ini *.py *.mako
+recursive-include ckanext/data_gov_gr/public *.*

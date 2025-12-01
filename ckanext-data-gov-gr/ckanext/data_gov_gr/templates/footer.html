@@ -1,0 +1,91 @@
+{% set stats_destination_url = config.get('ckanext.data_gov_gr.stats.destination.url', '/') %}
+{% set footer_source_code_url = config.get('ckanext.data_gov_gr.footer.source_code_url') %}
+
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    {% block footer_content %}
+    <div class="row">
+      {% block footer_nav %}
+      <div class="col-md-3 footer-section">
+        <h5>{{ _('About') }}</h5>
+        <ul class="list-unstyled">
+          {% block footer_about %}
+            <li><a href="{{ h.url_for('/pages/about-portal') }}">{{ _('About {0}').format(g.site_title) }}</a></li>
+            <li><a href="{{ 'https://data-gov-gr.gitbook.io/guides/texnika-egxeiridia' }}">{{ _('API Documentation') }}</a></li>
+            <li><a href="{{ 'https://data.europa.eu/en' }}">{{ _('data.europa.eu') }}</a></li>
+            {% if footer_source_code_url %}
+              <li><a href="{{ footer_source_code_url }}">{{ _('Πηγαιος κωδικας') }}</a></li>
+            {% endif %}
+          {% endblock %}
+        </ul>
+      </div>
+
+      <div class="col-md-3 footer-section">
+        <h5>{{ _('Menu') }}</h5>
+        <ul class="list-unstyled">
+          {% block footer_data %}
+            <li><a href="{{ h.url_for('dataset.search') }}">{{ _('Datasets') }}</a></li>
+            <li><a href="{{ h.url_for('/data-service') }}">{{ _('Data services') }}</a></li>
+            <li><a href="{{ h.url_for('/decision') }}">{{ _('Decisions') }}</a> </li>
+            <li><a href="{{ h.url_for('organization.index') }}">{{ _('Organizations') }}</a></li>
+            <li><a href="{{ h.url_for('/showcases') }}">{{ _('Showcases') }}</a></li>
+          {% endblock %}
+        </ul>
+      </div>
+
+      <div class="col-md-3 footer-section">
+        <h5>{{ _('Community') }}</h5>
+        <ul class="list-unstyled">
+          {% block footer_community %}
+            <li><a href="{{ h.url_for('/contact') }}">{{ _('Contact Us') }}</a></li>
+            <li><a href="{{ h.url_for('/more') }}">{{ _('Help') }}</a></li>
+            <li><a href="{{ h.url_for('/blog') }}">{{ _('News') }}</a></li>
+            <li><a href="{{ h.url_for(stats_destination_url) }}">{{ _('Statistics') }}</a></li>
+          {% endblock %}
+        </ul>
+      </div>
+      {% endblock %}
+
+      <div class="col-md-3 footer-section">
+        <h5>{{ _('Language') }}</h5>
+        <ul class="list-unstyled">
+           <li>
+              {% block footer_lang %}
+                {% snippet "snippets/language_selector.html" %}
+              {% endblock %}
+           </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="row footer-bottom">
+      <div class="col-md-8">
+        <div class="footer-logos">
+          <a href="https://www.gov.gr">
+            <img src="{{ h.url_for_static('/images/government/government-logo2.svg') }}" alt="government-logo" height="30">
+          </a>
+          <a href="http://www.opendefinition.org/okd/" class="ms-3">
+            <img src="{{ h.url_for_static('/base/images/od_80x15_blue.png') }}" alt="Open Data">
+          </a>
+        </div>
+      </div>
+      <div class="col-md-4 attribution text-end">
+        {% block footer_attribution %}
+          <p>{% trans %}<strong>Powered by</strong> <a class="hide-text" href="http://ckan.org">CKAN</a>{% endtrans %}</p>
+        {% endblock %}
+      </div>
+    </div>
+    {% endblock %}
+  </div>
+
+  <!-- botakis script -->
+  {% if config.get('botakis.webchat.url') %}
+    <script src="{{ config['botakis.webchat.url'] }}"></script>
+  {% endif %}
+
+  <!-- accessibility widget -->
+  {% if h.get_config_as_bool('accessibility.widget.enabled') %}
+    <script src="https://website-widgets.pages.dev/dist/sienna.min.js" defer></script>
+  {% endif %}
+
+</footer>

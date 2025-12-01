@@ -1,0 +1,494 @@
+# Translations template for ckanext-data-gov-gr.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the ckanext-data-gov-gr
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-data-gov-gr 0.0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-06-26 20:00+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ckanext/data_gov_gr/plugin.py:138
+msgid "Publisher Type"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:11
+msgid "Sysadmin settings"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:13
+msgid "Admin"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:19
+msgid "View profile"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:27
+msgid "View dashboard"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:29
+msgid "Dashboard"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:35
+#: ckanext/data_gov_gr/templates/header.html:37
+msgid "Profile settings"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:44
+msgid "Log out"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:53
+msgid "Account"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:56
+msgid "Log in"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:58
+#: ckanext/data_gov_gr/templates/user/new.html:8
+msgid "Register"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:93
+msgid "Toggle navigation"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:105
+msgid "Datasetss"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:106
+msgid "Data Services"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:107
+msgid "Decisions"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:108
+msgid "Organizations"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:109
+msgid "About"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:117
+msgid "Search Datasets..."
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:118
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:27
+msgid "Search"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:118
+#: ckanext/data_gov_gr/templates/package/search.html:35
+#: ckanext/data_gov_gr/templates/package/search.html:38
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:4
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:4
+msgid "Search datasets..."
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/header.html:119
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:26
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:19
+msgid "Submit"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/macros/form/input.html:33
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/repeating_subfields.html:36
+msgid "Data Service"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/organization/read.html:3
+msgid "Add Dataset - Data Service"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/organization/snippets/info.html:28
+msgid "Deleted"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/organization/snippets/info.html:38
+msgid "read more"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/organization/snippets/info.html:41
+msgid "There is no description for this organization"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/organization/snippets/info.html:49
+msgid "Followers"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/organization/snippets/info.html:53
+msgid "Datasets"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/organization/snippets/info.html:57
+msgid "Members"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/package/search.html:21
+msgid "Relevance"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/package/search.html:22
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:5
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:5
+msgid "Name Ascending"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/package/search.html:23
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:5
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:5
+msgid "Name Descending"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/package/search.html:24
+msgid "Last Modified"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/repeating_subfields.html:17
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:76
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:77
+msgid "Remove"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/repeating_subfields.html:60
+msgid "These fields have been removed, click update below to save your changes."
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/repeating_subfields.html:62
+msgid "These fields have been removed."
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/repeating_subfields.html:110
+msgid "Add"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:16
+msgid "Choose Location"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:23
+msgid "Location Search"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:35
+msgid "Name"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:36
+msgid "Country"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:37
+msgid "Region"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:38
+msgid "Population"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:39
+msgid "Latitude"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:40
+msgid "Longitude"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:47
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:22
+msgid "Confirm"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/select-location.html:48
+msgid "Cancel"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:37
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:37
+msgid "Order by"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:46
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:46
+msgid "Go"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:81
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:82
+msgid "Filter Results"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:88
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:89
+msgid "<p class=\"extra\">Please try another search.</p>"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/advanced_search_form.html:94
+#: ckanext/data_gov_gr/templates/snippets/search_form.html:95
+msgid ""
+"<p id=\"search-error\"><strong>There was an error while searching.</strong> "
+"Please try again.</p>"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/facet_list.html:78
+msgid "Show More {facet_type}"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/facet_list.html:81
+msgid "Show Only Popular {facet_type}"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/facet_list.html:85
+msgid "There are no {facet_type} that match this search"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/filters.html:16
+msgid "Επιπλέον Φίλτρο"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/filters.html:17
+msgid "Προσθέστε φίλτρο"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/license.html:10
+msgid "No License Provided"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/license.html:24
+msgid "License"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/license.html:31
+msgid "This dataset satisfies the Open Definition."
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/package_item.html:17
+msgid "Copied!"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:16
+msgid "{number} dataset found for \"{query}\""
+msgid_plural "{number} datasets found for \"{query}\""
+msgstr[0] ""
+msgstr[1] ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:17
+msgid "No datasets found for \"{query}\""
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:18
+msgid "{number} dataset found"
+msgid_plural "{number} datasets found"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:19
+msgid "No datasets found"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:22
+msgid "{number} group found for \"{query}\""
+msgid_plural "{number} groups found for \"{query}\""
+msgstr[0] ""
+msgstr[1] ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:23
+msgid "No groups found for \"{query}\""
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:24
+msgid "{number} group found"
+msgid_plural "{number} groups found"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:25
+msgid "No groups found"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:28
+msgid "{number} organization found for \"{query}\""
+msgid_plural "{number} organizations found for \"{query}\""
+msgstr[0] ""
+msgstr[1] ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:29
+msgid "No organizations found for \"{query}\""
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:30
+msgid "{number} organization found"
+msgid_plural "{number} organizations found"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ckanext/data_gov_gr/templates/snippets/search_result_text.html:31
+msgid "No organizations found"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/snippets/social.html:5
+msgid "Social"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/login.html:9
+#: ckanext/data_gov_gr/templates/user/login.html:12
+#: ckanext/data_gov_gr/templates/user/login.html:21
+#: ckanext/data_gov_gr/templates/user/snippets/login_form.html:41
+#: ckanext/data_gov_gr/templates/user/snippets/login_form.html:49
+msgid "Login"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/login.html:23
+msgid "Authentication Required"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/login.html:39
+msgid "Need an Account?"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/login.html:41
+msgid "Then sign right up, it only takes a minute."
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/login.html:45
+#: ckanext/data_gov_gr/templates/user/login.html:47
+msgid "Create an Account"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/login.html:60
+msgid "Forgotten your password?"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/login.html:62
+msgid "No problem, use our password recovery form to reset it."
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/login.html:66
+#: ckanext/data_gov_gr/templates/user/login.html:68
+msgid "Forgot your password?"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new.html:11
+msgid "Registration"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new.html:19
+msgid "Register for an Account"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new.html:31
+msgid "Why Sign Up?"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new.html:33
+msgid "Create datasets, groups and other exciting things"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:18
+msgid "Username"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:18
+msgid "username"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:19
+msgid "Full Name"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:19
+msgid "Joe Bloggs"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:20
+msgid "Email"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:20
+msgid "joe@example.com"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:21
+#: ckanext/data_gov_gr/templates/user/snippets/login_form.html:19
+msgid "Password"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:28
+msgid "Profile picture"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:28
+msgid "Profile picture URL"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:44
+msgid "Register to the system"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:50
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:53
+msgid "Create Account"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/new_user_form.html:51
+msgid "Create SSO Account"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/request_reset.html:9
+msgid "Reset your password"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/request_reset.html:15
+msgid "Email or username"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/request_reset.html:25
+#: ckanext/data_gov_gr/templates/user/request_reset.html:32
+msgid "Request Reset"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/request_reset.html:26
+msgid "Request SSO Reset"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/snippets/login_form.html:18
+msgid "Username or Email"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/snippets/login_form.html:20
+msgid "Remember me"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/snippets/login_form.html:33
+msgid "Sign in with Google"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/snippets/login_form.html:35
+msgid "Sign in with AzureAD"
+msgstr ""
+
+#: ckanext/data_gov_gr/templates/user/snippets/login_form.html:39
+#: ckanext/data_gov_gr/templates/user/snippets/login_form.html:45
+msgid "SSO"
+msgstr ""
+

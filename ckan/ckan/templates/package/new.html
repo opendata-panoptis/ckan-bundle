@@ -1,0 +1,12 @@
+<!-- Δημιουργία Dataset -->
+{% if not h.organizations_available('create_dataset')
+  and not h.check_config_permission('ckan.auth.create_unowned_dataset') %}
+  <!-- Σφάλμα Δημιουργίας Dataset-->
+  {% include "package/snippets/cannot_create_package.html" %}
+
+{% else %}
+  <!-- Βάσης Φόρμας Δημιουργίας Dataset-->
+  {% extends "package/base_form_page.html" %}
+
+  {% block subtitle %}{{ h.humanize_entity_type('package', dataset_type, 'create title') or _('Create Dataset') }}{% endblock %}
+{% endif  %}

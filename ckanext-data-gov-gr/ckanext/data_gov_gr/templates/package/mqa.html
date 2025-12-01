@@ -1,0 +1,397 @@
+{% extends "package/read_base.html" %}
+
+{% block subtitle %}{{ _('Metadata Quality Assessment') }} - {{ super() }}{% endblock %}
+
+{% block primary_content_inner %}
+  <h1>{{ _('Metadata Quality Assessment') }}</h1>
+
+  <div class="mqa-dashboard">
+    <!-- Overall Score -->
+    <div class="mqa-overall-score">
+      <div class="score-circle {{ display_data.overall.quality_level }}">
+        <span class="score-number">{{ display_data.overall.formatted_percentage }}</span>
+      </div>
+      <div class="score-label">
+        <h3>{{ _('Overall Quality') }}</h3>
+        <p>{{ display_data.overall.formatted_score }} / {{ display_data.overall.formatted_max_score }} {{ _('points') }}</p>
+
+        {% if display_data.overall.quality_level == 'excellent' %}
+          <span class="label label-success">{{ _('Excellent') }}</span>
+        {% elif display_data.overall.quality_level == 'good' %}
+          <span class="label label-info">{{ _('Good') }}</span>
+        {% elif display_data.overall.quality_level == 'sufficient' %}
+          <span class="label label-warning">{{ _('Sufficient') }}</span>
+        {% else %}
+          <span class="label label-important">{{ _('Poor') }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Dimensions (Combined Quality Dimensions and Distribution Quality) -->
+    <div class="mqa-dimensions container-fluid">
+      <h3>{{ _('Dimensions') }}</h3>
+
+      <div class="row">
+        <div class="col-md-6">
+          <!-- Accessibility -->
+          <div class="panel panel-default dimension-item">
+            <div class="panel-heading">
+              <h4 class="panel-title">{{ _('Accessibility') }}</h4>
+            </div>
+            <div class="panel-body">
+              <div class="progress">
+                <div class="progress-bar" style="width: {{ display_data.dimensions.accessibility.percentage }}%"></div>
+              </div>
+              <div class="dimension-score">{{ display_data.dimensions.accessibility.formatted_score }} / {{ display_data.dimensions.accessibility.formatted_max_score }}</div>
+              <div class="dimension-description">
+                <p>{{ _('How easily the data can be accessed once discovered.') }}</p>
+              </div>
+
+              {% if display_data.dataset_criteria %}
+                <div class="dimension-distribution-quality row">
+                  <div class="col-xs-6 col-sm-4 criterion">
+                    <label>{{ _('Download URL') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.accessibility.has_download_url|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-4 criterion">
+                    <label>{{ _('Download URL is accessible') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.accessibility.download_url_accessible|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-4 criterion">
+                    <label>{{ _('Access URL is accessible') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.accessibility.access_url_accessible|round|int }}%</div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <!-- Reusability -->
+          <div class="panel panel-default dimension-item">
+            <div class="panel-heading">
+              <h4 class="panel-title">{{ _('Reusability') }}</h4>
+            </div>
+            <div class="panel-body">
+              <div class="progress">
+                <div class="progress-bar" style="width: {{ display_data.dimensions.reusability.percentage }}%"></div>
+              </div>
+              <div class="dimension-score">{{ display_data.dimensions.reusability.formatted_score }} / {{ display_data.dimensions.reusability.formatted_max_score }}</div>
+              <div class="dimension-description">
+                <p>{{ _('How clearly the conditions for reuse are communicated.') }}</p>
+              </div>
+
+              {% if display_data.dataset_criteria %}
+                <div class="dimension-distribution-quality row">
+                  <div class="col-xs-6 col-sm-4 criterion">
+                    <label>{{ _('Access restrictions') }}</label>
+                    <div class="value">{% if display_data.dimensions.reusability.criteria.has_access_rights %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-4 criterion">
+                    <label>{{ _('License information') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.metadata_completeness.has_license|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-4 criterion">
+                    <label>{{ _('License vocabulary') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.metadata_completeness.has_license_in_vocabulary|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-4 criterion">
+                    <label>{{ _('Access restrictions vocabulary') }}</label>
+                    <div class="value">{% if display_data.dimensions.reusability.criteria.access_rights_in_vocabulary %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-4 criterion">
+                    <label>{{ _('Contact point') }}</label>
+                    <div class="value">{% if display_data.dimensions.reusability.criteria.has_contact_point %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-4 criterion">
+                    <label>{{ _('Publisher') }}</label>
+                    <div class="value">{% if display_data.dimensions.reusability.criteria.has_publisher %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <!-- Contextuality -->
+          <div class="panel panel-default dimension-item">
+            <div class="panel-heading">
+              <h4 class="panel-title">{{ _('Contextuality') }}</h4>
+            </div>
+            <div class="panel-body">
+              <div class="progress">
+                <div class="progress-bar" style="width: {{ display_data.dimensions.contextuality.percentage }}%"></div>
+              </div>
+              <div class="dimension-score">{{ display_data.dimensions.contextuality.formatted_score }} / {{ display_data.dimensions.contextuality.formatted_max_score }}</div>
+              <div class="dimension-description">
+                <p>{{ _('Additional context that helps users understand the data.') }}</p>
+              </div>
+
+              {% if display_data.dataset_criteria %}
+                <div class="dimension-distribution-quality row">
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('File size') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.documentation.has_size|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('Rights') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.documentation.has_rights|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('Date of issue') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.documentation.has_issue_date|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('Modification date') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.documentation.has_modification_date|round|int }}%</div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <!-- Findability -->
+          <div class="panel panel-default dimension-item">
+            <div class="panel-heading">
+              <h4 class="panel-title">{{ _('Findability') }}</h4>
+            </div>
+            <div class="panel-body">
+              <div class="progress">
+                <div class="progress-bar" style="width: {{ display_data.dimensions.findability.percentage }}%"></div>
+              </div>
+              <div class="dimension-score">{{ display_data.dimensions.findability.formatted_score }} / {{ display_data.dimensions.findability.formatted_max_score }}</div>
+              <div class="dimension-description">
+                <p>{{ _('How easily the dataset can be discovered through searches.') }}</p>
+              </div>
+
+              <div class="dimension-distribution-quality row">
+                <div class="col-xs-6 col-sm-3 criterion">
+                  <label>{{ _('Keyword usage') }}</label>
+                  <div class="value">{% if display_data.dimensions.findability.criteria.has_keywords %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</div>
+                </div>
+                <div class="col-xs-6 col-sm-3 criterion">
+                  <label>{{ _('Categories') }}</label>
+                  <div class="value">{% if display_data.dimensions.findability.criteria.has_categories %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</div>
+                </div>
+                <div class="col-xs-6 col-sm-3 criterion">
+                  <label>{{ _('Geo search') }}</label>
+                  <div class="value">{% if display_data.dimensions.findability.criteria.has_spatial %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</div>
+                </div>
+                <div class="col-xs-6 col-sm-3 criterion">
+                  <label>{{ _('Time based search') }}</label>
+                  <div class="value">{% if display_data.dimensions.findability.criteria.has_temporal %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <!-- Interoperability -->
+          <div class="panel panel-default dimension-item">
+            <div class="panel-heading">
+              <h4 class="panel-title">{{ _('Interoperability') }}</h4>
+            </div>
+            <div class="panel-body">
+              <div class="progress">
+                <div class="progress-bar" style="width: {{ display_data.dimensions.interoperability.percentage }}%"></div>
+              </div>
+              <div class="dimension-score">{{ display_data.dimensions.interoperability.formatted_score }} / {{ display_data.dimensions.interoperability.formatted_max_score }}</div>
+              <div class="dimension-description">
+                <p>{{ _('How easily the data can be integrated with other data and systems.') }}</p>
+              </div>
+
+              {% if display_data.dataset_criteria %}
+                <div class="dimension-distribution-quality row">
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('Format') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.format_quality.has_format|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('Media type') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.format_quality.has_media_type|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('Format/media type in vocabulary') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.format_quality.format_media_type_in_vocabulary|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('Open format') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.format_quality.is_open_format|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('Machine-readable format') }}</label>
+                    <div class="value">{{ display_data.dataset_criteria.format_quality.is_machine_readable|round|int }}%</div>
+                  </div>
+                  <div class="col-xs-6 col-sm-3 criterion">
+                    <label>{{ _('DCAT-AP compliance') }}</label>
+                    <div class="value">{% if display_data.dimensions.interoperability.criteria.is_dcat_ap_compliant %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Individual Distribution Quality -->
+    {% if display_data.distributions and display_data.distributions|length > 0 %}
+      <div class="mqa-distribution-quality">
+        <h3>{{ _('Individual Distribution Quality') }}</h3>
+        <p>{{ _('Quality assessment for individual distributions (resources) in this dataset.') }}</p>
+
+        <div class="distribution-quality-list">
+          {% for dist in display_data.distributions %}
+            <div class="distribution-item">
+              <div class="distribution-header">
+                <h4>{{ dist.name or _('Unnamed Resource') }}</h4>
+                <div class="distribution-format">{{ dist.format }}</div>
+                <div class="distribution-score {{ dist.quality_level }}">
+                  {{ dist.formatted_percentage }}
+                </div>
+                <button class="distribution-toggle" aria-expanded="false" aria-controls="distribution-details-{{ loop.index }}">
+                  <i class="fa fa-chevron-down"></i>
+                  <span class="sr-only">{{ _('Toggle details') }}</span>
+                </button>
+              </div>
+
+              <div id="distribution-details-{{ loop.index }}" class="distribution-details collapsed" style="display: none;">
+  {% if dist.criteria %}
+    <div class="criteria-section">
+      <h5>{{ _('Accessibility') }}</h5>
+      <p>{{ _('Download URL') }}: {% if dist.criteria.has_download_url %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+
+      {% if loop.first and dist.most_frequent_access_url_status_codes %}
+        <p>{{ _('Most frequent accessURL status codes') }}:</p>
+        <ul>
+          {% for status_code, count in dist.most_frequent_access_url_status_codes %}
+            <li>{{ status_code }} ({{ count }} times)</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if loop.first and dist.most_frequent_download_url_status_codes %}
+        <p>{{ _('Most frequent downloadURL status codes') }}:</p>
+        <ul>
+          {% for status_code, count in dist.most_frequent_download_url_status_codes %}
+            <li>{{ status_code }} ({{ count }} times)</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+
+    <div class="criteria-section">
+      <h5>{{ _('Reusability') }}</h5>
+      <p>{{ _('License information') }}: {% if dist.criteria.has_license %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+      <p>{{ _('License vocabulary') }}: {% if dist.criteria.has_license_in_vocabulary %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+    </div>
+
+    <div class="criteria-section">
+      <h5>{{ _('Contextuality') }}</h5>
+      <p>{{ _('File size') }}: {% if dist.criteria.has_size %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+      <p>{{ _('Rights') }}: {% if dist.criteria.has_rights %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+      <p>{{ _('Modification date') }}: {% if dist.criteria.has_modification_date %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+      <p>{{ _('Date of issue') }}: {% if dist.criteria.has_issue_date %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+    </div>
+
+    <div class="criteria-section">
+      <h5>{{ _('Interoperability') }}</h5>
+      <p>{{ _('Format') }}: {% if dist.criteria.has_format %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+      <p>{{ _('Media type') }}: {% if dist.criteria.has_media_type %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+      <p>{{ _('Format/media type in vocabulary') }}: {% if dist.criteria.format_media_type_in_vocabulary %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+      <p>{{ _('Open format') }}: {% if dist.criteria.is_open_format %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+      <p>{{ _('Machine-readable format') }}: {% if dist.criteria.is_machine_readable %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</p>
+    </div>
+  {% endif %}
+</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+
+  </div>
+{% endblock %}
+
+{% block secondary_content %}
+  {{ super() }}
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">{{ _('About MQA') }}</h2>
+    <div class="module-content">
+      <p>
+        {{ _('Metadata Quality Assessment (MQA) evaluates how well your dataset is described, making it easier to find, access, and reuse.') }}
+      </p>
+      <p>
+        {{ _('Improve your score by adding more metadata to your dataset.') }}
+      </p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  <link rel="stylesheet" href="/mqa_styles.css" />
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <!-- Load Bootstrap JS for collapse functionality -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Ensure all distribution details are collapsed initially
+      $('.distribution-details').addClass('collapsed').hide();
+      $('.distribution-toggle').attr('aria-expanded', 'false');
+
+      // Add click handlers to distribution headers and toggle buttons
+      $('.distribution-header').on('click', function(e) {
+        // Don't toggle if clicking on the score circle
+        if ($(e.target).closest('.distribution-score').length) {
+          return;
+        }
+
+        var $header = $(this);
+        var $toggle = $header.find('.distribution-toggle');
+        var $details = $header.next('.distribution-details');
+
+        // Check if details are currently collapsed
+        var isCollapsed = $details.hasClass('collapsed');
+
+        // Toggle the collapsed state
+        if (isCollapsed) {
+          // Show the details
+          $details.removeClass('collapsed').slideDown(300);
+          $toggle.attr('aria-expanded', 'true');
+          $toggle.find('i').css('transform', 'rotate(180deg)');
+        } else {
+          // Hide the details
+          $details.addClass('collapsed').slideUp(300);
+          $toggle.attr('aria-expanded', 'false');
+          $toggle.find('i').css('transform', 'rotate(0deg)');
+        }
+      });
+
+      // Prevent the click on the toggle button from bubbling up to the header
+      $('.distribution-toggle').on('click', function(e) {
+        e.stopPropagation();
+        $(this).closest('.distribution-header').trigger('click');
+      });
+
+      // Initialize Bootstrap collapse for the accordion
+      $('.panel-collapse').collapse({
+        toggle: false
+      });
+    });
+  </script>
+{% endblock %}

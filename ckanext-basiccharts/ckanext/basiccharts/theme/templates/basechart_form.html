@@ -1,0 +1,21 @@
+{% import 'macros/form.html' as form %}
+
+{% block form %}
+
+    {% if group_by_is_required %}
+      {% set group_by_fields = fields %}
+    {% else %}
+      {% set group_by_fields = [{'value': ''}] + fields %}
+    {% endif %}
+
+    {{
+        form.select('group_by', label=_('Group by'), options=group_by_fields,
+            selected=resource_view['group_by'], is_required=group_by_is_required)
+    }}
+
+    {{
+        form.select('y_axis', label=_('Y Axis'), options=fields,
+            selected=resource_view['y_axis'], is_required=true)
+    }}
+
+{% endblock %}

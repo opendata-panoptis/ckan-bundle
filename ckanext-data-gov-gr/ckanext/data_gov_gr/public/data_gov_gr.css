@@ -1,0 +1,1739 @@
+
+:root {
+  /* https://guide.services.gov.gr/docs/colour/ */
+  /* Brand */
+  --color-primary: #003375;
+  --color-primary-light: #0066b3; /* Λίγο πιο απαλό από το color-primary */
+  --color-secondary: #00b0f0;
+  /* Typography*/
+  --color-base-content: #25282f;
+  --color-gray-800: #515058;
+
+  --secondary-button: #b3b2b5;
+
+  --footer-color: #ecebec;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* Αφαίρεση πλαισίου κύριας περιοχής ckan */
+div.row.wrapper {
+  box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.05);
+  border: 0px;
+}
+
+/* Αφαίρεση ckan background */
+.main {
+  background-color: white;
+  background-image: none;
+}
+
+/* Σταδιακό shadow στα input */
+.form-control:focus {
+    transition: box-shadow 0.5s ease;
+}
+
+aside.secondary {
+    overflow-x: auto;
+    padding: 5px;
+}
+
+.btn-primary {
+    background-color: var(--color-primary-light);
+}
+
+.btn-primary:focus {
+    background-color: var(--color-primary-light);
+}
+
+/* ---------------------------------------------------------------------------- */
+/* templates/scheming/organization/about.html */
+
+.group-details {
+  margin: 20px 0;
+  padding: 15px;
+  background: #ffffff;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.group-details dl {
+  margin: 0;
+  padding: 0;
+}
+
+.field-container {
+  border: 1px solid #e3e3e3;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #fafafa;
+}
+
+.field-container:last-child {
+  margin-bottom: 0;
+}
+
+.group-details dt {
+  font-weight: 600;
+  color: #2d2d2d;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.group-details dd {
+  margin: 0;
+  padding: 5px 0 0 10px;
+  color: #4d4d4d;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.group-details dd:empty::before {
+  content: "\00a0";  /* Non-breaking space for empty values */
+}
+
+.publisher-type-value {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #fff;
+  border-radius: 3px;
+  border: 1px solid #e3e3e3;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+.secondary .additional-info .quality-info {
+  margin: 10px;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* pages extension */
+.box, .wrapper {
+  border: none;
+  box-shadow: none;
+}
+
+.page-list-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 16px;
+    margin-bottom: 20px;
+    background: #fff;
+    transition: box-shadow 0.2s ease;
+    padding-bottom: 5px;
+}
+
+.page-list-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dataset-item:last-of-type {
+    padding-bottom: 20px;
+}
+
+.pages-form .form-actions {
+    margin-top: 10px;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* scheming extension */
+.panel-heading {
+    background-color: #f6f6f6;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 5px;
+
+    /* προσθήκη για σωστό positioning στο remove btn */
+    position: relative;
+}
+
+/* μπήκε copy paste από scheming */
+/* try to resemble .btn-remove-url style in resource form */
+.btn.btn-danger.btn-repeating-remove {
+  position: absolute;
+  margin-right: 0;
+  top: 9px;
+  right: 7px;
+  padding: 0 12px;
+  border-radius: 100px;
+}
+
+.multiple-text-field {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+/* μπήκε copy paste από scheming */
+/* try to resemble .btn-remove-url style in resource form */
+a.btn.btn-multiple-remove {
+  position: absolute;
+  margin-right: 0;
+  top: 6px;
+  right: 7px;
+  padding: 0 12px;
+  border-radius: 100px;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* Wrapper γύρω από form-field element των πεδίων που ορίζει το scheming */
+.form-field-wrapper {
+    border-top: 3px solid gray;
+    border-bottom: 3px solid gray;
+    padding-left : 30px;
+    padding-right : 20px;
+    padding-top : 10px;
+    border-radius: 10px;
+    margin-bottom : 10px;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.5s ease;
+}
+
+.form-field-wrapper:hover {
+    background-color : aliceblue;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+#simple_search {
+    display: block;
+}
+
+#advanced_search {
+    display: none;
+}
+
+#simple-tab {
+    margin-right: 5px;
+}
+
+.nav.nav-tabs#search-tabs {
+    border-bottom-color: black;
+    margin-bottom: 15px;
+}
+
+.module h1 {
+    min-height: 30px;
+}
+
+li#simple-tab.active, li#advanced-tab.active {
+    background-color: #42b0f5;
+    background-color: #206b82;
+    background-color: var(--color-primary-light);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+li#simple-tab.active a, li#advanced-tab.active a {
+    color: white;
+}
+
+li#simple-tab, li#advanced-tab {
+    padding: 10px;
+}
+
+li#simple-tab a, li#advanced-tab a {
+    text-decoration: none;
+    font-weight: bold;
+}
+
+li#simple-tab:hover, li#advanced-tab:hover {
+    cursor: pointer;
+}
+
+#filters {
+    border: 1px solid light-dark(rgb(206, 206, 206), rgb(84, 84, 84));
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 15px;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------------------------------------------------------------------------- */
+
+.slug-preview {
+    padding-bottom: 10px;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+.masthead {
+    background-color: var(--color-primary);
+    border-bottom: 6px solid var(--color-secondary)
+}
+
+.account-masthead {
+    background-color: var(--color-primary-light);
+}
+
+.account-masthead .fa {
+    color: white;
+}
+
+.masthead .main-navbar ul li:hover a, .masthead .main-navbar ul li:focus a, .masthead .main-navbar ul li.active a {
+    background-color: var(--color-primary-light);
+}
+
+.site-footer {
+    background-color: var(--footer-color);
+}
+
+.site-footer .attribution p {
+    color: black;
+}
+
+.site-footer label, .site-footer small, .site-footer .small {
+    color: black;
+}
+
+.site-footer a {
+    color: black;
+}
+
+/* ------------------- footer ------------------------------------------------ */
+
+.site-footer {
+  background-color: #f8f9fa;
+  padding: 3rem 0;
+  margin-top: 3rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.footer-section h5 {
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  color: #212529;
+}
+
+.footer-section ul li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-section ul li a {
+  color: #495057;
+  text-decoration: none;
+}
+
+.footer-section ul li a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.footer-logos {
+  display: flex;
+  align-items: center;
+}
+
+.attribution {
+  font-size: 0.9rem;
+}
+
+.ckan-footer-logo {
+  text-indent: -999em;
+  height: 21px;
+  width: 96px;
+  margin: 0 0 0 8px;
+}
+
+.site-footer .attribution .ckan-footer-logo {
+  display: inline-block;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+a.service-name {
+    padding: 0.6rem 0.9rem;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+.module-content > .accordion > .accordion-item > .accordion-header .accordion-button  {
+    padding-right: 2rem;
+}
+
+/* ------------------------------ index.html ---------------------------------------------- */
+
+/* ---------------------------------------------------------------------------- */
+
+/* Hero image section */
+
+/* Hero Section Base */
+.hero-section {
+  position: relative;
+  height: 100vh;
+  height: calc(100vh - 98px); /* αφαιρούμε το ύψος του navbar */
+  min-height: 600px;
+  background: linear-gradient(
+    rgba(0, 51, 117, 0.85),
+    rgba(0, 102, 179, 0.90)
+  ),
+  url('/images/dataHero.png') no-repeat center center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-top: 0; /* Αλλαγή από -20px σε 0 */
+}
+
+/* Hero Content */
+.hero-content {
+  position: relative;
+  width: 100%;
+  color: white;
+  padding: 3rem;
+  z-index: 2;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-section h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+/* Features */
+.hero-features {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 2.5rem;
+}
+
+.hero-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.feature-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* Action Buttons */
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.hero-btn.primary-btn {
+  background: white;
+  color: var(--color-primary);
+}
+
+.hero-btn.secondary-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-arrow {
+  width: 24px;
+  height: 24px;
+  margin-left: 0.5rem;
+  fill: currentColor;
+  transition: transform 0.3s ease;
+}
+
+.hero-btn:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+/* Scroll Indicator */
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+}
+
+.scroll-arrow {
+  width: 30px;
+  height: 30px;
+  border-left: 2px solid rgba(255, 255, 255, 0.7);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.7);
+  transform: rotate(-45deg);
+  animation: scrollIndicator 2s infinite;
+}
+
+@keyframes scrollIndicator {
+  0% {
+    opacity: 0;
+    transform: rotate(-45deg) translate(0, 0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-45deg) translate(20px, 20px);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .hero-section h1 {
+    font-size: 3rem;
+  }
+  .hero-subtitle {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 500px;
+  }
+  .hero-section h1 {
+    font-size: 2.5rem;
+  }
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  .hero-features {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  .hero-btn {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-badge {
+    font-size: 0.9rem;
+  }
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  .hero-feature {
+    font-size: 1rem;
+  }
+  .hero-btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* sticky */
+
+.masthead {
+  background-color: var(--color-primary);
+  border-bottom: 6px solid var(--color-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+/* Απενεργοποίηση sticky σε μικρές οθόνες */
+@media (max-width: 768px) {
+  .masthead {
+    position: relative; /* Επαναφορά σε κανονική ροή */
+    top: auto;
+  }
+
+  .masthead.scrolled {
+    box-shadow: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* categories section */
+
+/* Container section styles */
+.data-categories {
+  padding: 2rem;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.data-categories h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--color-base-content);
+}
+
+/* Grid container */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+/* Card styles */
+.category-card {
+  background-color: var(--color-primary);
+  border: 2px solid var(--color-secondary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.category-card h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+
+.category-icon {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  width: 64px;
+  height: 64px;
+  opacity: 0.6;
+  fill: var(--color-secondary);
+  transition: all 0.3s ease;
+}
+
+/* Hover effects */
+.category-card:hover {
+  transform: translateY(-5px);
+  background-color: var(--color-primary-light);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.category-card:hover .category-icon {
+  transform: scale(1.1);
+  opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .category-card {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* NSIP ή ανοιχτά */
+
+.access-rights-section {
+    padding: 40px 0;
+    background-color: #f3f6f9; /* Ανοιχτό μπλε-γκρι του gov.gr */
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.access-rights-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(13, 70, 160, 0.03) 0%, rgba(13, 70, 160, 0.01) 100%);
+    z-index: 1;
+}
+
+.access-rights-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+.access-rights-section h2 {
+    margin-bottom: 30px;
+    color: #2c389e; /* Σκούρο μπλε του gov.gr */
+    font-weight: 600;
+}
+
+.access-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.access-rights-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+.access-rights-btn i {
+    margin-right: 10px;
+}
+
+.access-rights-btn-restricted {
+    background-color: #2c389e; /* Σκούρο μπλε του gov.gr */
+    border-color: #2c389e;
+    color: #ffffff;
+}
+
+.access-rights-btn-restricted:hover {
+    background-color: #1c2876; /* Σκουρότερη απόχρωση */
+    border-color: #1c2876;
+    color: #ffffff;
+    box-shadow: 0 4px 6px rgba(44, 56, 158, 0.2);
+}
+
+.access-rights-btn-public {
+    background-color: #0d77e4; /* Μπλε του gov.gr */
+    border-color: #0d77e4;
+    color: #ffffff;
+}
+
+.access-rights-btn-public:hover {
+    background-color: #0b5bb1; /* Σκουρότερη απόχρωση */
+    border-color: #0b5bb1;
+    color: #ffffff;
+    box-shadow: 0 4px 6px rgba(13, 119, 228, 0.2);
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+  .access-rights-section {
+    padding: 2rem 1rem;
+  }
+
+  .access-buttons {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .access-rights-btn {
+    width: 100%;
+    min-width: unset;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .access-rights-section {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .access-buttons {
+    max-width: 280px;
+  }
+
+  .access-rights-btn {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .access-rights-btn i {
+    font-size: 1.1rem;
+  }
+}
+
+/* --------------------------------------------------------------- */
+
+/* High Value Datasets Section */
+
+.high-value-datasets-section {
+  padding: 5rem 0;
+  background-color: #f8f9fa;
+}
+
+.high-value-datasets-section h2 {
+  margin-bottom: 1.5rem;
+  color: var(--color-primary);
+}
+
+.section-description {
+  font-size: 1.2rem;
+  color: #666;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+}
+
+.high-value-features {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.feature-item {
+  flex: 1;
+  min-width: 280px;
+  max-width: 350px;
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-5px);
+}
+
+.feature-item .feature-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.5rem;
+}
+
+.feature-item .feature-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--color-primary);
+}
+
+.feature-item h3 {
+  font-size: 1.4rem;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.feature-item p {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 992px) {
+  .high-value-features {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .feature-item {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* datasets - data-services */
+
+.data-section {
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.section-title {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  color: #333;
+}
+
+.data-cards {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.data-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  width: 300px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.data-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  text-decoration: none;
+}
+
+.card-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+}
+
+.card-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: #0056b3;
+}
+
+.data-card h3 {
+  margin: 0 0 1rem;
+  color: #2c3e50;
+}
+
+.data-card p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* showcase section */
+
+.showcase-section {
+  padding: 3rem 0;
+  background: linear-gradient(135deg,
+    rgba(0, 51, 117, 0.04) 0%,
+    rgba(0, 102, 179, 0.03) 50%,
+    rgba(0, 176, 240, 0.02) 100%
+  );
+  position: relative;
+}
+
+.showcase-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right,
+    transparent,
+    rgba(0, 102, 179, 0.2),
+    transparent
+  );
+}
+
+.showcase-cards {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.showcase-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.showcase-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.card-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--color-primary);
+}
+
+.card-text h3 {
+  margin: 0 0 0.5rem;
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+.card-text p {
+  margin: 0;
+  color: var(--color-gray-800);
+}
+
+.card-arrow {
+  width: 24px;
+  height: 24px;
+  margin-left: 1rem;
+}
+
+.card-arrow svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--color-primary);
+  transition: transform 0.3s ease;
+}
+
+.showcase-card:hover .card-arrow svg {
+  transform: translateX(5px);
+}
+
+@media (max-width: 768px) {
+  .showcase-card {
+    padding: 1.5rem;
+  }
+
+  .card-content {
+    gap: 1rem;
+  }
+
+  .card-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .card-text h3 {
+    font-size: 1.1rem;
+  }
+}
+
+.showcase-section {
+  position: relative;
+  padding: 4rem 0;
+  background: none;
+  overflow: hidden;
+}
+
+.showcase-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+                    url('/images/showcases.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  z-index: -1;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.showcase-section .section-title {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: right;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.showcase-section .showcase-card {
+  background: rgba(240, 240, 240, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.showcase-section .showcase-card:hover {
+  background: rgba(245, 245, 245, 0.98);
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+}
+
+.showcase-section .card-title,
+.showcase-section .card-text {
+  color: #333333;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* blog section */
+
+.news-section {
+  padding: 4rem 0;
+  background-color: #f8f9fa;
+  position: relative;
+}
+
+.news-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right,
+    transparent,
+    rgba(0, 102, 179, 0.2),
+    transparent
+  );
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.news-card {
+  position: relative;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  color: white;
+  text-decoration: none;
+  background-color: var(--color-primary);
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.3s ease;
+}
+
+.news-card.main-card {
+  grid-column: 1 / -1;
+  height: 250px;
+  background-color: var(--color-primary-light);
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 51, 117, 0.7),
+    rgba(0, 102, 179, 0.8)
+  );
+  transition: opacity 0.3s ease;
+}
+
+.card-content {
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.news-card h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.news-card p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.card-action {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+.arrow-icon {
+  width: 20px;
+  height: 20px;
+  margin-left: 0.5rem;
+  fill: white;
+  transition: transform 0.3s ease;
+}
+
+.news-card:hover {
+  transform: translateY(-5px);
+  color: white;
+  text-decoration: none;
+}
+
+.news-card:hover .card-overlay {
+  opacity: 0.9;
+}
+
+.news-card:hover .arrow-icon {
+  transform: translateX(5px);
+}
+
+@media (max-width: 768px) {
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .news-card {
+    height: 180px;
+  }
+
+  .news-card.main-card {
+    height: 220px;
+  }
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* guides section */
+
+.guides-section {
+  padding: 4rem 0;
+  background-color: white;
+  position: relative;
+}
+
+.guides-container {
+  margin-top: 2rem;
+}
+
+.guides-intro {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 3rem;
+}
+
+.guides-description {
+  font-size: 1.2rem;
+  color: var(--color-gray-700);
+  margin-bottom: 1.5rem;
+}
+
+.view-all-guides {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.guide-arrow {
+  width: 20px;
+  height: 20px;
+  margin-left: 0.5rem;
+  fill: currentColor;
+  transition: transform 0.3s ease;
+}
+
+.view-all-guides:hover {
+  color: var(--color-primary-light);
+  text-decoration: none;
+}
+
+.view-all-guides:hover .guide-arrow {
+  transform: translateX(5px);
+}
+
+.guides-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.guide-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.guide-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+}
+
+.guide-icon {
+  width: 48px;
+  height: 48px;
+  margin-right: 1rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background-color: var(--color-primary);
+}
+
+.guide-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: white;
+}
+
+.guide-content h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: var(--color-gray-900);
+}
+
+.guide-content p {
+  margin: 0;
+  color: var(--color-gray-700);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .guides-section {
+    padding: 3rem 0;
+  }
+
+  .guides-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-card {
+    padding: 1.25rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* Mητρώα DGA section */
+
+.dga-services-section {
+  padding: 4rem 0;
+  background: linear-gradient(135deg,
+    rgba(0, 51, 117, 0.03) 0%,
+    rgba(0, 102, 179, 0.02) 100%
+  );
+}
+
+.dga-services-intro {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+}
+
+.dga-services-intro p {
+  font-size: 1.2rem;
+  color: var(--color-gray-700);
+  margin-bottom: 0;
+}
+
+.dga-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.dga-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dga-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+  text-decoration: none;
+  color: inherit;
+}
+
+.dga-card .card-header {
+  background: var(--color-primary);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dga-card .card-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.dga-card .card-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: white;
+}
+
+.dga-card .card-header h3 {
+  color: white;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.dga-card .card-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.dga-card .card-content p {
+  color: var(--color-gray-700);
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+.dga-card .card-action {
+  display: flex;
+  align-items: center;
+  color: var(--color-primary);
+  font-weight: 500;
+  margin-top: auto;
+}
+
+.dga-card .action-arrow {
+  width: 20px;
+  height: 20px;
+  margin-left: 0.5rem;
+  fill: currentColor;
+  transition: transform 0.3s ease;
+}
+
+.dga-card:hover .action-arrow {
+  transform: translateX(5px);
+}
+
+/* Specific styles for each card type */
+.dga-card[href*="data-intermediation"] .card-header {
+  background: linear-gradient(135deg, #003775 0%, #0066b3 100%);
+}
+
+.dga-card[href*="data-altruism"] .card-header {
+  background: linear-gradient(135deg, #005694 0%, #0082cc 100%);
+}
+
+@media (max-width: 992px) {
+  .dga-cards {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dga-services-section {
+    padding: 3rem 0;
+  }
+
+  .dga-card .card-header {
+    padding: 1.25rem;
+  }
+
+  .dga-card .card-content {
+    padding: 1.25rem;
+  }
+
+  .dga-card .card-icon {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dga-services-intro p {
+    font-size: 1.1rem;
+  }
+
+  .dga-card .card-header h3 {
+    font-size: 1.1rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* Styles για κουμπί Μετάφρασης Πεδίων*/
+.govgr-translate-button {
+    background-color: #0a53be; /* gov.gr primary blue */
+    color: white;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Arial', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .govgr-translate:hover {
+    background-color: #0846a0;
+  }
+
+  .govgr-translate:focus {
+    outline: 3px solid #aac9f0;
+    outline-offset: 2px;
+  }
+
+  .showcase-header .badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+  .showcase-header .badge-success { background-color: #28a745; }
+  .showcase-header .badge-warning { background-color: #ffc107; color: black; }
+  .showcase-header .badge-danger  { background-color: #dc3545; }
+  .showcase-header .badge-secondary { background-color: #6c757d; }
+
+.note {
+  background-color: #e9f1f8;
+  border-left: 6px solid #003366;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  font-family: 'Open Sans', Arial, sans-serif;
+  color: #003366;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+
+/* ---------------------------------------------------------------------------- */
+
+/* stats */
+
+.module-narrow .nav-item.active > a:before,
+.module-narrow .nav-aside li.active a:before {
+  height: 100%;
+}
+
+.module-narrow .nav-item.active > a, .module-narrow .nav-aside li.active a {
+  background-color: var(--color-primary);
+}
+
+.module-narrow .nav-item.active > a:hover, .module-narrow .nav-aside li.active a:hover {
+  background-color: var(--color-primary);
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* total-orgs-counter stats */
+
+.total-orgs-counter {
+  text-align: center;
+  margin: 20px 0 30px 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.counter-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 30px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.counter-box.total {
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+}
+
+.counter-box.with-type {
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+}
+
+.counter-number {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.counter-label {
+  font-size: 1em;
+  color: #546e7a;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.percentage {
+  font-size: 0.9em;
+  color: #1976d2;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+@keyframes count-up {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+    color: #3498db;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.counter-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.counter-box:hover .counter-number {
+  animation: count-up 1s ease-in-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 0 15px;
+  }
+
+  .counter-box {
+    padding: 15px 20px;
+  }
+
+  .counter-number {
+    font-size: 2em;
+  }
+}
+
+/* ---------------------------------------------------------------------------- */
+
+/* Διόρθωση προβλήματος μενού στην ελληνική γλώσσα */
+.navbar-nav > li > a {
+  white-space: nowrap;
+  width: auto;
+  display: inline-block;
+}
+
+/* Ευθυγράμμιση site-name δίπλα στο λογότυπο */
+.navbar-left {
+  display: flex;
+  align-items: center; /* κάθετη στοίχιση στο κέντρο */
+}
+
+.navbar-left .logo img {
+  height: 40px; /* ή ό,τι ταιριάζει */
+}
+
+.navbar-left .service-name {
+  margin-left: 8px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+.controls .select2-container {
+    max-width: 100%;
+}
+
+.margin-top {
+    margin-top: 10px;
+}

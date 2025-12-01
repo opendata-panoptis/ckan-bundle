@@ -1,0 +1,31 @@
+{#
+Displays information about accessing a resource via the API.
+
+datastore_root_url - The root API url.
+resource_id - The resource id
+embedded - If true will not include the "modal" classes on the snippet.
+
+Example
+
+    {% snippet 'ajax_snippets/contact_form.html', recaptcha_v3_action=recaptcha_v3_action,
+        recaptcha_v3_key=recaptcha_v3_key, resource_id=resource_id, package_id=package_id %}
+
+#}
+
+
+<div class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ _('Contact form') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% set data = {} %}
+        {% set errors = {} %}
+        {% set error_summary = {} %}
+        {% include "contact/snippets/form.html" %}
+      </div>
+    </div>
+  </div>
+</div>

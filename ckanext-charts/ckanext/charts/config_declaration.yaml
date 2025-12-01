@@ -1,0 +1,51 @@
+version: 1
+groups:
+  - annotation: ckanext-charts
+    options:
+      - key: ckanext.charts.cache_strategy
+        description: Charts cache strategy
+        default: redis
+        editable: true
+        validators: OneOf(["file_orc","file_csv","redis"]) charts_strategy_support
+
+
+      - key: ckanext.charts.redis_cache_ttl
+        description: Redis cache TTL
+        default: 3600
+        editable: true
+        type: int
+        validators: ignore_missing int_validator is_positive_integer
+
+      - key: ckanext.charts.file_cache_ttl
+        description: File cache TTL
+        default: 3600
+        editable: true
+        type: int
+        validators: ignore_missing int_validator is_positive_integer
+
+      - key: ckanext.charts.enable_cache
+        description: Enable cache
+        default: true
+        editable: true
+        type: bool
+        validators: ignore_empty boolean_validator
+
+      - key: ckanext.charts.include_htmx_asset
+        description: Include HTMX asset
+        default: true
+        type: bool
+        validators: ignore_empty boolean_validator
+
+      - key: ckanext.charts.reinit_ckan_js_modules
+        description: Reinit CKAN JS modules
+        editable: true
+        default: false
+        type: bool
+        validators: ignore_empty boolean_validator
+
+      - key: ckanext.charts.allow_anon_building_charts
+        description: Allow anonymous users to build charts
+        editable: true
+        default: false
+        type: bool
+        validators: ignore_empty boolean_validator

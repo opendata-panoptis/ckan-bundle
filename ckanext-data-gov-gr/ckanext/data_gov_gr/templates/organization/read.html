@@ -1,0 +1,38 @@
+{% ckan_extends %}
+    {% if h.should_show_decision_button() %}
+        {% set link_label = _("Add Dataset - Data Service - Decision") %}
+    {% else %}
+        {% set link_label = _("Προσθήκη Συνόλου Δεδομένων - Υπηρεσίας Δεδομένων") %}
+    {% endif %}
+
+{% set route_name = 'dataset_type.add_dataset' %}
+{% set group = group_dict.id %}
+
+<!-- Προσθήκη συνόλου δεδομένων -->
+<!-- Ή προσθήκη υπηρεσίας -->
+<!-- Ή προσθήκη απόφασης -->
+{% block page_primary_action %}
+  {% if h.check_access('package_create', {'owner_org': group}) %}
+
+    {% if group %}
+        {% link_for link_label, named_route=route_name, group=group, class_='btn btn-primary', icon='plus-square' %}
+    {% else %}
+        {% link_for link_label, named_route=route_name, class_='btn btn-primary', icon='plus-square' %}
+    {% endif %}
+
+    {#
+      {% snippet 'snippets/add_dataset.html', group=group_dict.id %}
+    #}
+  {% endif %}
+{% endblock %}
+
+{% block organization_facets %}
+  <div class="filters">
+    <div>
+      {% for facet in facet_titles %}
+        {% snippet 'snippets/facet_list.html', title=h.vocabulary_facet_title(facet), name=facet, extras={'id':group_dict.id}, search_facets=search_facets, label_function=h.vocabulary_facet_item_label %}
+      {% endfor %}
+    </div>
+    <a class="close no-text hide-filters"><i class="fa fa-times-circle"></i><span class="text">close</span></a>
+  </div>
+{% endblock %}

@@ -1,0 +1,82 @@
+# Greek translations for ckanext-contact.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the ckanext-contact
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-contact 2.4.4\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-10-09 12:00+0300\n"
+"PO-Revision-Date: 2025-10-09 12:00+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: el\n"
+"Language-Team: el <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+msgid "Contact"
+msgstr "Επικοινωνία"
+
+msgid "Contact us"
+msgstr "Επικοινωνήστε μαζί μας"
+
+msgid "Contact Us"
+msgstr "Επικοινωνήστε μαζί μας"
+
+msgid "Questions? Comments? We are always glad to hear from you!"
+msgstr "Ερωτήσεις; Σχόλια; Είμαστε πάντα χαρούμενοι να ακούσουμε από εσάς!"
+
+msgid "Contact Name"
+msgstr "Ονοματεπώνυμο"
+
+
+msgid "Subject"
+msgstr "Θέμα"
+
+msgid "Optional subject"
+msgstr "Προαιρετικό θέμα"
+
+msgid "Your Request"
+msgstr "Το αίτημά σας"
+
+msgid "What do you have to tell us?"
+msgstr "Τι θέλετε να μας πείτε;"
+
+
+msgid "Contact form"
+msgstr "Φόρμα επικοινωνίας"
+
+msgid "Feedback"
+msgstr "Ανατροφοδότηση"
+
+msgid "Submit"
+msgstr "Υποβολή"
+msgid "Dataset Feedback"
+msgstr "Ανατροφοδότηση Συνόλου Δεδομένων"
+
+msgid "Hi, I wanted to ask about..."
+msgstr "Γεια σας, ήθελα να ρωτήσω για..."
+
+
+msgid "None"
+msgstr "Κανένα"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Thank you!"
+msgstr "Σας ευχαριστούμε!"
+
+msgid "Your comment has been sent and we will answer you as soon as possible."
+msgstr "Το σχόλιό σας έχει σταλεί και θα σας απαντήσουμε το συντομότερο δυνατό."
+
+msgid "Thank you for contacting us, and we will try and reply as soon as possible.<br />Unfortunately due to the number of enquiries received, we cannot always reply in person to every one."
+msgstr "Σας ευχαριστούμε που επικοινωνήσατε μαζί μας, και θα προσπαθήσουμε να απαντήσουμε το συντομότερο δυνατό.<br />Δυστυχώς, λόγω του μεγάλου αριθμού ερωτημάτων που λαμβάνουμε, δεν μπορούμε πάντα να απαντήσουμε προσωπικά σε καθένα."
+
+msgid "Sorry, there was an error sending the email. Please try again later."
+msgstr "Συγγνώμη, παρουσιάστηκε σφάλμα κατά την αποστολή του email. Παρακαλώ δοκιμάστε ξανά αργότερα."

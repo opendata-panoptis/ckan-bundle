@@ -1,0 +1,65 @@
+{% ckan_extends %}
+
+{% block subtitle %}{{ _("Welcome") }}{% endblock %}
+
+{% block maintag %}{% endblock %}
+{% block toolbar %}{% endblock %}
+
+{% block header %}
+  {% include "header_index.html" %}
+{% endblock %}
+
+{% block content %}
+  <div class="homepage">
+    <section class="hero-section">
+      <div class="pulse-overlay"></div>
+      <div class="hero-content">
+        <div class="container">
+          <div class="hero-badge">Πύλη Ανοικτών Δεδομένων</div>
+          <h1>Δήμος Αθηναίων</h1>
+          <p class="hero-subtitle">Αποκτήστε πρόσβαση και εξερευνήστε σύνολα δεδομένων, υπηρεσίες και πόρους του Δήμου Αθηναίων</p>
+
+          <div class="hero-features">
+            <div class="hero-feature">
+              <i class="fa fa-database feature-icon"></i>
+              <span>Ανοικτά Δεδομένα</span>
+            </div>
+            <div class="hero-feature">
+              <i class="fa fa-code feature-icon"></i>
+              <span>APIs</span>
+            </div>
+            <div class="hero-feature">
+              <i class="fa fa-chart-bar feature-icon"></i>
+              <span>Οπτικοποιήσεις</span>
+            </div>
+          </div>
+
+          {% block home_search %}
+            <div class="hero-search">
+              <form class="dataset-search" method="get" action="{{ h.url_for('dataset.search') }}">
+                <input type="text" class="search-input form-control" name="q" placeholder="Αναζήτηση συνόλων δεδομένων"
+                  aria-label="Αναζήτηση συνόλων δεδομένων">
+                <button type="submit" class="search-button btn btn-primary">
+                  <i class="fa fa-search"></i>
+                  <span>Αναζήτηση</span>
+                </button>
+              </form>
+            </div>
+          {% endblock %}
+        </div>
+      </div>
+    </section>
+
+    {% block stats %}
+      {# Remove this block as the snippet doesn't exist #}
+    {% endblock %}
+
+    {% block featured_groups %}
+      {# Remove this block as the snippet doesn't exist #}
+    {% endblock %}
+
+    {% block featured_datasets %}
+      {# Remove this block as the snippet doesn't exist #}
+    {% endblock %}
+  </div>
+{% endblock %}

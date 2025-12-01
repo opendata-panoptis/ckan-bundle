@@ -1,0 +1,225 @@
+/* MQA Dashboard Styles */
+.mqa-dashboard {
+  margin-top: 20px;
+}
+
+.mqa-overall-score {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.score-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  background-color: #f5f5f5;
+  border: 5px solid #ddd;
+}
+
+.score-circle.excellent {
+  border-color: #5cb85c;
+}
+
+.score-circle.good {
+  border-color: #5bc0de;
+}
+
+.score-circle.sufficient {
+  border-color: #f0ad4e;
+}
+
+.score-circle.poor {
+  border-color: #d9534f;
+}
+
+.score-number {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.score-label h3 {
+  margin-top: 0;
+}
+
+/* Panel styling for dimension items */
+.dimension-item.panel {
+  margin-bottom: 1.5em;
+}
+
+.dimension-item .panel-heading {
+  background: #f7f7f7;
+  border-bottom: 1px solid #ddd;
+}
+
+.dimension-item .panel-body {
+  padding: 1em;
+}
+
+/* Compact progress bars */
+.progress {
+  height: 8px;
+  margin-bottom: .8em;
+}
+
+.progress-bar {
+  border-radius: 4px;
+}
+
+.dimension-score {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.dimension-description {
+  margin-bottom: 15px;
+}
+
+/* Grid layout for criteria */
+.dimension-distribution-quality {
+  margin-top: .5em;
+  margin-bottom: 1.5em;
+}
+
+.dimension-distribution-quality .criterion {
+  padding: .5em 0;
+  border-bottom: none;
+  text-align: center;
+}
+
+.dimension-distribution-quality .criterion label {
+  display: block;
+  font-size: .85em;
+  color: #555;
+}
+
+.dimension-distribution-quality .criterion .value {
+  font-weight: bold;
+  font-size: 1em;
+  margin-top: .2em;
+}
+
+/* Distribution item styles */
+.distribution-item {
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.distribution-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.distribution-header h4 {
+  margin: 0;
+  flex-grow: 1;
+}
+
+.distribution-format {
+  background-color: #eee;
+  padding: 3px 8px;
+  border-radius: 3px;
+  margin-right: 15px;
+}
+
+.distribution-score {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 3px;
+  margin-right: 15px;
+  background-color: #f5f5f5;
+}
+
+.distribution-score.excellent {
+  background-color: #dff0d8;
+  color: #3c763d;
+}
+
+.distribution-score.good {
+  background-color: #d9edf7;
+  color: #31708f;
+}
+
+.distribution-score.sufficient {
+  background-color: #fcf8e3;
+  color: #8a6d3b;
+}
+
+.distribution-score.poor {
+  background-color: #f2dede;
+  color: #a94442;
+}
+
+.distribution-toggle {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+}
+
+.distribution-toggle i {
+  transition: transform 0.3s ease;
+}
+
+.distribution-details {
+  padding: 15px;
+}
+
+.criteria-section {
+  margin-bottom: 15px;
+}
+
+.criteria-section h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* Recommendation styles */
+.recommendation-section {
+  margin-bottom: 20px;
+}
+
+.recommendations-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.recommendations-list li {
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-left: 3px solid #5bc0de;
+  display: flex;
+  justify-content: space-between;
+}
+
+.recommendation-points {
+  font-weight: bold;
+  color: #5cb85c;
+}
+
+.mqa-perfect-score {
+  padding: 15px;
+  background-color: #dff0d8;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.mqa-criteria {
+  margin-top: 30px;
+}
+
+.panel-title a {
+  display: block;
+  padding: 5px 0;
+}

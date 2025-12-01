@@ -1,0 +1,99 @@
+{% extends "page.html" %}
+
+{% block breadcrumb_content %}
+  <li><a href="{{ h.url_for('stats.index') }}">{{ _('Statistics') }}</a></li>
+  <li class="active">{{ _('Organizations Per Publisher Type') }}</li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module">
+    <section id="stats-organizations-per-type" class="module-content">
+      <h2>{{ _('Organizations Per Publisher Type') }}</h2>
+      <div class="total-orgs-counter">
+        <div class="stats-grid">
+          <div class="counter-box total">
+            <span class="counter-number">{{ h.get_organizations_stats().total }}</span>
+            <span class="counter-label">{{ _('Total Organizations') }}</span>
+          </div>
+          <div class="counter-box with-type">
+            <span class="counter-number">{{ h.get_organizations_stats().with_type }}</span>
+            <span class="counter-label">{{ _('With Publisher Type') }}</span>
+            <span class="percentage">({{ h.get_organizations_stats().type_percentage }}%)</span>
+          </div>
+        </div>
+      </div>
+
+      {% if organizations_by_publisher_type %}
+        <button id="toggleOrgView" class="btn btn-default mb-5">
+          <i class="fa fa-table"></i> {{ _('Switch to Table') }}
+        </button>
+
+        <div id="publisher-table-view" style="display: none;">
+          <table class="table table-chunky table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>{{ _('Publisher Type Code') }}</th>
+                <th>{{ _('Publisher Type Name') }}</th>
+                <th class="metric">{{ _('Number of Organizations') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for type_code, type_label, num_orgs in organizations_by_publisher_type %}
+                <tr>
+                  <td>
+                    {{ type_code }}
+                  </td>
+                  <td>{{ type_label }}</td>
+                  <td class="metric">{{ num_orgs }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">{{ _('No publisher types found') }}</p>
+      {% endif %}
+    </section>
+
+    {% if organizations_by_publisher_type %}
+      <div class="publisher-content" id="publisher-pie-chart" style="width: 100%; height: 400px;"></div>
+    {% endif %}
+  </article>
+{% endblock %}
+
+{% block secondary_content %}
+  <section class="module module-narrow">
+    <h2 class="module-heading"><i class="fa fa-chart-bar"></i> {{ _('Statistics Menu') }}</h2>
+    <nav data-module="stats-nav">
+      <ul class="unstyled nav nav-simple">
+        <li class="nav-item">
+          <a href="{{ h.url_for('stats.datasets_by_theme') }}">{{ _('Datasets Per Theme') }}</a>
+        </li>
+        <li class="nav-item active">
+          <a href="{{ h.url_for('stats.organizations_by_publisher_type') }}">{{ _('Organizations Per Publisher Type') }}</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ h.url_for('stats.index') }}#stats-total-datasets">{{ _('Total Number of Packages') }}</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ h.url_for('stats.index') }}#stats-dataset-revisions">{{ _('Package Revisions per Week') }}</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ h.url_for('stats.index') }}#stats-most-edited">{{ _('Most Edited Packages') }}</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ h.url_for('stats.index') }}#stats-largest-groups">{{ _('Largest Groups') }}</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ h.url_for('stats.index') }}#stats-top-tags">{{ _('Top Tags') }}</a>
+        </li>
+      </ul>
+    </nav>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/stats/organizations-by-type.js') }}"></script>
+{% endblock %}

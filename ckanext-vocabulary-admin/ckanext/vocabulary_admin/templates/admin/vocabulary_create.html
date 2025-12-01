@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+
+{% block primary_content_inner %}
+  <h1 class="page-heading">{{ _('Δημιουργία Νέου Λεξιλογίου') }}</h1>
+
+  <form method="post" action="{{ h.url_for('vocabularyadmin.vocabulary_create') }}" class="form-horizontal">
+    {{ h.csrf_input() }}
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="name">{{ _('Όνομα') }}</label>
+      <div class="controls">
+        <input type="text" id="name" name="name" class="form-control" required>
+        <span class="info-block">{{ _('Το όνομα του λεξιλογίου') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="description_el">{{ _('Περιγραφή (Ελληνικά)') }}</label>
+      <div class="controls">
+        <textarea id="description_el" name="description_el" class="form-control" rows="3"></textarea>
+        <span class="info-block">{{ _('Η περιγραφή του λεξιλογίου στα ελληνικά (προαιρετικό)') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="description_en">{{ _('Περιγραφή (Αγγλικά)') }}</label>
+      <div class="controls">
+        <textarea id="description_en" name="description_en" class="form-control" rows="3"></textarea>
+        <span class="info-block">{{ _('Η περιγραφή του λεξιλογίου στα αγγλικά (προαιρετικό)') }}</span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ _('Δημιουργία') }}</button>
+      <a href="{{ h.url_for('vocabularyadmin.vocabulary_admin') }}" class="btn">{{ _('Ακύρωση') }}</a>
+    </div>
+  </form>
+{% endblock %}

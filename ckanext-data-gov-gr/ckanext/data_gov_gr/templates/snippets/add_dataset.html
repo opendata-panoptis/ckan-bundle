@@ -1,0 +1,32 @@
+{# Adds 'Add Dataset' button #}
+
+{% set dataset_type = dataset_type if dataset_type else h.default_package_type() %}
+{% if dataset_type == 'decision' %}
+    {% set link_label = _('Προσθήκη Απόφασης') %}
+{% elif dataset_type == 'data-service' %}
+    {% set link_label = _('Προσθήκη Υπηρεσίας Δεδομένων')  %}
+{% else %}
+    {% set link_label = h.humanize_entity_type('package', dataset_type, 'add link') or _("Add Dataset") %}
+{% endif %}
+{% set route_name = dataset_type ~ '.new' %}
+
+<!-- Προσθήκη συνόλου δεδομένων -->
+{% if dataset_type == 'dataset' %}
+    {% if group %}
+        {% link_for link_label, named_route=route_name, group=group, access_rights_type='open', class_='btn btn-primary', icon='plus-square' %}
+        {% if h.get_config_as_bool('ckanext.data_gov_gr.dataset.different_form_for_protected_data') %}
+            {% link_for _('Add dataset of protected data'), named_route=route_name, group=group, access_rights_type='protected', class_='btn btn-secondary', icon='lock' %}
+        {% endif %}
+    {% else %}
+        {% link_for link_label, named_route=route_name, access_rights_type='open', class_='btn btn-primary', icon='plus-square' %}
+        {% if h.get_config_as_bool('ckanext.data_gov_gr.dataset.different_form_for_protected_data') %}
+            {% link_for _('Add dataset of protected data'), named_route=route_name, access_rights_type='protected', class_='btn btn-secondary', icon='lock' %}
+        {% endif %}
+    {% endif %}
+{% else %}
+    {% if group %}
+        {% link_for link_label, named_route=route_name, group=group, class_='btn btn-primary', icon='plus-square' %}
+    {% else %}
+        {% link_for link_label, named_route=route_name, class_='btn btn-primary', icon='plus-square' %}
+    {% endif %}
+{% endif %}

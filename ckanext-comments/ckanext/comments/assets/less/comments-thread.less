@@ -1,0 +1,93 @@
+
+.comments-thread {
+    .comments-thread {
+	padding-inline-start: 15px;
+	border-inline-start: 1px solid grey;
+    }
+}
+.comments-comment {
+    border-bottom: 1px solid grey;
+    &:last-child {
+        border-bottom: none;
+    }
+    &.mobile-hidden-comment {
+	border-bottom: none;
+    }
+}
+
+.comment {
+    padding: 24px 0px 13px;
+    &.comment-sate-draft {}
+    .comment-heading {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        margin-bottom: 11px;
+        .comment-authored {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            margin-bottom: 11px;
+            margin-inline-end: 15px;
+            .author-avatar {
+                margin-inline-end: 8px;
+                img {
+                    object-fit: contain;
+                }
+            }
+            .comment-meta {
+                .author-name{
+                    font-size: 520px;
+                    font-size: 16px;
+                    line-height: 24px;
+                }
+                .comment-date{
+                    font-size: 12px;
+                    line-height: 22px;
+                    white-space: nowrap;
+                }
+            }
+        }
+        .comment-actions {
+            .comment-action {
+                margin-inline-end: 16px;
+		margin-bottom: 16px;
+                &:last-child {
+                    margin-inline-end: 0;
+                }
+                &.approve-comment {}
+                &.remove-comment {}
+            }
+        }
+    }
+    .comment-body {
+	margin-bottom: 11px;
+        .comment-content {
+            font-size: 16px;
+            line-height: 24px;
+            img {
+                max-width: 100%;
+            }
+        }
+    }
+    .comment-footer {
+        .reply-actions {
+            .reply-action {
+		margin-top: 10px;
+                margin-inline-end: 16px;
+		margin-bottom: 16px;
+                &:last-child {
+                    margin-inline-end: 0;
+                }
+	    }
+	}
+    }
+}
+
+@media (min-width: 769px) {
+    .comment {
+        .comment-heading {
+            // flex-direction: row;
+        }
+    }
+}

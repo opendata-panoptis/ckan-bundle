@@ -1,0 +1,32 @@
+<!-- Στοιχείο Λίστας Αναζήτησης Dataset-->
+
+{% ckan_extends %}
+
+{% block heading_title %}
+    <div class="d-flex align-items-center">
+        <a href="{{ h.url_for('%s.read' % package.type, id=package.name) }}" title="{{ title }}">
+            {{title|truncate(80)}}
+        </a>
+        {% if package.type == 'data-service' %}
+            <div class="position-relative">
+                <button class="btn btn-sm btn-outline-secondary ms-2"
+                        onclick="copyLink(this, window.location.origin + '{{ h.url_for('%s.read' % package.type, id=package.name) }}')">
+                    <i class="fa fa-copy"></i>
+                </button>
+                <div class="copy-tooltip d-none position-absolute start-100 ms-2 top-50 translate-middle-y">
+                    <small class="bg-success text-white px-2 py-1 rounded">{{ _('Copied!') }}</small>
+                </div>
+            </div>
+            <script>
+                function copyLink(button, url) {
+                    navigator.clipboard.writeText(url);
+                    const tooltip = button.parentElement.querySelector('.copy-tooltip');
+                    tooltip.classList.remove('d-none');
+                    setTimeout(() => {
+                        tooltip.classList.add('d-none');
+                    }, 2000);
+                }
+            </script>
+        {% endif %}
+    </div>
+{% endblock %}

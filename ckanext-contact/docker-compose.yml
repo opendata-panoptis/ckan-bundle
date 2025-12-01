@@ -1,0 +1,38 @@
+services:
+  ckan:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
+    depends_on:
+      - db
+      - solr
+      - redis
+    volumes:
+      - ./ckanext:/base/src/ckanext-contact/ckanext
+      - ./tests:/base/src/ckanext-contact/tests
+
+  solr:
+    image: ckan/ckan-solr:2.9
+    logging:
+      driver: none
+
+  db:
+    build:
+      context: https://github.com/okfn/docker-ckan.git#:postgresql
+      args:
+        - DATASTORE_READONLY_PASSWORD=password
+        - POSTGRES_PASSWORD=password
+    environment:
+      - DATASTORE_READONLY_PASSWORD=password
+      - POSTGRES_PASSWORD=password
+      - PGDATA=/var/lib/postgresql/data/db
+    logging:
+      driver: none
+
+  redis:
+    image: redis:latest
+    logging:
+      driver: none

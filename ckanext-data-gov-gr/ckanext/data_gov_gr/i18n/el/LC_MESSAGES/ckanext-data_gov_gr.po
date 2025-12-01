@@ -1,0 +1,715 @@
+# Greek translations for ckanext-data-gov-gr.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the ckanext-data-gov-gr
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-data-gov-gr 0.0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-06-13 14:57+0300\n"
+"PO-Revision-Date: 2025-06-13 14:58+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: el\n"
+"Language-Team: el <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:177
+msgid "Search..."
+msgstr "Αναζήτηση..."
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:187
+msgid "No results found."
+msgstr "Δεν βρέθηκαν αποτελέσματα."
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:102
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:279
+msgid "Population"
+msgstr "Πληθυσμός"
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:276
+msgid "Name"
+msgstr "Όνομα"
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:277
+msgid "Country"
+msgstr "Χώρα"
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:278
+msgid "Region"
+msgstr "Περιοχή"
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:280
+msgid "Latitude"
+msgstr "Γ. Πλάτος"
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:281
+msgid "Longitude"
+msgstr "Γ. Μήκος"
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:258
+msgid "Choose Location"
+msgstr "Επιλέξτε Τοποθεσία"
+
+#: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:265
+msgid "Location Search"
+msgstr "Αναζήτηση Τοποθεσίας"
+
+#: ckanext/data_gov_gr/templates/snippets/package_item.html:17
+msgid "Copied!"
+msgstr "Αντιγράφηκε!"
+
+#: ckanext/data_gov_gr/templates/ckanext_pages/blog_edit.html:12
+msgid "Blog"
+msgstr "Ιστολόγιο"
+
+#: ckanext/data_gov_gr/templates/ckanext_pages/blog_edit.html:16
+msgid "Add blog articles to CKAN here."
+msgstr "Προσθέστε άρθρα blog στο CKAN εδώ."
+
+#: ckanext/data_gov_gr/templates/header.html:106
+msgid "APIs"
+msgstr "APIs"
+
+#: ckanext/data_gov_gr/helpers.py:260
+msgid "Metadata Quality"
+msgstr "Ποιότητα Μεταδεδομένων"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:3
+#: ckanext/data_gov_gr/templates/package/mqa.html:6
+msgid "Metadata Quality Assessment"
+msgstr "Αξιολόγηση Ποιότητας Μεταδεδομένων"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:15
+msgid "Overall Quality"
+msgstr "Συνολική Ποιότητα"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:16
+msgid "points"
+msgstr "βαθμοί"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:19
+msgid "Excellent"
+msgstr "Εξαιρετική"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:21
+msgid "Good"
+msgstr "Καλή"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:23
+msgid "Sufficient"
+msgstr "Επαρκής"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:25
+msgid "Poor"
+msgstr "Ανεπαρκής"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:32
+msgid "Dimensions"
+msgstr "Διαστάσεις"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:39
+#: ckanext/data_gov_gr/templates/package/mqa.html:262
+msgid "Accessibility"
+msgstr "Προσβασιμότητα"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:47
+msgid "How easily the data can be accessed once discovered."
+msgstr "Πόσο εύκολα μπορεί να γίνει πρόσβαση στα δεδομένα μετά την ανακάλυψή τους."
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:53
+#: ckanext/data_gov_gr/templates/package/mqa.html:263
+msgid "Download URL"
+msgstr "URL Λήψης"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:57
+msgid "Download URL is accessible"
+msgstr "Το URL Λήψης είναι προσβάσιμο"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:61
+msgid "Access URL is accessible"
+msgstr "Το URL πρόσβασης είναι προσβάσιμο"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:61
+msgid "Access URL"
+msgstr "URL Πρόσβασης"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:74
+#: ckanext/data_gov_gr/templates/package/mqa.html:285
+msgid "Reusability"
+msgstr "Δυνατότητα επαναχρησιμοποίησης"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:82
+msgid "How clearly the conditions for reuse are communicated."
+msgstr "Πόσο ξεκάθαρα επικοινωνούνται οι όροι επαναχρησιμοποίησης."
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:88
+msgid "Access restrictions"
+msgstr "Περιορισμοί πρόσβασης"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:92
+#: ckanext/data_gov_gr/templates/package/mqa.html:286
+msgid "License information"
+msgstr "Πληροφορίες άδειας"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:96
+#: ckanext/data_gov_gr/templates/package/mqa.html:287
+msgid "License vocabulary"
+msgstr "Λεξιλόγιο αδειών"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:100
+msgid "Access restrictions vocabulary"
+msgstr "Λεξιλόγιο περιορισμών πρόσβασης"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:104
+msgid "Contact point"
+msgstr "Σημείο επικοινωνίας"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:108
+msgid "Publisher"
+msgstr "Εκδότης"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:123
+#: ckanext/data_gov_gr/templates/package/mqa.html:291
+msgid "Contextuality"
+msgstr "Πλαίσιο Διάθεσης"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:131
+msgid "Additional context that helps users understand the data."
+msgstr "Πρόσθετο πλαίσιο που βοηθά τους χρήστες να κατανοήσουν τα δεδομένα."
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:137
+#: ckanext/data_gov_gr/templates/package/mqa.html:292
+msgid "File size"
+msgstr "Μέγεθος αρχείου"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:141
+#: ckanext/data_gov_gr/templates/package/mqa.html:293
+msgid "Rights"
+msgstr "Δικαιώματα"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:145
+#: ckanext/data_gov_gr/templates/package/mqa.html:295
+msgid "Date of issue"
+msgstr "Ημερομηνία έκδοσης"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:149
+#: ckanext/data_gov_gr/templates/package/mqa.html:294
+msgid "Modification date"
+msgstr "Ημερομηνία τροποποίησης"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:162
+msgid "Findability"
+msgstr "Ευρεσιμότητα"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:170
+msgid "How easily the dataset can be discovered through searches."
+msgstr "Πόσο εύκολα μπορεί να ανακαλυφθεί το σύνολο δεδομένων μέσω αναζητήσεων."
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:175
+msgid "Keyword usage"
+msgstr "Χρήση λέξεων-κλειδιών"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:179
+msgid "Categories"
+msgstr "Κατηγορίες"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:183
+msgid "Geo search"
+msgstr "Γεωγραφική αναζήτηση"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:187
+msgid "Time based search"
+msgstr "Χρονική αναζήτηση"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:201
+#: ckanext/data_gov_gr/templates/package/mqa.html:299
+msgid "Interoperability"
+msgstr "Διαλειτουργικότητα"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:209
+msgid "How easily the data can be integrated with other data and systems."
+msgstr "Πόσο εύκολα μπορούν τα δεδομένα να ενσωματωθούν με άλλα δεδομένα και συστήματα."
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:215
+#: ckanext/data_gov_gr/templates/package/mqa.html:304
+msgid "Format"
+msgstr "Μορφότυπος"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:219
+#: ckanext/data_gov_gr/templates/package/mqa.html:305
+msgid "Media type"
+msgstr "Τύπος μέσου"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:223
+#: ckanext/data_gov_gr/templates/package/mqa.html:306
+msgid "Format/media type in vocabulary"
+msgstr "Μορφότυπος/τύπος μέσου από λεξιλόγιο"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:227
+#: ckanext/data_gov_gr/templates/package/mqa.html:307
+msgid "Open format"
+msgstr "Κοινός μορφότυπος"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:231
+#: ckanext/data_gov_gr/templates/package/mqa.html:308
+msgid "Machine-readable format"
+msgstr "Μηχαναγνώσιμος μορφότυπος"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:235
+msgid "DCAT-AP compliance"
+msgstr "Συμμόρφωση με DCAT-AP"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:241
+msgid "Individual Distribution Quality"
+msgstr "Ποιότητα Μεμονωμένης Διανομής"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:242
+msgid "Quality assessment for individual distributions (resources) in this dataset."
+msgstr "Αξιολόγηση ποιότητας για μεμονωμένες διανομές (πόρους) σε αυτό το σύνολο δεδομένων."
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:248
+msgid "Unnamed Resource"
+msgstr "Ανώνυμος Πόρος"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:255
+msgid "Toggle details"
+msgstr "Εναλλαγή λεπτομερειών"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:266
+msgid "Most frequent accessURL status codes"
+msgstr "Συχνότεροι κωδικοί κατάστασης accessURL"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:275
+msgid "Most frequent downloadURL status codes"
+msgstr "Συχνότεροι κωδικοί κατάστασης downloadURL"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:320
+msgid "About MQA"
+msgstr "Σχετικά με το MQA"
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:323
+msgid "Metadata Quality Assessment (MQA) evaluates how well your dataset is described, making it easier to find, access, and reuse."
+msgstr "Η Αξιολόγηση Ποιότητας Μεταδεδομένων (MQA) αξιολογεί πόσο καλά περιγράφεται το σύνολο δεδομένων σας, διευκολύνοντας την εύρεση, την πρόσβαση και την επαναχρησιμοποίησή του."
+
+#: ckanext/data_gov_gr/templates/package/mqa.html:326
+msgid "Improve your score by adding more metadata to your dataset."
+msgstr "Βελτιώστε τη βαθμολογία σας προσθέτοντας περισσότερα μεταδεδομένα στο σύνολο δεδομένων σας."
+
+#: ckanext/data_gov_gr/helpers.py:260
+msgid "Yes"
+msgstr "Ναι"
+
+#: ckanext/data_gov_gr/helpers.py:260
+msgid "No"
+msgstr "Όχι"
+
+# Μεταφράσεις για τον τύπο δεδομένων 'decision'
+msgid "Decisions"
+msgstr "Αποφάσεις"
+
+msgid "Decision"
+msgstr "Απόφαση"
+
+msgid "Create Decision"
+msgstr "Δημιουργία Απόφασης"
+
+msgid "Search Decisions..."
+msgstr "Αναζήτηση Aποφάσεων..."
+
+msgid "No decisions found"
+msgstr "Δεν βρέθηκαν αποφάσεις"
+
+msgid "No decisions found for \"{query}\""
+msgstr "Δεν βρέθηκαν αποφάσεις για \"{query}\""
+
+msgid "{number} decision found"
+msgid_plural "{number} decisions found"
+msgstr[0] "{number} απόφαση βρέθηκε"
+msgstr[1] "{number} αποφάσεις βρέθηκαν"
+
+msgid "{number} decision found for \"{query}\""
+msgid_plural "{number} decisions found for \"{query}\""
+msgstr[0] "{number} απόφαση βρέθηκε για \"{query}\""
+msgstr[1] "{number} αποφάσεις βρέθηκαν για \"{query}\""
+
+msgid "Add Decision"
+msgstr "Προσθήκη Απόφασης"
+
+msgid "New Decision"
+msgstr "Νέα Απόφαση"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:2
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:2
+msgid "Stats"
+msgstr "Στατιστικά"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:4
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:6
+msgid "Weekly visits for last 12 months"
+msgstr "Εβδομαδιαίες επισκέψεις κατά τους 12 τελευταίους μήνες"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:13
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:37
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:22
+msgid "Visits"
+msgstr "Επισκέψεις"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:14
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:19
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:18
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:23
+msgid "During last 30 days"
+msgstr "Κατά τις τελευταίες 30 ημέρες"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:15
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:20
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:19
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:24
+msgid "During last 12 months"
+msgstr "Κατά τους τελευταίους 12 μήνες"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:16
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:21
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:20
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:25
+msgid "All time:"
+msgstr "Ανέκαθεν"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:18
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:17
+msgid "Download counts"
+msgstr "Πλήθος λήψεων"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:37
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:37
+msgid "Year"
+msgstr "Έτος"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:37
+#: ckanext/matomo/templates/report/dataset_analytics.html:14
+#: ckanext/matomo/templates/report/dataset_analytics.html:42
+#: ckanext/matomo/templates/report/resource_analytics.html:11
+#: ckanext/matomo/templates/report/resource_analytics.html:32
+msgid "Downloads"
+msgstr "Λήψεις"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:34
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:39
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:39
+msgid "Week"
+msgstr "Εβδομάδα"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:10
+#: ckanext/matomo/templates/report/resource_analytics.html:10
+msgid "Organization"
+msgstr "Οργανισμός"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:11
+#: ckanext/matomo/templates/report/dataset_analytics.html:39
+msgid "Total views"
+msgstr "Συνολικές θεάσεις"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:12
+#: ckanext/matomo/templates/report/dataset_analytics.html:40
+msgid "Initial entrance"
+msgstr "Αρχική είσοδος"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:32
+msgid "Most viewed datasets"
+msgstr "Δημοφιλέστερα σύνολα δεδομένων"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:38
+msgid "Dataset"
+msgstr "Σύνολο δεδομένων"
+
+#: ckanext/matomo/templates/report/location_analytics.html:38
+msgid "Dates"
+msgstr "Ημερομηνίες"
+
+#: ckanext/matomo/templates/report/location_analytics.html:76
+msgid "Countries"
+msgstr "Χώρες"
+
+#: ckanext/matomo/templates/report/resource_analytics.html:31
+msgid "Resource"
+msgstr "Πόρος"
+
+#: ckanext/matomo/templates/report/search_term_analytics.html:10
+msgid "Total searches"
+msgstr "Συνολικές αναζητήσεις"
+
+msgid "Weekly downloads"
+msgstr "Εβδομαδιαίες λήψεις"
+
+msgid "over the last 12 months"
+msgstr "κατά τους τελευταίους 12 μήνες"
+
+msgid "Weekly visits"
+msgstr "Eβδομαδιαίες επισκέψεις"
+
+msgid "for the last 12 months"
+msgstr "κατά τους 12 τελευταίους μήνες"
+
+msgid "Popularity"
+msgstr "Δημοφιλία"
+
+# Footer translations
+msgid "Community"
+msgstr "Κοινότητα"
+
+msgid "Open Data - Restricted Access Data"
+msgstr "Ανοικτά Δεδομένα - Δεδομένα Περιορισμένης Πρόσβασης"
+
+msgid "Open data"
+msgstr "Ανοιχτά δεδομένα"
+
+msgid "Restricted Access Data"
+msgstr "Δεδομένα Περιορισμένης Πρόσβασης"
+
+msgid "Open Data"
+msgstr "Ανοικτά Δεδομένα"
+
+msgid "Contact Us"
+msgstr "Επικοινωνία"
+
+msgid "Help"
+msgstr "Βοήθεια"
+
+msgid "News"
+msgstr "Νέα"
+
+msgid "Statistics"
+msgstr "Στατιστικά"
+
+# High Value Datasets section translations
+msgid "High Value Datasets"
+msgstr "Σύνολα Δεδομένων Υψηλής Αξίας"
+
+msgid "Discover datasets that have been identified as having high value for society and economy"
+msgstr "Ανακαλύψτε σύνολα δεδομένων που έχουν αναγνωριστεί ως υψηλής αξίας για την κοινωνία και την οικονομία"
+
+msgid "Key Thematic Categories"
+msgstr "Βασικές Θεματικές Κατηγορίες"
+
+msgid "Geospatial, Earth observation, environmental, meteorological, statistics, mobility, and company data"
+msgstr "Γεωχωρικά, δεδομένα παρατήρησης της Γης, περιβαλλοντικά, μετεωρολογικά, στατιστικά, δεδομένα κινητικότητας και δεδομένα εταιρειών"
+
+msgid "Free Access"
+msgstr "Ελεύθερη Πρόσβαση"
+
+msgid "Available free of charge through standardized APIs and bulk downloads, ensuring maximum reusability"
+msgstr "Διατίθενται δωρεάν μέσω τυποποιημένων API και μαζικών λήψεων, εξασφαλίζοντας μέγιστη επαναχρησιμοποιησιμότητα"
+
+msgid "Machine Readability"
+msgstr "Μηχαναγνώσιμη Μορφή"
+
+msgid "Structured formats and metadata following EU standards, enabling automated processing and integration"
+msgstr "Δομημένες μορφές και μεταδεδομένα που ακολουθούν πρότυπα της ΕΕ, επιτρέποντας αυτοματοποιημένη επεξεργασία και ενσωμάτωση"
+
+msgid "Data Services"
+msgstr "Υπηρεσίες Δεδομένων"
+
+msgid "Data services"
+msgstr "Υπηρεσίες Δεδομένων"
+
+msgid "No data-services found"
+msgstr "Δεν βρέθηκαν υπηρεσίες δεδομένων"
+
+msgid "Add Data Service"
+msgstr "Προσθήκη Υπηρεσίας Δεδομένων"
+
+msgid "Add to Data Service"
+msgstr "Προσθήκη στην Υπηρεσία Δεδομένων"
+
+msgid "Create Data Service"
+msgstr "Δημιουργία Υπηρεσίας Δεδομένων"
+
+msgid "Are you sure you want to delete this Data Service?"
+msgstr "Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτή την Υπηρεσία Δεδομένων;"
+
+msgid "A little information about my Data Service..."
+msgstr "Λίγες πληροφορίες για την Υπηρεσία Δεδομένων μου..."
+
+msgid "Edit Data Service"
+msgstr "Επεξεργασία Υπηρεσίας Δεδομένων"
+
+msgid "Data Service Form"
+msgstr "Φόρμα Υπηρεσίας Δεδομένων"
+
+msgid "My Data Services"
+msgstr "Οι Υπηρεσίες Δεδομένων μου"
+
+msgid "View Data Service"
+msgstr "Προβολή Υπηρεσίας Δεδομένων"
+
+msgid "My Data Service"
+msgstr "Η Υπηρεσία Δεδομένων μου"
+
+msgid "There are currently no Data Services for this site"
+msgstr "Δεν υπάρχουν αυτή τη στιγμή Υπηρεσίες Δεδομένων για αυτόν τον ιστότοπο"
+
+msgid "There are no Data Services associated with this dataset"
+msgstr "Δεν υπάρχουν Υπηρεσίες Δεδομένων που να σχετίζονται με αυτό το σύνολο δεδομένων"
+
+msgid "There is no description for this Data Service"
+msgstr "Δεν υπάρχει περιγραφή για αυτή την Υπηρεσία Δεδομένων"
+
+msgid "No Data Service"
+msgstr "Καμία Υπηρεσία Δεδομένων"
+
+msgid "Save Data Service"
+msgstr "Αποθήκευση Υπηρεσίας Δεδομένων"
+
+msgid "Search Data Services..."
+msgstr "Αναζήτηση Υπηρεσιών Δεδομένων..."
+
+msgid "You are not a member of any Data Services."
+msgstr "Δεν είστε μέλος σε καμία Υπηρεσία Δεδομένων."
+
+msgid "User isn't a member of any Data Services."
+msgstr "Ο χρήστης δεν είναι μέλος σε καμία Υπηρεσία Δεδομένων."
+
+msgid "Update Data Service"
+msgstr "Ενημέρωση Υπηρεσίας Δεδομένων"
+
+msgid "New Dataset"
+msgstr "Νέο Σύνολο Δεδομένων"
+
+msgid "Create a new Dataset"
+msgstr "Δημιουργία νέου Συνόλου Δεδομένων"
+
+msgid "New Data Service"
+msgstr "Νέα Υπηρεσία Δεδομένων"
+
+msgid "Create a new Data Service"
+msgstr "Δημιουργία νέας Υπηρεσίας Δεδομένων"
+
+msgid "Create a new Decision"
+msgstr "Δημιουργία νέας Απόφασης"
+
+msgid "New Dataset of Protected Data"
+msgstr "Νέο Σύνολο Προστατευόμενων Δεδομένων"
+
+msgid "Create a new Dataset of Protected Data"
+msgstr "Δημιουργία νέου Συνόλου Προστατευόμενων Δεδομένων"
+
+msgid "Add dataset of protected data"
+msgstr "Προσθήκη συνόλου προστατευόμενων δεδομένων"
+
+msgid "Datasets/APIs/Decisions"
+msgstr "Σύνολα δεδομένων/APIs/Αποφάσεις"
+
+msgid "There is no description for this dataset"
+msgstr "Δεν υπάρχει περιγραφή για αυτό το σύνολο δεδομένων"
+
+msgid "There is no description for this organization"
+msgstr "Δεν υπάρχει περιγραφή για αυτόν τον οργανισμό"
+
+msgid "There is no description for this harvest source"
+msgstr "Δεν υπάρχει περιγραφή για αυτή την πηγή συγκομιδής"
+
+msgid "Dataset description"
+msgstr "Περιγραφή συνόλου δεδομένων"
+
+msgid "Dataset description:"
+msgstr "Περιγραφή συνόλου δεδομένων:"
+
+msgid "feedback"
+msgstr "σχόλια"
+
+msgid "leave a comment"
+msgstr "αφήστε ένα σχόλιο"
+
+msgid "Add Dataset - Data Service - Decision"
+msgstr "Προσθήκη Συνόλου Δεδομένων - Υπηρεσίας Δεδομένων - Απόφασης"
+
+msgid "What are data services?"
+msgstr "Τι είναι οι υπηρεσίες δεδομένων;"
+
+msgid "A CKAN Data Service provides programmatic access to data through APIs, web services, or other automated interfaces. Data services enable applications and systems to access and process data automatically."
+msgstr "Μια CKAN Υπηρεσία Δεδομένων προσφέρει προγραμματιστική πρόσβαση σε δεδομένα μέσω APIs, υπηρεσιών web ή άλλων αυτοματοποιημένων διεπαφών. Οι υπηρεσίες δεδομένων επιτρέπουν σε εφαρμογές και συστήματα να αποκτούν και να επεξεργάζονται δεδομένα αυτόματα."
+
+msgid "Read the data service submission guide"
+msgstr "Διαβάστε τον οδηγό υποβολής υπηρεσίας δεδομένων"
+
+msgid "Data Service"
+msgstr "Υπηρεσία Δεδομένων"
+
+msgid "Toggle description"
+msgstr "Εναλλαγή περιγραφής"
+
+msgid "Leave a comment"
+msgstr "Αφήστε ένα σχόλιο"
+
+msgid "Content"
+msgstr "Περιεχόμενο"
+
+msgid "Save"
+msgstr "Αποθήκευση"
+
+msgid "Members"
+msgstr "Μέλη"
+
+
+msgid "Explore High Value Datasets"
+msgstr "Εξερευνήστε Σύνολα Δεδομένων Υψηλής Αξίας"
+
+msgid "Authentication Required"
+msgstr "Απαιτείται Αυθεντικοποίηση"
+
+msgid "You need to login in order to continue."
+msgstr "Πρέπει να συνδεθείτε για να συνεχίσετε."
+
+
+msgid "Datasets Per Theme"
+msgstr "Σύνολα Δεδομένων ανά Θέμα"
+
+msgid "Switch to Table"
+msgstr "Εμφάνιση ως Πίνακας"
+
+msgid "Theme Code"
+msgstr "Κωδικός Θέματος"
+
+msgid "Theme Name"
+msgstr "Όνομα Θέματος"
+
+msgid "No themes found"
+msgstr "Δεν βρέθηκαν θέματα"
+
+msgid "Organizations Per Publisher Type"
+msgstr "Οργανισμοί ανά Τύπον Εκδότη"
+
+msgid "Total Organizations"
+msgstr "Συνολικοί Οργανισμοί"
+
+msgid "With Publisher Type"
+msgstr "Με Τύπο Εκδότη"
+
+msgid "Publisher Type Code"
+msgstr "Κωδικός Τύπου Εκδότη"
+
+msgid "Publisher Type Name"
+msgstr "Όνομα Τύπου Εκδότη"
+
+msgid "Number of Organizations"
+msgstr "Αριθμός Οργανισμών"
+
+msgid "No publisher types found"
+msgstr "Δεν βρέθηκαν τύποι εκδοτών"
+msgid "Total Number of Packages"
+msgstr "Πλήθος συνόλων δεδομένων και APIs"
+
+msgid "Package Revisions per Week"
+msgstr "Αναθεωρήσεις συνόλων δεδομένων και APIs ανά εβδομάδα"
+
+msgid "Most Edited Packages"
+msgstr "Περισσότερο επεξεργασμένα σύνολα δεδομένων και APIs "

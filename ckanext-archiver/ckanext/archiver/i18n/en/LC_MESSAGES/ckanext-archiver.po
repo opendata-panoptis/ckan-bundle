@@ -1,0 +1,182 @@
+# English translations for ckanext-archiver.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the ckanext-archiver
+# project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-archiver 2.0.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2017-03-20 17:18+0100\n"
+"PO-Revision-Date: 2025-07-11 12:00+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: ckanext/archiver/reports.py:239
+#: ckanext/archiver/templates/report/broken_links.html:4
+#: ckanext/archiver/templates/report/broken_links.html:15
+#: ckanext/archiver/templates/report/broken_links.html:35
+msgid "Broken links"
+msgstr "Broken links"
+
+#: ckanext/archiver/reports.py:240
+msgid "Dataset resource URLs that are found to result in errors when resolved."
+msgstr "Dataset resource URLs that are found to result in errors when resolved."
+
+#: ckanext/archiver/tasks.py:409 ckanext/archiver/tasks.py:430
+#: ckanext/archiver/tasks.py:626
+#, python-format
+msgid "Content-length %s exceeds maximum allowed value %s"
+msgstr "Content-length %s exceeds maximum allowed value %s"
+
+#: ckanext/archiver/tasks.py:424
+#, python-format
+msgid "Server content contained an API error message: %s"
+msgstr "Server content contained an API error message: %s"
+
+#: ckanext/archiver/tasks.py:446
+#, python-format
+msgid "Content-length after streaming was %i"
+msgstr "Content-length after streaming was %i"
+
+#: ckanext/archiver/tasks.py:502
+msgid "No value for ckanext-archiver.cache_url_root in config"
+msgstr "No value for ckanext-archiver.cache_url_root in config"
+
+#: ckanext/archiver/tasks.py:590
+#, python-format
+msgid "URL parsing failure: %s"
+msgstr "URL parsing failure: %s"
+
+#: ckanext/archiver/tasks.py:595
+#, python-format
+msgid "Invalid url scheme. Please use one of: %s"
+msgstr "Invalid url scheme. Please use one of: %s"
+
+#: ckanext/archiver/tasks.py:599
+msgid "URL parsing failure - did not find a host name"
+msgstr "URL parsing failure - did not find a host name"
+
+#: ckanext/archiver/tasks.py:722 ckanext/archiver/tasks.py:872
+#, python-format
+msgid "Connection error: %s"
+msgstr "Connection error: %s"
+
+#: ckanext/archiver/tasks.py:724 ckanext/archiver/tasks.py:874
+#, python-format
+msgid "Invalid HTTP response: %s"
+msgstr "Invalid HTTP response: %s"
+
+#: ckanext/archiver/tasks.py:726 ckanext/archiver/tasks.py:876
+#, python-format
+msgid "Connection timed out after %ss"
+msgstr "Connection timed out after %ss"
+
+#: ckanext/archiver/tasks.py:728 ckanext/archiver/tasks.py:878
+msgid "Too many redirects"
+msgstr "Too many redirects"
+
+#: ckanext/archiver/tasks.py:730
+#, python-format
+msgid "Error downloading: %s"
+msgstr "Error downloading: %s"
+
+#: ckanext/archiver/tasks.py:734
+#, python-format
+msgid "Error with the download: %s"
+msgstr "Error with the download: %s"
+
+#: ckanext/archiver/tasks.py:867
+msgid "Invalid URL or Redirect Link"
+msgstr "Invalid URL or Redirect Link"
+
+#: ckanext/archiver/tasks.py:870
+msgid "Could not make HEAD request"
+msgstr "Could not make HEAD request"
+
+#: ckanext/archiver/tasks.py:880
+#, python-format
+msgid "Error during request: %s"
+msgstr "Error during request: %s"
+
+#: ckanext/archiver/tasks.py:882
+#, python-format
+msgid "Error with the request: %s"
+msgstr "Error with the request: %s"
+
+#: ckanext/archiver/templates/archiver/is_resource_broken.html:3
+msgid "Link check"
+msgstr "Link check"
+
+#: ckanext/archiver/templates/archiver/is_resource_broken.html:5
+msgid "This link works."
+msgstr "This link works."
+
+#: ckanext/archiver/templates/archiver/is_resource_broken.html:7
+msgid "This link is broken."
+msgstr "This link is broken."
+
+#: ckanext/archiver/templates/archiver/is_resource_broken.html:9
+msgid "This link has not been checked."
+msgstr "This link has not been checked."
+
+#: ckanext/archiver/templates/archiver/is_resource_cached.html:3
+msgid "Cached resource"
+msgstr "Cached resource"
+
+#: ckanext/archiver/templates/archiver/is_resource_cached.html:5
+msgid "This resource is cached by CKAN."
+msgstr "This resource is cached by CKAN."
+
+#: ckanext/archiver/templates/archiver/is_resource_cached.html:7
+msgid "This resource is not cached by CKAN."
+msgstr "This resource is not cached by CKAN."
+
+#: ckanext/archiver/templates/report/broken_links.html:3
+msgid "Datasets with broken resource links"
+msgstr "Datasets with broken resource links"
+
+#: ckanext/archiver/templates/report/broken_links.html:16
+msgid "Datasets with broken resource links:"
+msgstr "Datasets with broken resource links:"
+
+#: ckanext/archiver/templates/report/broken_links.html:17
+msgid "Percentage of datasets with broken resource links:"
+msgstr "Percentage of datasets with broken resource links:"
+
+#: ckanext/archiver/templates/report/broken_links.html:18
+msgid "Broken links:"
+msgstr "Broken links:"
+
+#: ckanext/archiver/templates/report/broken_links.html:19
+msgid "Percentage of resources with broken links:"
+msgstr "Percentage of resources with broken links:"
+
+#: ckanext/archiver/templates/report/broken_links.html:36
+msgid "Dataset"
+msgstr "Dataset"
+
+#: ckanext/archiver/templates/report/broken_links.html:37
+msgid "Notes"
+msgstr "Notes"
+
+#: ckanext/archiver/templates/report/broken_links.html:38
+msgid "User"
+msgstr "User"
+
+#: ckanext/archiver/templates/report/broken_links.html:39
+msgid "Resources"
+msgstr "Resources"
+
+#: ckanext/archiver/templates/report/broken_links.html:40
+msgid "Reason"
+msgstr "Reason"
+
+#: ckanext/archiver/templates/report/broken_links.html:41
+msgid "Attempt"
+msgstr "Attempt"

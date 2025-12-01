@@ -1,0 +1,14 @@
+athens-theme-css:
+  filter: cssrewrite
+  output: athens_theme/%(version)s_athens_theme.css
+  contents:
+    - css/athens-theme.css
+
+athens-theme-js:
+  filter: rjsmin
+  output: athens_theme/%(version)s_athens_theme.js
+  contents:
+    - athens-theme.js
+  extra:
+    preload:
+      - base/main

@@ -1,0 +1,51 @@
+
+<!-- Select Επιλογή Τοποθεσίας -->
+<div class="gov-inputgroup">
+  <input type="text"  placeholder="Choose Location..." readonly class="locked-or-not" id="personInput-{{index}}">
+  <button type="button" class="gov-button" title="Search" onclick="onOpenDialog(event, {{index}})">
+    <i class="fa fa-search" aria-hidden="true"></i>
+  </button>
+  <button type="button" class="gov-button" title="Remove" onclick="clearSpecialCoverageFields(event, {{index}})" id="removeButton-{{index}}">
+    <i class="fa fa-times" aria-hidden="true"></i>
+  </button>
+</div>
+
+<!-- Dialog Επιλογής Τοποθεσίας -->
+<div id="dialogOverlay">
+  <div id="dialogBox" onclick="event.stopPropagation()">
+    <h2>{{ _('Choose Location') }}</h2>
+
+    <!--  Φόρμα Αναζήτησης  -->
+    <div id="searchForm" style="margin-bottom: 20px;">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="{{ _('Location Search') }}"
+        style="padding: 10px; width: 80%; font-size: 16px; border-radius: 6px; border: 1px solid #ccc;"
+      />
+      <button type="button" onclick="onSearch(event)" style="padding: 10px 20px; font-size: 16px; border-radius: 6px; margin-left: 10px;">
+        {{ _('Search') }}
+      </button>
+    </div>
+
+    <!--  Πίνακας Αποτελεσμάτων  -->
+    <table id="dataTable" border="1">
+      <thead>
+        <tr>
+          <th>{{ _('Name') }}</th>
+          <th>{{ _('Country') }}</th>
+          <th>{{ _('Region') }}</th>
+          <th>{{ _('Population') }}</th>
+          <th>{{ _('Latitude') }}</th>
+          <th>{{ _('Longitude') }}</th>
+        </tr>
+      </thead>
+      <tbody id="dataBody"></tbody>
+    </table>
+
+    <!--  Επιβεβαίωση / Ακύρωση  -->
+    <button type="button" onclick="onConfirmSelection(event)" id="confirmBtn" >{{ _('Confirm') }}</button>
+    <button type="button" onclick="onCloseDialog(event)" id="cancelBtn">{{ _('Cancel') }}</button>
+
+  </div>
+</div>

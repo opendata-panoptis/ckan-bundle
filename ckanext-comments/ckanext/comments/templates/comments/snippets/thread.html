@@ -1,0 +1,22 @@
+{#
+subject_id - subject for thread
+subject_type - type of the subject for thread
+
+{% snippet 'comments/snippets/thread.html', subject_id=pkg.id, subject_type='package' %}
+#}
+
+{% set thread = h.comments_thread_for(subject_id, subject_type) %}
+
+{% asset 'comments/comments-thread' %}
+{% asset 'comments/comments-thread-styles' %}
+
+<div data-module="comments-thread" data-module-subject-id="{{ thread.subject_id }}" data-module-subject-type="{{ thread.subject_type }}">
+    {% if thread.comments %}
+        <h3 class="heading">{{ _('Comments') }}</h3>
+        {% snippet 'comments/snippets/comments_list.html', comments=thread.comments %}
+    {% endif %}
+
+    {% if h.check_access('comments_comment_create', thread) %}
+        {% snippet 'comments/snippets/comment_form.html', subject_id=thread.subject_id, subject_type=thread.subject_type %}
+    {% endif %}
+</div>

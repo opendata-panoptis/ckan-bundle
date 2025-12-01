@@ -1,0 +1,157 @@
+{% extends "dataviewer/base.html" %}
+
+{% block page %}
+    {% set lang = h.lang() %}
+    <style>
+        #sdgmap-container {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #sdgmap-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .sdgmap-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+        .loading-dialog {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <div class="sdgmap-info">
+        {% if lang == 'el' %}
+            <h4>Ενσωμάτωση Ενιαίου Ψηφιακού Χάρτη</h4>
+            <p>Αυτή η προβολή ενσωματώνει τον Ενιαίο Ψηφιακό Χάρτη της Ελλάδας (https://sdigmap.tee.gov.gr) για βελτιωμένη γεωγραφική οπτικοποίηση.</p>
+        {% else %}
+            <h4>Unified Digital Map Integration</h4>
+            <p>This view integrates the Greek Unified Digital Map service for enhanced geographic visualization.</p>
+        {% endif %}
+        
+        <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 10px; margin: 10px 0;">
+            {% if lang == 'el' %}
+                <h5 style="color: #856404; margin-top: 0;">📋 Οδηγίες Χρήσης:</h5>
+                <ol style="margin: 5px 0; padding-left: 20px; color: #856404;">
+                    <li><strong>Κατεβάστε το αρχείο:</strong> Κάντε κλικ στον παρακάτω σύνδεσμο για να κατεβάσετε το γεωγραφικό αρχείο</li>
+                    <li><strong>Ανοίξτε τον Ενιαίο Ψηφιακό Χάρτη:</strong> Ο χάρτης θα φορτωθεί παρακάτω</li>
+                    <li><strong>Προσθέστε το αρχείο στον χάρτη:</strong> Χρησιμοποιήστε τα εργαλεία του Ενιαίου Ψηφιακού Χάρτη για να εισάγετε το αρχείο που κατεβάσατε</li>
+                    <li><strong>Εξερευνήστε τα δεδομένα:</strong> Χρησιμοποιήστε τις λειτουργίες του χάρτη για ανάλυση και οπτικοποίηση</li>
+                </ol>
+            {% else %}
+                <h5 style="color: #856404; margin-top: 0;">📋 Usage Instructions:</h5>
+                <ol style="margin: 5px 0; padding-left: 20px; color: #856404;">
+                    <li><strong>Download the file:</strong> Click the link below to download the geographic file</li>
+                    <li><strong>Open the Unified Digital Map:</strong> The map will load below</li>
+                    <li><strong>Add the file to the map:</strong> Use the Unified Digital Map's tools to import the file you downloaded</li>
+                    <li><strong>Explore the data:</strong> Use the map's features for analysis and visualization</li>
+                </ol>
+            {% endif %}
+        </div>
+
+        {% if resource_url %}
+            {% if lang == 'el' %}
+                <p><strong>Λήψη Αρχείου:</strong>
+                    <a href="{{ resource_url }}" target="_blank" style="background-color: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">
+                        ⬇️ {{ resource.name or resource_url }}
+                    </a>
+                    {% if resource_format %}
+                        <span style="background-color: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px;">{{ resource_format.upper() }}</span>
+                    {% endif %}
+                </p>
+            {% else %}
+                <p><strong>Original Resource:</strong> 
+                    <a href="{{ resource_url }}" target="_blank" style="background-color: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">
+                        📥 Download: {{ resource.name or resource_url }}
+                    </a>
+                    {% if resource_format %}
+                        <span style="background-color: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px;">{{ resource_format.upper() }}</span>
+                    {% endif %}
+                </p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div id="sdgmap-container">
+        <div class="loading-dialog" id="loading-dialog">
+            <div class="loading-spinner"></div>
+            {% if lang == 'el' %}
+                <span>Φόρτωση Ενιαίου Ψηφιακού Χάρτη...</span>
+            {% else %}
+                <span>Loading Unified Digital Map...</span>
+            {% endif %}
+        </div>
+        <iframe id="sdgmap-iframe" 
+                src="{{ sdgmap_url }}" 
+                title="{% if lang == 'el' %}Ελληνικός Ενιαίος Ψηφιακός Χάρτης{% else %}Greek Unified Digital Map{% endif %}"
+                style="display: none;"
+                onload="document.getElementById('loading-dialog').style.display='none'; this.style.display='block';">
+        </iframe>
+    </div>
+
+    <div class="sdgmap-info" style="margin-top: 15px;">
+        <small>
+            {% if lang == 'el' %}
+                Υποστηρίζεται από 
+                <a href="https://sdigmap.tee.gov.gr" target="_blank">Ενιαίος Ψηφιακός Χάρτης</a> - 
+                Τεχνικό Επιμελητήριο Ελλάδας (ΤΕΕ)
+            {% else %}
+                Powered by 
+                <a href="https://sdigmap.tee.gov.gr" target="_blank">Unified Digital Map</a> - 
+                Technical Chamber of Greece (TEE)
+            {% endif %}
+        </small>
+    </div>
+
+    <script>
+        // Handle iframe loading and error cases
+        document.addEventListener('DOMContentLoaded', function() {
+            var iframe = document.getElementById('sdgmap-iframe');
+            var loadingDialog = document.getElementById('loading-dialog');
+            
+            // Set a timeout in case the iframe doesn't load
+            setTimeout(function() {
+                if (loadingDialog.style.display !== 'none') {
+                    {% if lang == 'el' %}
+                        loadingDialog.innerHTML = '<span style="color: #dc3545;">Αδύνατη η φόρτωση του Ενιαίου Ψηφιακού Χάρτη. Ελέγξτε τη σύνδεσή σας στο διαδίκτυο ή δοκιμάστε ξανά αργότερα.</span>';
+                    {% else %}
+                        loadingDialog.innerHTML = '<span style="color: #dc3545;">Unable to load Unified Digital Map. Please check your internet connection or try again later.</span>';
+                    {% endif %}
+                }
+            }, 15000); // 15 second timeout
+            
+            // Handle iframe errors
+            iframe.addEventListener('error', function() {
+                {% if lang == 'el' %}
+                    loadingDialog.innerHTML = '<span style="color: #dc3545;">Σφάλμα φόρτωσης του Ενιαίου Ψηφιακού Χάρτη.</span>';
+                {% else %}
+                    loadingDialog.innerHTML = '<span style="color: #dc3545;">Error loading Unified Digital Map service.</span>';
+                {% endif %}
+            });
+        });
+    </script>
+
+{% endblock %}

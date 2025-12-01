@@ -1,0 +1,75 @@
+<div class="module module-narrow">
+  <h2 class="module-heading"><i class="fa-solid fa-chart-line"></i> {{ _('Stats') }}</h2>
+  <section class="module-content">
+
+    {% if h.matomo_show_download_graph() %}
+      <div style="text-align: center; margin-bottom: 10px;">
+        <span style="font-size: 1rem; font-weight: 100; color: #333; display: block;">
+          {{ _('Weekly downloads') }}
+        </span>
+        <span style="font-size: 0.90rem; font-weight: 100; color: #666;">
+          {{ _('over the last 12 months') }}
+        </span>
+      </div>
+      <div id="chart_div" style="margin: 0 auto;"></div>
+    {% endif %}
+
+    {% set visits =  h.get_downloads_in_date_range_for_resource(res.id) %}
+    {% set visit_count_last_12_month = h.get_visit_count_for_resource(res.id, 'year') %}
+    {% set visit_count_last_30_days = h.get_visit_count_for_resource(res.id, 'month') %}
+    {% set download_count_last_12_month = h.get_download_count_for_resource(res.id, 'year') %}
+    {% set download_count_last_30_days = h.get_download_count_for_resource(res.id, 'month') %}
+
+    <div style="text-align: center; margin-top: 15px;">
+      <dl class="list-unstyled" style="display: inline-block; text-align: left;">
+        {% if h.matomo_show_download_graph() %}
+        <dt>{{ _('Download counts') }}:</dt>
+        <dd>{{ _('During last 30 days') }}: {{ download_count_last_30_days }}</dd>
+        <dd>{{ _('During last 12 months') }}: {{ download_count_last_12_month }}</dd>
+        <dd>{{ _('All time:') }} {{ visits.total_downloads }}</dd>
+        {% endif %}
+        <dt>{{ _('Visits') }}:</dt>
+        <dd>{{ _('During last 30 days') }}: {{ visit_count_last_30_days }}</dd>
+        <dd>{{ _('During last 12 months') }}: {{ visit_count_last_12_month }}</dd>
+        <dd>{{ _('All time:') }} {{ visits.total_visits }}</dd>
+      </dl>
+    </div>
+
+
+    {% if h.matomo_show_download_graph() %}
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script type="text/javascript">
+      google.charts.load('current', {packages: ['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ["{{ _('Year') }}", "{{ _('Downloads') }}"],
+          {% for v in visits.visits %}
+        ["{{ _('Week') }}" + ' ' + {{ v.week }} + ', ' + {{ v.year }}, {{ v.downloads }}],
+        {% endfor %}
+      ]);
+
+        var options = {
+          hAxis: {
+            textPosition: 'none',
+            gridlines: {
+              count : 4
+            }
+          },
+          vAxis: {
+            minValue: 4
+          },
+          legend: { position: 'bottom' },
+          focusTarget: 'category'
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+        chart.draw(data, options);
+      }
+    </script>
+    {% endif %}
+  </section>
+</div>

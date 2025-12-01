@@ -1,0 +1,146 @@
+{% import 'macros/form.html' as form %}
+
+{% if not h.should_hide_azure_translation() %}
+  <button type="button" class="govgr-translate-button" onclick='translateGreekFieldToEnglish("{{field.field_name}}", "{{ data.id }}")'>
+    Μετάφραση <i class="fas fa-language" style="margin-left: 8px;"></i>
+  </button>
+<govgr-confirm-modal id="confirmModal"></govgr-confirm-modal>
+<br>
+<br>
+{% endif %}
+<!-- Εμφάνιση του πεδίου σε όσες γλώσσες υποστηρίζονται -->
+{%- for lang in h.fluent_form_languages(field, entity_type, object_type, schema) -%}
+  <!-- Εμφάνιση φόρμας -->
+  {% call form.input(
+    field.field_name + '-' + lang,
+    id='field-' + field.field_name + '-' + lang,
+    label=h.fluent_form_label(field, lang),
+    placeholder=h.scheming_language_text(field.form_placeholder, lang),
+    value=data[field.field_name + '-' + lang]
+        or data.get(field.field_name, {})[lang],
+    error=errors[field.field_name + '-' + lang],
+    classes=['control-medium'],
+    attrs=dict({"class": "form-control"}, **(field.get('form_attrs', {}))),
+    is_required=h.fluent_language_is_required(field, lang)
+    ) %}
+
+    <!-- Εμφάνιση Βοηθητικού Κειμένου -->
+    {%- snippet 'scheming/form_snippets/fluent_help_text.html',
+      field=field,
+      lang=lang -%}
+  {% endcall %}
+{%- endfor -%}
+
+{% if field.field_name == 'title_translated' %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+    // Επιλέγουμε το πεδίο με τον ΕΛΛΗΝΙΚΟ τίτλο
+    const titleInput = document.querySelector("#field-title_translated-el");
+    if (!titleInput) {
+      // Αν το πεδίο δεν υπάρχει, σταματάμε την εκτέλεση
+      return;
+    }
+
+    // Επιλέγουμε το πεδίο του slug (name)
+    let nameInput = document.querySelector("#field-name");
+    // Flag για να καταγράφουμε αν το πεδίο 'name' τροποποιήθηκε χειροκίνητα
+    let nameModified = false;
+
+    // Συνάρτηση που μετατρέπει Ελληνικό κείμενο σε "slug" λατινικών χαρακτήρων
+    function slugify(text) {
+      // Χάρτης απλού transliteration από ελληνικά σε λατινικά
+      const charMap = {
+        'α': 'a', 'β': 'v', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'ζ': 'z',
+        'η': 'i', 'θ': 'th', 'ι': 'i', 'κ': 'k', 'λ': 'l', 'μ': 'm',
+        'ν': 'n', 'ξ': 'x', 'ο': 'o', 'π': 'p', 'ρ': 'r', 'σ': 's',
+        'ς': 's', 'τ': 't', 'υ': 'y', 'φ': 'f', 'χ': 'ch', 'ψ': 'ps',
+        'ω': 'o',
+
+        // Με τόνους - πεζά
+        'ά': 'a', 'έ': 'e', 'ή': 'i', 'ί': 'i', 'ό': 'o', 'ύ': 'y', 'ώ': 'o',
+
+        // Διαλυτικά
+        'ϊ': 'i', 'ϋ': 'y',
+
+        // Διαλυτικά με τόνους
+        'ΐ': 'i', 'ΰ': 'y',
+
+        // Προαιρετικά κεφαλαία γράμματα
+        'Α': 'a', 'Β': 'v', 'Γ': 'g', 'Δ': 'd', 'Ε': 'e', 'Ζ': 'z',
+        'Η': 'i', 'Θ': 'th', 'Ι': 'i', 'Κ': 'k', 'Λ': 'l', 'Μ': 'm',
+        'Ν': 'n', 'Ξ': 'x', 'Ο': 'o', 'Π': 'p', 'Ρ': 'r', 'Σ': 's',
+        'Τ': 't', 'Υ': 'y', 'Φ': 'f', 'Χ': 'ch', 'Ψ': 'ps', 'Ω': 'o',
+
+        // Με τόνους - κεφαλαία
+        'Ά': 'a', 'Έ': 'e', 'Ή': 'i', 'Ί': 'i', 'Ό': 'o', 'Ύ': 'y', 'Ώ': 'o',
+
+        // Διαλυτικά - κεφαλαία
+        'Ϊ': 'i', 'Ϋ': 'y'
+
+      };
+
+      // Μετατρέπουμε κάθε χαρακτήρα ξεχωριστά με βάση το charMap και αν δεν υπάρχει μετάφραση, τον μετατρέπουμε σε πεζό
+      let latin = '';
+      for (const ch of text) {
+        if (charMap[ch]) {
+          latin += charMap[ch];
+        } else {
+          latin += ch.toLowerCase();
+        }
+      }
+
+      // Καθαρισμός κειμένου: Αφαίρεση τόνων, Αντικατάσταση μη αλφαριθμητικών με παύλες, Αφαίρεση περιττών παυλών στην αρχή και στο τέλος και Περικοπή στους 100 χαρακτήρες
+      return latin
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Αφαίρεση τόνων
+        .replace(/[^a-z0-9]+/g, "-")                      // Μόνο λατινικοί και αριθμοί, αλλιώς -
+        .replace(/^-+|-+$/g, "")                          // Αφαίρεση περιττών παύλων στην αρχή/τέλος
+        .substring(0, 100);
+    }
+
+    // Συνάρτηση για να προσθέσουμε event listeners στο πεδίο name και title
+    function setupListeners() {
+      if (!nameInput) {
+        // Αν το πεδίο name δεν υπάρχει, δεν συνεχίζουμε
+        return;
+      }
+
+      // Όταν ο χρήστης τροποποιεί χειροκίνητα το πεδίο name, σηματοδοτούμε ότι δεν θέλουμε αυτόματη ενημέρωση από το title
+      nameInput.addEventListener("input", function () {
+        nameModified = true;
+      });
+
+      // Όταν αλλάζει το πεδίο title (ΕΛΛΗΝΙΚΟΣ τίτλος)
+      titleInput.addEventListener("input", function () {
+        // Αν δεν έχει γίνει χειροκίνητη τροποποίηση στο πεδίο name
+        if (!nameModified) {
+          // Δημιουργούμε το slug από το title και ενημερώνουμε το πεδίο name
+          const slug = slugify(titleInput.value);
+          nameInput.value = slug;
+
+          // Ενημερώνουμε και το preview του slug στην οθόνη
+          const slugPreview = document.querySelector(".slug-preview-value");
+          if (slugPreview) {
+            slugPreview.textContent = slug || "<dataset>";
+          }
+        }
+      });
+    }
+
+    // Αν το πεδίο name υπάρχει ήδη, προσθέτουμε τους listeners
+    if (nameInput) {
+      setupListeners();
+    } else {
+      // Αν δεν υπάρχει ακόμα, παρακολουθούμε το DOM να προστεθεί δυναμικά
+      const observer = new MutationObserver(function (mutations, obs) {
+        nameInput = document.querySelector("#field-name");
+        if (nameInput) {
+          setupListeners();
+          obs.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+  });
+</script>
+{% endif %}

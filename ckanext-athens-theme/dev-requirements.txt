@@ -1,0 +1,4 @@
+pytest
+pytest-ckan
+pytest-cov
+

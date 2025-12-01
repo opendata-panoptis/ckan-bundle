@@ -1,0 +1,85 @@
+{% import 'macros/form.html' as form %}
+
+{% set access_rights_type = h.get_access_rights_type() %}
+
+{%- set options=[] -%}
+{%- set form_restrict_choices_to=field.get('form_restrict_choices_to') -%}
+{%- if not h.scheming_field_required(field) or
+    field.get('form_include_blank_choice', false) -%}
+  {%- do options.append({'value': '', 'text': ''}) -%}
+{%- endif -%}
+
+{%- for c in h.scheming_field_choices(field) -%}
+  {%- if not form_restrict_choices_to or c.value in form_restrict_choices_to -%}
+
+    {%- if field.field_name == 'access_rights' -%}
+      {%- if not access_rights_type -%}
+        {# Αν δεν υπάρχει access_rights_type, φόρτωσε όλες τις επιλογές #}
+        {%- do options.append({
+          'value': c.value|string,
+          'text': h.scheming_language_text(c.label) }) -%}
+      {%- elif access_rights_type == 'open' and c.value == 'http://publications.europa.eu/resource/authority/access-right/PUBLIC' -%}
+        {%- do options.append({
+          'value': c.value|string,
+          'text': h.scheming_language_text(c.label) }) -%}
+      {%- elif access_rights_type == 'protected' and c.value in ['http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC', 'http://publications.europa.eu/resource/authority/access-right/RESTRICTED'] -%}
+        {%- do options.append({
+          'value': c.value|string,
+          'text': h.scheming_language_text(c.label) }) -%}
+      {%- endif -%}
+    {%- else -%}
+      {%- do options.append({
+        'value': c.value|string,
+        'text': h.scheming_language_text(c.label) }) -%}
+    {%- endif -%}
+
+  {%- endif -%}
+{%- endfor -%}
+{%- if field.get('sorted_choices') -%}
+  {%- set options = options|sort(case_sensitive=false, attribute='text') -%}
+{%- endif -%}
+{%- if data[field.field_name] is defined -%}
+  {%- set option_selected = data[field.field_name]|string -%}
+{%- elif field.default is defined -%}
+  {%- set option_selected = field.default|string -%}
+{%- else -%}
+  {%- set option_selected = None -%}
+{%- endif -%}
+
+{%- set show_only_selected = False -%}
+
+{%- if data.get('type', 'dataset') == 'dataset' -%}
+  {%- set option_selected = '' -%}
+
+  {%- if access_rights_type == 'open' and not data.get(field.field_name) -%}
+    {%- set option_selected = 'http://publications.europa.eu/resource/authority/access-right/PUBLIC' -%}
+  {%- elif data.get(field.field_name) -%}
+    {%- set show_only_selected = True -%}
+    {%- set option_selected = data.get(field.field_name) -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- if show_only_selected -%}
+  {%- set filtered_options = [] -%}
+  {%- for option in options -%}
+    {%- if option.value == option_selected -%}
+      {%- do filtered_options.append(option) -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- set options = filtered_options -%}
+{%- endif -%}
+
+{% call form.select(
+    field.field_name,
+    id='field-' + field.field_name,
+    label=h.scheming_language_text(field.label),
+    options=options,
+    selected=option_selected,
+    error=errors[field.field_name],
+    classes=field.classes if 'classes' in field else ['control-medium'],
+    attrs=dict({"class": "form-control form-select"}, **(field.get('form_attrs', {}))),
+    is_required=h.scheming_field_required(field)
+    )
+%}
+    {%- snippet 'scheming/form_snippets/help_text.html', field=field -%}
+{% endcall %}

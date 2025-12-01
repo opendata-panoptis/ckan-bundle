@@ -1,0 +1,4 @@
+# Required packages for ckanext-athens-theme
+Babel>=2.7.0
+Flask>=1.1.1
+

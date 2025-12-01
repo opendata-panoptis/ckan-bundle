@@ -1,0 +1,328 @@
+/* CSS styles for the vocabulary admin extension */
+
+/* CSS Variables for easy theming and maintenance */
+:root {
+  --primary-color: #337ab7;
+  --primary-color-dark: #23527c;
+  --danger-color: #a94442;
+  --danger-background: #f2dede;
+  --danger-border: #ebccd1;
+  --light-gray-bg: #f5f5f5;
+  --hover-gray-bg: #e5e5e5;
+  --border-color: #ccc;
+  --border-light: #eee;
+  --text-muted: #777;
+  --border-radius: 3px;
+  --border-radius-lg: 4px;
+  --spacing-xs: 5px;
+  --spacing-sm: 10px;
+  --spacing-md: 15px;
+  --spacing-lg: 20px;
+  --spacing-xl: 30px;
+  --transition-speed: 0.3s;
+}
+
+/* Main container class to scope all our styles */
+.vocabulary-admin-page .vocabulary-admin-heading {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Style for the page_primary_action container */
+.vocabulary-admin-page .page_primary_action {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  clear: both;
+  display: block;
+  position: relative;
+  float: none;
+}
+
+.vocabulary-admin-page .module-content {
+  clear: both;
+  position: relative;
+}
+
+.vocabulary-admin-page .page-header {
+  margin-bottom: var(--spacing-lg);
+  overflow: visible;
+}
+
+.vocabulary-admin-page .nav-tabs {
+  margin-bottom: 0;
+  clear: both;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+/* Main action buttons for creating new vocabularies/tags */
+.vocabulary-admin-page .vocab-admin-actions {
+  margin-bottom: var(--spacing-lg);
+  margin-top: var(--spacing-sm);
+  clear: both;
+  display: block;
+  position: relative;
+  width: 100%;
+  padding: var(--spacing-sm) 0;
+  border-top: 1px solid var(--border-light);
+}
+
+/* Make the main action buttons smaller (like Bootstrap's btn-sm) */
+.vocabulary-admin-page .vocab-admin-actions .btn {
+  margin-right: var(--spacing-sm);
+  padding: 5px var(--spacing-sm);
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: var(--border-radius);
+}
+
+/* Statistics block */
+.vocabulary-admin-page .stats {
+  background-color: var(--light-gray-bg);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-lg);
+  border-left: 4px solid var(--primary-color);
+  transition: all var(--transition-speed) ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.vocabulary-admin-page .stats:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Vocabulary List Styles */
+.vocabulary-admin-page .vocabulary-list {
+  margin-top: var(--spacing-lg);
+}
+
+.vocabulary-admin-page .vocabulary-list h2 {
+  margin-bottom: var(--spacing-lg);
+}
+
+.vocabulary-admin-page .vocabulary-list table {
+  margin-top: var(--spacing-md);
+  width: 100%;
+}
+
+.vocabulary-admin-page .vocabulary-list th {
+  background-color: var(--light-gray-bg);
+}
+
+/* Table row hover effect - replacing JS hover */
+.vocabulary-admin-page .vocabulary-list tbody tr:hover {
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.vocabulary-admin-page .vocabulary-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.vocabulary-admin-page .vocabulary-header strong {
+  margin-right: auto;
+  font-size: 1.1em;
+}
+
+.vocabulary-admin-page .vocabulary-description {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.vocabulary-admin-page .vocabulary-tags {
+  margin-top: var(--spacing-xs);
+  line-height: 1.8;
+}
+
+.vocabulary-admin-page .vocabulary-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: var(--light-gray-bg);
+  border-radius: var(--border-radius);
+  margin-right: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+  cursor: pointer;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all var(--transition-speed) ease;
+  font-size: 0.9em;
+}
+
+.vocabulary-admin-page .vocabulary-tag:hover {
+  background-color: var(--hover-gray-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.vocabulary-admin-page .vocabulary-tag small {
+  color: var(--text-muted);
+  margin-left: var(--spacing-xs);
+  font-style: italic;
+}
+
+.vocabulary-admin-page .empty-vocabularies, 
+.vocabulary-admin-page .empty {
+  padding: var(--spacing-lg);
+  background-color: #f9f9f9;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Form styles */
+.vocabulary-admin-page .form-horizontal .control-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.vocabulary-admin-page .form-horizontal .control-label {
+  font-weight: bold;
+}
+
+.vocabulary-admin-page .form-horizontal .controls {
+  margin-left: 180px;
+}
+
+.vocabulary-admin-page .form-horizontal .info-block {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.9em;
+  margin-top: var(--spacing-xs);
+}
+
+.vocabulary-admin-page .form-horizontal .form-actions {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-light);
+}
+
+/* --- Styles for ALL small action buttons (Vocabularies AND Tags) --- */
+.vocabulary-admin-page .vocabulary-header a.vocab-action-btn,
+.vocabulary-admin-page .vocabulary-tag-container a.tag-edit-button {
+  all: unset; /* Reset ALL inherited styles aggressively */
+
+  /* Now, re-apply ONLY the styles we want */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* -- ΑΛΛΑΓΕΣ -- */
+  font-size: 1em; /* 1. Κληρονομεί το μέγεθος του γονικού στοιχείου */
+  line-height: 1; /* 2. Βελτιώνει την κάθετη στοίχιση */
+  padding: 0.2em 0.5em; /* 3. Το padding γίνεται σχετικό με το μέγεθος */
+
+  border-radius: var(--border-radius);
+  margin-left: 4px;
+  vertical-align: middle;
+
+  cursor: pointer;
+  text-decoration: none;
+  opacity: 0.7;
+  transition: all var(--transition-speed) ease;
+
+  /* Default button appearance */
+  background-color: #f0f0f0;
+  border: 1px solid var(--border-color);
+  color: #333; /* Default text/icon color */
+}
+
+.vocabulary-admin-page .vocabulary-header a.vocab-action-btn:hover,
+.vocabulary-admin-page .vocabulary-tag-container a.tag-edit-button:hover {
+  opacity: 1;
+  background-color: #e0e0e0;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+/* Specific color for danger/delete buttons */
+.vocabulary-admin-page .vocabulary-header a.btn-danger.vocab-action-btn,
+.vocabulary-admin-page .vocabulary-tag-container a.btn-danger.tag-edit-button {
+  background-color: var(--danger-background); /* Lighter red */
+  border-color: var(--danger-border);
+  color: var(--danger-color); /* Darker red text/icon */
+}
+
+.vocabulary-admin-page .vocabulary-header a.btn-danger.vocab-action-btn:hover,
+.vocabulary-admin-page .vocabulary-tag-container a.btn-danger.tag-edit-button:hover {
+  background-color: var(--danger-border); /* Slightly darker red on hover */
+  color: var(--danger-color);
+}
+
+/* Specific color for default/edit buttons (if different from base) */
+.vocabulary-admin-page .vocabulary-header a.btn-default.vocab-action-btn,
+.vocabulary-admin-page .vocabulary-tag-container a.btn-default.tag-edit-button {
+  /* Uses the base styles defined above for .vocab-action-btn / .tag-edit-button */
+  /* You can add specific overrides here if needed, e.g., different color for edit */
+   color: var(--primary-color); /* Standard link blue for edit icon */
+   background-color: #e7e7e7;
+   border-color: var(--border-color);
+}
+
+.vocabulary-admin-page .vocabulary-header a.btn-default.vocab-action-btn:hover,
+.vocabulary-admin-page .vocabulary-tag-container a.btn-default.tag-edit-button:hover {
+   background-color: #d4d4d4;
+   color: var(--primary-color-dark);
+}
+
+
+/* Ensure the tag text itself is not styled as part of the button if it's separate */
+.vocabulary-admin-page .vocabulary-tag-container .vocabulary-tag {
+  margin-right: 0;
+  padding: 2px 0;
+  background-color: transparent;
+  cursor: default;
+  display: inline-block; 
+  vertical-align: middle;
+}
+
+/* Styles for the "more tags" message */
+.vocabulary-admin-page .more-tags-message {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--light-gray-bg);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.vocabulary-admin-page .more-tags-message:hover {
+  background-color: var(--hover-gray-bg);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.vocabulary-admin-page .more-tags-message .toggle-tags-link {
+  margin: 0;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.vocabulary-admin-page .more-tags-message .expand-icon {
+  display: inline-block;
+  margin-left: var(--spacing-xs);
+  transition: transform var(--transition-speed) ease;
+}
+
+/* Styles for the hidden tags container */
+.vocabulary-admin-page .hidden-tags {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px dashed var(--border-light);
+  animation: fadeIn var(--transition-speed) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

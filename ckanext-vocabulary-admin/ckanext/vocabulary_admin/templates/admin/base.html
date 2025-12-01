@@ -1,0 +1,11 @@
+{% ckan_extends %}
+
+{% block content_primary_nav %}
+  {{ super() }}
+  {{ h.build_nav_icon(
+    'vocabularyadmin.vocabulary_admin',
+    _('Vocabulary Management'),
+    icon='tag',
+    highlight_controllers=['vocabularyadmin']
+  ) }}
+{% endblock %}

@@ -1,0 +1,10 @@
+
+msgid "Harvest job stopped"
+msgstr "Η εργασία συγκομιδής σταμάτησε"
+
+msgid "Document Error"
+msgstr "Σφάλμα Εγγράφου"
+
+msgid "Stop"
+msgstr "Διακοπή"
+

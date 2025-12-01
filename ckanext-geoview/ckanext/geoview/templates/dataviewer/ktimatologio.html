@@ -1,0 +1,171 @@
+{% extends "dataviewer/base.html" %}
+
+{% block page %}
+    {% set lang = h.lang() %}
+    <style>
+        #ktimatologio-container {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #ktimatologio-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .ktimatologio-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+            border-radius: 4px;
+        }
+        .loading-dialog {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #28a745;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .guide-button {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 0 5px;
+            border: 1px solid #b0c4de; /* Ανοιχτό μπλε περίγραμμα */
+            background-color: #e6f0fa; /* Πολύ ανοιχτό μπλε φόντο */
+            border-radius: 4px;
+            color: #4682B4; /* Χρώμα εικονιδίου (ατσάλινο μπλε) */
+            font-size: 16px;
+            vertical-align: middle; /* Σωστή στοίχιση με το κείμενο */
+            line-height: 1;
+        }
+    </style>
+
+    <div class="ktimatologio-info">
+        {% if lang == 'el' %}
+            <h4>Ενσωμάτωση Ελληνικού Κτηματολογίου</h4>
+            <p>Αυτή η προβολή ενσωματώνει την υπηρεσία του Ελληνικού Κτηματολογίου (https://maps.ktimatologio.gr) για βελτιωμένη κτηματολογική και γεωγραφική οπτικοποίηση.</p>
+        {% else %}
+            <h4>Greek Ktimatologio Integration</h4>
+            <p>This view integrates the Greek Ktimatologio service for enhanced cadastral and geographic visualization.</p>
+        {% endif %}
+        
+        {# Manual loading mode - user needs to download and upload #}
+        <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; padding: 10px; margin: 10px 0;">
+            {% if lang == 'el' %}
+                <h5 style="color: #0c5460; margin-top: 0;">🗺️ Οδηγίες Χρήσης:</h5>
+                <ol style="margin: 5px 0; padding-left: 20px; color: #0c5460;">
+                    <li><strong>Κατεβάστε το αρχείο:</strong> Κάντε κλικ στον παρακάτω σύνδεσμο για να κατεβάσετε το γεωγραφικό αρχείο</li>
+                    <li><strong>Ανοίξτε το Κτηματολόγιο:</strong> Ο χάρτης του Κτηματολογίου θα φορτωθεί παρακάτω</li>
+                    <li><strong>Προσθέστε το αρχείο στον χάρτη:</strong> Χρησιμοποιήστε τα εργαλεία του Κτηματολογίου για να εισάγετε το αρχείο που κατεβάσατε</li>
+                    <li><strong>Εξερευνήστε τα κτηματολογικά δεδομένα:</strong> Χρησιμοποιήστε τις λειτουργίες του χάρτη</li>
+                </ol>
+            {% else %}
+                <h5 style="color: #0c5460; margin-top: 0;">🗺️ Usage Instructions:</h5>
+                <ol style="margin: 5px 0; padding-left: 20px; color: #0c5460;">
+                    <li><strong>Download the file:</strong> Click the link below to download the geographic file</li>
+                    <li><strong>Open Ktimatologio:</strong> The Ktimatologio map will load below</li>
+                    <li><strong>Add the file to the map:</strong> Use Ktimatologio's tools to import the file you downloaded</li>
+                    <li><strong>Explore the cadastral data:</strong> Use the map's features </li>
+                </ol>
+            {% endif %}
+        </div>
+
+        {% if resource_url %}
+            {# Always show download link in manual mode #}
+            {% if lang == 'el' %}
+                <p><strong>Λήψη Αρχείου:</strong>
+                    <a href="{{ resource_url }}" target="_blank" style="background-color: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">
+                        ⬇️ {{ resource.name or resource_url }}
+                    </a>
+                    {% if resource_format %}
+                        <span style="background-color: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px;">{{ resource_format.upper() }}</span>
+                    {% endif %}
+                </p>
+            {% else %}
+                <p><strong>Original Resource:</strong> 
+                    <a href="{{ resource_url }}" target="_blank" style="background-color: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">
+                        📥 Download: {{ resource.name or resource_url }}
+                    </a>
+                    {% if resource_format %}
+                        <span style="background-color: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px;">{{ resource_format.upper() }}</span>
+                    {% endif %}
+                </p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div id="ktimatologio-container">
+        <div class="loading-dialog" id="loading-dialog">
+            <div class="loading-spinner"></div>
+            {% if lang == 'el' %}
+                <span>Φόρτωση Κτηματολογίου...</span>
+            {% else %}
+                <span>Loading Ktimatologio...</span>
+            {% endif %}
+        </div>
+        <iframe id="ktimatologio-iframe" 
+                src="{{ ktimatologio_url }}" 
+                title="{% if lang == 'el' %}Ελληνική Υπηρεσία Κτηματολογίου{% else %}Greek Ktimatologio Service{% endif %}"
+                style="display: none;"
+                onload="document.getElementById('loading-dialog').style.display='none'; this.style.display='block';">
+        </iframe>
+    </div>
+
+    <div class="ktimatologio-info" style="margin-top: 15px;">
+        <small>
+            {% if lang == 'el' %}
+                Υποστηρίζεται από 
+                <a href="https://maps.ktimatologio.gr" target="_blank">Ελληνική Υπηρεσία Κτηματολογίου</a> - 
+                Ελληνικός Οργανισμός Κτηματολογίου και Χαρτογραφήσεων
+            {% else %}
+                Powered by 
+                <a href="https://maps.ktimatologio.gr" target="_blank">Greek Ktimatologio Service</a> - 
+                Hellenic Cadastre and Mapping Organization
+            {% endif %}
+        </small>
+    </div>
+
+    <script>
+        // Handle iframe loading and error cases
+        document.addEventListener('DOMContentLoaded', function() {
+            var iframe = document.getElementById('ktimatologio-iframe');
+            var loadingDialog = document.getElementById('loading-dialog');
+            
+            // Set a timeout in case the iframe doesn't load
+            setTimeout(function() {
+                if (loadingDialog.style.display !== 'none') {
+                    {% if lang == 'el' %}
+                        loadingDialog.innerHTML = '<span style="color: #dc3545;">Αδύνατη η φόρτωση του Κτηματολογίου. Ελέγξτε τη σύνδεσή σας στο διαδίκτυο ή δοκιμάστε ξανά αργότερα.</span>';
+                    {% else %}
+                        loadingDialog.innerHTML = '<span style="color: #dc3545;">Unable to load Ktimatologio. Please check your internet connection or try again later.</span>';
+                    {% endif %}
+                }
+            }, 15000); // 15 second timeout
+            
+            // Handle iframe errors
+            iframe.addEventListener('error', function() {
+                {% if lang == 'el' %}
+                    loadingDialog.innerHTML = '<span style="color: #dc3545;">Σφάλμα φόρτωσης της υπηρεσίας Κτηματολογίου.</span>';
+                {% else %}
+                    loadingDialog.innerHTML = '<span style="color: #dc3545;">Error loading Ktimatologio service.</span>';
+                {% endif %}
+            });
+        });
+    </script>
+
+{% endblock %}

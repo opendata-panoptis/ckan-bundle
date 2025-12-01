@@ -1,0 +1,9 @@
+{% ckan_extends %}
+{% set showcase_dataset_showcase_list_route = 'showcase_blueprint.dataset_showcase_list' %}
+
+{% block content_primary_nav %}
+  {{ super() }}
+  {% if pkg.type == 'dataset' %}
+    {{ h.build_nav_icon(showcase_dataset_showcase_list_route, _('Showcases'), id=pkg.name, icon='trophy') }}
+  {% endif %}
+{% endblock %}

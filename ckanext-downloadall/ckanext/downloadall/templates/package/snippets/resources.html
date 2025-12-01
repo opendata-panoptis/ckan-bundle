@@ -1,0 +1,31 @@
+{#
+    Don't display the Download All ZIP resource
+    Only process if the dataset exists (has name or id)
+#}
+{% ckan_extends %}
+
+{% block resources %}
+  {% if pkg.name or pkg.id %}
+    {% set dataset_type_value = dataset_type if dataset_type is defined else pkg.type %}
+    {% set current_path = request.path if request is defined else h.current_url() %}
+    {% set is_data_service = h.downloadall__is_data_service(pkg) or dataset_type_value in ['data-service', 'data_service'] or 'data-service' in current_path %}
+    {% set zip_res = h.downloadall__pop_zip_resource(pkg) %}
+    {% if pkg.resources and not is_data_service %}
+      {# Don't show the Download all button on resource pages (when active is set), on dataset edit pages (when URL contains '/edit/'), or on new dataset page (when action='new_resource') #}
+      {% if not active is defined and not h.current_url().endswith('/edit/' + pkg.name) and not (action is defined and action == 'new_resource') %}
+        <div class="btn-group" style="float:right; margin-top: -7px;">
+          {% if zip_res %}
+            <a class="btn btn-primary resource-url-analytics resource-type-{{ zip_res.resource_type }}" href="{{ zip_res.url }}">
+              <i class="fa fa-arrow-circle-o-down"></i> {{ _('Download all') }}
+            </a>
+          {% else %}
+            <a class="btn btn-secondary" disabled="disabled" title="{{ _('This download is not currently available') }}" href="#">
+              <i class="fa fa-arrow-circle-o-down"></i> {{ _('Download all') }}
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endif %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}

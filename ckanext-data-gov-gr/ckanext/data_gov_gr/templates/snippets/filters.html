@@ -1,0 +1,30 @@
+{% set decision_vocabs = [] %}
+{% set service_vocabs = ['theme', 'hvd_category', 'license'] %}
+{% set dataset_vocabs = ['theme', 'hvd_category', 'license', 'dcat_type'] %}
+
+{% if 'decision' in request.path %}
+    {% set current_vocabs = decision_vocabs %}
+{% elif 'service' in request.path %}
+    {% set current_vocabs = service_vocabs %}
+{% else %}
+    {% set current_vocabs = dataset_vocabs %}
+{% endif %}
+
+<div id="filters">
+    {% for vocab in current_vocabs %}
+        <div class="mb-3">
+            <label for="field-{{ vocab }}" class="form-label">{{ h.vocabulary_facet_title(vocab) }}</label>
+            <select id="field-{{ vocab }}" class="form-select" name="{{ vocab }}" multiple aria-label="multiple select for {{ vocab }}">
+                {% for option in h.vocabularyadmin_get_tags_for_scheming({'form_choices_helper_kwargs': {'vocabulary_id_or_name': h.get_vocabulary_id_for_field(vocab)}}) %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endfor %}
+
+    <!-- Νέο πεδίο Input για το query -->
+    <div class="mb-3">
+        <label for="additionalInput" class="form-label">{{ _('Επιπλέον Φίλτρο') }}</label>
+        <input type="text" id="additionalInput" class="form-control" placeholder="{{ _('Προσθέστε φίλτρο') }}">
+    </div>
+</div>

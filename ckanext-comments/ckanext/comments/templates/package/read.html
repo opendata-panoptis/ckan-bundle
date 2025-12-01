@@ -1,0 +1,25 @@
+{% ckan_extends %}
+
+{% block primary_content_inner %}
+  {{ super() }}
+
+{% set params = {"var" : "hello"} %}
+
+<a class="btn btn-primary"
+   data-module="modal-contact"
+   data-module-template="contact_form.html"
+   data-module-key="{{ config.get('ckanext.contact.recaptcha_v3_key') }}"
+   data-module-action="contact"
+   data-module-data-name="{{ c.userobj.fullname }}"
+   data-module-data-email="{{ c.userobj.email }}"
+   data-module-data-subject="Dataset Feedback"
+   data-module-data-content="Hi, I wanted to ask about..."
+   data-module-package-id="{{ pkg.id }}"
+   title="{{ _('Contact') }}">
+   <i class="fas fa-envelope"></i>
+   {{ link_text if link_text else _('Feedback') }}
+</a>
+
+{% asset 'ckanext-contact/main' %}
+    {% snippet 'comments/snippets/thread.html', subject_id=pkg.id, subject_type='package' %}
+{% endblock primary_content_inner %}

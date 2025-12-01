@@ -1,0 +1,41 @@
+[project]
+name = "ckanext-qa"
+version = "2.0"
+description = "Quality Assurance plugin for CKAN"
+authors = [
+  {name = "Open Knowledge Foundation, Cabinet Office & contributors", email="info@okfn.org"}
+]
+maintainers = [
+  {name = "CKAN Tech Team and contributors", email = "tech-team@ckan.org"}
+]
+
+license = {text = "AGPL"}
+classifiers = [
+  "Intended Audience :: Developers",
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: GNU Affero General Public License v3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
+]
+
+keywords = [
+  "ckan",
+  "ckanext",
+  "qa",
+]
+
+dependencies = []
+
+[project.urls]
+Homepage = "http://github.com/ckan/ckanext-qa"
+Repository = "https://github.com/ckan/ckanext-qa"
+Issues = "https://github.com/ckan/ckanext-qa/issues"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.entry-points."ckan.plugins"]
+qa = "ckanext.qa.plugin:QAPlugin"

@@ -1,0 +1,92 @@
+# Translations template for ckanext-vocabulary-admin.
+
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-vocabulary-admin 0.0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-06-30 15:00+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:6
+msgid "Δημιουργία Νέου Λεξιλογίου"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:9
+msgid "Δημιουργία Νέας Ετικέτας"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:16
+msgid "Διαχείριση Ελεγχόμενων Λεξιλογίων"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:17
+msgid "Σε αυτή την ενότητα μπορείτε να διαχειριστείτε τα ελεγχόμενα λεξιλόγια και τις ετικέτες τους."
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:20
+msgid "Συνολικά λεξιλόγια"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:21
+msgid "Συνολικές ετικέτες"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:26
+msgid "Διαθέσιμα Λεξιλόγια"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:30
+msgid "Όνομα Λεξιλογίου"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:31
+msgid "Αριθμός Ετικετών"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:32
+msgid "Ετικέτες"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:41
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:77
+msgid "Επεξεργασία"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:44
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:80
+msgid "Διαγραφή"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:44
+msgid "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το λεξιλόγιο και όλες τις ετικέτες του; Αυτή η ενέργεια δεν αναιρείται."
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:74
+msgid "(Ανενεργό)"
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:80
+msgid "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την ετικέτα; Αυτή η ενέργεια δεν αναιρείται."
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:86
+msgid "Δεν υπάρχουν ετικέτες σε αυτό το λεξιλόγιο."
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:96
+msgid "Δεν υπάρχουν διαθέσιμα λεξιλόγια."
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/vocabulary_management_index.html:97
+msgid "Χρησιμοποιήστε το κουμπί \"Δημιουργία Νέου Λεξιλογίου\" για να δημιουργήσετε το πρώτο σας λεξιλόγιο."
+msgstr ""
+
+#: ckanext/vocabulary_admin/templates/admin/base.html:5
+msgid "Vocabulary Management"
+msgstr ""

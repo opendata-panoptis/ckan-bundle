@@ -1,0 +1,7 @@
+repos:
+-   repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+    - id: flake8
+      files: ckanext
+      args: [--max-line-length=130]

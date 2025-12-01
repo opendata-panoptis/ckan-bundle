@@ -1,0 +1,86 @@
+{% extends "admin/base.html" %}
+
+{% block primary_content_inner %}
+  <h1 class="page-heading">{{ _('Δημιουργία Νέας Ετικέτας') }}</h1>
+
+  <form method="post" action="{{ h.url_for('vocabularyadmin.tag_create') }}" class="form-horizontal">
+    {{ h.csrf_input() }}
+
+      <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="is_active">{{ _('Ενεργή') }}</label>
+      <div class="controls">
+        <input type="checkbox" id="is_active" name="is_active" value="true" checked>
+        <span class="info-block"></span>
+      </div>
+    </div>
+
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="name">{{ _('Όνομα') }}</label>
+      <div class="controls">
+        <input type="text" id="name" name="name" class="form-control" required>
+        <span class="info-block">{{ _('Το όνομα της ετικέτας ') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="vocabulary_id">{{ _('Λεξιλόγιο') }}</label>
+      <div class="controls">
+        <select id="vocabulary_id" name="vocabulary_id" class="form-control" required>
+          <option value="">{{ _('Επιλέξτε λεξιλόγιο...') }}</option>
+          {% for vocabulary in vocabularies %}
+            <option value="{{ vocabulary.id }}">{{ vocabulary.name }}</option>
+          {% endfor %}
+        </select>
+        <span class="info-block">{{ _('Το λεξιλόγιο στο οποίο θα ανήκει η ετικέτα') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="value_uri">{{ _('URI Τιμής') }}</label>
+      <div class="controls">
+        <input type="text" id="value_uri" name="value_uri" class="form-control">
+        <span class="info-block">{{ _('Το URI της τιμής (προαιρετικό)') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="label_el">{{ _('Ετικέτα (Ελληνικά)') }}</label>
+      <div class="controls">
+        <input type="text" id="label_el" name="label_el" class="form-control">
+        <span class="info-block">{{ _('Η ετικέτα στα ελληνικά (προαιρετικό)') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="label_en">{{ _('Ετικέτα (Αγγλικά)') }}</label>
+      <div class="controls">
+        <input type="text" id="label_en" name="label_en" class="form-control">
+        <span class="info-block">{{ _('Η ετικέτα στα αγγλικά (προαιρετικό)') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="description_el">{{ _('Περιγραφή (Ελληνικά)') }}</label>
+      <div class="controls">
+        <textarea id="description_el" name="description_el" class="form-control" rows="3"></textarea>
+        <span class="info-block">{{ _('Η περιγραφή στα ελληνικά (προαιρετικό)') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="description_en">{{ _('Περιγραφή (Αγγλικά)') }}</label>
+      <div class="controls">
+        <textarea id="description_en" name="description_en" class="form-control" rows="3"></textarea>
+        <span class="info-block">{{ _('Η περιγραφή στα αγγλικά (προαιρετικό)') }}</span>
+      </div>
+    </div>
+
+
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ _('Δημιουργία') }}</button>
+      <a href="{{ h.url_for('vocabularyadmin.vocabulary_admin') }}" class="btn">{{ _('Ακύρωση') }}</a>
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,5 @@
+{# We don't want to display here the 'download all' ZIP resource on the list of file types #}
+{% set zip_resource = h.downloadall__pop_zip_resource(package) %}
+
+{# otherwise, the same #}
+{% ckan_extends %}

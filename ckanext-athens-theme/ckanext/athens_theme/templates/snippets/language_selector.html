@@ -1,0 +1,12 @@
+{% set current_url = request.environ.SCRIPT_NAME + request.environ.PATH_INFO %}
+{% set current_lang = request.environ.CKAN_LANG %}
+
+<div class="language-select">
+  {% if 'en' == current_lang %}
+    <a href="{{ h.url_for(request.endpoint, locale='el', **request.view_args) if request.endpoint else h.url_for('home.index', locale='el') }}"
+      class="lang-link">EL</a>
+  {% else %}
+    <a href="{{ h.url_for(request.endpoint, locale='en', **request.view_args) if request.endpoint else h.url_for('home.index', locale='en') }}"
+      class="lang-link">EN</a>
+  {% endif %}
+</div>

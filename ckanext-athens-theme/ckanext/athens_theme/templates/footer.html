@@ -1,0 +1,88 @@
+{% ckan_extends %}
+
+{% block footer_content %}
+{% set footer_source_code_url = config.get('ckanext.data_gov_gr.footer.source_code_url') %}
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    <div class="row">
+      {% block footer_nav %}
+      <div class="col-md-3 footer-section">
+        <h5>{{ _('About') }}</h5>
+        <ul class="list-unstyled">
+          {% block footer_about %}
+            <li><a href="{{ h.url_for('/pages/about-portal') }}">{{ _('About the Portal') }}</a></li>
+            <li><a href="https://www.cityofathens.gr">{{ _('About the Municipality') }}</a></li>
+            <li><a href="https://www.data.gov.gr">{{ _('Open Data Gov') }}</a></li>
+            {% if footer_source_code_url %}
+              <li><a href="{{ footer_source_code_url }}">{{ _('Πηγαιος κωδικας') }}</a></li>
+            {% endif %}
+
+          {% endblock %}
+        </ul>
+      </div>
+
+      <div class="col-md-3 footer-section">
+        <h5>{{ _('Data') }}</h5>
+        <ul class="list-unstyled">
+          {% block footer_data %}
+            <li><a href="{{ h.url_for('dataset.search') }}">{{ _('Datasets') }}</a></li>
+            <li><a href="{{ h.url_for('/data-service') }}">{{ _('Data services') }}</a></li>
+            <li><a href="{{ h.url_for('organization.index') }}">{{ _('Organizations') }}</a></li>
+            <li><a href="{{ 'https://documenter.getpostman.com/view/46464335/2sB3QJNqnE' }}">{{ _('API Guide') }}</a></li>
+          {% endblock %}
+        </ul>
+      </div>
+
+      <div class="col-md-3 footer-section">
+        <h5>{{ _('Community') }}</h5>
+        <ul class="list-unstyled">
+          {% block footer_community %}
+            <li><a href="{{ h.url_for('/blog') }}">{{ _('News') }}</a></li>
+            <li><a href="{{ h.url_for('/pages/faq') }}">{{ _('FAQ') }}</a></li>
+            <li><a href="{{ h.url_for('/pages/privacy') }}">{{ _('Privacy Policy') }}</a></li>
+            <li><a href="{{ h.url_for('/stats') }}">{{ _('Statistics') }}</a></li>
+            <li><a href="https://www.cityofathens.gr/contact">{{ _('Contact Us') }}</a></li>
+          {% endblock %}
+        </ul>
+      </div>
+
+      <div class="col-md-3 footer-section">
+        <h5>{{ _('Language') }}</h5>
+        <ul class="list-unstyled">
+           <li>
+              {% block footer_lang %}
+                {% snippet "snippets/language_selector.html" %}
+              {% endblock %}
+           </li>
+        </ul>
+        <h5 class="mt-4">{{ _('Follow Us') }}</h5>
+        <div class="social-links">
+          <a href="https://www.facebook.com/CityofAthensOfficial/" class="me-2" title="Facebook">
+            <i class="fa fa-facebook"></i>
+          </a>
+
+        </div>
+      </div>
+      {% endblock %}
+    </div>
+
+    <div class="row footer-bottom">
+      <div class="col-md-8">
+        <div class="footer-logos">
+          <a href="https://www.cityofathens.gr/">
+            <img src="/images/athens-logo.png" alt="{{ g.site_title }}" height="40">
+          </a>
+          <a href="http://www.opendefinition.org/okd/" class="ms-3">
+            <img src="{{ h.url_for_static('/base/images/od_80x15_blue.png') }}" alt="Open Data">
+          </a>
+        </div>
+      </div>
+      <div class="col-md-4 attribution text-end">
+        {% block footer_attribution %}
+          <p>{% trans %}<strong>Powered by</strong> <a class="hide-text" href="http://ckan.org">CKAN</a>{% endtrans %}</p>
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock %}

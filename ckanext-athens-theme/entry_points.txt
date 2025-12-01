@@ -1,0 +1,5 @@
+[ckan.plugins]
+athens_theme = ckanext.athens_theme.plugin:AthensThemePlugin
+
+[babel.extractors]
+ckan = ckan.lib.extract:extract_ckan

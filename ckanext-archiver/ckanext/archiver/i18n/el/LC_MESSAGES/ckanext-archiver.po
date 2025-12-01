@@ -1,0 +1,202 @@
+# Greek translations for ckanext-archiver.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the ckanext-archiver
+# project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-archiver 2.0.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2017-03-20 17:18+0100\n"
+"PO-Revision-Date: 2025-07-11 12:00+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: el <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: ckanext/archiver/reports.py:239
+#: ckanext/archiver/templates/report/broken_links.html:4
+#: ckanext/archiver/templates/report/broken_links.html:15
+#: ckanext/archiver/templates/report/broken_links.html:35
+msgid "Broken links"
+msgstr "Μη λειτουργικοί σύνδεσμοι"
+
+#: ckanext/archiver/reports.py:240
+msgid "Dataset resource URLs that are found to result in errors when resolved."
+msgstr "URLs πόρων συνόλων δεδομένων που βρέθηκαν να προκαλούν σφάλματα κατά την επίλυση."
+
+#: ckanext/archiver/tasks.py:409 ckanext/archiver/tasks.py:430
+#: ckanext/archiver/tasks.py:626
+#, python-format
+msgid "Content-length %s exceeds maximum allowed value %s"
+msgstr "Το μέγεθος περιεχομένου %s υπερβαίνει τη μέγιστη επιτρεπόμενη τιμή %s"
+
+#: ckanext/archiver/tasks.py:424
+#, python-format
+msgid "Server content contained an API error message: %s"
+msgstr "Το περιεχόμενο του διακομιστή περιείχε ένα μήνυμα σφάλματος API: %s"
+
+#: ckanext/archiver/tasks.py:446
+#, python-format
+msgid "Content-length after streaming was %i"
+msgstr "Το μέγεθος περιεχομένου μετά τη ροή ήταν %i"
+
+#: ckanext/archiver/tasks.py:502
+msgid "No value for ckanext-archiver.cache_url_root in config"
+msgstr "Δεν υπάρχει τιμή για το ckanext-archiver.cache_url_root στις ρυθμίσεις"
+
+#: ckanext/archiver/tasks.py:590
+#, python-format
+msgid "URL parsing failure: %s"
+msgstr "Αποτυχία ανάλυσης URL: %s"
+
+#: ckanext/archiver/tasks.py:595
+#, python-format
+msgid "Invalid url scheme. Please use one of: %s"
+msgstr "Μη έγκυρο σχήμα url. Παρακαλώ χρησιμοποιήστε ένα από τα: %s"
+
+#: ckanext/archiver/tasks.py:599
+msgid "URL parsing failure - did not find a host name"
+msgstr "Αποτυχία ανάλυσης URL - δεν βρέθηκε όνομα κεντρικού υπολογιστή"
+
+#: ckanext/archiver/tasks.py:722 ckanext/archiver/tasks.py:872
+#, python-format
+msgid "Connection error: %s"
+msgstr "Σφάλμα σύνδεσης: %s"
+
+#: ckanext/archiver/tasks.py:724 ckanext/archiver/tasks.py:874
+#, python-format
+msgid "Invalid HTTP response: %s"
+msgstr "Μη έγκυρη απόκριση HTTP: %s"
+
+#: ckanext/archiver/tasks.py:726 ckanext/archiver/tasks.py:876
+#, python-format
+msgid "Connection timed out after %ss"
+msgstr "Η σύνδεση έληξε μετά από %s δευτερόλεπτα"
+
+#: ckanext/archiver/tasks.py:728 ckanext/archiver/tasks.py:878
+msgid "Too many redirects"
+msgstr "Πάρα πολλές ανακατευθύνσεις"
+
+#: ckanext/archiver/tasks.py:730
+#, python-format
+msgid "Error downloading: %s"
+msgstr "Σφάλμα κατά τη λήψη: %s"
+
+#: ckanext/archiver/tasks.py:734
+#, python-format
+msgid "Error with the download: %s"
+msgstr "Σφάλμα με τη λήψη: %s"
+
+#: ckanext/archiver/tasks.py:867
+msgid "Invalid URL or Redirect Link"
+msgstr "Μη έγκυρο URL ή σύνδεσμος ανακατεύθυνσης"
+
+#: ckanext/archiver/tasks.py:870
+msgid "Could not make HEAD request"
+msgstr "Δεν ήταν δυνατή η δημιουργία αιτήματος HEAD"
+
+#: ckanext/archiver/tasks.py:880
+#, python-format
+msgid "Error during request: %s"
+msgstr "Σφάλμα κατά τη διάρκεια του αιτήματος: %s"
+
+#: ckanext/archiver/tasks.py:882
+#, python-format
+msgid "Error with the request: %s"
+msgstr "Σφάλμα με το αίτημα: %s"
+
+#: ckanext/archiver/templates/archiver/is_resource_broken.html:3
+msgid "Link check"
+msgstr "Έλεγχος συνδέσμου"
+
+#: ckanext/archiver/templates/archiver/is_resource_broken.html:5
+msgid "This link works."
+msgstr "Αυτός ο σύνδεσμος λειτουργεί."
+
+#: ckanext/archiver/templates/archiver/is_resource_broken.html:7
+msgid "This link is broken."
+msgstr "Αυτός ο σύνδεσμος είναι μη λειτουργικός."
+
+#: ckanext/archiver/templates/archiver/is_resource_broken.html:9
+msgid "This link has not been checked."
+msgstr "Αυτός ο σύνδεσμος δεν έχει ελεγχθεί."
+
+#: ckanext/archiver/templates/archiver/is_resource_cached.html:3
+msgid "Cached resource"
+msgstr "Αποθηκευμένος πόρος"
+
+#: ckanext/archiver/templates/archiver/is_resource_cached.html:5
+msgid "This resource is cached by CKAN."
+msgstr "Αυτός ο πόρος είναι αποθηκευμένος από το CKAN."
+
+#: ckanext/archiver/templates/archiver/is_resource_cached.html:7
+msgid "This resource is not cached by CKAN."
+msgstr "Αυτός ο πόρος δεν είναι αποθηκευμένος από το CKAN."
+
+#: ckanext/archiver/templates/report/broken_links.html:3
+msgid "Datasets with broken resource links"
+msgstr "Σύνολα δεδομένων με μη λειτουργικούς συνδέσμους πόρων"
+
+#: ckanext/archiver/templates/report/broken_links.html:16
+msgid "Datasets with broken resource links:"
+msgstr "Σύνολα δεδομένων με μη λειτουργικούς συνδέσμους πόρων:"
+
+#: ckanext/archiver/templates/report/broken_links.html:17
+msgid "Percentage of datasets with broken resource links:"
+msgstr "Ποσοστό συνόλων δεδομένων με μη λειτουργικούς συνδέσμους πόρων:"
+
+#: ckanext/archiver/templates/report/broken_links.html:18
+msgid "Broken links:"
+msgstr "Μη λειτουργικοί σύνδεσμοι:"
+
+#: ckanext/archiver/templates/report/broken_links.html:19
+msgid "Percentage of resources with broken links:"
+msgstr "Ποσοστό πόρων με μη λειτουργικούς συνδέσμους:"
+
+#: ckanext/archiver/templates/report/broken_links.html:36
+msgid "Dataset"
+msgstr "Σύνολο δεδομένων"
+
+#: ckanext/archiver/templates/report/broken_links.html:37
+msgid "Notes"
+msgstr "Σημειώσεις"
+
+#: ckanext/archiver/templates/report/broken_links.html:38
+msgid "User"
+msgstr "Χρήστης"
+
+#: ckanext/archiver/templates/report/broken_links.html:39
+msgid "Resources"
+msgstr "Πόροι"
+
+#: ckanext/archiver/templates/report/broken_links.html:40
+msgid "Reason"
+msgstr "Αιτία"
+
+#: ckanext/archiver/templates/report/broken_links.html:41
+msgid "Attempt"
+msgstr "Προσπάθεια"
+
+#: ckanext/archiver/templates/report/broken_links.html:42
+msgid "First fail"
+msgstr "Πρώτη αποτυχία"
+
+#: ckanext/archiver/templates/report/broken_links.html:43
+msgid "Latest fail"
+msgstr "Τελευταία αποτυχία"
+
+#: ckanext/archiver/templates/report/broken_links.html:44
+msgid "Last success"
+msgstr "Τελευταία επιτυχία"
+
+#: ckanext/archiver/templates/report/broken_links.html:45
+msgid "No. of fails"
+msgstr "Αρ. αποτυχιών"
+
+msgid "Broken datasets"
+msgstr "Προβληματικά σύνολα δεδομένων"
+

@@ -1,0 +1,21 @@
+{% ckan_extends %}
+{% set hide_pages_button = h.asbool(config.get('ckanext.pages.pages.manage.button.hide', False)) %}
+{% set hide_blog_button = h.asbool(config.get('ckanext.pages.blog.manage.button.hide', False)) %}
+
+{% block header_account_logged %}
+  {% if not hide_pages_button %}
+  <li>
+    <a href="{{ h.url_for('pages.pages_index') }}" title="{{ _('Pages') }}">
+      <i class="fa fa-file icon-file"></i>
+    </a>
+  </li>
+  {% endif %}
+  {% if not hide_blog_button %}
+  <li>
+    <a href="{{ h.url_for('pages.blog_index') }}" title="{{ _('Blog') }}">
+      <i class="fa fa-pencil icon-pencil"></i>
+    </a>
+  </li>
+  {% endif %}
+  {{ super() }}
+{% endblock %}

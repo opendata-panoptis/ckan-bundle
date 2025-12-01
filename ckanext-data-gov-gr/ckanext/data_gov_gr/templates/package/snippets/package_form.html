@@ -1,0 +1,10 @@
+<!-- Φόρμα Dataset-->
+{% ckan_extends %}
+
+      {% block save_button_text %}
+        {% if h.asbool(config.get('ckan.dataset.create_on_ui_requires_resources', true)) %}
+          {{ _('Next: Add Data') }}
+        {% else %}
+          {{ _('Save') }}
+        {% endif %}
+      {% endblock %}

@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+  {% block package_tags %}
+    {{ super() }}
+    {% if h.show_relationships_on_dataset_detail() %}
+      {% snippet "package/snippets/relationship_list.html", id=pkg.id %}
+    {% endif %}
+  {% endblock %}

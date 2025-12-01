@@ -1,0 +1,67 @@
+{#
+Stale Datasets Report Template
+
+table - main data, as a list of rows, each row is a dict
+data - other data values, as a dict
+#}
+
+{% set ckan_29_or_higher = h.check_ckan_version(min_version="2.9.0", max_version="3.0.0") %}
+{% set dataset_read_route = 'dataset.read' if ckan_29_or_higher else 'dataset_read' %}
+
+<ul>
+    <li><strong>{% trans %}Total datasets checked{% endtrans %}:</strong> {{ data['num_packages'] }}</li>
+    <li><strong>{% trans %}Stale datasets{% endtrans %}:</strong> {{ data['num_stale'] }} ({{ data['stale_percentage'] }}%)</li>
+    <li><strong>{% trans %}Up-to-date datasets{% endtrans %}:</strong> {{ data['num_packages'] - data['num_stale'] }}</li>
+    <li><strong>{% trans %}Total datasets in scope{% endtrans %}:</strong> {{ data['total_datasets'] }}</li>
+</ul>
+
+{% if table|length > 0 %}
+<div class="report-table-wrapper">
+    <table class="table table-striped table-bordered table-condensed tablesorter" id="report-table">
+      <thead>
+        <tr>
+          <th>{% trans %}Dataset{% endtrans %}</th>
+          <th>{% trans %}Organization{% endtrans %}</th>
+          <th>{% trans %}Frequency{% endtrans %}</th>
+          <th>{% trans %}Status{% endtrans %}</th>
+          <th>{% trans %}Last Modified{% endtrans %}</th>
+          <th>{% trans %}Days Since Update{% endtrans %}</th>
+          <th>{% trans %}Notes{% endtrans %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in table %}
+          <tr>
+            <td>
+              <a href="{{ h.url_for(dataset_read_route, id=row.name) }}" title="{{ row.title }}">
+                {{ row.title }}
+              </a>
+            </td>
+            <td>{{ row.organization or _('N/A') }}</td>
+            <td>{{ row.frequency }}</td>
+            <td>{{ row.status }}</td>
+            <td>{{ row.last_modified }}</td>
+            <td>
+              {% if row.days_since_update is not none %}
+                {{ row.days_since_update }}
+              {% else %}
+                {% trans %}N/A{% endtrans %}
+              {% endif %}
+            </td>
+            <td>{{ row.notes or _('No description') }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+
+<p><strong>{% trans %}Status Legend{% endtrans %}:</strong></p>
+<ul>
+  <li><strong>{% trans %}STALE{% endtrans %}</strong> - {% trans %}Dataset has not been updated within its expected frequency schedule{% endtrans %}</li>
+  <li><strong>{% trans %}OK{% endtrans %}</strong> - {% trans %}Dataset is up-to-date according to its frequency schedule{% endtrans %}</li>
+  <li><strong>{% trans %}N/A{% endtrans %}</strong> - {% trans %}Dataset has irregular, continuous, or unknown update frequency{% endtrans %}</li>
+</ul>
+
+{% else %}
+<p>{% trans %}No datasets with defined frequencies found in the selected scope.{% endtrans %}</p>
+{% endif %}

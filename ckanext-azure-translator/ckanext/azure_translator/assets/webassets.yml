@@ -1,0 +1,14 @@
+# azure_translator-js:
+#   filter: rjsmin
+#   output: ckanext-azure_translator/%(version)s-azure_translator.js
+#   contents:
+#     - js/azure_translator.js
+#   extra:
+#     preload:
+#       - base/main
+
+# azure_translator-css:
+#   filter: cssrewrite
+#   output: ckanext-azure_translator/%(version)s-azure_translator.css
+#   contents:
+#     - css/azure_translator.css

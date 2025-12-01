@@ -1,0 +1,69 @@
+{% set dataset_type = h.default_package_type() %}
+
+{% block header_wrapper %} {% block header_account %}
+{% endblock %}
+<header class="masthead">
+  <div class="container">
+    {% block header_debug %} {% if g.debug and not g.debug_supress_header %}
+    <div class="debug">Blueprint : {{ g.blueprint }}<br />View : {{ g.view }}</div>
+    {% endif %} {% endblock %}
+    <nav class="navbar navbar-expand-lg navbar-light">
+      <hgroup class="{{ g.header_class }} navbar-left">
+
+      {% block header_logo %}
+      {% if g.site_logo %}
+      <a class="logo" href="{{ h.url_for('home.index') }}">
+        <img src="{{ h.url_for_static_or_external(g.site_logo) }}" alt="{{ g.site_title }}"
+          title="{{ g.site_title }}" />
+      </a>
+        <a class="service-name" href="{{ h.url_for('home.index') }}">data.gov.gr</a>
+      {% else %}
+      <h1>
+        <a href="{{ h.url_for('home.index') }}">{{ g.site_title }}</a>
+      </h1>
+      {% if g.site_description %}
+      <h2>{{ g.site_description }}</h2>
+      {% endif %}
+      {% endif %}
+      {% endblock %}
+
+       </hgroup>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navigation-toggle"
+        aria-controls="main-navigation-toggle" aria-expanded="false" aria-label="{{ _('Toggle navigation') }}">
+        <span class="fa fa-bars text-white"></span>
+      </button>
+
+      <div class="main-navbar collapse navbar-collapse" id="main-navigation-toggle">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          {% block header_site_navigation %}
+            {% block header_site_navigation_tabs %}
+              {% set org_type = h.default_group_type('organization') %}
+              {% set group_type = h.default_group_type('group') %}
+              {% set showcase_route = 'showcase_blueprint.index' %}
+
+              {% set more_label = 'Περισσότερα' if h.lang() == 'el' else _('More') %}
+              {{ h.build_nav_main(
+                ('dataset' ~ '.search', h.humanize_entity_type('package', 'dataset', 'main nav') or _('Datasets'), ["dataset", "resource"]),
+                ('data-service' ~ '.search', _('APIs'), ["data-service"]),
+                ('decision' ~ '.search', _('Decisions'), ["decision"]),
+                (org_type ~ '.index',
+                  h.humanize_entity_type('organization', org_type, 'main nav') or _('Organizations'), ['organization']),
+                ('dataset_type.more_page', more_label, ['more']) ) }}
+              {{ h.build_nav_main((showcase_route, _('Showcases'))) }}
+            {% endblock %}
+          </ul>
+
+      {% endblock %}
+       <!-- Αναζήτηση από Κεφαλίδα -->
+      {% block header_site_search %}
+          <form class="d-flex site-search" action="{% url_for dataset_type ~ '.search' %}" method="get">
+              <label class="d-none" for="field-sitewide-search">{% block header_site_search_label %}{{ h.humanize_entity_type('package', dataset_type, 'search_placeholder') or _('Search Datasets...') }}{% endblock %}</label>
+              <input id="field-sitewide-search" class="form-control me-2"  type="text" name="q" placeholder="{{ _('Search') }}" aria-label="{{ h.humanize_entity_type('package', dataset_type, 'search_placeholder') or _('Search datasets...') }}"/>
+              <button class="btn" type="submit" aria-label="{{ _('Submit') }}"><i class="fa fa-search"></i></button>
+          </form>
+      {% endblock %}
+      </div>
+    </nav>
+  </div>
+</header>
+{% endblock %}

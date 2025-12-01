@@ -1,0 +1,530 @@
+scheming_version: 2
+dataset_type: dataset
+about: Recommended properties for the DCAT AP (2 and 3) schema
+about_url: http://github.com/ckan/ckanext-dcat
+form_languages: [el, en]
+
+dataset_fields:
+
+
+- field_name: title_translated
+  label:
+    en: Title
+    el: Tίτλος
+  fluent_form_label:
+    el:
+      el: Τίτλος στα Ελληνικά
+      en: Τitle in Greek
+    en:
+      el: Tίτλος στα Αγγλικά
+      en: Title in English
+  preset: fluent_core_translated
+  validators: custom_fluent_text
+  form_languages: [ el, en ]
+  required_languages: [ el ]  # <-- Νέο custom field
+  required: true
+  fluent_help_text:
+    el:
+      el: Tο όνομα που συνοπτικά περιγράφει ένα Σύνολο Δεδομένων στα Ελληνικά
+      en: A name given to the Dataset in Greek
+    en:
+      el: Tο όνομα που συνοπτικά περιγράφει ένα Σύνολο Δεδομένων στα Αγγλικά
+      en: A name given to the Dataset in English
+
+- field_name: name
+  label: URL
+  preset: dataset_slug
+  form_placeholder: eg. my-dataset
+
+- field_name: notes_translated
+  label:
+    en: Description
+    el: Περιγραφή
+  fluent_form_label:
+    el:
+      el: Περιγραφή στα Ελληνικά
+      en: Description in Greek
+    en:
+      el: Περιγραφή στα Αγγλικά
+      en: Description in English
+  preset: fluent_core_translated
+  validators: custom_fluent_text
+  form_languages: [ el, en ]
+  required_languages: [ el ]  # <-- Νέο custom field
+  required: true
+  form_snippet: fluent_markdown.html
+  fluent_help_text:
+    el:
+      el: H Περιγραφή ενός Συνόλου Δεδομένων σε ελεύθερο κείμενο στα Ελληνικά
+      en: A free-text account of the Dataset in Greek
+    en:
+      el: H Περιγραφή ενός Συνόλου Δεδομένων σε ελεύθερο κείμενο στα Αγγλικά
+      en: A free-text account of the Dataset in English
+
+- field_name: tag_string
+  label:
+    el: Λέξεις Κλειδιά
+    en: Keywords
+  preset: tag_string_autocomplete
+  form_placeholder: eg. economy, mental health, government
+  help_text:
+    el: Λέξη Κλειδί ή ετικέτα που περιγράφει το σύνολο δεδομένων
+    en: Κeyword or tag describing the Dataset
+
+- field_name: contact
+  label:
+    el: Σημεία επαφής
+    en: Contact points
+  repeating_label: Contact point
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: name
+      label:
+        el: Όνομα
+        en: Name
+
+    - field_name: email
+      label:
+        el: Hλεκτρονικό Ταχυδρομείο
+        en: Email
+      display_snippet: email.html
+    
+    - field_name: url
+      label: URL
+      help_text:
+        el: Μια διεύθυνση URL που σχετίζεται με την επαφή
+        en: A URL associated with the contact
+  help_text:
+    el: Nα χρησιμοποιηθεί για την αποστολή σχολίων σχετικά με το σύνολο δεδομένων
+    en: Βe used for sending comments about the Dataset
+
+- field_name: publisher
+  label:
+    el: Eκδότης
+    en: Publisher
+  repeating_label: Publisher
+  repeating_once: true
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: name
+      label:
+        el: Όνομα
+        en: Name
+
+    - field_name: description
+      label:
+        el: Περιγραφή
+        en: Description
+      form_snippet: markdown.html
+      form_placeholder: A little information about this organization.
+
+    - field_name: email
+      label:
+        el: Hλεκτρονικό Ταχυδρομείο
+        en: Email
+      display_snippet: email.html
+
+    - field_name: url
+      label: URL
+      display_snippet: link.html
+
+    - field_name: type
+      label:
+        el: Tύπος Εκδότη
+        en: Publisher Type
+      preset: select
+      choices_helper: vocabularyadmin_get_tags_for_scheming
+      form_choices_helper_kwargs:
+        vocabulary_id_or_name: "Publisher type"
+      required: false
+      help_text:
+        el: Επιλέξτε τον τύπο Εκδότη για αυτόν τον πόρο από την ελεγχόμενη λίστα
+        en: Select the Publisher type for this resource from the controlled list
+
+    - field_name: identifier
+      label:
+        el: Aναγνωριστικό
+        en: Identifier
+      help_text:
+        el: Μοναδικό αναγνωριστικό για τον εκδότη, όπως αναγνωριστικό ROR ID
+        en: Unique identifier for the publisher, such as a ROR ID
+  help_text:
+    el: Οντότητα υπεύθυνη για τη διάθεση του συνόλου δεδομένων
+    en: Entity responsible for making the dataset available
+
+- field_name: owner_org
+  label:
+    el: Φορέας
+    en: Organization
+  preset: dataset_organization
+  help_text:
+    el: Ο φορέας στον οποίο ανήκει το σύνολο δεδομένων
+    en: The organization the dataset belongs to
+
+- field_name: temporal_coverage
+  label:
+    el: Χρονική Κάλυψη
+    en: Τemporal Coverage
+  repeating_subfields:
+
+    - field_name: start
+      label:
+        el: Έναρξη
+        en: Start
+      preset: dcat_date
+
+    - field_name: end
+      label:
+        el: Λήξη
+        en: End
+      preset: dcat_date
+  help_text:
+    el: Η χρονική περίοδος ή περίοδοι που καλύπτει το σύνολο δεδομένων
+    en: The temporal period or periods the dataset covers
+
+- field_name: spatial_coverage
+  label:
+    el: Xωρική Κάλυψη
+    en: Spatial Coverage
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: text
+      label:
+        el: Eτικέτα
+        en: Label
+
+    - field_name: geom
+      label:
+        el: Γεωμετρία
+        en: Geometry
+
+    - field_name: bbox
+      label:
+        el: Πλαίσιο Oριοθέτησης
+        en: Bounding Box
+
+    - field_name: centroid
+      label:
+        el: Kεντροειδές
+        en: Centroid
+  help_text:
+    el: Μια γεωγραφική περιοχή που καλύπτεται από το σύνολο δεδομένων
+    en: A geographic region that is covered by the dataset.
+
+- field_name: theme
+  label:
+    el: Θέμα
+    en: Theme
+  preset: multiple_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Data theme"
+  required: false
+  help_text:
+    el: Μια κατηγορία του συνόλου δεδομένων. Ένα σύνολο δεδομένων μπορεί να συσχετίζεται με πολλά θέματα
+    en: A category of the dataset. A Dataset may be associated with multiple themes
+
+# extra than recommended
+
+- field_name: access_rights
+  label:
+    el: Δικαιώματα Πρόσβασης
+    en: Access Rights
+  preset: select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Access right"
+  required: false
+  help_text:
+    el: Πληροφορίες που υποδεικνύουν εάν το σύνολο δεδομένων ανήκει στα Ανοικτά Δεδομένα, έχει περιορισμούς πρόσβασης ή δεν είναι δημόσιο
+    en: Information that indicates whether the dataset is Open Data, has access restrictions or is not public
+
+
+- field_name: applicable_legislation
+  label:
+    el: Εφαρμοστέα Nομοθεσία
+    en: Applicable Legislation
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:
+    el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση του συνόλου δεδομένων
+    en: The legislation that mandates the creation or management of the dataset
+
+- field_name: hvd_category
+  label:
+    el: Κατηγορία Σύνολου Δεδομένων Υψηλής Αξίας
+    en: Ηigh Value Datasets category
+  preset: multiple_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "High-value dataset categories"
+  required: false
+  help_text:
+    el: Κατηγορία συνόλου δεδομένων υψηλής αξίας. Ένα σύνολο δεδομένων μπορεί να συσχετιστεί με πολλές κατηγορίες συνόλου δεδομένων υψηλής αξίας
+    en: Ηigh Value Datasets category of the dataset. A Dataset may be associated with multiple Ηigh Value Dataset categories.
+
+
+
+- field_name: frequency
+  label:
+    el: Συχνότητα
+    en: Frequency
+  preset: select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Frequency"
+  required: false
+  help_text:
+    el: Η συχνότητα με την οποία δημοσιεύεται το σύνολο δεδομένων
+    en: The frequency at which dataset is published
+
+
+- field_name: dcat_type
+  label:
+    el: Tύπος
+    en: Type
+  preset: multiple_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Dataset type"
+  required: false
+  help_text:
+    el: Ο τύπος του συνόλου δεδομένων
+    en: The type of the dataset
+
+
+- field_name: language_options
+  label:
+    el: Γλώσσες
+    en: Languages
+  preset: multiple_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Languages"
+  required: false
+  help_text:
+    el: Διαθεσιμότητα σε γλώσσες για αυτό το σύνολο δεδομένων
+    en: Availability in languages for this dataset
+
+- field_name: version
+  label:
+    el: Έκδοση
+    en: Version
+  help_text:
+    el: Ο αριθμός έκδοσης αυτού του συνόλου δεδομένων (π.χ. 1.0, 2.1-beta)
+    en: The version number of this dataset (e.g. 1.0, 2.1-beta)
+  form_placeholder: "π.χ. 1.0"
+  validators: ignore_empty
+  required: false
+
+- field_name: version_info
+  label:
+    el: Πληροφορίες Έκδοσης
+    en: Version Info
+  help_text:
+    el: Πρόσθετες πληροφορίες σχετικά με την έκδοση αυτού του συνόλου δεδομένων
+    en: Additional information about this version of the dataset
+  form_snippet: markdown.html
+  display_snippet: markdown.html
+  required: false
+  validators: ignore_empty
+
+- field_name: landing_page
+  label:
+    en: Landing page
+    el: Σελίδα προορισμού
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:
+    en: A web page that provides access to the Dataset, its Distributions and/or additional information
+    el: Μια ιστοσελίδα που παρέχει πρόσβαση στo Σύνολο Δεδομένων, των Διανομών του και/ή επιπλέον πληροφορίες
+
+
+resource_fields:
+
+- field_name: url
+  label: URL
+  preset: resource_url_upload
+
+- field_name: name_translated
+  label:
+    en: Title
+    el: Tίτλος
+  fluent_form_label:
+    el:
+      el: Όνομα στα Ελληνικά
+      en: Νame in Greek
+    en:
+      el: Όνομα στα Αγγλικά
+      en: Name in English
+  preset: fluent_core_translated
+  form_placeholder:
+  fluent_help_text:
+    el:
+      el: Tο όνομα που συνοπτικά περιγράφει τον Πόρο Συνόλου Δεδομένων στα Ελληνικά
+      en: A name given to the Resource in Greek
+    en:
+      el: Tο όνομα που συνοπτικά περιγράφει τον Πόρο Συνόλου Δεδομένων στα Αγγλικά
+      en: A name given to the Resource in English
+
+- field_name: description_translated
+  label:
+    en: Description
+    el: Περιγραφή
+  fluent_form_label:
+    el:
+      el: Περιγραφή στα Ελληνικά
+      en: Description in Greek
+    en:
+      el: Περιγραφή στα Αγγλικά
+      en: Description in English
+  preset: fluent_core_translated
+  form_snippet: fluent_markdown.html
+  fluent_help_text:
+    el:
+      el: H Περιγραφή του Πόρου Συνόλου Δεδομένων σε ελεύθερο κείμενο στα Ελληνικά
+      en: A free-text account of the Resource in Greek
+    en:
+      el: H Περιγραφή του Πόρου Συνόλου Δεδομένων σε ελεύθερο κείμενο στα Αγγλικά
+      en: A free-text account of the Resource in English
+
+- field_name: format
+  label:
+    el: Μορφή
+    en: Format
+  preset: resource_format_autocomplete
+  help_text:
+    el: Μορφή Αρχείου. Αν δεν παρέχεται, θα προβλεφθεί
+    en: File format. If not provided it will be guessed
+
+- field_name: availability
+  label:
+    el: Προγραμματισμένη Διαθεσιμότητα
+    en: Planned Availability
+  preset: select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Planned availability"
+  required: false
+  help_text:
+    el: Δείχνει πόσο χρόνο έχει προγραμματιστεί να κρατήσει τον πόρο διαθέσιμο
+    en: Indicates how long it is planned to keep the resource available
+
+
+- field_name: license
+  label:
+    el: Άδεια
+    en: License
+  preset: searchable_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Licence"
+  required: false
+  help_text:
+    el: Άδεια κατά την οποία ο πόρος είναι διαθέσιμος. Αν δεν παρέχεται, θα κληρονομηθεί από το σύνολο δεδομένων
+    en: License in which the resource is made available. If not provided will be inherited from the dataset
+
+# extra than recommended
+
+# Note: this falls back to the standard resource url field
+- field_name: access_url
+  label:
+    el: Διεύθυνση Πρόσβασης URL
+    en: Access URL
+  help_text:
+    el: Διεύθυνση URL που δίνει πρόσβαση στο σύνολο δεδομένων (προεπιλογή το πρότυπο των πόρων URL)
+    en: URL that gives access to the dataset (defaults to the standard resource URL)
+
+# Note: this falls back to the standard resource url field
+- field_name: download_url
+  label:
+    el: Διεύθυνση Λήψης URL
+    en: Download URL
+  display_snippet: link.html
+  help_text:
+    el: Διεύθυνση URL που παρέχει άμεση σύνδεση με ένα αρχείο με δυνατότητα λήψης (προεπιλογή το πρότυπο των πόρων URL)
+    en: URL that provides a direct link to a downloadable file (defaults to the standard resource URL)
+
+- field_name: mimetype
+  label:
+    el: Τύπος Μέσου
+    en: Media Type
+  preset: searchable_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Media types"
+  required: false
+  help_text:
+    el: Επιλέξτε τον τύπο μέσου IANA (τύπος MIME) για αυτόν τον πόρο από την ελεγχόμενη λίστα
+    en: Select the IANA Media type (MIME type) for this resource from the controlled list
+
+
+- field_name: rights
+  label:
+    el: Δικαιώματα
+    en: Rights
+  form_snippet: markdown.html
+  display_snippet: markdown.html
+  help_text:
+    el: Κάποια δήλωση σχετικά με τα δικαιώματα που σχετίζονται με τον πόρο
+    en: Some statement about the rights associated with the resource
+
+- field_name: size
+  label:
+    el: Μέγεθος
+    en: Size
+  validators: ignore_missing int_validator
+  form_snippet: number.html
+  display_snippet: file_size.html
+  help_text:
+    el: Μέγεθος αρχείου σε bytes
+    en: File size in bytes
+
+- field_name: applicable_legislation
+  label:
+    el: Εφαρμοστέα Nομοθεσία
+    en: Applicable Legislation
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:
+    el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση του συνόλου δεδομένων
+    en: The legislation that mandates the creation or management of the dataset
+
+- field_name: access_services
+  label:
+    el: Υπηρεσίες Πρόσβασης
+    en: Access Services
+  repeating_label: Access service
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+      help_text:
+        el: Το μοναδικό URI της περιγραφής της υπηρεσίας δεδομένων στο data.gov.gr
+        en: The unique URI of the dataservice description in the data.gov.gr
+
+  help_text:
+    el: Μια υπηρεσία δεδομένων που παρέχει πρόσβαση στον πόρο
+    en: A data service that gives access to the resource
+
+- field_name: language_options
+  label:
+    el: Γλώσσες
+    en: Languages
+  preset: multiple_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Languages"
+  required: false
+  help_text:
+    el: Διαθεσιμότητα σε γλώσσες για αυτό το σύνολο δεδομένων
+    en: Availability in languages for this dataset

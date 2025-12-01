@@ -1,0 +1,71 @@
+{% extends "admin/base.html" %}
+
+{% set messages = h.get_all_announcements() %}
+
+{% block primary_content_inner %}
+<h2>{{ _('Announcements to all users') }}</h2>
+
+<div id="new-announcement">
+<a
+    href="#system-message-new"
+    role="button"
+    class="btn btn-primary"
+    title="Schedule new message"
+    data-bs-toggle="modal"
+    data-toggle="modal"
+    data-target="#system-message-new"
+  >{{ _('Schedule new message') }}</a>
+</div>
+
+<div id="announcement-table">
+<table id="system-messages-list" class="table table-header table-hover table-bordered table-responsive">
+  <thead>
+    <tr>
+      <th class="announcement-msg-column">{{ _('Message') }}</th>
+      <th>{{ _('From') }}</th>
+      <th>{{ _('To') }}</th>
+      <th>{{ _('Actions') }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for message in messages %}
+    <tr>
+      <td>{{ h.render_markdown(message.message) }}</td>
+      <td>{{ h.render_datetime(message.from_date, with_hours=True) }} ({{ display_timezone }})</td>
+      <td>{{ h.render_datetime(message.to_date, with_hours=True) }} ({{ display_timezone }})</td>
+      <td>
+        <a href="#system-message-edit-{{ message.id }}" role="button" class="btn btn-info announcement-edit-btn" title="edit" data-bs-toggle="modal" data-toggle="modal" data-target="#system-message-edit-{{ message.id }}">
+          <i class="fa fa-edit"></i>
+        </a>
+        <a href="#system-message-delete-{{ message.id }}" role="button" class="btn btn-danger announcement-delete-btn" title="delete" data-bs-toggle="modal" data-toggle="modal" data-target="#system-message-delete-{{ message.id }}">
+          <i class="fa fa-trash"></i>
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% include "admin/snippets/new-announcement.html" %}
+
+{% for message in messages %}
+
+{% snippet "admin/snippets/edit-announcement.html", message=message, display_timezone=display_timezone, timezones=timezones %}
+{% snippet "admin/snippets/delete-announcement.html", message=message %}
+
+{% endfor %}
+
+{% endblock %}
+
+{% block secondary_content %}
+<div class="module module-narrow module-shallow">
+  <h2 class="module-heading">
+    <i class="fa fa-history"></i>
+    {{ _('Announcements to all users') }}
+  </h2>
+  <div class="module-content">
+    {# allow to define start and end dates for a custom message #}
+  </div>
+</div>
+{% endblock %}

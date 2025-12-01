@@ -1,0 +1,64 @@
+{% import 'macros/form.html' as form %}
+{% asset 'ckanext-contact/main' %}
+
+{% set recaptcha_v3_key = h.get_recaptcha_v3_key() %}
+{% set recaptcha_v3_action = h.get_recaptcha_v3_action() %}
+
+{% block contact_form %}
+    <form class="contact-form form-horizontal" method="post" data-module="form-contact"
+          data-module-action="{{ recaptcha_v3_action }}" data-module-key="{{ recaptcha_v3_key }}">
+
+        {{ form.errors(error_summary) }}
+
+        <fieldset>
+            {% block contact_form_legend %}
+                <legend>
+                    {% block contact_form_legend_content %}
+                        {{ _('Questions? Comments? We are always glad to hear from you!') }}
+                    {% endblock %}
+                </legend>
+            {% endblock %}
+            {% block contact_form_fields %}
+                <div class="form-group control-medium">
+                    <span class="text-danger">*</span>
+                    <label for="field-name">{{ _('Contact Name') }}</label>
+                    <input id="field-name" type="text" name="name"
+                           value="{{ (data.name if data.name not in [none] else '')|e }}"
+                           class="form-control">
+                    {% if errors.name %}
+                        <div class="error-block">{{ errors.name }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group control-medium">
+                    <span class="text-danger">*</span>
+                    <label for="field-email">{{ _('Email') }}</label>
+                    <input id="field-email" type="email" name="email"
+                            value="{{ (data.email if data.email not in [none] else '')|e }}"
+                           class="form-control">
+                    {% if errors.email %}
+                        <div class="error-block">{{ errors.email }}</div>
+                    {% endif %}
+                </div>
+
+                {{ form.input('subject', label=_('Subject'), id='field-subject',
+                              value=data.subject, error=errors.subject, classes=['control-medium'],
+                              is_required=false, placeholder=_('Optional subject')) }}
+
+                {{ form.textarea('content', label=_('Your Request'), id='field-content',
+                                 value=data.content, error=errors.content,
+                                 placeholder=_('What do you have to tell us?'), is_required=true) }}
+            {% endblock %}
+        </fieldset>
+
+        <div class="form-actions">
+            {% block contact_form_actions %}
+                {{ form.required_message() }}
+
+                <button class="btn btn-primary save" type="submit" name="save">
+                    {{ _('Submit') }}
+                </button>
+            {% endblock %}
+        </div>
+    </form>
+{% endblock %}

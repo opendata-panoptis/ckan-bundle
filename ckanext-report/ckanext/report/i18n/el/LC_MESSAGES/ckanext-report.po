@@ -1,0 +1,290 @@
+# Greek translations for ckanext-report.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the ckanext-report
+# project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-report 0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-07-11 10:00+0300\n"
+"PO-Revision-Date: 2025-07-11 10:00+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: el <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: ckanext/report/templates/report/index.html:3
+#: ckanext/report/templates/report/index.html:6
+#: ckanext/report/templates/report/view.html:3
+#: ckanext/report/templates/report/view.html:6
+msgid "Reports"
+msgstr "Αναφορές"
+
+#: ckanext/report/templates/report/index.html:26
+msgid "View Report"
+msgstr "Προβολή Αναφοράς"
+
+#: ckanext/report/templates/report/option_include_sub_organizations.html:9
+msgid "Include results from sub-organizations"
+msgstr "Συμπερίληψη αποτελεσμάτων από υπο-οργανισμούς"
+
+#: ckanext/report/templates/report/option_organization.html:12
+#: ckanext/report/templates/report/option_organization.html:16
+msgid "Index of all organizations"
+msgstr "Κατάλογος όλων των οργανισμών"
+
+#: ckanext/report/templates/report/tagless-datasets.html:8
+msgid "Datasets without tags"
+msgstr "Σύνολα δεδομένων χωρίς ετικέτες"
+
+#: ckanext/report/templates/report/tagless-datasets.html:9
+msgid "Average tags per package"
+msgstr "Μέσος όρος ετικετών ανά πακέτο"
+
+#: ckanext/report/templates/report/tagless-datasets.html:16
+msgid "Notes"
+msgstr "Σημειώσεις"
+
+#: ckanext/report/templates/report/view.html:14
+msgid "Generated"
+msgstr "Δημιουργήθηκε"
+
+#: ckanext/report/templates/report/view.html:18
+msgid "Refresh report"
+msgstr "Ανανέωση αναφοράς"
+
+#: ckanext/report/templates/report/view.html:21
+msgid "Refresh"
+msgstr "Ανανέωση"
+
+#: ckanext/report/templates/report/view.html:23
+msgid ""
+"As a system administrator you are able to refresh this report on demand "
+"by clicking the 'Refresh' button."
+msgstr ""
+"Ως διαχειριστής συστήματος μπορείτε να ανανεώσετε αυτή την αναφορά κατά "
+"απαίτηση κάνοντας κλικ στο κουμπί 'Ανανέωση'."
+
+#: ckanext/report/templates/report/view.html:29
+msgid "Options"
+msgstr "Επιλογές"
+
+#: ckanext/report/templates/report/view.html:50
+msgid "Results"
+msgstr "Αποτελέσματα"
+
+#: ckanext/report/templates/report/view.html:52
+msgid "No results found."
+msgstr "Δεν βρέθηκαν αποτελέσματα."
+
+msgid "View various reports about the datasets and organizations in this portal."
+msgstr "Προβολή διαφόρων αναφορών σχετικά με τα σύνολα δεδομένων και τους οργανισμούς σε αυτή την πύλη."
+
+msgid "Tagless Datasets"
+msgstr "Σύνολα δεδομένων χωρίς ετικέτες"
+
+msgid "Datasets which have no tags."
+msgstr "Σύνολα δεδομένων που δεν έχουν ετικέτες."
+
+#: ckanext/report/templates/report/view.html:50
+msgid "Download"
+msgstr "Λήψη"
+
+# Stale Datasets Report translations
+msgid "Stale Datasets"
+msgstr "Μη επικαιροποιημένα Σύνολα Δεδομένων"
+
+msgid "Datasets that have not been updated according to their frequency schedule"
+msgstr "Σύνολα δεδομένων που δεν έχουν ενημερωθεί σύμφωνα με το πρόγραμμα συχνότητάς τους"
+
+msgid "Dataset Freshness Summary"
+msgstr "Περίληψη Κατάστασης Επικαιροποίησης Συνόλων Δεδομένων"
+
+msgid "Total datasets checked"
+msgstr "Σύνολο συνόλων δεδομένων που ελέγχθηκαν"
+
+msgid "Stale datasets"
+msgstr "Μη επικαιροποιημένα σύνολα δεδομένων"
+
+msgid "Up-to-date datasets"
+msgstr "Ενημερωμένα σύνολα δεδομένων"
+
+msgid "Total datasets in scope"
+msgstr "Σύνολο συνόλων δεδομένων στο πεδίο εφαρμογής"
+
+msgid "Dataset"
+msgstr "Σύνολο Δεδομένων"
+
+msgid "Organization"
+msgstr "Οργανισμός"
+
+msgid "Frequency"
+msgstr "Συχνότητα"
+
+msgid "Last Modified"
+msgstr "Τελευταία Τροποποίηση"
+
+msgid "Days Since Update"
+msgstr "Ημέρες από την Ενημέρωση"
+
+msgid "Status"
+msgstr "Κατάσταση"
+
+msgid "Status Legend"
+msgstr "Επεξήγηση Κατάστασης"
+
+msgid "Dataset has not been updated within its expected frequency schedule"
+msgstr "Το σύνολο δεδομένων δεν έχει ενημερωθεί εντός του αναμενόμενου προγράμματος συχνότητας"
+
+msgid "Dataset is up-to-date according to its frequency schedule"
+msgstr "Το σύνολο δεδομένων είναι ενημερωμένο σύμφωνα με το πρόγραμμα συχνότητάς του"
+
+msgid "Dataset has irregular, continuous, or unknown update frequency"
+msgstr "Το σύνολο δεδομένων έχει ακανόνιστη, συνεχή ή άγνωστη συχνότητα ενημέρωσης"
+
+msgid "No datasets with defined frequencies found in the selected scope."
+msgstr "Δεν βρέθηκαν σύνολα δεδομένων με καθορισμένες συχνότητες στο επιλεγμένο πεδίο."
+
+msgid "No title"
+msgstr "Χωρίς τίτλο"
+
+msgid "N/A"
+msgstr "Μ/Δ"
+
+msgid "No description"
+msgstr "Χωρίς περιγραφή"
+
+msgid "STALE"
+msgstr "ΜΗ ΕΠΙΚΑΙΡΟΠΟΙΗΜΕΝΟ"
+
+msgid "OK"
+msgstr "ΕΠΙΚΑΙΡΟΠΟΙΗΜΕΝΟ"
+
+msgid "stale"
+msgstr "μη επικαιροποιημένα"
+
+# Frequency display name translations
+msgid "Unknown"
+msgstr "Άγνωστο"
+
+msgid "Every minute"
+msgstr "Κάθε λεπτό"
+
+msgid "Every 5 minutes"
+msgstr "Κάθε 5 λεπτά"
+
+msgid "Every 10 minutes"
+msgstr "Κάθε 10 λεπτά"
+
+msgid "Every 15 minutes"
+msgstr "Κάθε 15 λεπτά"
+
+msgid "Every 30 minutes"
+msgstr "Κάθε 30 λεπτά"
+
+msgid "Hourly"
+msgstr "Κάθε ώρα"
+
+msgid "Every 2 hours"
+msgstr "Κάθε 2 ώρες"
+
+msgid "Every 3 hours"
+msgstr "Κάθε 3 ώρες"
+
+msgid "Every 12 hours"
+msgstr "Κάθε 12 ώρες"
+
+msgid "Daily"
+msgstr "Καθημερινά"
+
+msgid "Twice daily"
+msgstr "Δύο φορές την ημέρα"
+
+msgid "Weekly"
+msgstr "Εβδομαδιαία"
+
+msgid "Twice weekly"
+msgstr "Δύο φορές την εβδομάδα"
+
+msgid "Three times weekly"
+msgstr "Τρεις φορές την εβδομάδα"
+
+msgid "Five times weekly"
+msgstr "Πέντε φορές την εβδομάδα"
+
+msgid "Every 2 weeks"
+msgstr "Κάθε 2 εβδομάδες"
+
+msgid "Monthly"
+msgstr "Μηνιαία"
+
+msgid "Twice monthly"
+msgstr "Δύο φορές το μήνα"
+
+msgid "Three times monthly"
+msgstr "Τρεις φορές το μήνα"
+
+msgid "Every 2 months"
+msgstr "Κάθε 2 μήνες"
+
+msgid "Quarterly"
+msgstr "Τριμηνιαία"
+
+msgid "Annually"
+msgstr "Ετησίως"
+
+msgid "Twice yearly"
+msgstr "Δύο φορές το χρόνο"
+
+msgid "Three times yearly"
+msgstr "Τρεις φορές το χρόνο"
+
+msgid "Every 2 years"
+msgstr "Κάθε 2 χρόνια"
+
+msgid "Every 3 years"
+msgstr "Κάθε 3 χρόνια"
+
+msgid "Every 4 years"
+msgstr "Κάθε 4 χρόνια"
+
+msgid "Every 5 years"
+msgstr "Κάθε 5 χρόνια"
+
+msgid "Every 10 years"
+msgstr "Κάθε 10 χρόνια"
+
+msgid "Every 20 years"
+msgstr "Κάθε 20 χρόνια"
+
+msgid "Every 30 years"
+msgstr "Κάθε 30 χρόνια"
+
+msgid "As needed"
+msgstr "Όταν χρειάζεται"
+
+msgid "Continuous"
+msgstr "Συνεχής"
+
+msgid "Irregular"
+msgstr "Ακανόνιστη"
+
+msgid "Never"
+msgstr "Ποτέ"
+
+msgid "Not planned"
+msgstr "Μη προγραμματισμένη"
+
+msgid "Other"
+msgstr "Άλλη"
+
+msgid "Continuously updated"
+msgstr "Συνεχώς ενημερωμένη"
+
+msgid "M/Δ"
+msgstr "Μ/Δ"
+

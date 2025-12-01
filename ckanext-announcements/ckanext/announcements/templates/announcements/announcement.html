@@ -1,0 +1,17 @@
+<div class="announcements-container container">
+    {% for announcement in h.get_public_announcements() %}
+        <div class="announcement-card info" id="announcement-{{ announcement.id }}" data-announcement-id="{{ announcement.id }}">
+           <div class="announcement-head">
+             <i class="fa fa-bullhorn"></i>
+             <span class="announcement-title">{{ _('Announcement') }}</span>
+             <span class="announcement-date">{{ h.render_datetime(announcement.from_date, date_format='%d/%m/%Y') }}</span>
+           </div>
+           <div class="announcement-body">
+             {{ h.render_markdown(announcement.message) }}
+           </div>
+           <button class="announcement-close announcement-close-button" data-announcement-id="{{ announcement.id }}" aria-label="{{ _('Close announcements') }}">
+             <span aria-hidden="true">&times;</span>
+           </button>
+        </div>
+    {% endfor %}
+</div>

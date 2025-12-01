@@ -1,0 +1,117 @@
+# Greek translations for ckanext-athens-theme
+# Copyright (C) 2025 Municipality of Athens
+# This file is distributed under the same license as the ckanext-athens-theme
+# project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-athens-theme 0.1.0\n"
+"Report-Msgid-Bugs-To: info@opendatathens.gr\n"
+"POT-Creation-Date: 2025-09-19 08:00+0200\n"
+"PO-Revision-Date: 2025-09-19 08:00+0200\n"
+"Last-Translator: Municipality of Athens\n"
+"Language: el\n"
+"Language-Team: el <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Welcome to "
+msgstr "Καλώς ήρθατε στο "
+
+msgid "Search Datasets"
+msgstr "Αναζήτηση Συνόλων Δεδομένων"
+
+msgid "Access and explore open datasets from the Municipality of Athens"
+msgstr "Πρόσβαση και εξερεύνηση ανοικτών δεδομένων από τον Δήμο Αθηναίων"
+
+msgid "Municipality of Athens Open Data Portal"
+msgstr "Πύλη Ανοικτών Δεδομένων Δήμου Αθηναίων"
+
+msgid "Access and explore open data from the Municipality of Athens"
+msgstr "Πρόσβαση και εξερεύνηση στα ανοικτά δεδομένα του Δήμου Αθηναίων"
+
+msgid "Featured Categories"
+msgstr "Προτεινόμενες Κατηγορίες"
+
+msgid "Latest Datasets"
+msgstr "Πρόσφατα Σύνολα Δεδομένων"
+
+msgid "datasets"
+msgstr "σύνολα δεδομένων"
+
+msgid "organizations"
+msgstr "οργανισμοί"
+
+msgid "categories"
+msgstr "κατηγορίες"
+
+msgid "resources"
+msgstr "πόροι"
+
+msgid "Municipality"
+msgstr "Δήμος"
+
+msgid "Official Website"
+msgstr "Επίσημη Ιστοσελίδα"
+
+msgid "About"
+msgstr "Σχετικά"
+
+msgid "Contact"
+msgstr "Επικοινωνία"
+
+msgid "Data"
+msgstr "Δεδομένα"
+
+msgid "Social Media"
+msgstr "Κοινωνικά Δίκτυα"
+
+msgid "About the Portal"
+msgstr "Σχετικά με την Πύλη"
+
+msgid "About the Municipality"
+msgstr "Σχετικά με το Δήμο"
+
+msgid "Datasets"
+msgstr "Σύνολα Δεδομένων"
+
+msgid "Organizations"
+msgstr "Οργανισμοί"
+
+msgid "Groups"
+msgstr "Ομάδες"
+
+msgid "API Guide"
+msgstr "Οδηγός API"
+
+msgid "Community"
+msgstr "Κοινότητα"
+
+msgid "News"
+msgstr "Νέα"
+
+msgid "FAQ"
+msgstr "Συχνές Ερωτήσεις"
+
+msgid "Privacy Policy"
+msgstr "Πολιτική Απορρήτου"
+
+msgid "Statistics"
+msgstr "Στατιστικά"
+
+msgid "Contact Us"
+msgstr "Επικοινωνήστε μαζί μας"
+
+msgid "Language"
+msgstr "Γλώσσα"
+
+msgid "Follow Us"
+msgstr "Ακολουθήστε μας"
+
+msgid "Powered by"
+msgstr "Με την υποστήριξη του"
+
+msgid "Showcases"
+msgstr "Εφαρμογές"

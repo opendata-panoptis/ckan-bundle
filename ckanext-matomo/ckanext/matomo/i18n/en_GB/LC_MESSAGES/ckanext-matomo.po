@@ -1,0 +1,287 @@
+# Translations template for ckanext-matomo.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the ckanext-matomo project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+# 
+# Translators:
+# Roosa Lampinen, 2023
+# Suvi Nuttunen, 2023
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-matomo 0.0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-04-12 07:27+0000\n"
+"PO-Revision-Date: 2021-11-17 12:18+0000\n"
+"Last-Translator: Suvi Nuttunen, 2023\n"
+"Language-Team: English (United Kingdom) (https://app.transifex.com/avoindata/teams/7979/en_GB/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.7.0\n"
+"Language: en_GB\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ckanext/matomo/translations.py:8
+msgid "Matomo showing most audience locations (bot traffic is filtered out)"
+msgstr "Audience locations sorted by country (bot traffic is filtered out)"
+
+#: ckanext/matomo/translations.py:9
+msgid "Most popular datasets"
+msgstr "Number of views for datasets"
+
+#: ckanext/matomo/translations.py:10
+msgid "Matomo showing top datasets with most views by organization"
+msgstr "Datasets with the most views by organisation"
+
+#: ckanext/matomo/translations.py:11
+msgid "Most popular resources"
+msgstr "Number of downloads for resources"
+
+#: ckanext/matomo/translations.py:12
+msgid "Matomo showing most downloaded resources"
+msgstr "The most downloaded datasets by organisation"
+
+#: ckanext/matomo/templates/report/search_term_analytics.html:3
+#: ckanext/matomo/translations.py:13
+msgid "Most popular search terms"
+msgstr ""
+
+#: ckanext/matomo/translations.py:14
+msgid "Matomo showing most popular search terms"
+msgstr "The most popular search terms and date of the last search"
+
+#: ckanext/matomo/templates/report/search_term_analytics.html:11
+#: ckanext/matomo/translations.py:15
+msgid "Last searched date"
+msgstr "Last searched"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:2
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:2
+msgid "Stats"
+msgstr "Στατιστικά"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:4
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:6
+msgid "Weekly visits for last 12 months"
+msgstr "Εβδομαδιαίες επισκέψεις κατά τους 12 τελευταίους μήνες"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:13
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:37
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:22
+msgid "Visits"
+msgstr "Επισκέψεις"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:14
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:19
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:18
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:23
+msgid "During last 30 days"
+msgstr "Κατά τη διάρκεια των τελευταίων 30 ημερών"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:15
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:20
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:19
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:24
+msgid "During last 12 months"
+msgstr "Κατά τη διάρκεια των τελευταίων 12 μηνών"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:16
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:21
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:20
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:25
+msgid "All time:"
+msgstr "Ανέκαθεν"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:18
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:17
+msgid "Download counts"
+msgstr "Πλήθος λήψεων"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:37
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:37
+msgid "Year"
+msgstr "Έτος"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:32
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:37
+#: ckanext/matomo/templates/report/dataset_analytics.html:14
+#: ckanext/matomo/templates/report/dataset_analytics.html:42
+#: ckanext/matomo/templates/report/resource_analytics.html:11
+#: ckanext/matomo/templates/report/resource_analytics.html:32
+msgid "Downloads"
+msgstr "Λήψεις"
+
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:34
+#: ckanext/matomo/templates/matomo/snippets/dataset_stats.html:39
+#: ckanext/matomo/templates/matomo/snippets/resource_stats.html:39
+msgid "Week"
+msgstr "Εβδομάδα"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:5
+#: ckanext/matomo/templates/report/resource_analytics.html:5
+msgid "Organizations that have published data"
+msgstr "Organisations that have published data"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:10
+#: ckanext/matomo/templates/report/resource_analytics.html:10
+msgid "Organization"
+msgstr "Οργανισμός"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:11
+#: ckanext/matomo/templates/report/dataset_analytics.html:39
+msgid "Total views"
+msgstr "Συνολικές θεάσεις"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:12
+#: ckanext/matomo/templates/report/dataset_analytics.html:40
+msgid "Initial entrance"
+msgstr "Αρχική είσοδος"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:13
+#: ckanext/matomo/templates/report/dataset_analytics.html:41
+msgid "Entrances of total views"
+msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:15
+msgid "Number of API requests (package_show)"
+msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:32
+msgid "Most viewed datasets"
+msgstr "Δημοφιλέστερα σύνολα δεδομένων"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:38
+msgid "Dataset"
+msgstr "Σύνολο δεδομένων"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:43
+#: ckanext/matomo/templates/report/resource_analytics.html:12
+msgid "API events"
+msgstr "Number of API requests"
+
+#: ckanext/matomo/templates/report/dataset_analytics.html:58
+msgid "No analytics found for most downloaded datasets."
+msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics_description.html:3
+msgid ""
+"You can choose to discover the statistics of datasets either on organization"
+" or dataset level. Total views include pageviews of the organization's all "
+"datasets counted together. Initial entrance includes visitors that visit the"
+" page for the first time. Downloads include all dataset downloads of the "
+"organization. Number of API requests include the total sum of API requests "
+"made for the organization's datasets. Please note downloads and number of "
+"API requests include only statistics of datasets that have been uploaded to "
+"the service."
+msgstr ""
+
+#: ckanext/matomo/templates/report/dataset_analytics_description.html:9
+msgid ""
+"Discover statistics of the organization on dataset level. Total views "
+"include all pageviews of the specific dataset. Initial entrance includes "
+"visitors that visit the page for the first time. Downloads include all "
+"downloads of the specific dataset. Number of API requests include the total "
+"sum of API requests made on the dataset. Please note downloads and number of"
+" API requests include only statistics of datasets that have been uploaded to"
+" the service."
+msgstr ""
+
+#: ckanext/matomo/templates/report/location_analytics.html:37
+msgid "Sessions by month"
+msgstr ""
+
+#: ckanext/matomo/templates/report/location_analytics.html:38
+msgid "Dates"
+msgstr "Ημερομηνίες"
+
+#: ckanext/matomo/templates/report/location_analytics.html:39
+#: ckanext/matomo/templates/report/location_analytics.html:78
+msgid "Sessions"
+msgstr ""
+
+#: ckanext/matomo/templates/report/location_analytics.html:47
+#: ckanext/matomo/templates/report/location_analytics.html:56
+msgid "Sessions last month"
+msgstr ""
+
+#: ckanext/matomo/templates/report/location_analytics.html:63
+msgid "Sessions total"
+msgstr ""
+
+#: ckanext/matomo/templates/report/location_analytics.html:71
+msgid "Audience locations"
+msgstr ""
+
+#: ckanext/matomo/templates/report/location_analytics.html:72
+msgid "Collected since"
+msgstr ""
+
+#: ckanext/matomo/templates/report/location_analytics.html:76
+msgid "Countries"
+msgstr "Χώρες"
+
+#: ckanext/matomo/templates/report/location_analytics.html:77
+msgid "Sessions (since recording started)"
+msgstr ""
+
+#: ckanext/matomo/templates/report/location_analytics.html:89
+msgid "No statistics found for audience locations."
+msgstr ""
+
+#: ckanext/matomo/templates/report/option_last.html:9
+msgid "Records to be shown:"
+msgstr ""
+
+#: ckanext/matomo/templates/report/option_time.html:9
+msgid "Timespan for records"
+msgstr ""
+
+#: ckanext/matomo/templates/report/resource_analytics.html:25
+msgid "Most downloaded resources"
+msgstr ""
+
+#: ckanext/matomo/templates/report/resource_analytics.html:31
+msgid "Resource"
+msgstr "Πόρος"
+
+#: ckanext/matomo/templates/report/resource_analytics.html:33
+msgid "Last accessed date"
+msgstr ""
+
+#: ckanext/matomo/templates/report/resource_analytics.html:34
+msgid "Number of API requests (datastore_search, datastore_search_sql)"
+msgstr ""
+
+#: ckanext/matomo/templates/report/resource_analytics.html:51
+msgid "No statistics found for most downloaded resources."
+msgstr ""
+
+#: ckanext/matomo/templates/report/resource_analytics_description.html:3
+msgid ""
+"Discover datasets' download and API request amounts on organization level. "
+"Please note that this data only includes statistics of datasets that have "
+"been uploaded to the service."
+msgstr ""
+
+#: ckanext/matomo/templates/report/resource_analytics_description.html:8
+msgid ""
+"Discover selected organization's download and API request amounts on dataset"
+" level. Please note that this data only includes statistics of datasets that"
+" have been uploaded to the service."
+msgstr ""
+
+#: ckanext/matomo/templates/report/search_term_analytics.html:9
+msgid "Search term"
+msgstr ""
+
+#: ckanext/matomo/templates/report/search_term_analytics.html:10
+msgid "Total searches"
+msgstr "Συνολικές αναζητήσεις"
+
+#: ckanext/matomo/templates/report/search_term_analytics.html:22
+msgid "No analytics found for most popular search terms"
+msgstr ""

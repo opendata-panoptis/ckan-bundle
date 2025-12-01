@@ -1,0 +1,115 @@
+<!-- Ευρετήριο Dataset -->
+
+{% ckan_extends %}
+
+{% block primary_content %}
+  <section class="module">
+    <div class="module-content">
+      {% block page_primary_action %}
+        {{ super() }}
+      {% endblock %}
+
+      {% block form %}
+        {% set facets = {
+          'fields': fields_grouped,
+          'search': search_facets,
+          'titles': facet_titles,
+          'translated_fields': translated_fields,
+          'remove_field': remove_field }
+        %}
+        {% set sorting = [
+          (_('Relevance'), 'score desc, metadata_modified desc'),
+          (_('Name Ascending'), 'title_string asc'),
+          (_('Name Descending'), 'title_string desc'),
+          (_('Last Modified'), 'metadata_modified desc'),
+          (_('Popularity'), 'views_recent desc')
+          ]
+        %}
+
+        <ul class="nav nav-tabs" id="search-tabs">
+          <li class="active" id="simple-tab"><a href="#" data-toggle="tab">Αναζήτηση</a></li>
+          <li id="advanced-tab"><a href="#" data-toggle="tab">Βοηθός Σύνθετης Αναζήτησης</a></li>
+        </ul>
+
+        <div class="tab-content-no-working">
+          <div class="tab-pane-stop fade-a active-a" id="simple_search">
+            {% snippet 'snippets/search_form.html', form_id='dataset-search-form', type=dataset_type, query=q, sorting=sorting, sorting_selected=sort_by_selected, count=page.item_count, placeholder=h.humanize_entity_type('package', dataset_type, 'search placeholder') or _('Search datasets...'), facets=facets, show_empty=request.args, error=query_error, fields=fields %}
+          </div>
+          <div class="tab-pane-stop fade-a" id="advanced_search">
+            {% snippet 'snippets/advanced_search_form.html', form_id='dataset-search-form-2', type=dataset_type, query=q, sorting=sorting, sorting_selected=sort_by_selected, count=page.item_count, placeholder=h.humanize_entity_type('package', dataset_type, 'search placeholder') or _('Search datasets...'), facets=facets, show_empty=request.args, error=query_error, fields=fields %}
+          </div>
+        </div>
+
+      <script src="{{ url_for('static', filename='script-search.js') }}"></script>
+
+      {% endblock %}
+
+      {% block package_search_results_list %}
+        {% snippet 'snippets/package_list.html', packages=page.items %}
+      {% endblock %}
+    </div>
+
+    {% block page_pagination %}
+      {{ page.pager(q=q) }}
+    {% endblock %}
+  </section>
+
+  {% block package_search_results_api %}
+    {{ super() }}
+  {% endblock %}
+{% endblock %}
+
+{% block secondary_content %}
+  <div class="filters">
+
+    {% if not 'data-service' in request.path and not 'decision' in request.path %}
+
+      <!-- Περιοχή εμφάνισης του Leaflet χάρτη -->
+      <div id="map" style="height: 300px; margin-bottom: 15px;"></div>
+
+      <!-- Κουμπί ενεργοποίησης χωρικής αναζήτησης -->
+      <div style="text-align: center; margin-bottom: 10px;">
+        <div style="display: inline-flex; align-items: center; gap: 8px;">
+          <button type="button"
+                  class="btn btn-outline-secondary btn-md"
+                  id="map-search-button"
+                  style="padding: 6px 12px; font-size: 1.2rem;">
+            <i class="fa fa-map"></i>
+          </button>
+          <span style="font-size: 0.85rem; font-weight: bold; color: #333;">
+            Αναζήτηση με βάση την τρέχουσα προβολή του χάρτη
+          </span>
+        </div>
+      </div>
+
+      <!-- Κρυφό πεδίο όπου αποθηκεύεται το ext_bbox (bounding box) -->
+      <input type="hidden" name="ext_bbox" id="ext_bbox_input" value="">
+
+    {% endif %}
+
+    <!-- Εμφάνιση υπαρχόντων φίλτρων CKAN -->
+    <div>
+      {% for facet in facet_titles %}
+        {% snippet 'snippets/facet_list.html', title=h.vocabulary_facet_title(facet), name=facet, search_facets=search_facets, label_function=h.vocabulary_facet_item_label %}
+      {% endfor %}
+    </div>
+
+    <!-- Κουμπί για απόκρυψη φίλτρων -->
+    <a class="close no-text hide-filters"><i class="fa fa-times-circle"></i><span class="text">close</span></a>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+  {% if not 'data-service' in request.path and not 'decision' in request.path %}
+
+    <!-- Leaflet βιβλιοθήκες -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script src="/map_search.js"></script>
+
+  {% endif %}
+
+{% endblock %}

@@ -1,0 +1,104 @@
+@import "variables";
+@import "mixins";
+
+.row.wrapper.charts-view {
+    .dataset-resource-form {
+        position: relative;
+        padding: 0;
+    }
+}
+
+.resource-view-charts_builder_view,
+.resource-view-charts_view,
+#content div.charts-view {
+    label.no-dots {
+        &:after {
+            display: none;
+        }
+    }
+
+    .chart-container {
+        max-height: 600px;
+    }
+
+    select {
+        border: 1px solid #d0d0d0;
+        padding: 8px;
+        border-radius: 3px;
+        width: 100%;
+    }
+
+    #chart-clear {
+        margin-left: auto;
+    }
+
+    .tab-content {
+        display: block !important;
+    }
+
+    #chart-indicator {
+        display: none;
+    }
+
+    .htmx-request#chart-indicator{
+        display:inline;
+    }
+}
+
+.charts-filters {
+    .filter-container {
+        margin-bottom: 1rem;
+
+        .filter-pair {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid beige;
+
+            &:last-of-type {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: unset;
+            }
+
+            .remove-pair {
+                top: 0;
+                height: fit-content;
+            }
+
+            .ts-wrapper {
+                flex-basis: 45%;
+            }
+        }
+    }
+}
+
+.charts-view--form {
+    .ts-wrapper {
+        .ts-control {
+            // caret down icon
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+
+        // position select clear button
+        &.plugin-clear_button {
+            .ts-control {
+                background: white;
+
+                .clear-button {
+                    right: .550rem;
+                    font-size: 1.25rem;
+                }
+            }
+        }
+
+        .ts-dropdown {
+            top: unset;
+            margin-top: 1px;
+        }
+    }
+}

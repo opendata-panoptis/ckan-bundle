@@ -1,0 +1,256 @@
+scheming_version: 2
+dataset_type: data-service
+about: A collection of operations that provides access to one or more datasets or data processing functions.
+about_url: http://github.com/ckan/ckanext-dcat
+
+dataset_fields:
+
+- field_name: title
+  label:
+    en: Name of Service
+    el: Όνομα υπηρεσίας
+  preset: title
+  required: true
+  help_text:
+    en: A name given to the Data Service
+    el: Tο όνομα που συνοπτικά περιγράφει την διατιθέμενη υπηρεσία
+
+- field_name: name
+  label: URL
+  preset: dataset_slug
+  form_placeholder: eg. my-data-service
+
+- field_name: notes
+  label: Description
+  form_snippet: markdown.html
+  help_text:
+    en: A free-text account of the Data Service
+    el: H Περιγραφή μιας Υπηρεσίας Δεδομένων σε ελεύθερο κείμενο
+
+- field_name: tag_string
+  label:
+    en: Keywords
+    el: Λέξεις κλειδιά
+  preset: tag_string_autocomplete
+  form_placeholder: eg. economy, mental health, government
+  help_text:
+    en: Keywords or tags describing the Data Service. Use commas to separate multiple values
+    el: Λέξεις Κλειδιά ή ετικέτες που περιγράφουν την Υπηρεσία Δεδομένων. Χρησιμοποιείστε κόμματα για να διαχωρίσετε τις τιμές
+
+- field_name: owner_org
+  label: Organization
+  preset: dataset_organization
+  help_text:
+    en: The data.gov.gr organization the data service belongs to
+    el: Ο φορέας του data.gov.gr στον οποίο ανήκει η Υπηρεσία Δεδομένων
+
+- field_name: publisher
+  label:
+    en: Publisher
+    el: Εκδότης
+  repeating_label: Publisher
+  repeating_once: true
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: name
+      label: Name
+
+    - field_name: email
+      label: Email
+      display_snippet: email.html
+
+    - field_name: url
+      label: URL
+      display_snippet: link.html
+
+    - field_name: type
+      label: Publisher Type
+      preset: select
+      choices_helper: vocabularyadmin_get_tags_for_scheming
+      form_choices_helper_kwargs:
+        vocabulary_id_or_name: "Publisher type"
+      required: false
+      help_text:
+        en: Select the Publisher type  for this resource from the controlled list
+        el: Επιλέξτε τον τύπο Εκδότη για αυτόν τον πόρο από την ελεγχόμενη λίστα
+
+    - field_name: identifier
+      label: Identifier
+      help_text:
+        en: Unique identifier for the publisher, such as a ROR ID
+        el: Μοναδικό αναγνωριστικό για τον εκδότη, όπως αναγνωριστικό ROR ID
+  help_text:
+    en: An entity (organisation) responsible for making the Data Service available
+    el: Οντότητα (Φορέας) υπεύθυνη για τη διάθεση της Υπηρεσίας Δεδομένων
+
+# required in DCAT-AP-HVD
+- field_name: endpoint_description
+  label:
+    en: Endpoint description
+    el: Περιγραφή σημείου πρόσβασης
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:
+    en: A description of the services available via the end-points, including their operations, parameters etc
+    el: Μια περιγραφή των υπηρεσιών που είναι διαθέσιμες μέσω των σημείων πρόσβασης, συμπεριλαμβανομένων των λειτουργιών τους, των παραμέτρων κ.λπ.
+
+# required in DCAT-AP-HVD
+- field_name: endpoint_url
+  label:
+    en: Endpoint URL
+    el: Διεύθυνση URL σημείου πρόσβασης
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  required: true
+  help_text:
+    en: The root location or primary endpoint of the service (an IRI)
+    el: Η ριζική τοποθεσία ή το κύριο σημείο πρόσβασης της υπηρεσίας (μια IRI)
+
+# required in DCAT-AP-HVD
+- field_name: access_rights
+  label:
+    en: Access rights
+    el: Δικαιώματα Πρόσβασης
+  preset: select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Access right"
+  required: false
+  help_text:
+    en: Information regarding access or restrictions based on privacy, security, or other policies
+    el: Πληροφορίες σχετικά με την πρόσβαση ή τους περιορισμούς που βασίζονται σε πολιτικές απορρήτου, ασφάλειας ή άλλες πολιτικές
+
+# required in DCAT-AP-HVD
+- field_name: applicable_legislation
+  label:
+    en: Applicable legislation
+    el: Εφαρμοστέα Nομοθεσία
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:
+    en: The legislation that mandates the creation or management of the Data Service
+    el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση της Υπηρεσίας Δεδομένων
+
+# required in DCAT-AP-HVD
+- field_name: contact
+  label:
+    el: Σημεία επαφής
+    en: Contact points
+  repeating_label: Contact point
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: name
+      label: Name
+
+    - field_name: email
+      label: Email
+      display_snippet: email.html
+
+    - field_name: url
+      label: URL
+      help_text:
+        en: A URL associated with the contact
+        el: Μια διεύθυνση URL που σχετίζεται με την επαφή
+  help_text:
+    en: Contact information that can be used for sending comments about the Data Service
+    el: Πληροφορίες επαφής που μπορούν να χρησιμοποιηθούν για την αποστολή σχολίων σχετικά με την Υπηρεσία Δεδομένων
+
+- field_name: documentation
+  label:
+    en: Documentation
+    el: Τεκμηρίωση
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:
+    en: A page that provides additional information about the Data Service
+    el: Μια σελίδα που παρέχει επιπλέον πληροφορίες σχετικά με την Υπηρεσία Δεδομένων
+
+- field_name: theme
+  label:
+    en: Theme
+    el: Θέμα
+  preset: multiple_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Data theme"
+  required: false
+  help_text:
+    en: A category of the dataset. A Data Service may be associated with multiple themes
+    el: Μια κατηγορία του συνόλου δεδομένων. Μια Υπηρεσία Δεδομένων μπορεί να σχετίζεται με πολλαπλά θέματα
+
+- field_name: hvd_category
+  label:
+    en: Ηigh Value Datasets category
+    el: Κατηγορία Σύνολου Δεδομένων Υψηλής Αξίας
+  preset: multiple_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "High-value dataset categories"
+  required: false
+  help_text:
+    en: Ηigh Value Dataset category to which this Data Service belongs. A Data Service may be associated with multiple Ηigh Value Dataset categories
+    el: Κατηγορία Υψηλής Αξίας Συνόλου Δεδομένων στην οποία ανήκει αυτή η Υπηρεσία Δεδομένων. Μια Υπηρεσία Δεδομένων μπορεί να σχετίζεται με πολλαπλές κατηγορίες Υψηλής Αξίας Συνόλου Δεδομένων
+
+- field_name: license
+  label: License
+  preset: searchable_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Licence"
+  required: false
+  help_text:
+    en: A licence under which the Data service is made available
+    el: Μια άδεια υπό την οποία η Υπηρεσία Δεδομένων είναι διαθέσιμη
+
+- field_name: rights
+  label:
+    en: Rights
+    el: Δικαιώματα
+  form_snippet: markdown.html
+  display_snippet: markdown.html
+  help_text:
+    en: A statement that specifies rights associated with the Data Service
+    el: Μια δήλωση που καθορίζει τα δικαιώματα που σχετίζονται με την Υπηρεσία Δεδομένων
+
+- field_name: format
+  label: Format
+  preset: searchable_select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "File Type"
+  required: false
+  help_text:
+    en: The structure that can be returned by querying the endpointURL. Select the IANA Media type (MIME type) for this property from the controlled vocabulary list
+    el: Η δομή που μπορεί να επιστραφεί με την ερώτηση του endpointURL. Επιλέξτε τον τύπο IANA Media (τύπος MIME) για αυτή την ιδιότητα από τη λίστα ελεγχόμενου λεξιλογίου
+
+- field_name: landing_page
+  label:
+    en: Landing page
+    el: Σελίδα προορισμού
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:
+    en: A web page that provides access to the Data Service and/or additional information
+    el: Μια ιστοσελίδα που παρέχει πρόσβαση στην Υπηρεσία Δεδομένων και/ή επιπλέον πληροφορίες
+
+resource_fields:
+
+- field_name: url
+  label: URL
+  preset: resource_url_upload
+
+- field_name: distribution_type
+  label:
+    en: Resource type
+    el: Τύπος πόρου
+  form_snippet: text-hidden-with-default-value.html
+  display_snippet: null
+  help_text:
+    en: Η ιδιότητα προστέθηκε για να διασφαλιστεί ότι υπάρχει ένα συμπληρωμένο πεδίο, ώστε να μπορεί να προχωρήσει η διαδικασία καταχώρησης μιας καινούριας Υπηρεσίας Δεδομένων
+    el: The property was added to ensure there is a completed field so that the process of registering a new data service can proceed

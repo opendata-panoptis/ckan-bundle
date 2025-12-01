@@ -1,0 +1,89 @@
+/* Bubble container */
+.comment {
+  position: relative;
+  padding: 16px 20px;
+  background-color: #f1f3f5;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 80%;
+  word-wrap: break-word;
+  display: inline-block;
+}
+
+/* Heading inside bubble */
+.comment .comment-heading {
+  display: flex;
+  align-items: center; /* aligns avatar + name + date */
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+/* Avatar */
+.comment .comment-heading .author-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.comment .comment-heading .author-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Name + date container */
+.comment .comment-heading .comment-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.comment .comment-heading .author-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #0a53be;
+}
+
+.comment .comment-heading .comment-date {
+  font-size: 12px;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+/* Comment content */
+.comment .comment-body .comment-content {
+  font-size: 16px;
+  line-height: 24px;
+  color: #212529;
+  margin-bottom: 8px;
+}
+
+/* Action buttons below content */
+.comment .comment-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px; /* spacing from content */
+}
+
+.comment .comment-actions .comment-action {
+  font-size: 0.85rem;
+  color: #0a53be;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.comment .comment-actions .comment-action:hover {
+  text-decoration: underline;
+}
+
+/* Nested replies */
+.comments-thread .comments-thread {
+  padding-left: 40px;
+}
+
+.comments-thread .comments-thread .comment {
+  background-color: #e9ecef;
+}

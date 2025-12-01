@@ -1,0 +1,238 @@
+# English translations for ckanext-vocabulary-admin.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-vocabulary-admin 0.0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-08-19 15:00+0300\n"
+"PO-Revision-Date: 2025-08-19 15:00+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: en <LL@li.org>\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+msgid "Create New Vocabulary"
+msgstr "Create New Vocabulary"
+
+msgid "Create New Tag"
+msgstr "Create New Tag"
+
+msgid "Controlled Vocabularies Management"
+msgstr "Controlled Vocabularies Management"
+
+msgid "In this section you can manage controlled vocabularies and their tags."
+msgstr "In this section you can manage controlled vocabularies and their tags."
+
+msgid "Total vocabularies"
+msgstr "Total vocabularies"
+
+msgid "Total tags"
+msgstr "Total tags"
+
+msgid "Available Vocabularies"
+msgstr "Available Vocabularies"
+
+msgid "Vocabulary Name"
+msgstr "Vocabulary Name"
+
+msgid "Number of Tags"
+msgstr "Number of Tags"
+
+msgid "Tags"
+msgstr "Tags"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Are you sure you want to delete this vocabulary and all its tags? This action cannot be undone."
+msgstr "Are you sure you want to delete this vocabulary and all its tags? This action cannot be undone."
+
+msgid "(Inactive)"
+msgstr "(Inactive)"
+
+msgid "Are you sure you want to delete this tag? This action cannot be undone."
+msgstr "Are you sure you want to delete this tag? This action cannot be undone."
+
+msgid "There are no tags in this vocabulary."
+msgstr "There are no tags in this vocabulary."
+
+msgid "There are no available vocabularies."
+msgstr "There are no available vocabularies."
+
+msgid "Use the \"Create New Vocabulary\" button to create your first vocabulary."
+msgstr "Use the \"Create New Vocabulary\" button to create your first vocabulary."
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "The name of the tag"
+msgstr "The name of the tag"
+
+msgid "Vocabulary"
+msgstr "Vocabulary"
+
+msgid "The vocabulary this tag belongs to"
+msgstr "The vocabulary this tag belongs to"
+
+msgid "Display Name (Greek)"
+msgstr "Display Name (Greek)"
+
+msgid "How this tag will be displayed in Greek"
+msgstr "How this tag will be displayed in Greek"
+
+msgid "Display Name (English)"
+msgstr "Display Name (English)"
+
+msgid "How this tag will be displayed in English"
+msgstr "How this tag will be displayed in English"
+
+msgid "Description (Greek)"
+msgstr "Description (Greek)"
+
+msgid "A brief description of this tag in Greek"
+msgstr "A brief description of this tag in Greek"
+
+msgid "Description (English)"
+msgstr "Description (English)"
+
+msgid "A brief description of this tag in English"
+msgstr "A brief description of this tag in English"
+
+msgid "Value URI"
+msgstr "Value URI"
+
+msgid "A unique URI for this tag value"
+msgstr "A unique URI for this tag value"
+
+msgid "Create Tag"
+msgstr "Create Tag"
+
+msgid "Update Tag"
+msgstr "Update Tag"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Create Vocabulary"
+msgstr "Create Vocabulary"
+
+msgid "Update Vocabulary"
+msgstr "Update Vocabulary"
+
+msgid "The name of the vocabulary"
+msgstr "The name of the vocabulary"
+
+msgid "Vocabulary Management"
+msgstr "Vocabulary Management"
+
+msgid "Δημιουργία Νέου Λεξιλογίου"
+msgstr "Create New Vocabulary"
+
+msgid "Δημιουργία Νέας Ετικέτας"
+msgstr "Create New Tag"
+
+msgid "Όνομα"
+msgstr "Name"
+
+msgid "Το όνομα του λεξιλογίου"
+msgstr "The name of the vocabulary"
+
+msgid "Περιγραφή (Ελληνικά)"
+msgstr "Description (Greek)"
+
+msgid "Η περιγραφή του λεξιλογίου στα ελληνικά (προαιρετικό)"
+msgstr "The description of the vocabulary in Greek (optional)"
+
+msgid "Περιγραφή (Αγγλικά)"
+msgstr "Description (English)"
+
+msgid "Η περιγραφή του λεξιλογίου στα αγγλικά (προαιρετικό)"
+msgstr "The description of the vocabulary in English (optional)"
+
+msgid "Δημιουργία"
+msgstr "Create"
+
+msgid "Ακύρωση"
+msgstr "Cancel"
+
+msgid "Επεξεργασία Λεξιλογίου"
+msgstr "Edit Vocabulary"
+
+msgid "Ενημέρωση"
+msgstr "Update"
+
+msgid "Ετικέτες Λεξιλογίου"
+msgstr "Vocabulary Tags"
+
+msgid "Ετικέτες που ανήκουν σε αυτό το λεξιλόγιο:"
+msgstr "Tags that belong to this vocabulary:"
+
+msgid "(Ανενεργό)"
+msgstr "(Inactive)"
+
+msgid "Επεξεργασία"
+msgstr "Edit"
+
+msgid "Διαγραφή"
+msgstr "Delete"
+
+msgid "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την ετικέτα; Αυτή η ενέργεια δεν αναιρείται."
+msgstr "Are you sure you want to delete this tag? This action cannot be undone."
+
+msgid "Δεν υπάρχουν ετικέτες σε αυτό το λεξιλόγιο."
+msgstr "There are no tags in this vocabulary."
+
+msgid "Προσθήκη Νέας Ετικέτας"
+msgstr "Add New Tag"
+
+msgid "Επεξεργασία Ετικέτας"
+msgstr "Edit Tag"
+
+msgid "Ενεργή"
+msgstr "Active"
+
+msgid "Το όνομα της ετικέτας"
+msgstr "The name of the tag"
+
+msgid "Λεξιλόγιο"
+msgstr "Vocabulary"
+
+msgid "Επιλέξτε λεξιλόγιο..."
+msgstr "Select vocabulary..."
+
+msgid "Το λεξιλόγιο στο οποίο θα ανήκει η ετικέτα"
+msgstr "The vocabulary this tag belongs to"
+
+msgid "URI Τιμής"
+msgstr "Value URI"
+
+msgid "Το URI της τιμής (προαιρετικό)"
+msgstr "The URI of the value (optional)"
+
+msgid "Ετικέτα (Ελληνικά)"
+msgstr "Label (Greek)"
+
+msgid "Η ετικέτα στα ελληνικά (προαιρετικό)"
+msgstr "The label in Greek (optional)"
+
+msgid "Ετικέτα (Αγγλικά)"
+msgstr "Label (English)"
+
+msgid "Η ετικέτα στα αγγλικά (προαιρετικό)"
+msgstr "The label in English (optional)"
+
+msgid "Η περιγραφή στα ελληνικά (προαιρετικό)"
+msgstr "The description in Greek (optional)"
+
+msgid "Η περιγραφή στα αγγλικά (προαιρετικό)"
+msgstr "The description in English (optional)"

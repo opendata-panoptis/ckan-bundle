@@ -1,0 +1,9 @@
+{% ckan_extends %}
+
+{% block content_primary_nav %}
+  {{ super() }}
+  <!--  Θέλουμε να διασυνδέουμε packages τα οποία είναι dataset-->
+  {% if pkg.type == 'dataset' %}
+    {{ h.build_relationships_nav_icon(pkg.name) }}
+  {% endif %}
+{% endblock %}

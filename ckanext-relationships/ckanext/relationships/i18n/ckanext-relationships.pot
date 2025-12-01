@@ -1,0 +1,181 @@
+# Translations template for ckanext-relationships.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the ckanext-relationships
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-relationships 3.0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-07-09 15:10+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ckanext/relationships/blueprint.py:39 ckanext/relationships/controller.py:34
+msgid "Dataset not found"
+msgstr ""
+
+#: ckanext/relationships/helpers.py:110
+msgid "An issue occurred"
+msgstr ""
+
+#: ckanext/relationships/logic/auth/create.py:84
+#, python-format
+msgid "User %s not authorized to edit this package"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:69
+msgid "Existing Relationships"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:78
+#: ckanext/relationships/templates/package/snippets/relationship_list.html:7
+msgid "Type"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:79
+msgid "CKAN Dataset"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:80
+msgid "Action"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:102
+#: ckanext/relationships/templates/package/relationships.html:108
+msgid "Delete"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:118
+msgid "There are no existing relationships."
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:123
+msgid "Create relationship"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:126
+msgid "CKAN dataset to dataset relationship"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:135
+#: ckanext/relationships/templates/package/relationships.html:168
+msgid "Relationship type"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:144
+msgid "Target dataset"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:153
+msgid "Add CKAN relationship"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:157
+msgid "There are no other datasets to link to."
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:162
+msgid "CKAN dataset to external URI relationship"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:177
+msgid "External URI"
+msgstr ""
+
+#: ckanext/relationships/templates/package/relationships.html:182
+msgid "Add URI relationship"
+msgstr ""
+
+#: ckanext/relationships/templates/package/snippets/relationship_list.html:3
+msgid "Relationships"
+msgstr ""
+
+#: ckanext/relationships/templates/package/snippets/relationship_list.html:8
+msgid "Dataset"
+msgstr ""
+
+#: ckanext/relationships/templates/package/snippets/relationship_list.html:8
+msgid "This dataset has no existing relationships."
+msgstr "Αυτό το Σύνολο Δεδομένων δεν έχει διασυνδέσεις."
+
+# Μεταφράσεις Λιστών
+
+msgid "unspecified relationship"
+msgstr ""
+
+msgid "Is Part Of"
+msgstr ""
+
+msgid "Has Part"
+msgstr ""
+
+msgid "Is Format Of"
+msgstr ""
+
+msgid "Has Format"
+msgstr ""
+
+msgid "Is Version Of"
+msgstr ""
+
+msgid "Has Version"
+msgstr ""
+
+msgid "Replaces"
+msgstr ""
+
+msgid "Is Replaced By"
+msgstr ""
+
+msgid "References"
+msgstr ""
+
+msgid "Is Referenced By"
+msgstr ""
+
+msgid "Requires"
+msgstr ""
+
+msgid "Is Required By"
+msgstr ""
+
+msgid "Was Derived From"
+msgstr ""
+
+msgid "Was Derivation of"
+msgstr ""
+
+msgid "Was Influenced By"
+msgstr ""
+
+msgid "Influenced"
+msgstr ""
+
+msgid "Quoted As"
+msgstr ""
+
+msgid "Quoted From"
+msgstr ""
+
+msgid "Was Revision Of"
+msgstr ""
+
+msgid "Had Revision"
+msgstr ""
+
+msgid "Is Alternate Of"
+msgstr ""
+
+msgid "Is Specialization Of"
+msgstr ""
+
+msgid "Is Generalization Of"
+msgstr ""

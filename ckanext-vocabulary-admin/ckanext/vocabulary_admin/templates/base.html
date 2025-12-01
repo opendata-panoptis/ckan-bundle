@@ -1,0 +1,13 @@
+{% ckan_extends %}
+
+{# Add custom CSS #}
+{% block styles %}
+  {{ super() }}
+  {% asset 'vocabulary_admin/vocabulary_admin-css' %}
+{% endblock %}
+
+{# Add custom JavaScript #}
+{% block scripts %}
+  {{ super() }}
+  {% asset 'vocabulary_admin/vocabulary_admin-js' %}
+{% endblock %}

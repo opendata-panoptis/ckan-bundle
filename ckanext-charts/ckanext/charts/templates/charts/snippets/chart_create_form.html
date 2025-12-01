@@ -1,0 +1,38 @@
+{% import "macros/form.html" as form %}
+
+{% asset "charts/plotly" %}
+{% asset "charts/chartjs" %}
+{% asset "charts/observable" %}
+{% asset "charts/echarts" %}
+
+{# Global styles for all charts #}
+{% asset "charts/charts-css" %}
+{% asset "charts/charts-js" %}
+
+{# Custom select library #}
+{% asset "charts/tom-select-js" %}
+{% asset "charts/tom-select-css" %}
+
+{# chart form #}
+<div class="charts-view--form" data-module="charts-global" data-module-reinit-js="{{ h.charts_reinit_ckan_js_modules() }}">
+    {% snippet "charts/snippets/charts_form_fields.html",
+        resource_id=resource_id,
+        resource_view_id=resource_view_id,
+        data=settings,
+        builder=form_builder,
+        errors=errors,
+        exclude_tabs=exclude_tabs or false,
+        user_chart_builder=user_chart_builder or false
+    %}
+</div>
+
+{# a spinner to show when the chart is updating #}
+<div id="chart-indicator">
+    {% snippet "charts/snippets/svg/loader.svg" %}
+    {{ _("Updating chart...") }}
+</div>
+
+{# a container for the chart preview #}
+<div class="charts-view--preview" id="charts-view--preview" style="min-height: 450px;">
+
+</div>

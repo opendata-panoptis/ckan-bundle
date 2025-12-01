@@ -1,0 +1,167 @@
+# Greek translations for ckanext-relationships.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the
+# ckanext-relationships
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-relationships 3.0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-07-09 13:11+0300\n"
+"PO-Revision-Date: 2025-07-09 13:12+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: el\n"
+"Language-Team: el <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ckanext/relationships/blueprint.py:39 ckanext/relationships/controller.py:34
+msgid "Dataset not found"
+msgstr "Το σύνολο δεδομένων δεν βρέθηκε"
+
+#: ckanext/relationships/helpers.py:114
+msgid "An issue occurred"
+msgstr "Προέκυψε ένα πρόβλημα"
+
+#: ckanext/relationships/logic/auth/create.py:84
+#, python-format
+msgid "User %s not authorized to edit this package"
+msgstr "Ο χρήστης %s δεν έχει άδεια να επεξεργαστεί αυτό το πακέτο"
+
+#: ckanext/relationships/templates/package/relationships.html:5
+msgid "Existing Relationships"
+msgstr "Υφιστάμενες διασυνδέσεις"
+
+#: ckanext/relationships/templates/package/relationships.html:42
+msgid "There are no existing relationships."
+msgstr "Δεν υπάρχουν υφιστάμενες διασυνδέσεις."
+
+#: ckanext/relationships/templates/package/relationships.html:45
+msgid "Create relationship"
+msgstr "Δημιουργία διασύνδεσης"
+
+#: ckanext/relationships/templates/package/relationships.html:47
+msgid "CKAN dataset to dataset relationship"
+msgstr "Σχέση μεταξύ συνόλων δεδομένων CKAN"
+
+#: ckanext/relationships/templates/package/relationships.html:77
+msgid "CKAN dataset to external URI relationship"
+msgstr "Σχέση μεταξύ συνόλου δεδομένων CKAN και εξωτερικού URI"
+
+#: ckanext/relationships/templates/package/snippets/relationship_list.html:3
+msgid "Relationships"
+msgstr "Διασυνδέσεις"
+
+#: ckanext/relationships/templates/package/snippets/relationship_list.html:8
+msgid "Dataset"
+msgstr "Σύνολο Δεδομένων"
+
+#: ckanext/relationships/templates/package/relationships.html:78
+#: ckanext/relationships/templates/package/snippets/relationship_list.html:7
+msgid "Type"
+msgstr "Τύπος Διασύνδεσης"
+
+#: ckanext/relationships/templates/package/relationships.html:153
+msgid "Add CKAN relationship"
+msgstr "Προσθήκη Διασύνδεσης"
+
+#: ckanext/relationships/templates/package/relationships.html:135
+#: ckanext/relationships/templates/package/relationships.html:168
+msgid "Relationship type"
+msgstr "Τύπο Διασύνδεσης"
+
+#: ckanext/relationships/templates/package/relationships.html:177
+msgid "External URI"
+msgstr "Εξωτερικό URI"
+
+#: ckanext/relationships/templates/package/relationships.html:144
+msgid "Target dataset"
+msgstr "Σύνολο δεδομένων προς σύνδεση"
+
+#: ckanext/relationships/templates/package/relationships.html:182
+msgid "Add URI relationship"
+msgstr "Προσθήκης Διασύνδεσης URI"
+
+#: ckanext/relationships/templates/package/snippets/relationship_list.html:8
+msgid "This dataset has no existing relationships."
+msgstr "Αυτό το Σύνολο Δεδομένων δεν έχει διασυνδέσεις."
+
+
+# Μεταφράσεις Λιστών
+msgid "unspecified relationship"
+msgstr "Απροσδιόριστη σχέση"
+
+msgid "Is Part Of"
+msgstr "Είναι μέρος του"
+
+msgid "Has Part"
+msgstr "Έχει μέρος"
+
+msgid "Is Format Of"
+msgstr "Είναι μορφή του"
+
+msgid "Has Format"
+msgstr "Έχει μορφή"
+
+msgid "Is Version Of"
+msgstr "Είναι έκδοση του"
+
+msgid "Has Version"
+msgstr "Έχει έκδοση"
+
+msgid "Replaces"
+msgstr "Αντικαθιστά"
+
+msgid "Is Replaced By"
+msgstr "Αντικαθίσταται από"
+
+msgid "References"
+msgstr "Αναφέρεται σε"
+
+msgid "Is Referenced By"
+msgstr "Αναφέρεται από"
+
+msgid "Requires"
+msgstr "Απαιτεί"
+
+msgid "Is Required By"
+msgstr "Απαιτείται από"
+
+msgid "Was Derived From"
+msgstr "Προήλθε από"
+
+msgid "Was Derivation of"
+msgstr "Παραγωγή από"
+
+msgid "Was Influenced By"
+msgstr "Επηρεάστηκε από"
+
+msgid "Influenced"
+msgstr "Επηρέασε"
+
+msgid "Quoted As"
+msgstr "Παρατίθεται ως"
+
+msgid "Quoted From"
+msgstr "Παρατίθεται από"
+
+msgid "Was Revision Of"
+msgstr "Ήταν αναθεώρηση του"
+
+msgid "Had Revision"
+msgstr "Είχε αναθεώρηση"
+
+msgid "Is Alternate Of"
+msgstr "Είναι εναλλακτική του"
+
+msgid "Is Specialization Of"
+msgstr "Είναι εξειδίκευση του"
+
+msgid "Is Generalization Of"
+msgstr "Είναι γενίκευση του"
+

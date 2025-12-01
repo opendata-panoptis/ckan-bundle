@@ -1,0 +1,36 @@
+# Greek translations for ckanext-downloadall.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-downloadall 0.1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2019-11-27 09:54+0000\n"
+"PO-Revision-Date: 2023-05-23 12:00+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: el\n"
+"Language-Team: el <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.3.4\n"
+
+#: ckanext/downloadall/templates/package/read.html:12
+msgid "This download is not currently available"
+msgstr "Αυτή η λήψη δεν είναι διαθέσιμη αυτή τη στιγμή"
+
+#: ckanext/downloadall/templates/package/read.html:14
+msgid "Download all"
+msgstr "Λήψη όλων"
+
+#: ckanext/downloadall/templates/package/read.html:18
+msgid "Generate download"
+msgstr "Δημιουργία λήψης"
+
+#: ckanext/downloadall/templates/package/read.html:19
+msgid "Generate"
+msgstr "Δημιουργία"
+
+#: ckanext/downloadall/templates/package/read.html:51
+msgid "Preparing download..."
+msgstr "Προετοιμασία λήψης..."

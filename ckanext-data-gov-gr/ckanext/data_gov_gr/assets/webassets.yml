@@ -1,0 +1,14 @@
+# data_gov_gr-js:
+#   filter: rjsmin
+#   output: ckanext-data_gov_gr/%(version)s-data_gov_gr.js
+#   contents:
+#     - js/data_gov_gr.js
+#   extra:
+#     preload:
+#       - base/main
+
+# data_gov_gr-css:
+#   filter: cssrewrite
+#   output: ckanext-data_gov_gr/%(version)s-data_gov_gr.css
+#   contents:
+#     - css/data_gov_gr.css

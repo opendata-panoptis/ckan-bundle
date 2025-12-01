@@ -1,0 +1,6 @@
+select = ["E", "F"]
+
+extend-exclude = []
+
+line-length = 127
+

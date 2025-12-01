@@ -1,0 +1,611 @@
+# Translations template for ckanext-showcase.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the ckanext-showcase
+# project.
+# Automatically generated, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-showcase 1.8.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-07-22 15:55+0300\n"
+"PO-Revision-Date: 2025-07-22 15:55+0300\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+"Language: el\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ckanext/showcase/plugin.py:105
+#: ckanext/showcase/templates/showcase/new_package_form.html:60
+msgid "Approval Status"
+msgstr "Κατάσταση Έγκρισης"
+
+#: ckanext/showcase/plugin.py:105
+#: ckanext/showcase/templates/showcase/new_package_form.html:50
+#: ckanext/showcase/utils.py:370 ckanext/showcase/views.py:124
+msgid "Tags"
+msgstr "Ετικέτες"
+
+#: ckanext/showcase/utils.py:40 ckanext/showcase/utils.py:147
+msgid "User not authorized to edit {showcase_id}"
+msgstr "Ο χρήστης δεν είναι εξουσιοδοτημένος να επεξεργαστεί την εφαρμογή {showcase_id}"
+
+#: ckanext/showcase/utils.py:61
+msgid "Unauthorized to create a package"
+msgstr "Μη εξουσιοδοτημένος για τη δημιουργία πακέτου"
+
+#: ckanext/showcase/utils.py:96 ckanext/showcase/utils.py:154
+#: ckanext/showcase/utils.py:480 ckanext/showcase/utils.py:538
+#: ckanext/showcase/utils.py:554
+msgid "Showcase not found"
+msgstr "Η εφαρμογή δεν βρέθηκε"
+
+#: ckanext/showcase/utils.py:98 ckanext/showcase/utils.py:156
+msgid "Unauthorized to read showcase"
+msgstr "Μη εξουσιοδοτημένος για την ανάγνωση εφαρμογής"
+
+#: ckanext/showcase/utils.py:101
+msgid "You do not have access to this showcase"
+msgstr "Δεν έχετε πρόσβαση σε αυτήν την εφαρμογή"
+
+#: ckanext/showcase/utils.py:185 ckanext/showcase/utils.py:557
+msgid "The dataset has been removed from the showcase."
+msgid_plural "The datasets have been removed from the showcase."
+msgstr[0] "Το σύνολο δεδομένων έχει αφαιρεθεί από την εφαρμογή."
+msgstr[1] "Τα σύνολα δεδομένων έχουν αφαιρεθεί από την εφαρμογή."
+
+#: ckanext/showcase/utils.py:194
+msgid ""
+"Δεν μπορεί να γίνει προσθήκη διασύνδεσης μη εγκεκριμένης εφαρμογής με σύνολο "
+"δεδομένων."
+msgstr ""
+
+#: ckanext/showcase/utils.py:221 ckanext/showcase/utils.py:541
+msgid "The dataset has been added to the showcase."
+msgid_plural "The datasets have been added to the showcase."
+msgstr[0] "Το σύνολο δεδομένων έχει προστεθεί στην εφαρμογή."
+msgstr[1] "Τα σύνολα δεδομένων έχουν προστεθεί στην εφαρμογή."
+
+#: ckanext/showcase/utils.py:368 ckanext/showcase/views.py:114
+msgid "Organizations"
+msgstr "Οργανισμοί"
+
+#: ckanext/showcase/utils.py:369 ckanext/showcase/views.py:119
+msgid "Groups"
+msgstr "Ομάδες"
+
+#: ckanext/showcase/utils.py:371 ckanext/showcase/views.py:125
+msgid "Formats"
+msgstr "Μορφές"
+
+#: ckanext/showcase/utils.py:372 ckanext/showcase/views.py:126
+msgid "Licenses"
+msgstr "Άδειες"
+
+#: ckanext/showcase/utils.py:432
+msgid "Parameter '{parameter_name}' is not an integer"
+msgstr "Η παράμετρος '{parameter_name}' δεν είναι ακέραιος αριθμός"
+
+#: ckanext/showcase/utils.py:466 ckanext/showcase/utils.py:478
+msgid "Unauthorized to delete showcase"
+msgstr "Μη εξουσιοδοτημένος για τη διαγραφή εφαρμογής"
+
+#: ckanext/showcase/utils.py:474
+msgid "Showcase has been deleted."
+msgstr "Η εφαρμογή έχει διαγραφεί."
+
+#: ckanext/showcase/utils.py:500 ckanext/showcase/utils.py:511
+msgid "Dataset not found"
+msgstr "Το σύνολο δεδομένων δεν βρέθηκε"
+
+#: ckanext/showcase/utils.py:502
+msgid "Not authorized to see this page"
+msgstr "Δεν είστε εξουσιοδοτημένος να δείτε αυτήν τη σελίδα"
+
+#: ckanext/showcase/utils.py:513
+msgid "Unauthorized to read package"
+msgstr "Μη εξουσιοδοτημένος για την ανάγνωση πακέτου"
+
+#: ckanext/showcase/utils.py:526
+msgid ""
+"Δεν μπορεί να γίνει αφαίρεση διασύνδεσης μη εγκεκριμένης εφαρμογής με σύνολο "
+"δεδομένων."
+msgstr ""
+
+#: ckanext/showcase/utils.py:599 ckanext/showcase/utils.py:642
+msgid "User not authorized to view page"
+msgstr "Ο χρήστης δεν είναι εξουσιοδοτημένος να δει τη σελίδα"
+
+#: ckanext/showcase/utils.py:612 ckanext/showcase/utils.py:658
+msgid "Unauthorized to perform that action"
+msgstr "Μη εξουσιοδοτημένος για την εκτέλεση αυτής της ενέργειας"
+
+#: ckanext/showcase/utils.py:615
+msgid "User '{user_name}' not found."
+msgstr "Ο χρήστης '{user_name}' δεν βρέθηκε."
+
+#: ckanext/showcase/utils.py:619
+msgid "The user is now a Showcase Admin"
+msgstr "Ο χρήστης είναι πλέον Διαχειριστής Εφαρμογών"
+
+#: ckanext/showcase/utils.py:660
+msgid "The user is not a Showcase Admin"
+msgstr "Ο χρήστης δεν είναι Διαχειριστής Εφαρμογών"
+
+#: ckanext/showcase/utils.py:662
+msgid "The user is no longer a Showcase Admin"
+msgstr "Ο χρήστης δεν είναι πλέον Διαχειριστής Εφαρμογών"
+
+#: ckanext/showcase/utils.py:705
+msgid "Only Posting is availiable"
+msgstr "Μόνο η αποστολή είναι διαθέσιμη"
+
+#: ckanext/showcase/utils.py:722
+#, python-format
+msgid "Unauthorized to upload file %s"
+msgstr "Μη εξουσιοδοτημένος για τη μεταφόρτωση του αρχείου %s"
+
+#: ckanext/showcase/views.py:172
+msgid "Invalid search query: {error_message}"
+msgstr "Μη έγκυρο ερώτημα αναζήτησης: {error_message}"
+
+#: ckanext/showcase/views.py:201
+msgid "Parameter u\"{parameter_name}\" is not an integer"
+msgstr "Η παράμετρος u\"{parameter_name}\" δεν είναι ακέραιος αριθμός"
+
+#: ckanext/showcase/logic/converters.py:24
+#: ckanext/showcase/logic/validators.py:29
+msgid "Not found"
+msgstr "Δεν βρέθηκε"
+
+#: ckanext/showcase/logic/converters.py:24
+#: ckanext/showcase/logic/validators.py:29
+msgid "Dataset"
+msgstr "Σύνολο δεδομένων"
+
+#: ckanext/showcase/templates/header.html:7
+#: ckanext/showcase/templates/package/dataset_showcase_list.html:3
+#: ckanext/showcase/templates/package/read_base.html:7
+#: ckanext/showcase/templates/showcase/edit_base.html:13
+#: ckanext/showcase/templates/showcase/edit_base.html:25
+#: ckanext/showcase/templates/showcase/edit_base.html:29
+#: ckanext/showcase/templates/showcase/read.html:13
+#: ckanext/showcase/templates/showcase/read.html:44
+#: ckanext/showcase/templates/showcase/search.html:8
+#: ckanext/showcase/templates/showcase/search.html:12
+msgid "Showcases"
+msgstr "Εφαρμογές"
+
+#: ckanext/showcase/templates/admin/base.html:5
+msgid "Showcase Config"
+msgstr "Διαμόρφωση Εφαρμογών"
+
+#: ckanext/showcase/templates/admin/confirm_remove_showcase_admin.html:4
+#: ckanext/showcase/templates/admin/confirm_remove_showcase_admin.html:18
+msgid "Confirm Remove"
+msgstr "Επιβεβαίωση Αφαίρεσης"
+
+#: ckanext/showcase/templates/admin/confirm_remove_showcase_admin.html:12
+msgid "Are you sure you want to remove this user as a Showcase Admin - {name}?"
+msgstr "Είστε βέβαιοι ότι θέλετε να αφαιρέσετε αυτόν τον χρήστη ως Διαχειριστή Εφαρμογών - {name};"
+
+#: ckanext/showcase/templates/admin/confirm_remove_showcase_admin.html:17
+#: ckanext/showcase/templates/showcase/confirm_delete.html:20
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:11
+msgid "Manage Showcase Admins"
+msgstr "Διαχείριση Διαχειριστών Εφαρμογών"
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:19
+msgid "Add an Existing User"
+msgstr "Προσθήκη Υπάρχοντος Χρήστη"
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:22
+msgid ""
+"To make an existing user a Showcase Admin, search for their username below."
+msgstr ""
+"Για να κάνετε έναν υπάρχοντα χρήστη Διαχειριστή Εφαρμογών, αναζητήστε το όνομα χρήστη τους παρακάτω."
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:26
+msgid "Username"
+msgstr "Όνομα χρήστη"
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:35
+msgid "Add User"
+msgstr "Προσθήκη Χρήστη"
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:41
+msgid "Showcase Admins"
+msgstr "Διαχειριστές Εφαρμογών"
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:46
+msgid "User"
+msgstr "Χρήστης"
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:54
+msgid "Are you sure you want to remove this user from the Showcase Admin list?"
+msgstr "Είστε βέβαιοι ότι θέλετε να αφαιρέσετε αυτόν τον χρήστη από τη λίστα Διαχειριστών Εφαρμογών;"
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:56
+#: ckanext/showcase/templates/showcase/snippets/showcase_item.html:51
+msgid "Remove"
+msgstr "Αφαίρεση"
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:64
+msgid "There are currently no Showcase Admins."
+msgstr "Δεν υπάρχουν προς το παρόν Διαχειριστές Εφαρμογών."
+
+#: ckanext/showcase/templates/admin/manage_showcase_admins.html:72
+msgid ""
+"<p><strong>Showcase Admin:</strong> Can create and remove showcases. Can add "
+"and remove datasets from showcases.</p>"
+msgstr ""
+"<p><strong>Διαχειριστής Εφαρμογών:</strong> Μπορεί να δημιουργεί και να αφαιρεί εφαρμογές. Μπορεί να προσθέτει "
+"και να αφαιρεί σύνολα δεδομένων από εφαρμογές.</p>"
+
+#: ckanext/showcase/templates/home/snippets/stats.html:10
+msgid "{site_title} statistics"
+msgstr "Στατιστικά {site_title}"
+
+#: ckanext/showcase/templates/home/snippets/stats.html:15
+msgid "dataset"
+msgid_plural "datasets"
+msgstr[0] "σύνολο δεδομένων"
+msgstr[1] "σύνολα δεδομένων"
+
+#: ckanext/showcase/templates/home/snippets/stats.html:21
+msgid "organization"
+msgid_plural "organizations"
+msgstr[0] "οργανισμός"
+msgstr[1] "οργανισμοί"
+
+#: ckanext/showcase/templates/home/snippets/stats.html:27
+msgid "group"
+msgid_plural "groups"
+msgstr[0] "ομάδα"
+msgstr[1] "ομάδες"
+
+#: ckanext/showcase/templates/home/snippets/stats.html:33
+msgid "showcase"
+msgid_plural "showcases"
+msgstr[0] "εφαρμογή"
+msgstr[1] "εφαρμογές"
+
+#: ckanext/showcase/templates/package/dataset_showcase_list.html:14
+msgid "Associate this showcase with this dataset"
+msgstr "Συσχετισμός αυτής της εφαρμογής με αυτό το σύνολο δεδομένων"
+
+#: ckanext/showcase/templates/package/dataset_showcase_list.html:14
+msgid "Add to showcase"
+msgstr "Προσθήκη στην εφαρμογή"
+
+#: ckanext/showcase/templates/package/dataset_showcase_list.html:18
+msgid "Showcases featuring {dataset_name}"
+msgstr "Εφαρμογές που περιλαμβάνουν το {dataset_name}"
+
+#: ckanext/showcase/templates/package/dataset_showcase_list.html:23
+msgid "There are no showcases that feature this dataset"
+msgstr "Δεν υπάρχουν εφαρμογές που να περιλαμβάνουν αυτό το σύνολο δεδομένων"
+
+#: ckanext/showcase/templates/package/dataset_showcase_list.html:27
+#: ckanext/showcase/templates/showcase/manage_datasets.html:94
+msgid "Note"
+msgstr "Σημείωση"
+
+#: ckanext/showcase/templates/package/dataset_showcase_list.html:27
+#: ckanext/showcase/templates/showcase/manage_datasets.html:94
+msgid "Only"
+msgstr "Μόνο"
+
+#: ckanext/showcase/templates/package/dataset_showcase_list.html:27
+msgid "approved showcases"
+msgstr "εγκεκριμένες εφαρμογές"
+
+#: ckanext/showcase/templates/package/dataset_showcase_list.html:27
+msgid "are displayed in the list above."
+msgstr "εμφανίζονται στην παραπάνω λίστα."
+
+#: ckanext/showcase/templates/showcase/add_datasets.html:3
+msgid "Showcases - Add datasets"
+msgstr "Εφαρμογές - Προσθήκη συνόλων δεδομένων"
+
+#: ckanext/showcase/templates/showcase/add_datasets.html:21
+#: ckanext/showcase/templates/showcase/manage_datasets.html:24
+#: ckanext/showcase/templates/showcase/search.html:35
+msgid "Relevance"
+msgstr "Σχετικότητα"
+
+#: ckanext/showcase/templates/showcase/add_datasets.html:22
+#: ckanext/showcase/templates/showcase/manage_datasets.html:25
+#: ckanext/showcase/templates/showcase/search.html:36
+msgid "Name Ascending"
+msgstr "Όνομα Αύξουσα"
+
+#: ckanext/showcase/templates/showcase/add_datasets.html:23
+#: ckanext/showcase/templates/showcase/manage_datasets.html:26
+#: ckanext/showcase/templates/showcase/search.html:37
+msgid "Name Descending"
+msgstr "Όνομα Φθίνουσα"
+
+#: ckanext/showcase/templates/showcase/add_datasets.html:24
+#: ckanext/showcase/templates/showcase/manage_datasets.html:27
+#: ckanext/showcase/templates/showcase/search.html:38
+msgid "Last Modified"
+msgstr "Τελευταία Τροποποίηση"
+
+#: ckanext/showcase/templates/showcase/add_datasets.html:25
+#: ckanext/showcase/templates/showcase/manage_datasets.html:28
+#: ckanext/showcase/templates/showcase/search.html:39
+msgid "Popular"
+msgstr "Δημοφιλή"
+
+#: ckanext/showcase/templates/showcase/add_datasets.html:31
+#: ckanext/showcase/templates/showcase/manage_datasets.html:36
+msgid "Datasets available to add to this showcase"
+msgstr "Σύνολα δεδομένων διαθέσιμα για προσθήκη σε αυτήν την εφαρμογή"
+
+#: ckanext/showcase/templates/showcase/add_datasets.html:49
+#: ckanext/showcase/templates/showcase/manage_datasets.html:52
+msgid "Add to Showcase"
+msgstr "Προσθήκη στην Εφαρμογή"
+
+#: ckanext/showcase/templates/showcase/add_datasets.html:79
+#: ckanext/showcase/templates/showcase/manage_datasets.html:89
+msgid "No datasets could be found"
+msgstr "Δεν βρέθηκαν σύνολα δεδομένων"
+
+#: ckanext/showcase/templates/showcase/confirm_delete.html:6
+#: ckanext/showcase/templates/showcase/confirm_delete.html:21
+msgid "Confirm Delete"
+msgstr "Επιβεβαίωση Διαγραφής"
+
+#: ckanext/showcase/templates/showcase/confirm_delete.html:16
+msgid "Are you sure you want to delete showcase - {showcase_name}?"
+msgstr "Είστε βέβαιοι ότι θέλετε να διαγράψετε την εφαρμογή - {showcase_name};"
+
+#: ckanext/showcase/templates/showcase/edit_base.html:27
+msgid "Edit"
+msgstr "Επεξεργασία"
+
+#: ckanext/showcase/templates/showcase/edit_base.html:30
+#: ckanext/showcase/templates/showcase/new.html:3
+#: ckanext/showcase/templates/showcase/new_package_form.html:98
+msgid "Create Showcase"
+msgstr "Δημιουργία Εφαρμογής"
+
+#: ckanext/showcase/templates/showcase/edit_base.html:43
+msgid "View showcase"
+msgstr "Προβολή εφαρμογής"
+
+#: ckanext/showcase/templates/showcase/edit_base.html:49
+msgid "Edit showcase"
+msgstr "Επεξεργασία εφαρμογής"
+
+#: ckanext/showcase/templates/showcase/edit_base.html:50
+msgid "Manage datasets"
+msgstr "Διαχείριση συνόλων δεδομένων"
+
+#: ckanext/showcase/templates/showcase/manage_datasets.html:3
+msgid "Showcases - Manage datasets"
+msgstr "Εφαρμογές - Διαχείριση συνόλων δεδομένων"
+
+#: ckanext/showcase/templates/showcase/manage_datasets.html:94
+msgid "public datasets"
+msgstr "δημόσια σύνολα δεδομένων"
+
+#: ckanext/showcase/templates/showcase/manage_datasets.html:94
+msgid "are displayed in the table above."
+msgstr "εμφανίζονται στον παραπάνω πίνακα."
+
+#: ckanext/showcase/templates/showcase/manage_datasets.html:100
+msgid "Datasets in this showcase"
+msgstr "Σύνολα δεδομένων σε αυτήν την εφαρμογή"
+
+#: ckanext/showcase/templates/showcase/manage_datasets.html:114
+msgid "Remove from Showcase"
+msgstr "Αφαίρεση από την Εφαρμογή"
+
+#: ckanext/showcase/templates/showcase/manage_datasets.html:145
+msgid "This showcase has no datasets associated to it"
+msgstr "Αυτή η εφαρμογή δεν έχει συσχετισμένα σύνολα δεδομένων"
+
+#: ckanext/showcase/templates/showcase/new.html:8
+msgid "Create a Showcase"
+msgstr "Δημιουργία Εφαρμογής"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:18
+msgid "Title"
+msgstr "Τίτλος"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:18
+msgid "eg. A descriptive title"
+msgstr "π.χ. Ένας περιγραφικός τίτλος"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:28
+msgid "URL"
+msgstr "URL"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:28
+msgid "eg. my-showcase"
+msgstr "π.χ. η-εφαρμογή-μου"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:41
+#: ckanext/showcase/templates/showcase/new_package_form.html:43
+msgid "Description"
+msgstr "Περιγραφή"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:41
+#: ckanext/showcase/templates/showcase/new_package_form.html:43
+msgid "eg. Some useful notes about the data"
+msgstr "π.χ. Μερικές χρήσιμες σημειώσεις σχετικά με τα δεδομένα"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:50
+msgid "eg. economy, mental health, government"
+msgstr "π.χ. οικονομία, ψυχική υγεία, κυβέρνηση"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:63
+#: ckanext/showcase/templates/showcase/read.html:77
+msgid "Pending"
+msgstr "Εκκρεμεί"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:64
+#: ckanext/showcase/templates/showcase/read.html:79
+msgid "Approved"
+msgstr "Εγκρίθηκε"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:65
+#: ckanext/showcase/templates/showcase/read.html:81
+msgid "Rejected"
+msgstr "Απορρίφθηκε"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:78
+msgid "External link"
+msgstr "Εξωτερικός σύνδεσμος"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:78
+msgid "http://www.example.com"
+msgstr "http://www.example.com"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:83
+msgid "Submitted By"
+msgstr "Υποβλήθηκε από"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:83
+msgid "Joe Bloggs"
+msgstr "Νίκος Παπαδόπουλος"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:85
+msgid "Submitter Email"
+msgstr "Email Υποβάλλοντος"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:85
+msgid "joe@example.com"
+msgstr "nikos@example.com"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:93
+msgid "Are you sure you want to delete this showcase?"
+msgstr "Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτήν την εφαρμογή;"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:94
+msgid "Delete"
+msgstr "Διαγραφή"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:98
+msgid "Update Showcase"
+msgstr "Ενημέρωση Εφαρμογής"
+
+#: ckanext/showcase/templates/showcase/read.html:57
+msgid "Manage"
+msgstr "Διαχείριση"
+
+#: ckanext/showcase/templates/showcase/read.html:64
+msgid "Private"
+msgstr "Ιδιωτικό"
+
+#: ckanext/showcase/templates/showcase/read.html:71
+msgid "Draft"
+msgstr "Πρόχειρο"
+
+#: ckanext/showcase/templates/showcase/read.html:83
+msgid "Unknown"
+msgstr "Άγνωστο"
+
+#: ckanext/showcase/templates/showcase/read.html:107
+#: ckanext/showcase/templates/showcase/snippets/showcase_info.html:27
+msgid "Launch website"
+msgstr "Εκκίνηση ιστοσελίδας"
+
+#: ckanext/showcase/templates/showcase/search.html:19
+msgid "Add Showcase"
+msgstr "Προσθήκη Εφαρμογής"
+
+#: ckanext/showcase/templates/showcase/search.html:41
+msgid "Search showcases..."
+msgstr "Αναζήτηση εφαρμογών..."
+
+#: ckanext/showcase/templates/showcase/snippets/helper.html:6
+msgid "What are Showcases?"
+msgstr "Τι είναι οι Εφαρμογές;"
+
+#: ckanext/showcase/templates/showcase/snippets/helper.html:10
+msgid ""
+"Datasets have been used to build apps, websites and visualizations. They've "
+"been featured in articles, and written about in news reports and blog posts. "
+"Showcases collect together the best examples of datasets in use, to provide "
+"further insight, ideas, and inspiration."
+msgstr ""
+"Τα σύνολα δεδομένων έχουν χρησιμοποιηθεί για τη δημιουργία εφαρμογών, ιστοσελίδων "
+"και οπτικοποιήσεων. Έχουν παρουσιαστεί σε άρθρα και έχουν γραφτεί για αυτά σε "
+"ειδησεογραφικές αναφορές και αναρτήσεις ιστολογίου. Οι εφαρμογές συγκεντρώνουν "
+"τα καλύτερα παραδείγματα συνόλων δεδομένων σε χρήση, για να παρέχουν περαιτέρω "
+"επισκόπηση, ιδέες και έμπνευση."
+
+#: ckanext/showcase/templates/showcase/snippets/helper.html:16
+#, python-format
+msgid ""
+"Sysadmins can manage Showcase Admins from the <a href='%(url)s'>Showcase "
+"configuration page</a>."
+msgstr ""
+"Οι διαχειριστές συστήματος μπορούν να διαχειριστούν τους διαχειριστές εφαρμογών "
+"από τη <a href='%(url)s'>σελίδα διαμόρφωσης εφαρμογών</a>."
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_info.html:21
+msgid "Submitted by"
+msgstr "Υποβλήθηκε από"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_info.html:37
+msgid "Datasets in Showcase"
+msgstr "Σύνολα δεδομένων στην Εφαρμογή"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_info.html:47
+msgid "There are no Datasets in this Showcase"
+msgstr "Δεν υπάρχουν Σύνολα Δεδομένων σε αυτήν την Εφαρμογή"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_item.html:32
+msgid "This showcase has no description"
+msgstr "Αυτή η εφαρμογή δεν έχει περιγραφή"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_item.html:37
+msgid "{num} Dataset"
+msgid_plural "{num} Datasets"
+msgstr[0] "{num} Σύνολο Δεδομένων"
+msgstr[1] "{num} Σύνολα Δεδομένων"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_item.html:39
+msgid "0 Datasets"
+msgstr "0 Σύνολα Δεδομένων"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_item.html:43
+#: ckanext/showcase/templates/showcase/snippets/showcase_item.html:44
+msgid "View {showcase_title}"
+msgstr "Προβολή {showcase_title}"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_item.html:51
+msgid "Remove dataset from this showcase"
+msgstr "Αφαίρεση συνόλου δεδομένων από αυτήν την εφαρμογή"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_search_result_text.html:7
+msgid "{number} showcase found for '{query}'"
+msgid_plural "{number} showcases found for '{query}'"
+msgstr[0] "Βρέθηκε {number} εφαρμογή για το '{query}'"
+msgstr[1] "Βρέθηκαν {number} εφαρμογές για το '{query}'"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_search_result_text.html:8
+msgid "No showcases found for '{query}'"
+msgstr "Δεν βρέθηκαν εφαρμογές για το '{query}'"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_search_result_text.html:9
+msgid "{number} showcase found"
+msgid_plural "{number} showcases found"
+msgstr[0] "Βρέθηκε {number} εφαρμογή"
+msgstr[1] "Βρέθηκαν {number} εφαρμογές"
+
+#: ckanext/showcase/templates/showcase/snippets/showcase_search_result_text.html:10
+msgid "No showcases found"
+msgstr "Δεν βρέθηκαν εφαρμογές"

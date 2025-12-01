@@ -1,0 +1,123 @@
+{% extends "page.html" %}
+
+{# Render the /more page using base.html to get header/footer/assets without the page.html default tabs #}
+
+{% block subtitle %}{% set more_label = 'Περισσότερα' if h.lang() == 'el' else _('More') %}{{ more_label }}{% endblock %}
+
+{% block custom_styles %}
+  {{ super() }}
+  <style>
+    .more-sections { margin-top: 20px; margin-bottom: 20px; }
+    .section-card { height: 100%; transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; margin-bottom: 15px; background: #ffffff; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e3e3e3; padding: 20px 15px; display: flex; flex-direction: column; }
+    .section-card:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    .section-icon { text-align: center; margin-bottom: 15px; color: #003375; }
+    .section-title { text-align: center; color: #25282f; font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+    .section-description { text-align: left; color: #515058; font-size: 14px; line-height: 1.4; margin-bottom: 15px; min-height: 60px; padding: 0 5px; }
+    .section-action { text-align: center; margin-top: auto; padding-bottom: 10px; }
+    .section-action .btn { font-weight: 500; background-color: #0066b3; border-color: #0066b3; color: white; padding: 6px 12px; font-size: 14px; border-radius: 3px; }
+    .section-action .btn:hover { background-color: #003375; border-color: #003375; }
+
+    .module { background: #ffffff; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e3e3e3; margin-bottom: 15px; }
+    .module-content { padding: 15px; }
+    .module-heading { background-color: #fafafa; color: #25282f; font-size: 14px; font-weight: 600; border-bottom: 1px solid #e3e3e3; padding: 10px 15px; margin: 0; border-radius: 3px 3px 0 0; }
+
+    .info-section { margin-top: 30px; }
+    .info-content p { margin-bottom: 10px; color: #515058; font-size: 14px; line-height: 1.4; }
+    .info-content p:last-child { margin-bottom: 0; }
+    .info-content strong { color: #25282f; font-weight: 600; }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .section-card { margin-bottom: 10px; }
+      .section-description { min-height: auto; }
+      .info-section { margin-top: 20px; }
+    }
+  </style>
+{% endblock %}
+
+{% block page %}
+  {# Use the same overall page structure as page.html but without its default header/tabs #}
+  {% block header %}
+    {% include "header.html" %}
+  {% endblock %}
+
+  <div class="main">
+    <div id="content" class="container">
+      <div class="toolbar" role="navigation" aria-label="{{ _('Breadcrumb') }}">
+        <ol class="breadcrumb">
+          {% snippet 'snippets/home_breadcrumb_item.html' %}
+          {% set more_label = 'Περισσότερα' if h.lang() == 'el' else _('More') %}
+          <li class="breadcrumb-item">{% link_for more_label, named_route='dataset_type.more_page' %}</li>
+        </ol>
+      </div>
+
+      <div class="row wrapper">
+        <aside class="secondary col-md-3">
+          <aside class="module module-narrow module-shallow">
+            <h2 class="module-heading"><i class="fa fa-question-circle"></i> Βοήθεια</h2>
+            <div class="module-content">
+              <p>Χρειάζεστε βοήθεια με κάποια από τις ενότητες;</p>
+              <ul class="list-unstyled">
+                <li><a href="{{ h.url_for('pages.show', page='about-portal', locale=h.lang()) }}"><i class="fa fa-info"></i> Σχετικά με την Πύλη</a></li>
+                <li><a href="{{ config.get('guides_base_url', '/pages') }}" target="_blank" rel="noopener"><i class="fa fa-book"></i> Οδηγοί Χρήσης</a></li>
+                <li><a href="{{ h.url_for('/contact') }}"><i class="fa fa-envelope"></i> Επικοινωνία</a></li>
+              </ul>
+            </div>
+          </aside>
+          <aside class="module module-narrow module-shallow">
+            <h2 class="module-heading"><i class="fa fa-rss"></i> Τελευταίες Ενημερώσεις</h2>
+            <div class="module-content">
+              <p>Μείνετε ενημερωμένοι με τις τελευταίες αναρτήσεις στο blog.</p>
+              <a href="{{ h.url_for('/blog') }}" class="btn btn-primary btn-sm"><i class="fa fa-newspaper-o"></i> Δείτε το Blog</a>
+            </div>
+          </aside>
+        </aside>
+
+        <div class="primary col-md-9 col-xs-12" role="main">
+          <article class="module">
+            <div class="module-content">
+              <h1 class="page-heading">{{ page_title }}</h1>
+              <p class="lead">Επιλέξτε μία από τις παρακάτω ενότητες για περισσότερες πληροφορίες και λειτουργίες.</p>
+
+              <div class="row more-sections">
+                {% for section in sections %}
+                  {% if not (h.should_disable_protected_data() and section.title == 'Προστατευόμενα Δεδομένα') %}
+                    <div class="col-md-4 col-sm-6">
+                      <div class="section-card">
+                        <div class="section-icon"><i class="fa {{ section.icon }} fa-2x"></i></div>
+                        <h3 class="section-title">{{ section.title }}</h3>
+                        <p class="section-description">{{ section.description }}</p>
+                        <div class="section-action">
+                          {% if section.title == 'Αναφορές' %}
+                            <a href="{{ h.url_for('report.index', locale=h.lang()) }}" class="btn btn-primary btn-sm">Μετάβαση <i class="fa fa-arrow-right"></i></a>
+                          {% elif section.title == 'Στατιστικά' %}
+                            <a href="{{ h.url_for(section.url) }}" class="btn btn-primary btn-sm">Μετάβαση <i class="fa fa-arrow-right"></i></a>
+                          {% elif section.title == 'Blog' %}
+                            <a href="{{ h.url_for('/blog') }}" class="btn btn-primary btn-sm">Μετάβαση <i class="fa fa-arrow-right"></i></a>
+                          {% elif section.title == 'Σχετικά με την Πύλη' %}
+                            <a href="{{ h.url_for('pages.show', page='about-portal', locale=h.lang()) }}" class="btn btn-primary btn-sm">Μετάβαση <i class="fa fa-arrow-right"></i></a>
+                          {% elif section.title == 'Ανοικτά Δεδομένα' %}
+                            <a href="{{ h.url_for('pages.show', page='anoikta', locale=h.lang()) }}" class="btn btn-primary btn-sm">Μετάβαση <i class="fa fa-arrow-right"></i></a>
+                          {% elif section.title == 'Προστατευόμενα Δεδομένα' %}
+                            <a href="{{ h.url_for('pages.show', page='prostateumena', locale=h.lang()) }}" class="btn btn-primary btn-sm">Μετάβαση <i class="fa fa-arrow-right"></i></a>
+                          {% else %}
+                            <a href="{{ section.url }}" class="btn btn-primary btn-sm">Μετάβαση <i class="fa fa-arrow-right"></i></a>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include "footer.html" %}
+{% endblock %}
+
+{% block footer %}
+  {% include "footer.html" %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "dataviewer/base.html" %}
+
+{% block page %}
+  {# dgg fix: build proper proxy & use JSON for data-module-* #}
+  {% set site_url = h.url_for('home.index', _external=True) %}
+  {% set raw_url  = resource.url %}
+  {# Robust KML detection: use format or URL extension #}
+  {% set fmt = (resource.format or '').lower() %}
+  {% set lower_url = (raw_url or '').lower() %}
+  {% set is_kml = fmt in ['kml','kmz'] or lower_url.endswith('.kml') or lower_url.endswith('.kmz') %}
+
+  {# CKAN 2.11: resource_proxy χρειάζεται dataset id/name + resource_id + url #}
+  {% set pkg_id = package.get('id') or package.get('name') %}
+  {% set res_id = resource.get('id') %}
+
+  {# Build appropriate proxy URLs based on file type #}
+  {% if is_kml %}
+    {# For KML files, extract filename and use the custom KML proxy #}
+    {% set kml_filename = raw_url.split('/')[-1] %}
+    {% set proxified = h.url_for('geo_view_kml.kml_proxy',
+                                 resource_id=res_id,
+                                 filename=kml_filename,
+                                 _external=True) %}
+    {% set proxy_service = proxified %}
+  {% else %}
+    {# For other formats, use the geoview proxy #}
+    {% set filename = raw_url.split('/')[-1] %}
+    {% set proxified = h.url_for('geojson_view.geoview_proxy',
+                                 resource_id=res_id,
+                                 filename=filename,
+                                 _external=True) %}
+    {% set proxy_service = proxified %}
+  {% endif %}
+
+  {% set ol = (ol_config or h.get_openlayers_viewer_config() or {}) %}
+
+  <div id="data-preview">
+    <div id="map-container"
+         data-module="olpreview"
+         {% if gapi_key %}data-module-gapi_key="{{ h.dump_json(gapi_key) }}"{% endif %}
+         data-module-site_url="{{ h.dump_json(site_url) }}"
+         {% if proxified %}data-module-proxy_url="{{ h.dump_json(proxified) }}"{% endif %}
+         data-module-proxy_service_url="{{ h.dump_json(proxy_service) }}"
+         data-module-raw_url="{{ h.dump_json(raw_url) }}"
+         data-module-ol_config="{{ h.dump_json(ol) }}"
+         {% if resource_view %}data-module-resource-view="{{ h.dump_json(resource_view) }}"{% endif %}
+         style="height:420px;">
+      <h4 class="loading-dialog">
+        <div class="loading-spinner"></div>
+        <div class="left">{{ _('Loading...') }}</div>
+      </h4>
+    </div>
+    <div class="layerswitcher olControlLayerSwitcher"></div>
+  </div>
+
+  {% set type = 'asset' if h.ckan_version().split('.')[1] | int >= 9 else 'resource' %}
+  {% include 'geoview/snippets/openlayers_' ~ type ~ '.html' %}
+
+{% endblock %}

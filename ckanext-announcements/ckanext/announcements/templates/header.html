@@ -1,0 +1,10 @@
+{% ckan_extends %}
+
+{% block header_account %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+  {% snippet 'announcements/announcement.html' %}
+  {{ super() }}
+{% endblock %}

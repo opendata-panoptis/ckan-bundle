@@ -1,0 +1,53 @@
+{#
+Το συγκεκριμένο template είναι αντίγραφο του αντίστοιχου template του ckanext keycloak
+#}
+
+{% import 'macros/form.html' as form %}
+
+{% set username_error = true if error_summary %}
+{% set password_error = true if error_summary %}
+
+{% set enable_ckan_login = h.enable_internal_login() %}
+
+<form action="{{ action }}" method="post">
+  {{ h.csrf_input() }}
+  {{ form.errors(errors=error_summary) }}
+
+  <!-- Υπο περίπτωση εμφάνιση της φόρμας σύνδεσης μέσω CKAN -->
+  {% if enable_ckan_login %}
+    {{ form.input('login', label=_("Username or Email"), id='field-login', value="", error=username_error, classes=["control-medium"]) }}
+    {{ form.input('password', label=_("Password"), id='field-password', type="password", value="", error=password_error, classes=["control-medium"]) }}
+    {{ form.checkbox('remember', label=_("Remember me"), id='field-remember', checked=true, value="63072000") }}
+    {% if g.recaptcha_publickey %}
+      {% snippet "user/snippets/recaptcha.html", public_key=g.recaptcha_publickey %}
+    {% endif %}
+  {% else %}
+    <p>You need to login in order to continue.</p>
+  {% endif %}
+
+  <div class="form-actions">
+    {% block login_button %}
+      {% set button_style = h.button_style() %}
+
+      {% if button_style == "google" %}
+        <a class="gbtn btn btn-default" href="{{ h.url_for('keycloak.sso') }}">{{ _('Sign in with Google') }}</a>
+      {% elif  button_style == "azure" %}
+        <a class="azurebtn btn btn-default" href="{{ h.url_for('keycloak.sso') }}">{{ _('Sign in with AzureAD') }}</a>
+      {% elif  button_style == "govgr" %}
+        <a class="btn btn-primary" href="{{ h.url_for('keycloak.sso') }}">
+            {% if enable_ckan_login %}
+                {{ _('SSO') }}
+            {% else %}
+                {{ _('Login') }}
+            {% endif %}
+        </a>
+      {% else %}
+        <a class="btn btn-primary" href="{{ h.url_for('keycloak.sso') }}">{{ _('SSO') }}</a>
+      {% endif %}
+
+      {% if enable_ckan_login %}
+        <button class="btn btn-primary" type="submit">{{ _('Login') }}</button>
+      {% endif %}
+    {% endblock %}
+  </div>
+</form>

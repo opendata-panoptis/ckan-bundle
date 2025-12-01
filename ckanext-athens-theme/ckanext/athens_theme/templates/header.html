@@ -1,0 +1,41 @@
+{% ckan_extends %}
+
+{% block header_site_search %}
+    <form class="d-flex site-search ms-auto" action="{% url_for dataset_type ~ '.search' %}" method="get">
+        <label class="d-none" for="field-sitewide-search">{% block header_site_search_label %}{{ h.humanize_entity_type('package', dataset_type, 'search_placeholder') or _('Search Datasets...') }}{% endblock %}</label>
+        <div class="search-input-group">
+            <input id="field-sitewide-search" class="form-control" type="text" name="q" placeholder="{{ _('Search') }}" aria-label="{{ h.humanize_entity_type('package', dataset_type, 'search_placeholder') or _('Search datasets...') }}"/>
+        </div>
+    </form>
+{% endblock %}
+
+{% block header_logo %}
+<a class="navbar-brand" href="{{ h.url_for_static('/') }}">
+<img src="{{ h.url_for_static('images/athens-logo.png') }}"
+     alt="Δήμος Αθηναίων"
+     style="height:70px;">
+</a>
+{% endblock %}
+
+{% block header_site_navigation_tabs %}
+  {% set dataset_type = h.default_package_type() %}
+  {% set org_type = h.default_group_type('organization') %}
+  {% set group_type = h.default_group_type('group') %}
+  {% set more_label = 'Περισσότερα' if h.lang() == 'el' else _('More') %}
+
+  {% set nav_items = [
+    ('dataset' ~ '.search', h.humanize_entity_type('package', 'dataset', 'main nav') or _('Datasets'), ["dataset", "resource"]),
+    ('data-service' ~ '.search', _('APIs'), ["data-service"]),
+    (org_type ~ '.index',
+      h.humanize_entity_type('organization', org_type, 'main nav') or _('Organizations'), ['organization']),
+    ('dataset_type.more_page', more_label, ['more']),
+    ('showcase.search', _('Showcases'), ["showcase"])
+  ] %}
+
+  {% if h.should_show_decision_menu() %}
+    {% set _ = nav_items.insert(2, ('decision' ~ '.search', _('Decisions'), ["decision"])) %}
+  {% endif %}
+
+  {{ h.build_nav_main(*nav_items) }}
+
+{% endblock %}

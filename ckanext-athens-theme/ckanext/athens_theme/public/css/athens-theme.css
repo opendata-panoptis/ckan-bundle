@@ -1,0 +1,654 @@
+/* City of Athens Theme CSS */
+
+/* Brand Colors based on cityofathens.gr */
+:root {
+  --primary-blue: #1877B8;        /* Primary blue from Athens Geoportal */
+  --light-bg: #F6F9FC;            /* Light background */
+  --dark-gray: #24292F;           /* Dark gray for text */
+  --light-gray: #EDEFF1;          /* Light gray for borders */
+  --card-shadow: 0 2px 8px 0 rgba(24,119,184,0.08);
+  --athens-gold: #C9A236;         /* Gold accent color */
+  --athens-text: var(--dark-gray);/* Main text color */
+  --athens-light: var(--light-bg);/* Light background */
+  --athens-gray: #6C757D;         /* Secondary text */
+  --athens-dark: #1A1A1A;         /* Dark gray */
+}
+
+
+
+/* Smooth Scroll Behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base Styles */
+body {
+  font-family: 'Open Sans', 'Inter', 'Source Sans Pro', 'Noto Sans Greek', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--athens-text);
+  line-height: 1.6;
+  background-color: var(--athens-light);
+}
+
+/* Header */
+.masthead {
+  background: #fff;
+  color: var(--dark-gray);
+  border-bottom: 2px solid var(--light-gray);
+  padding: 6px 0 2px 0;
+}
+
+.navbar-nav > li > a,
+.navbar-right > li > a {
+  color: var(--primary-blue) !important;
+  font-weight: 600;
+}
+
+.navbar .navbar-nav > li > a,
+.main-navbar .navbar-nav > li > a,
+.navbar-collapse .nav > li > a,
+.navbar-default .navbar-nav > li > a {
+  color: var(--primary-blue) !important;
+}
+
+/* Για τα dropdown menus αν υπάρχουν */
+.navbar .dropdown-menu > li > a {
+  color: var(--primary-blue) !important;
+}
+
+
+.navbar-left .logo img {
+  height: 70px;
+  width: auto;
+  margin-left: 24px;
+}
+
+.account-masthead {
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%);
+  color: white;
+  padding: 0.5rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.account-masthead .list-unstyled {
+  margin: 0;
+  padding: 0;
+}
+
+.account-masthead .list-unstyled li {
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+.account-masthead a {
+  color: #a6cbef;
+  text-decoration: none;
+}
+
+.account-masthead a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Service name */
+.service-name {
+  color: var(--primary-blue);
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  margin-left: 1rem;
+}
+
+/* Main navigation */
+.main-navbar {
+  background: #fff;
+  border: none;
+  border-radius: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+
+/* Βασικό στυλ - μόνο μπλε κείμενο */
+.main-navbar .nav > li > a {
+  color: var(--primary-blue) !important;
+  padding: 12px 16px;
+  margin: 0 4px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 2px solid transparent;
+  border-radius: 4px;
+}
+
+/* Καθαρό hover effect για navigation */
+.main-navbar .nav > li > a:hover,
+.navbar-nav > li > a:hover {
+  color: white !important;
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%) !important;
+  border: 2px solid #4a7ba7 !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+
+/* Ενεργό menu item */
+.main-navbar .nav > li.active > a,
+.navbar-nav > li.active > a {
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%) !important;
+  color: #fff !important;   /* <-- λευκά γράμματα */
+  border: 2px solid #4a7ba7 !important;
+  font-weight: 600;
+}
+
+.navbar-nav > li > a:hover,
+.navbar-right > li > a:hover {
+  color: white !important;
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%) !important;
+  border: 2px solid #4a7ba7 !important;
+  text-decoration: none !important;
+}
+
+.main-navbar *::after,
+.main-navbar *::before,
+.nav-pills > li.active > a::after,
+.nav-pills > li.active > a::before,
+.nav-item.active::after,
+.nav-item.active::before {
+  display: none !important;
+}
+
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%);
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  padding: 10px 24px;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background: linear-gradient(to right, #3a6b97 0%, #4a7ba7 100%);
+  color: white;
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(24, 119, 184, 0.25);
+}
+
+.btn-secondary {
+  background-color: white;
+  border: 1px solid #4a7ba7;
+  color: #4a7ba7;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-secondary:active {
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%);
+  border-color: #4a7ba7;
+  color: white;
+}
+
+.btn-accent {
+  background-color: var(--athens-gold);
+  border-color: var(--athens-gold);
+  color: white;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn-accent:hover,
+.btn-accent:focus,
+.btn-accent:active {
+  background-color: #d4b452;
+  border-color: #d4b452;
+  color: white;
+}
+
+/* Links */
+a {
+  color: var(--primary-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  color: #3a6b97;
+  text-decoration: underline;
+}
+
+/* Footer */
+.site-footer {
+  background: #f8f9fa;
+  color: var(--dark-gray);
+  border-top: 1px solid var(--light-gray);
+  padding: 2rem 0;
+}
+
+.site-footer a {
+  color: #4a7ba7;
+}
+
+.site-footer a:hover {
+  color: #3a6b97;
+  text-decoration: underline;
+}
+
+.site-footer h3 {
+  color: #4a7ba7;
+  border-bottom: 1px solid var(--light-gray);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+
+.hero-section {
+  background: linear-gradient(to bottom, rgba(0, 35, 70, 0.7) 0%, rgba(255, 255, 255, 0) 100%), url('../images/general-search.jpg') center/cover;
+  color: white;
+  padding: 4rem 0 12rem 0;
+  margin-top: -12px;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.hero-search {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero-features {
+  margin-top: 1rem;
+}
+
+.hero-badge {
+    margin-top: 0; /* Ensure badge is at the top */
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.dataset-list .dataset-item {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: box-shadow 0.2s ease;
+}
+
+.dataset-list .dataset-item:hover {
+  box-shadow: 0 4px 16px 0 rgba(24,119,184,0.15);
+}
+
+.dataset-item h3 {
+  color: #4a7ba7;
+}
+
+.dataset-resources li {
+  background-color: var(--light-bg);
+  border: 1px solid var(--light-gray);
+  border-radius: 6px;
+}
+
+.dataset-resources li a {
+  color: #4a7ba7;
+}
+
+/* Facets */
+.facet-box {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 3px rgba(24,119,184,0.05);
+}
+
+/* Search */
+.search-form .search-input.search-giant button {
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%);
+  color: white;
+  border-radius: 6px;
+}
+
+.search-form .search-input.search-giant button:hover {
+  background: linear-gradient(to right, #3a6b97 0%, #4a7ba7 100%);
+}
+
+.search-form .search-input.search-giant input {
+  border: 2px solid var(--light-gray);
+  border-radius: 8px;
+  padding: 15px 20px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.search-form .search-input.search-giant input:focus {
+  outline: none;
+  border-color: #4a7ba7;
+  box-shadow: 0 0 0 0.2rem rgba(74, 123, 167, 0.25);
+}
+
+/* Κάνουμε το φόντο μπλε σαν τα κουμπιά */
+.search-form .nav-pills > li.active {
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%) !important;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+/* Και το κείμενο λευκό, όπως στα κουμπιά του μενού */
+.search-form .nav-pills > li.active > a {
+  color: white !important;
+}
+
+/* Active tabs for search forms (simple/advanced) */
+li#simple-tab.active, li#advanced-tab.active {
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%) !important;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+li#simple-tab.active a, li#advanced-tab.active a {
+  color: white !important;
+}
+
+/* Athens theme hero search styling */
+.hero-search {
+  position: relative;
+}
+
+.hero-search .dataset-search {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.hero-search .search-input {
+  width: 100%;
+  padding: 15px 120px 15px 20px;
+  border: 2px solid var(--light-gray);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.hero-search .search-input:focus {
+  outline: none;
+  border-color: #4a7ba7;
+  box-shadow: 0 0 0 0.2rem rgba(74, 123, 167, 0.25);
+}
+
+.hero-search .search-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s ease;
+}
+
+.hero-search .search-button:hover {
+  background: linear-gradient(to right, #3a6b97 0%, #4a7ba7 100%);
+  color: white;
+}
+
+.hero-search .search-button i {
+  margin: 0;
+}
+
+/* Reset τα li για να μη φαίνονται διπλά */
+.tag-list li,
+.dataset-resources li {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.tag-list li a,
+.dataset-resources li a,
+.dataset-resources .label,
+.dataset-resources .format-label,
+.dataset-resources [class*="format-"],
+.resource-format,
+.label-format {
+  display: inline-block;
+  background-color: #f0f0f0 !important;
+  color: #333 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px;
+  padding: 2px 6px; /* Μικρότερο padding από 4px 10px */
+  font-size: 0.65rem; /* Μικρότερο font από 0.8rem */
+  font-weight: 500;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  line-height: 1.2;
+  transition: all 0.2s ease; /* Προσθέτουμε transition */
+}
+
+.tag-list li a:hover,
+.dataset-resources li a:hover {
+  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%) !important;
+  color: #fff !important;
+  border-color: #4a7ba7 !important;
+  text-decoration: none !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(74, 123, 167, 0.4);
+}
+
+.section-title {
+  color: #4a7ba7;
+  font-weight: bold;
+  margin-bottom: 21px;
+}
+
+/* Hide "Data.gov.gr" text from the header */
+.header-text-logo h1 {
+    display: none;
+}
+
+/* Organization page specific styles */
+.organization-view {
+  margin-top: 20px;
+}
+
+.organization-view .page-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.organization-view .organization-details {
+  margin-top: 20px;
+}
+
+.organization-view .organization-logo {
+  max-width: 200px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.organization-view .datasets-list {
+  margin-top: 30px;
+}
+
+.organization-view .dataset-item {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+}
+
+.organization-view .dataset-item:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+/* Dataset page specific styles */
+.dataset-view {
+  margin-top: 20px;
+}
+
+.dataset-view .page-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.dataset-view .resources {
+  margin-top: 30px;
+}
+
+.dataset-view .resource-item {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+}
+
+.dataset-view .resource-item:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+.dataset-view .resource-actions {
+  margin-top: 10px;
+}
+
+.dataset-view .additional-info {
+  margin-top: 30px;
+}
+
+.dataset-view .additional-info table {
+  width: 100%;
+}
+
+.dataset-view .additional-info th {
+  width: 30%;
+  vertical-align: top;
+  text-align: left;
+  padding-right: 15px;
+}
+
+/* Group page specific styles */
+.group-view {
+  margin-top: 20px;
+}
+
+.group-view .page-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.group-view .group-details {
+  margin-top: 20px;
+}
+
+.group-view .group-image {
+  max-width: 200px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.group-view .datasets-list {
+  margin-top: 30px;
+}
+
+.group-view .dataset-item {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+}
+
+.group-view .dataset-item:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .navbar-nav .nav-link {
+    padding: 8px 12px;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-accent {
+    padding: 8px 16px;
+  }
+}
+
+/* Ensure homepage header buttons match other pages */
+.homepage .main-navbar .nav > li > a,
+.homepage .main-navbar .navbar-nav > li > a,
+.homepage header .navbar-nav > li > a,
+.homepage .navbar-collapse .navbar-nav > li > a {
+  padding: 12px 16px !important;
+  margin: 0 4px !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  border: 2px solid transparent !important;
+  border-radius: 4px !important;
+  text-decoration: none !important;
+}
+
+/* More specific selectors for homepage navigation */
+.homepage header.masthead .main-navbar .navbar-nav > li > a {
+  padding: 12px 16px !important;
+  margin: 0 4px !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  min-height: 44px !important;
+  line-height: 1.2 !important;
+}

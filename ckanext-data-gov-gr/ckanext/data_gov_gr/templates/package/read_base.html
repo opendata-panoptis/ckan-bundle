@@ -1,0 +1,82 @@
+{% extends "package/base.html" %}
+
+{# Έλεγχος αν θέλουμε να μην εμφανίζεται το tab των groups από το ckan.ini #}
+{% set hide_group_tabs = h.asbool(config.get('ckanext.data_gov_gr.user.hide_group_tabs', False)) %}
+
+{% set default_group_type = h.default_group_type('group') %}
+
+{% block subtitle %}{{ h.dataset_display_name(pkg) }} {{ g.template_title_delimiter }} {{ super() }}{% endblock %}
+
+{% block head_extras -%}
+  {{ super() }}
+  {% set description = h.markdown_extract(
+    h.get_translated(pkg, 'notes'), extract_length=200) %}
+  <meta property="og:title" content="{{ h.dataset_display_name(pkg) }} - {{ g.site_title }}">
+  <meta property="og:description" content="{{ description|forceescape|trim }}">
+{% endblock -%}
+
+{% block content_action %}
+  {% if h.check_access('package_update', {'id':pkg.id }) %}
+    {% link_for _('Manage'), named_route=pkg.type ~ '.edit', id=pkg.name, class_='btn btn-light', icon='wrench' %}
+  {% endif %}
+{% endblock %}
+
+{% block content_primary_nav %}
+  {% if dataset_type == 'data-service' %}
+    {{ h.build_nav_icon(dataset_type ~ '.read', _('API'),  id=pkg.name, icon='sitemap') }}
+  {% elif dataset_type == 'decision' %}
+    {{ h.build_nav_icon(dataset_type ~ '.read', _('Decision'),  id=pkg.name, icon='sitemap') }}
+  {% else %}
+    {{ h.build_nav_icon(dataset_type ~ '.read', _('Dataset'),  id=pkg.name, icon='sitemap') }}
+  {% endif %}
+
+  {% if not hide_group_tabs %}
+    {{ h.build_nav_icon(dataset_type ~ '.groups', h.humanize_entity_type('group', default_group_type, 'content tab') or _('Groups'), id=pkg.name, icon='users') }}
+  {% endif %}
+
+    {% if dataset_type == 'dataset' and not h.should_hide_mqa_tab() %}
+      {{ h.build_mqa_nav_icon(pkg.name, dataset_type) }}
+    {% endif %}
+{% endblock %}
+
+{% block secondary_content %}
+
+  {% block secondary_help_content %}{% endblock %}
+
+  {% block package_info %}
+    {% snippet 'package/snippets/info.html', pkg=pkg, am_following=am_following %}
+  {% endblock %}
+
+  {% block package_organization %}
+    {% if pkg.organization %}
+      {% set org = h.get_organization(pkg.organization.id) %}
+      {% snippet "organization/snippets/info.html", organization=org, show_nums=false, am_following=am_following %}
+    {% endif %}
+  {% endblock %}
+
+  {% block package_social %}
+    {% snippet "snippets/social.html" %}
+  {% endblock %}
+
+  {% block package_license %}
+    {# License section is intentionally hidden as per requirements #}
+  {% endblock %}
+
+  {% block package_qa %}
+    {% if h.qa_openness_stars_dataset_html and dataset_type not in ['decision', 'data-service'] %}
+      <section class="additional-info module module-narrow">
+        <h2 class="module-heading"><i class="fa-solid fa-star"></i> {% trans %}Openness{% endtrans %}</h2>
+        <div class="quality-info">
+          {{ h.qa_openness_stars_dataset_html(pkg) }}
+        </div>
+      </section>
+    {% endif %}
+  {% endblock %}
+
+  {% block stats %}
+    {% if dataset_type == 'dataset' %}
+      {% snippet "matomo/snippets/dataset_stats.html", pkg=pkg %}
+    {% endif %}
+  {% endblock %}
+
+{% endblock %}

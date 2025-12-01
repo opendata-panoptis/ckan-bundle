@@ -1,0 +1,415 @@
+<!-- index home page-->
+{% ckan_extends %}
+
+  {%- block header %}
+    {% include "header_index.html" %}
+  {% endblock -%}
+
+{% block subtitle %}{{ _("Welcome") }}{% endblock %}
+
+{% block maintag %}{% endblock %}
+{% block toolbar %}{% endblock %}
+
+{% block content %}
+<div class="homepage">
+
+  <section class="hero-section">
+    <div class="pulse-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="hero-badge">Εθνική Πύλη Δεδομένων & Ενιαίο Σημείο Πληροφόρησης</div>
+        <h1>Πύλη Δεδομένων & Υπηρεσιών</h1>
+        <p class="hero-subtitle">  Κεντρική πύλη ανοικτών δεδομένων και ενιαίο σημείο πληροφόρησης δεδομένων ελεγχόμενης πρόσβασης του δημόσιου τομέα</p>
+        <div class="hero-features">
+          <div class="hero-feature">
+              <i class="fa-solid fa-lock-open feature-icon"></i>
+              <span>Ανοικτά Δεδομένα</span>
+          </div>
+          <div class="hero-feature restricted">
+            <svg class="feature-icon" viewBox="0 0 24 24">
+              <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+            </svg>
+            <span>Δεδομένα Περιορισμένης Πρόσβασης</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <a href="#data-categories" class="hero-btn primary-btn">
+            Εξερεύνηση Κατηγοριών
+            <svg class="btn-arrow" viewBox="0 0 24 24">
+              <path d="M11,4H13V16L18.5,10.5L19.92,11.92L12,19.84L4.08,11.92L5.5,10.5L11,16V4Z"/>
+            </svg>
+          </a>
+          <a href="/more" class="hero-btn secondary-btn">
+            Περισσότερα
+            <svg class="btn-arrow" viewBox="0 0 24 24">
+              <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <a href="#data-categories">
+      <div class="hero-scroll-indicator">
+        <div class="scroll-arrow"></div>
+      </div>
+    </a>
+  </section>
+
+  <section class="data-categories" id="data-categories">
+    <h2>Θεματικές Κατηγορίες</h2>
+
+    <div class="categories-grid">
+      <a href="/dataset?q=theme:*AGRI*" class="category-card">
+        <h3>Γεωργία, αλιεία, δασοκομία και τρόφιμα</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M12,20L12.76,17C9.5,16.79 6.59,15.4 5.75,13.58C5.66,14.06 5.53,14.5 5.33,14.83C4.67,16 3.33,16 2,16C3.1,16 3.5,14.43 3.5,12.5C3.5,10.57 3.1,9 2,9C3.33,9 4.67,9 5.33,10.17C5.53,10.5 5.66,10.94 5.75,11.42C6.4,10 8.32,8.85 10.66,8.32L9,5C11,5 13,5 14.33,5.67C15.46,6.23 16.11,7.27 16.69,8.38C19.61,9.08 22,10.66 22,12.5C22,14.38 19.5,16 16.5,16.66C15.67,17.76 14.86,18.78 14.17,19.33C13.33,20 12.67,20 12,20M17,11A1,1 0 0,0 16,12A1,1 0 0,0 17,13A1,1 0 0,0 18,12A1,1 0 0,0 17,11Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*ECON*" class="category-card">
+        <h3>Οικονομία και χρηματοοικονομικά θέματα</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M11.8,10.9c-2.27-0.59-3-1.2-3-2.15c0-1.09,1.01-1.85,2.7-1.85c1.78,0,2.44,0.85,2.5,2.1h2.21 c-0.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94,0.42-3.5,1.68-3.5,3.61c0,2.31,1.91,3.46,4.7,4.13c2.5,0.6,3,1.48,3,2.41 c0,0.69-0.49,1.79-2.7,1.79c-2.06,0-2.87-0.92-2.98-2.1h-2.2c0.12,2.19,1.76,3.42,3.68,3.83V21h3v-2.15 c1.95-0.37,3.5-1.5,3.5-3.55C16.5,12.46,14.07,11.49,11.8,10.9z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*EDUC*" class="category-card">
+        <h3>Παιδεία, πολιτιστικά θέματα και αθλητισμός</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M12,3L1,9L12,15L21,10.09V17H23V9M5,13.18V17.18L12,21L19,17.18V13.18L12,17L5,13.18Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*ENER*" class="category-card">
+        <h3>Ενέργεια</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M7,2V13H10V22L17,10H13L17,2H7Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*ENVI*" class="category-card">
+        <h3>Περιβάλλον</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*GOVE*" class="category-card">
+        <h3>Κυβέρνηση και δημόσιος τομέας</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M12,2L1,8L12,14L23,8L12,2M12,16L1,10V16L12,22L23,16V10L12,16Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*HEAL*" class="category-card">
+        <h3>Υγεία</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M7.5,4A5.5,5.5 0 0,0 2,9.5C2,10 2.09,10.5 2.22,11H6.3L7.57,7.63C7.87,6.83 9.05,6.75 9.43,7.63L11.5,13L12.09,11.58C12.22,11.25 12.57,11 13,11H21.78C21.91,10.5 22,10 22,9.5A5.5,5.5 0 0,0 16.5,4C14.64,4 13,4.93 12,6.34C11,4.93 9.36,4 7.5,4M3,12.5A1,1 0 0,0 2,13.5A1,1 0 0,0 3,14.5H5.44L11,20C12,20.9 12,20.9 13,20L18.56,14.5H21A1,1 0 0,0 22,13.5A1,1 0 0,0 21,12.5H13.4L12.47,14.8C12.07,15.81 10.92,15.67 10.55,14.83L8.5,9.5L7.54,12.1C7.39,12.5 7,12.7 6.6,12.5H3Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*INTR*" class="category-card">
+        <h3>Διεθνή θέματα</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*JUST*" class="category-card">
+        <h3>Δικαιοσύνη, νομικό σύστημα και δημόσια ασφάλεια</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M12,3C10.73,3 9.6,3.8 9.18,5H3V7H4.95L2,14C1.53,16 3,17 5,17C7,17 8.47,16 8,14L5.05,7H9.17C9.5,7.85 10.15,8.5 11,8.83V20H2V22H22V20H13V8.83C13.85,8.5 14.5,7.85 14.82,7H18.95L16,14C15.53,16 17,17 19,17C21,17 22.47,16 22,14L19.05,7H21V5H14.83C14.4,3.8 13.27,3 12,3M12,5A1,1 0 0,1 13,6A1,1 0 0,1 12,7A1,1 0 0,1 11,6A1,1 0 0,1 12,5M5,10.27L7,14H3L5,10.27M19,10.27L21,14H17L19,10.27Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*REGI*" class="category-card">
+        <h3>Περιφέρειες και πόλεις</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M15,11V5L12,2L9,5V7H3V21H21V11H15M7,19H5V17H7V19M7,15H5V13H7V15M7,11H5V9H7V11M13,19H11V17H13V19M13,15H11V13H13V15M13,11H11V9H13V11M13,7H11V5H13V7M19,19H17V17H19V19M19,15H17V13H19V15Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*SOCI*" class="category-card">
+        <h3>Πληθυσμός και κοινωνία</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M16,13C15.71,13 15.38,13 15.03,13.05C16.19,13.89 17,15 17,16.5V19H23V16.5C23,14.17 18.33,13 16,13M8,13C5.67,13 1,14.17 1,16.5V19H15V16.5C15,14.17 10.33,13 8,13M8,11A3,3 0 0,0 11,8A3,3 0 0,0 8,5A3,3 0 0,0 5,8A3,3 0 0,0 8,11M16,11A3,3 0 0,0 19,8A3,3 0 0,0 16,5A3,3 0 0,0 13,8A3,3 0 0,0 16,11Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*TECH*" class="category-card">
+        <h3>Επιστήμη και τεχνολογία</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M12,10.11C13.03,10.11 13.87,10.95 13.87,12C13.87,13 13.03,13.85 12,13.85C10.97,13.85 10.13,13 10.13,12C10.13,10.95 10.97,10.11 12,10.11M7.37,20C8,20.44 9.04,19.84 10.09,19.36C11.14,18.88 12.18,18.39 13.25,17.96C14.32,17.53 15.41,17.15 16.5,16.85C17.59,16.55 18.67,16.33 19.74,16.19C20.81,16.05 21.85,16 22.86,16C23.87,16 24.83,16.05 25.72,16.19C26.61,16.33 27.39,16.55 28.05,16.85C28.71,17.15 29.2,17.53 29.5,17.96C29.8,18.39 29.91,18.88 29.81,19.36C29.71,19.84 29.39,20.44 28.86,21.16C28.33,21.88 27.56,22.72 26.57,23.69C25.58,24.66 24.35,25.75 22.86,27C21.37,28.25 19.62,29.66 17.59,31.26C15.56,32.86 13.24,34.67 10.63,36.69C8.02,34.67 5.7,32.86 3.67,31.26C1.64,29.66 -0.11,28.25 -1.6,27C-3.09,25.75 -4.32,24.66 -5.31,23.69C-6.3,22.72 -7.07,21.88 -7.6,21.16C-8.13,20.44 -8.45,19.84 -8.55,19.36C-8.65,18.88 -8.54,18.39 -8.24,17.96C-7.94,17.53 -7.45,17.15 -6.79,16.85C-6.13,16.55 -5.35,16.33 -4.46,16.19C-3.57,16.05 -2.61,16 -1.6,16C-0.59,16 0.45,16.05 1.52,16.19C2.59,16.33 3.67,16.55 4.76,16.85C5.85,17.15 6.94,17.53 8.01,17.96C9.08,18.39 10.12,18.88 11.17,19.36C12.22,19.84 13.26,20.44 13.89,20H7.37Z"/>
+        </svg>
+      </a>
+
+      <a href="/dataset?q=theme:*TRAN*" class="category-card">
+        <h3>Μεταφορές</h3>
+        <svg class="category-icon" viewBox="0 0 24 24">
+          <path d="M18.92,6.01C18.72,5.42 18.16,5 17.5,5H6.5C5.84,5 5.28,5.42 5.08,6.01L3,12V20A1,1 0 0,0 4,21H5A1,1 0 0,0 6,20V19H18V20A1,1 0 0,0 19,21H20A1,1 0 0,0 21,20V12L18.92,6.01M6.5,16C5.67,16 5,15.33 5,14.5C5,13.67 5.67,13 6.5,13C7.33,13 8,13.67 8,14.5C8,15.33 7.33,16 6.5,16M17.5,16C16.67,16 16,15.33 16,14.5C16,13.67 16.67,13 17.5,13C18.33,13 19,13.67 19,14.5C19,15.33 18.33,16 17.5,16M5,11L6.5,6.5H17.5L19,11H5Z"/>
+        </svg>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="access-rights-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <h2>{% trans %}Ανοικτά Δεδομένα - Δεδομένα Περιορισμένης Πρόσβασης{% endtrans %}</h2>
+          <div class="access-buttons">
+            <a href="/dataset/?is_nsip=No"
+               class="btn access-rights-btn access-rights-btn-public btn-lg">
+              <i class="fa-solid fa-lock-open"></i>
+              {% trans %}Ανοιχτά δεδομένα{% endtrans %}
+            </a>
+            <a href="/dataset/?is_nsip=Yes"
+               class="btn access-rights-btn access-rights-btn-restricted btn-lg">
+              <i class="fa fa-lock"></i>
+              {% trans %}Δεδομένα Περιορισμένης Πρόσβασης{% endtrans %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="high-value-datasets-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <h2>{% trans %}High Value Datasets{% endtrans %}</h2>
+          <p class="section-description">{% trans %}Discover datasets that have been identified as having high value for society and economy{% endtrans %}</p>
+          <div class="high-value-features">
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M16,9H19L14,16M10,9H14L12,17M5,9H8L10,16M15,4H17L19,7H16M11,4H13L14,7H10M7,4H9L8,7H5M6,2L2,8L12,22L22,8L18,2H6Z"/>
+                </svg>
+              </div>
+              <h3>{% trans %}Key Thematic Categories{% endtrans %}</h3>
+              <p>{% trans %}Geospatial, Earth observation, environmental, meteorological, statistics, mobility, and company data{% endtrans %}</p>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z"/>
+                </svg>
+              </div>
+              <h3>{% trans %}Free Access{% endtrans %}</h3>
+              <p>{% trans %}Available free of charge through standardized APIs and bulk downloads, ensuring maximum reusability{% endtrans %}</p>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L6.04,7.5L12,10.85L17.96,7.5L12,4.15Z"/>
+                </svg>
+              </div>
+              <h3>{% trans %}Machine Readability{% endtrans %}</h3>
+              <p>{% trans %}Structured formats and metadata following EU standards, enabling automated processing and integration{% endtrans %}</p>
+            </div>
+          </div>
+          <div class="mt-4">
+            <a href="/dataset?is_hvd=Yes" class="btn btn-primary btn-lg">
+              <i class="fa fa-search"></i>
+              {% trans %}Explore High Value Datasets{% endtrans %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="data-section">
+    <h2 class="section-title">Δεδομένα και Υπηρεσίες</h2>
+    <div class="data-cards">
+      <a href="/dataset" class="data-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M4,9V12C4,14.21 7.58,16 12,16C16.42,16 20,14.21 20,12V9C20,11.21 16.42,13 12,13C7.58,13 4,11.21 4,9M4,14V17C4,19.21 7.58,21 12,21C16.42,21 20,19.21 20,17V14C20,16.21 16.42,18 12,18C7.58,18 4,16.21 4,14Z"/>
+          </svg>
+        </div>
+        <h3>Σύνολα Δεδομένων</h3>
+        <p>Εξερευνήστε και αποκτήστε πρόσβαση σε ανοικτά δεδομένα</p>
+      </a>
+
+      <a href="/data-service" class="data-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M4,1H20A1,1 0 0,1 21,2V6A1,1 0 0,1 20,7H4A1,1 0 0,1 3,6V2A1,1 0 0,1 4,1M4,9H20A1,1 0 0,1 21,10V14A1,1 0 0,1 20,15H4A1,1 0 0,1 3,14V10A1,1 0 0,1 4,9M4,17H20A1,1 0 0,1 21,18V22A1,1 0 0,1 20,23H4A1,1 0 0,1 3,22V18A1,1 0 0,1 4,17M9,5H10V3H9V5M9,13H10V11H9V13M9,21H10V19H9V21M5,3V5H7V3H5M5,11V13H7V11H5M5,19V21H7V19H5Z"/>
+          </svg>
+        </div>
+        <h3>Υπηρεσίες Δεδομένων</h3>
+        <p>Ανακαλύψτε APIs και υπηρεσίες διάθεσης δεδομένων</p>
+      </a>
+
+      <a href="/decision" class="data-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M14.59,2.59C14.21,2.21 13.7,2 13.17,2H6C4.9,2 4,2.9 4,4V20C4,21.1 4.9,22 6,22H18C19.1,22 20,21.1 20,20V8.83C20,8.3 19.79,7.79 19.41,7.41L14.59,2.59M13,9V3.5L18.5,9H13M8,14H16V16H8V14M8,17H13V19H8V17Z" />
+          </svg>
+        </div>
+        <h3>Αποφάσεις</h3>
+        <p>Πρόσβαση σε αποφάσεις και διοικητικά έγγραφα</p>
+      </a>
+    </div>
+  </div>
+
+  <section class="showcase-section">
+    <div class="container">
+      <h2 class="section-title">Αξιοποίηση Δεδομένων</h2>
+      <div class="showcase-cards">
+        <a href="/showcase" class="showcase-card">
+          <div class="card-content">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M21,8C19.5,8 18.7,9.4 19.1,10.5L15.5,14.1C15.2,14 14.8,14 14.5,14.1L11.9,11.5C12.3,10.4 11.5,9 10,9C8.6,9 7.7,10.4 8.1,11.5L3.5,16C2.4,15.7 1,16.5 1,18C1,19.1 1.9,20 3,20C4.4,20 5.3,18.6 4.9,17.5L9.4,12.9C9.7,13 10.1,13 10.4,12.9L13,15.5C12.7,16.5 13.5,18 15,18C16.5,18 17.3,16.6 16.9,15.5L20.5,11.9C21.6,12.2 23,11.4 23,10C23,8.9 22.1,8 21,8M15,9L15.9,6.9L18,6L15.9,5.1L15,3L14.1,5.1L12,6L14.1,6.9L15,9M3.5,11L4,9L6,8.5L4,8L3.5,6L3,8L1,8.5L3,9L3.5,11Z"/>
+              </svg>
+            </div>
+            <div class="card-text">
+              <h3>Εφαρμογές και Υπηρεσίες</h3>
+              <p>Ανακαλύψτε πώς αξιοποιούνται τα ανοικτά δεδομένα</p>
+            </div>
+          </div>
+          <div class="card-arrow">
+            <svg viewBox="0 0 24 24">
+              <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
+            </svg>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="news-section">
+    <div class="container">
+      <h2 class="section-title">Νέα & Ανακοινώσεις</h2>
+      <div class="news-grid">
+        <a href="/blog" class="news-card main-card">
+          <div class="card-overlay"></div>
+          <div class="card-content">
+            <h3>Τελευταία Νέα</h3>
+            <p>Μείνετε ενημερωμένοι για τις τελευταίες εξελίξεις και ανακοινώσεις</p>
+            <div class="card-action">
+              <span>Δείτε όλα τα νέα</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24">
+                <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="guides-section">
+    <div class="container">
+      <h2 class="section-title">Οδηγοί Χρήσης</h2>
+      <div class="guides-container">
+        <div class="guides-intro">
+          <p class="guides-description">Ανακαλύψτε πώς να αξιοποιήσετε στο έπακρο την πλατφόρμα και τα δεδομένα</p>
+          <a href="{{ config.get('ckanext.data_gov_gr.guides.url', '/') }}" class="view-all-guides">
+            Όλοι οι οδηγοί
+            <svg class="guide-arrow" viewBox="0 0 24 24">
+              <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="guides-grid">
+          <a href="{{ config.get('ckanext.data_gov_gr.getting_started.url', '/') }}" class="guide-card">
+            <div class="guide-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.1 14.8,9.5V11C15.4,11 16,11.6 16,12.3V15.8C16,16.4 15.4,17 14.7,17H9.2C8.6,17 8,16.4 8,15.7V12.2C8,11.6 8.6,11 9.2,11V9.5C9.2,8.1 10.6,7 12,7M12,8.2C11.2,8.2 10.5,8.7 10.5,9.5V11H13.5V9.5C13.5,8.7 12.8,8.2 12,8.2Z"/>
+              </svg>
+            </div>
+            <div class="guide-content">
+              <h3>Ξεκινώντας</h3>
+              <p>Βασικός οδηγός χρήσης της πλατφόρμας</p>
+            </div>
+          </a>
+
+          <a href="{{ config.get('ckanext.data_gov_gr.api_guide.url', '/') }}" class="guide-card">
+            <div class="guide-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M20.5,11H19V7C19,5.89 18.1,5 17,5H13V3.5A2.5,2.5 0 0,0 10.5,1A2.5,2.5 0 0,0 8,3.5V5H4A2,2 0 0,0 2,7V10.8H3.5C5,10.8 6.2,12 6.2,13.5C6.2,15 5,16.2 3.5,16.2H2V20A2,2 0 0,0 4,22H7.8V20.5C7.8,19 9,17.8 10.5,17.8C12,17.8 13.2,19 13.2,20.5V22H17A2,2 0 0,0 19,20V16H20.5A2.5,2.5 0 0,0 23,13.5A2.5,2.5 0 0,0 20.5,11Z"/>
+              </svg>
+            </div>
+            <div class="guide-content">
+              <h3>API Documentation</h3>
+              <p>Οδηγός χρήσης του API</p>
+            </div>
+          </a>
+
+          <a href="{{ config.get('ckanext.data_gov_gr.data_publishing_guide.url', '/') }}" class="guide-card">
+            <div class="guide-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M14,13V17H10V13H7L12,8L17,13M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z"/>
+              </svg>
+            </div>
+            <div class="guide-content">
+              <h3>Δημοσίευση Δεδομένων</h3>
+              <p>Πώς να δημοσιεύσετε τα δεδομένα σας</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dga-services-section">
+    <div class="container">
+      <h2 class="section-title">{{ _("Data Governance Act") }}</h2>
+      <div class="dga-services-intro">
+        <p>Υποβάλετε αίτηση για αναγνώριση σύμφωνα με τον Κανονισμό Διακυβέρνησης Δεδομένων</p>
+      </div>
+
+      <div class="dga-cards">
+        <a href="{{ config.get('ckanext.data_gov_gr.dga.data_intermediation.url', '/') }}" class="dga-card">
+          <div class="card-header">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M18 16.08C17.24 16.08 16.56 16.38 16.04 16.85L8.91 12.7C8.96 12.47 9 12.24 9 12S8.96 11.53 8.91 11.3L15.96 7.19C16.5 7.69 17.21 8 18 8C19.66 8 21 6.66 21 5S19.66 2 18 2 15 3.34 15 5C15 5.24 15.04 5.47 15.09 5.7L8.04 9.81C7.5 9.31 6.79 9 6 9C4.34 9 3 10.34 3 12S4.34 15 6 15C6.79 15 7.5 14.69 8.04 14.19L15.16 18.34C15.11 18.55 15.08 18.77 15.08 19C15.08 20.61 16.39 21.91 18 21.91S20.92 20.61 20.92 19C20.92 17.39 19.61 16.08 18 16.08M18 4C18.55 4 19 4.45 19 5S18.55 6 18 6 17 5.55 17 5 17.45 4 18 4M6 13C5.45 13 5 12.55 5 12S5.45 11 6 11 7 11.45 7 12 6.55 13 6 13M18 20C17.45 20 17 19.55 17 19S17.45 18 18 18 19 18.45 19 19 18.55 20 18 20Z"/>
+              </svg>
+            </div>
+            <h3>Υπηρεσία Διαμεσολάβησης Δεδομένων</h3>
+          </div>
+          <div class="card-content">
+            <p>Υποβάλετε αίτηση για αναγνώριση ως πάροχος υπηρεσιών διαμεσολάβησης δεδομένων</p>
+            <div class="card-action">
+              <span>Υποβολή αίτησης</span>
+              <svg class="action-arrow" viewBox="0 0 24 24">
+                <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <a href="{{ config.get('ckanext.data_gov_gr.dga.data_altruism.url', '/') }}" class="dga-card">
+          <div class="card-header">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z"/>
+              </svg>
+            </div>
+            <h3>Οργάνωση Αλτρουισμού Δεδομένων</h3>
+          </div>
+          <div class="card-content">
+            <p>Υποβάλετε αίτηση για αναγνώριση ως οργάνωση αλτρουισμού δεδομένων</p>
+            <div class="card-action">
+              <span>Υποβολή αίτησης</span>
+              <svg class="action-arrow" viewBox="0 0 24 24">
+                <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {% block primary_content %}
+  {% endblock %}
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+syntax: glob
+# generic
+*.pyc
+*.swp
+*.swo
+.DS_Store
+ckan.egg-info/*
+ckanext_cloudstorage.egg-info/*
+sandbox/*
+dist
+
+# other
+pip-requirements-local.txt
+migrate/*
+build/*
+tmp/*
+solr_runtime/*
+fl_notes.txt
+*.ini
+!alembic.ini
+.noseids
+*~

@@ -1,0 +1,490 @@
+{% extends "page.html" %}
+
+{% block title %}{{ _('Reports') }} - {{ super() }}{% endblock %}
+
+{% block breadcrumb_content %}
+  <li>{{ h.nav_link(_('Reports'), named_route='report.index') }}</li>
+{% endblock %}
+
+{% block primary_content_inner %}
+  <div class="dataset reports-section" style="min-height: calc(100vh - 200px); display: flex; flex-direction: column;">
+    <div class="reports-header">
+      <div class="reports-header-content">
+        <h1>{{ _('Reports') }}</h1>
+        <p class="reports-intro">{{ _('View various reports about the datasets and organizations in this portal.') }}</p>
+      </div>
+    </div>
+    
+    <div class="reports-grid">
+      <div class="row">
+        {% for report in reports %}
+          {% if not (h.should_hide_mqa_tab() and 'metadata-quality' in report.name) %}
+            {# Removed clearfix divs as we're using flex layout now #}
+            <div class="report-card-column">
+              {% set report_url=h.url_for('report.view', report_name=report.name, **h.report__explicit_default_options(report.name)) %}
+              <div class="report-summary">
+                <a href="{{ report_url }}" class="report-header">
+                  <div class="report-icon">
+                    {% if 'metadata' in report.name %}
+                      <i class="fa fa-check-circle"></i>
+                    {% elif 'openness' in report.name %}
+                      <i class="fa fa-star"></i>
+                    {% elif 'broken' in report.name %}
+                      <i class="fa fa-chain-broken"></i>
+                    {% elif 'stale-datasets' in report.name %}
+                      <i class="fa fa-clock"></i>
+                    {% else %}
+                      <i class="fa fa-bar-chart"></i>
+                    {% endif %}
+                  </div>
+                  <div class="report-title">
+                    {% if 'metadata' in report.name %}
+                      {{ gettext('Metadata Quality', domain='ckanext-qa') }}
+                    {% elif 'openness' in report.name %}
+                      {{ gettext('Openness (Five Stars)', domain='ckanext-qa') }}
+                    {% elif 'broken' in report.name %}
+                      {{ gettext('Broken links', domain='ckanext-archiver') }}
+                    {% elif 'tagless' in report.name %}
+                      {{ gettext('Tagless Datasets', domain='ckanext-report') }}
+                    {% elif 'stale-datasets' in report.name %}
+                      {{ gettext('Stale Datasets', domain='ckanext-report') }}
+                    {% else %}
+                      {{ report.title }}
+                    {% endif %}
+                  </div>
+                </a>
+                <div class="report-body">
+                  <div class="report-description">
+                    {% if 'metadata' in report.name %}
+                      {{ gettext('Datasets graded on metadata quality, based on the MQA method', domain='ckanext-qa') }}
+                    {% elif 'openness' in report.name %}
+                      {{ gettext('Datasets graded on Tim Berners Lees\' Five Stars of Openness - openly licensed, openly accessible, structured, open format, URIs for entities, linked.', domain='ckanext-qa') }}
+                    {% elif 'broken' in report.name %}
+                      {{ gettext('Dataset resource URLs that are found to result in errors when resolved.', domain='ckanext-archiver') }}
+                    {% elif 'tagless' in report.name %}
+                      {{ gettext('Datasets which have no tags.', domain='ckanext-report') }}
+                    {% elif 'stale-datasets' in report.name %}
+                      {{ gettext('Datasets that have not been updated according to their frequency schedule', domain='ckanext-report') }}
+                    {% else %}
+                      {{ report.description }}
+                    {% endif %}
+                  </div>
+                  <a class="view-report-link btn btn-primary" href="{{ report_url }}">
+                    {{ _('View Report') }}
+                    <span class="btn-arrow">
+                      <i class="fa fa-arrow-right"></i>
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    .reports-section.dataset{
+      float:none;
+      width:100%;
+      max-width:1280px;
+      margin:0 auto;      /* κεντράρισμα */
+      border-left:none;   /* φεύγει η γκρίζα κάθετη γραμμή */
+      padding-left: 24px;      /* εσωτερικό κενό αριστερά */
+      padding-right: 24px;     /* εσωτερικό κενό δεξιά */
+      box-sizing: border-box;  /* να μετρά το padding στο πλάτος */
+    }
+    
+    .reports-section {
+      padding: 2.5rem 0;
+      background: linear-gradient(135deg,
+        rgba(0, 51, 117, 0.05) 0%,
+        rgba(0, 102, 179, 0.04) 50%,
+        rgba(0, 176, 240, 0.03) 100%
+      );
+      position: relative;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .reports-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right,
+        transparent,
+        rgba(0, 102, 179, 0.3),
+        transparent
+      );
+    }
+    
+    .reports-header {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(0, 102, 179, 0.15);
+      position: relative;
+    }
+    
+    .reports-header-content {
+      text-align: left;
+      max-width: 100%;
+      padding: 0 20px;
+    }
+    
+    .reports-header h1 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #333;
+      font-size: 2.2rem;
+      font-weight: 600;
+      position: relative;
+      display: block;
+    }
+    
+    .reports-intro {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #555;
+      margin-top: 15px;
+    }
+    
+    /* Grid layout improvements */
+    .reports-grid {
+      margin: 0 -12px; /* Negative margin to counteract padding on columns */
+    }
+    
+    /* Make the .row a flex container */
+    .reports-grid .row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center; /* Center alignment to start cards more to the right */
+      gap: 20px;              /* Consistent spacing */
+      align-items: stretch;   /* Ensure all items stretch to match the tallest */
+      width: 100%;            /* Ensure full width */
+      padding: 0 10px 0 80px; /* Add padding to match CKAN style and push cards to the right */
+    }
+    
+    /* Fix for IE11 which doesn't support flex properly */
+    @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+      .reports-grid .row {
+        display: block;
+      }
+      .report-card-column {
+        float: left;
+      }
+      .clearfix {
+        clear: both;
+      }
+    }
+    
+    /* Each card gets the same width */
+    .report-card-column {
+      flex: 0 1 calc(25% - 20px);  /* 4 cards per row, accounting for gap */
+      padding: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      box-sizing: border-box;
+      min-width: 240px; /* Minimum width for all languages */
+    }
+    
+    /* ≥992 px & <1200 px → 3 cards per row */
+    @media(max-width: 1199px) {
+      .report-card-column {
+        flex: 0 1 calc(33.333% - 20px);
+      }
+    }
+    
+    /* ≥768 px & <992 px → 2 cards per row */
+    @media(max-width: 991px) {
+      .report-card-column {
+        flex: 0 1 calc(50% - 20px);
+      }
+      
+      /* Adjust left padding on tablets for better layout */
+      .reports-grid .row {
+        padding: 0 10px 0 60px; /* Intermediate left padding for tablets */
+      }
+    }
+    
+    /* <768 px → 1 card per row */
+    @media(max-width: 767px) {
+      .report-card-column {
+        flex: 0 1 100%;
+        max-width: 100%;
+      }
+      
+      /* Reduce left padding on mobile for better layout */
+      .reports-grid .row {
+        padding: 0 10px 0 40px; /* Reduced left padding on mobile */
+      }
+    }
+    
+    /* Standardized card width for all languages */
+    .report-card-column {
+      min-width: 260px; /* Consistent width for all languages */
+    }
+    
+    .report-summary {
+      background-color: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      transition: all 0.25s ease;
+      width: 100%; /* Ensure the card takes full width of the column */
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      overflow: hidden;
+      height: 100%; /* Ensure all cards have the same height */
+      min-height: 300px; /* Standardized minimum height for all languages */
+    }
+    
+    .report-summary:hover {
+      border-color: #2275bb;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      transform: translateY(-3px);
+    }
+    
+    .report-header {
+      padding: 15px;
+      background: #f8f8f8;
+      border-bottom: 1px solid #e0e0e0;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: center;
+      text-decoration: none !important;
+      transition: background-color 0.2s ease;
+    }
+    
+    .report-summary:hover .report-header {
+      background: #f0f7ff;
+    }
+    
+    .report-icon {
+      margin-right: 12px;
+      font-size: 22px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      background-color: rgba(34, 117, 187, 0.08);
+      color: #2275bb;
+      text-align: center;
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+    
+    .report-summary:hover .report-icon {
+      transform: scale(1.05);
+      background-color: rgba(34, 117, 187, 0.12);
+    }
+    
+    .report-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      transition: color 0.3s ease;
+      line-height: 1.3;
+      flex: 1;
+      min-width: 0;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      height: auto;
+      min-height: 52px; /* Standardized height for all languages */
+      display: -webkit-box;
+      -webkit-line-clamp: 3; /* Allow up to 3 lines for all languages */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    /* Language-specific adjustments for titles (font size only) */
+    html[lang="el"] .report-title {
+      font-size: 16px; /* Slightly smaller font for Greek */
+    }
+    
+    .report-summary:hover .report-title {
+      color: #2275bb;
+    }
+    
+    .report-body {
+      padding: 15px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      justify-content: space-between; /* Space between description and button */
+      min-height: 180px; /* Standardized minimum height for all languages */
+    }
+    
+    .report-description {
+      color: #666;
+      margin-bottom: 15px;
+      flex-grow: 1;
+      font-size: 13px;
+      line-height: 1.4;
+      /* Ensure consistent height for descriptions */
+      min-height: 80px;
+      max-height: 120px; /* Standardized maximum height */
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 5; /* Allow up to 5 lines for all languages */
+      -webkit-box-orient: vertical;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+    }
+    
+    /* Language-specific adjustments for descriptions (font size only) */
+    html[lang="el"] .report-description {
+      font-size: 12px; /* Smaller font for Greek */
+      line-height: 1.35; /* Tighter line height for Greek */
+    }
+    
+    
+    .view-report-link {
+      align-self: flex-start; /* Align to the left to match CKAN style */
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s ease;
+      padding: 8px 15px;
+      border-radius: 3px;
+      font-weight: 500;
+      font-size: 13px;
+      box-shadow: none;
+      position: relative;
+      bottom: 0;
+      white-space: nowrap; /* Prevent button text from wrapping */
+    }
+    
+    /* Language-specific adjustments for button */
+    html[lang="el"] .view-report-link {
+      font-size: 12px; /* Smaller font for Greek */
+      padding: 8px 12px; /* Smaller padding for Greek */
+    }
+    
+    .btn-arrow {
+      margin-left: 8px;
+      display: inline-flex;
+      align-items: center;
+      transition: transform 0.3s ease;
+    }
+    
+    .view-report-link:hover .btn-arrow {
+      transform: translateX(5px);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 991px) {
+      .reports-header h1 {
+        font-size: 2rem;
+      }
+      
+      .reports-intro {
+        font-size: 15px;
+      }
+      
+      .report-summary {
+        min-height: 280px; /* Standardized height for tablets */
+      }
+      
+      .report-body {
+        min-height: 170px; /* Standardized height for tablets */
+      }
+      
+      .report-title {
+        font-size: 16px;
+        min-height: 48px; /* Standardized height for tablets */
+      }
+      
+      html[lang="el"] .report-title {
+        font-size: 15px;
+      }
+    }
+    
+    @media (max-width: 767px) {
+      .reports-header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .reports-intro {
+        font-size: 14px;
+      }
+      
+      .report-description {
+        min-height: 75px;
+        max-height: 110px;
+      }
+      
+      .report-card-column {
+        padding: 8px;
+      }
+      
+      .report-icon {
+        font-size: 20px;
+        width: 32px;
+        height: 32px;
+        margin-right: 10px;
+      }
+      
+      .report-header {
+        padding: 12px;
+      }
+      
+      .report-title {
+        font-size: 15px;
+        min-height: 46px; /* Standardized height for mobile */
+      }
+      
+      html[lang="el"] .report-title {
+        font-size: 14px;
+      }
+      
+      .report-summary {
+        min-height: 260px; /* Standardized height for mobile */
+      }
+      
+      .report-body {
+        min-height: 150px; /* Standardized height for mobile */
+        padding: 12px;
+      }
+    }
+    
+    /* Extra small devices */
+    @media (max-width: 480px) {
+      .reports-header h1 {
+        font-size: 1.6rem;
+      }
+      
+      .reports-header-content {
+        padding: 0 12px;
+      }
+      
+      .reports-grid .row {
+        padding: 0 5px 0 20px; /* Minimal left padding for very small screens */
+      }
+      
+      .report-card-column {
+        padding: 5px;
+      }
+      
+      .report-description {
+        min-height: auto;
+      }
+      
+      .report-summary {
+        min-height: 240px; /* Standardized height for very small screens */
+      }
+      
+      .report-body {
+        min-height: 130px; /* Standardized height for very small screens */
+      }
+    }
+  </style>
+{% endblock%}

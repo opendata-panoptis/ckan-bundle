@@ -1,0 +1,14 @@
+ vocabulary_admin-js:
+   filter: rjsmin
+   output: ckanext-vocabulary_admin/%(version)s-vocabulary_admin.js
+   contents:
+     - js/vocabularyadmin.js
+   extra:
+     preload:
+       - base/main
+
+ vocabulary_admin-css:
+   filter: cssrewrite
+   output: ckanext-vocabulary_admin/%(version)s-vocabulary_admin.css
+   contents:
+     - css/vocabularyadmin.css

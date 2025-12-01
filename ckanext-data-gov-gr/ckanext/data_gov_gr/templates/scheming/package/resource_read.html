@@ -1,0 +1,17 @@
+{% ckan_extends %}
+
+{# Override the resource_license block to hide the license field #}
+{% block resource_license %}
+  {# License field is intentionally hidden #}
+{% endblock %}
+{# Override the resource_format block to hide the format field #}
+{% block resource_format %}
+{% endblock %}
+
+{% block resource_additional_information_inner %}
+  {{ super() }}
+
+  {{ h.archiver_is_resource_broken_html(c.resource) }}<br>
+  {{ h.archiver_is_resource_cached_html(c.resource) }}<br>
+  {{ h.qa_openness_stars_resource_html(c.resource) }}
+{% endblock %}

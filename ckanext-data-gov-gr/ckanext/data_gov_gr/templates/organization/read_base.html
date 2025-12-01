@@ -1,0 +1,11 @@
+{% ckan_extends %}
+
+{% block content_primary_nav %}
+  {% if h.should_show_decision_button() %}
+    {{ h.build_nav_icon(group_type + '.read', _('Datasets/APIs/Decisions'), id=group_dict.name, icon='sitemap') }}
+  {% else %}
+    {{ h.build_nav_icon(group_type + '.read', _('Datasets/APIs'), id=group_dict.name, icon='sitemap') }}
+  {% endif %}
+  {{ h.build_nav_icon(group_type + '.members', _('Members'), id=group_dict.name, icon='users') }}
+  {{ h.build_nav_icon(group_type + '.about', _('About'), id=group_dict.name, icon='info-circle') }}
+{% endblock %}

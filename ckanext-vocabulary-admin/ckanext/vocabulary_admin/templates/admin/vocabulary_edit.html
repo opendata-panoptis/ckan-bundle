@@ -1,0 +1,89 @@
+{% extends "admin/base.html" %}
+
+{% block primary_content_inner %}
+  <div class="vocabulary-admin-page">
+    <h1 class="page-heading vocabulary-admin-heading">{{ _('Επεξεργασία Λεξιλογίου') }}</h1>
+
+    <form method="post" action="{{ h.url_for('vocabularyadmin.vocabulary_edit', vocabulary_id=vocabulary.id) }}" class="form-horizontal">
+    {{ h.csrf_input() }}
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="name">{{ _('Όνομα') }}</label>
+      <div class="controls">
+        <input type="text" id="name" name="name" class="form-control" value="{{ vocabulary.name }}" required>
+        <span class="info-block">{{ _('Το όνομα του λεξιλογίου') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="description_el">{{ _('Περιγραφή (Ελληνικά)') }}</label>
+      <div class="controls">
+        <textarea id="description_el" name="description_el" class="form-control" rows="3">{{ vocabulary_description.description_el or '' if vocabulary_description else '' }}</textarea>
+        <span class="info-block">{{ _('Η περιγραφή του λεξιλογίου στα ελληνικά (προαιρετικό)') }}</span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="description_en">{{ _('Περιγραφή (Αγγλικά)') }}</label>
+      <div class="controls">
+        <textarea id="description_en" name="description_en" class="form-control" rows="3">{{ vocabulary_description.description_en or '' if vocabulary_description else '' }}</textarea>
+        <span class="info-block">{{ _('Η περιγραφή του λεξιλογίου στα αγγλικά (προαιρετικό)') }}</span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ _('Ενημέρωση') }}</button>
+      <a href="{{ h.url_for('vocabularyadmin.vocabulary_admin') }}" class="btn">{{ _('Ακύρωση') }}</a>
+    </div>
+  </form>
+
+  <div class="vocabulary-tags-section">
+    <h3>{{ _('Ετικέτες Λεξιλογίου') }}</h3>
+    <p>{{ _('Ετικέτες που ανήκουν σε αυτό το λεξιλόγιο:') }}</p>
+
+    <div class="vocabulary-tags">
+      {% if vocabulary.tags.count() > 0 %}
+        {% for tag in vocabulary.tags %}
+          {% set metadata = h.vocabularyadmin_get_tag_metadata(tag.id) %}
+          <div class="vocabulary-tag-container">
+            <span class="vocabulary-tag" data-id="{{ tag.id }}" 
+                  {% if metadata and metadata.value_uri %}data-uri="{{ metadata.value_uri }}"{% endif %}
+                  {% if metadata and metadata.label_el %}data-label-el="{{ metadata.label_el }}"{% endif %}
+                  {% if metadata and metadata.label_en %}data-label-en="{{ metadata.label_en }}"{% endif %}
+                  {% if metadata and metadata.description_el %}data-desc-el="{{ metadata.description_el }}"{% endif %}
+                  {% if metadata and metadata.description_en %}data-desc-en="{{ metadata.description_en }}"{% endif %}
+                  title="{% if metadata %}{% if h.lang() == 'en' and metadata.description_en %}{{ metadata.description_en }}{% elif metadata.description_el %}{{ metadata.description_el }}{% elif metadata.description_en %}{{ metadata.description_en }}{% endif %}{% endif %}">
+              {{ tag.name }}
+              {% if metadata %}
+                {% if h.lang() == 'en' and metadata.label_en %}
+                  <small>({{ metadata.label_en }})</small>
+                {% elif metadata.label_el %}
+                  <small>({{ metadata.label_el }})</small>
+                {% elif metadata.label_en %}
+                  <small>({{ metadata.label_en }})</small>
+                {% endif %}
+              {% endif %}
+              {% if metadata and metadata.is_active == False %}
+                <span class="label label-default">{{ _('(Ανενεργό)') }}</span>
+              {% endif %}
+            </span>
+            <a href="{{ h.url_for('vocabularyadmin.tag_edit', tag_id=tag.id) }}" class="btn btn-default tag-edit-button" title="{{ _('Επεξεργασία') }}">
+              <i class="fa fa-pencil"></i>
+            </a>
+            <a href="{{ h.url_for('vocabularyadmin.tag_delete', tag_id=tag.id) }}" class="btn btn-danger tag-edit-button" title="{{ _('Διαγραφή') }}" onclick="return confirm('{{ _('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την ετικέτα; Αυτή η ενέργεια δεν αναιρείται.') }}');">
+              <i class="fa fa-trash"></i>
+            </a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="empty">{{ _('Δεν υπάρχουν ετικέτες σε αυτό το λεξιλόγιο.') }}</p>
+      {% endif %}
+    </div>
+
+    <div class="tag-actions">
+      <a href="{{ h.url_for('vocabularyadmin.tag_create') }}" class="btn btn-success">
+        <i class="fa fa-plus"></i> {{ _('Προσθήκη Νέας Ετικέτας') }}
+      </a>
+    </div>
+  </div>
+  </div>
+{% endblock %}

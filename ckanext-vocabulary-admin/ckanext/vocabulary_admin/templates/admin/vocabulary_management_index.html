@@ -1,0 +1,114 @@
+{% extends "admin/base.html" %}
+
+{% block page_primary_action %}
+  <div class="vocab-admin-actions">
+    <a href="{{ h.url_for('vocabularyadmin.vocabulary_create') }}" class="btn btn-primary">
+      <i class="fa fa-plus"></i> {{ _('Create New Vocabulary') }}
+    </a>
+    <a href="{{ h.url_for('vocabularyadmin.tag_create') }}" class="btn btn-success">
+      <i class="fa fa-plus"></i> {{ _('Create New Tag') }}
+    </a>
+  </div>
+{% endblock %}
+
+{% block primary_content_inner %}
+  <div class="vocabulary-admin-page">
+    <h1 class="page-heading vocabulary-admin-heading">{{ _('Controlled Vocabularies Management') }}</h1>
+    <p>{{ _('In this section you can manage controlled vocabularies and their tags.') }}</p>
+
+    <div class="stats">
+      <p>{{ _('Total vocabularies') }}: {{ h.vocabularyadmin_get_vocabulary_count() }}</p>
+      <p>{{ _('Total tags') }}: {{ h.vocabularyadmin_get_tag_count() }}</p>
+    </div>
+
+    <div class="vocabulary-list">
+      {% if data.vocabularies %}
+        <h2>{{ _('Available Vocabularies') }}</h2>
+        <table class="table table-striped table-bordered table-condensed">
+          <thead>
+            <tr>
+              <th>{{ _('Vocabulary Name') }}</th>
+              <th>{{ _('Number of Tags') }}</th>
+              <th>{{ _('Tags') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for vocabulary in data.vocabularies %}
+              <tr>
+                <td>
+                  <div class="vocabulary-header">
+                    <strong>{{ vocabulary.name }}</strong>
+                    <a href="{{ h.url_for('vocabularyadmin.vocabulary_edit', vocabulary_id=vocabulary.id) }}" class="btn btn-xs btn-default vocab-action-btn" title="{{ _('Edit') }}">
+                      <i class="fa fa-pencil"></i>
+                    </a>
+                    <a href="{{ h.url_for('vocabularyadmin.vocabulary_delete', vocabulary_id=vocabulary.id) }}" class="btn btn-danger vocab-action-btn" title="{{ _('Delete') }}" onclick="return confirm('{{ _('Are you sure you want to delete this vocabulary and all its tags? This action cannot be undone.') }}');">
+                      <i class="fa fa-trash"></i>
+                    </a>
+                  </div>
+                  {% set description = h.vocabularyadmin_get_vocabulary_description(vocabulary.id) %}
+                  <div class="vocabulary-description text-muted">
+                    {% if description %}
+                      {% if h.lang() == 'en' and description.description_en %}
+                        {{ description.description_en | truncate(100, True) }}
+                      {% elif description.description_el %}
+                        {{ description.description_el | truncate(100, True) }}
+                      {% elif description.description_en %}
+                        {{ description.description_en | truncate(100, True) }}
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </td>
+                <td>{{ vocabulary.tags.count() }}</td>
+                <td>
+                  <div class="vocabulary-tags">
+                    {% if vocabulary.tags.count() > 0 %}
+                      {% for tag in vocabulary.tags[:20] %}
+                        {% set metadata = h.vocabularyadmin_get_tag_metadata(tag.id) %}
+                        <div class="vocabulary-tag-container">
+                          <span class="vocabulary-tag" data-id="{{ tag.id }}" 
+                                {% if metadata and metadata.value_uri %}data-uri="{{ metadata.value_uri }}"{% endif %}
+                                {% if metadata and metadata.label_el %}data-label-el="{{ metadata.label_el }}"{% endif %}
+                                {% if metadata and metadata.label_en %}data-label-en="{{ metadata.label_en }}"{% endif %}
+                                {% if metadata and metadata.description_el %}data-desc-el="{{ metadata.description_el }}"{% endif %}
+                                {% if metadata and metadata.description_en %}data-desc-en="{{ metadata.description_en }}"{% endif %}
+                                title="{% if metadata %}{% if h.lang() == 'en' and metadata.description_en %}{{ metadata.description_en }}{% elif metadata.description_el %}{{ metadata.description_el }}{% elif metadata.description_en %}{{ metadata.description_en }}{% endif %}{% endif %}">
+                            {{ tag.name }}
+                            {% if metadata %}
+                              {% if h.lang() == 'en' and metadata.label_en %}
+                                <small>({{ metadata.label_en }})</small>
+                              {% elif metadata.label_el %}
+                                <small>({{ metadata.label_el }})</small>
+                              {% elif metadata.label_en %}
+                                <small>({{ metadata.label_en }})</small>
+                              {% endif %}
+                            {% endif %}
+                            {% if metadata and metadata.is_active == False %}
+                              <span class="label label-default">{{ _('(Inactive)') }}</span>
+                            {% endif %}
+                          </span>
+                          <a href="{{ h.url_for('vocabularyadmin.tag_edit', tag_id=tag.id) }}" class="btn btn-default tag-edit-button" title="{{ _('Edit') }}">
+                            <i class="fa fa-pencil"></i>
+                          </a>
+                          <a href="{{ h.url_for('vocabularyadmin.tag_delete', tag_id=tag.id) }}" class="btn btn-danger tag-edit-button" title="{{ _('Delete') }}" onclick="return confirm('{{ _('Are you sure you want to delete this tag? This action cannot be undone.') }}');">
+                            <i class="fa fa-trash"></i>
+                          </a>
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <p class="empty">{{ _('There are no tags in this vocabulary.') }}</p>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty-vocabularies">
+          <p>{{ _('There are no available vocabularies.') }}</p>
+          <p>{{ _('Use the "Create New Vocabulary" button to create your first vocabulary.') }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

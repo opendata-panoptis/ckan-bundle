@@ -1,0 +1,65 @@
+scheming_version: 2
+dataset_type: decision
+about: A collection of operations related to the dataset lists published by the Organization Administrator.
+about_url: http://github.com/ckan/ckanext-dcat
+
+dataset_fields:
+
+- field_name: title
+  label:
+    en: Name of Decision
+    el: Όνομα Aπόφασης
+  preset: title
+  required: true
+  help_text:
+    en: A name given to the Decision
+    el: Tο όνομα που συνοπτικά περιγράφει την απόφαση
+
+- field_name: name
+  label: URL
+  preset: dataset_slug
+  form_placeholder:
+    en: eg. my-decision
+    el: π.χ. η-απόφασή-μου
+
+- field_name: notes
+  label: Description
+  form_snippet: markdown.html
+  help_text:
+    en: A free-text account of the Decision
+    el: H Περιγραφή μιας Aπόφασης σε ελεύθερο κείμενο
+
+- field_name: tag_string
+  label:
+    en: Keywords
+    el: Λέξεις κλειδιά
+  preset: tag_string_autocomplete
+  form_placeholder:
+    en: eg. economy, mental health, government
+    el: π.χ. οικονομία, ψυχική υγεία, κυβέρνηση
+  help_text:
+    en: Keywords or tags describing the Decision. Use commas to separate multiple values
+    el: Λέξεις Κλειδιά ή ετικέτες που περιγράφουν την Aπόφαση. Χρησιμοποιείστε κόμματα για να διαχωρίσετε τις τιμές
+
+- field_name: owner_org
+  label: Organization
+  preset: dataset_organization
+  form_snippet: scheming/form_snippets/organization_decision.html
+  help_text:
+    en: The data.gov.gr organization the decision belongs to
+    el: Ο φορέας του data.gov.gr στον οποίο ανήκει η Aπόφαση
+
+resource_fields:
+
+- field_name: url
+  label: URL
+  preset: resource_url_upload
+
+- field_name: name
+  label:
+    en: Title
+    el: Τίτλος
+  required: true
+  help_text:
+    en: A name given to the resource of this Decision
+    el: Tο όνομα που συνοπτικά περιγράφει τον πόρο αυτής της Απόφασης

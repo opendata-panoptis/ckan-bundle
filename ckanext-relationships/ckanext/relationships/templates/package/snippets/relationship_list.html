@@ -1,0 +1,33 @@
+{% set relationships = h.get_relationships(id) %}
+
+{% if c.pkg_dict.type == 'dataset' or not c.pkg_dict.type %}
+    <h3>{{ _('Relationships') }}</h3>
+    {% if relationships %}
+        <table class="table table-striped relationships">
+            <thead>
+                <th width="20%">{{ _('Type') }}</th>
+                <th>{{ _('Dataset') }}</th>
+            </thead>
+            {% for relationship in relationships %}
+            <tr>
+                <td>
+                    {{ _(relationship.type ) }}
+                </td>
+                <td>
+                    {% if relationship.object %}
+                        <a href="{{ h.url_for('dataset_read', id=relationship.object) }}">{{ relationship.title }}</a>
+                    {% else %}
+                        <a href="{{ relationship.comment }}">{{ relationship.comment }}</a>
+                    {% endif %}
+                    {% if relationship.type == 'derives_from' %}
+                        <h4>Lineage notes:</h4>
+                        {{ h.render_markdown(h.get_lineage_notes(relationship.type, relationship.object)) }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h4>{{ _('This dataset has no existing relationships.') }}</h4>
+    {% endif %}
+{% endif %}

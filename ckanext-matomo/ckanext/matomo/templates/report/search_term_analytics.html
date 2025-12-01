@@ -1,0 +1,25 @@
+<div class="module-content">
+  {% set start_date, end_date = h.get_date_range() %}
+  <h2>{% trans %}Most popular search terms{% endtrans %}
+    <span class="h4">({{start_date.strftime('%d.%m.%Y')}} - {{end_date.strftime('%d.%m.%Y')}})</span>
+  </h2>
+    {% if data['table'] %}
+      <table class="table table-condensed table-bordered table-striped">
+      <tr>
+        <th>{% trans %}Search term{% endtrans %}</th>
+        <th>{% trans %}Total searches{% endtrans %}</th>
+        <th>{% trans %}Last searched date{% endtrans %}</th>
+      </tr>
+        {% for row in table %}
+          <tr>
+            <td>{{ row.search_term }}</td>
+            <td>{{ row.count }}</td>
+            <td>{{ h.format_date(row.latest_search_date) }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>{% trans %}No analytics found for most popular search terms{% endtrans %}</p>
+    {% endif %}
+
+ </div>

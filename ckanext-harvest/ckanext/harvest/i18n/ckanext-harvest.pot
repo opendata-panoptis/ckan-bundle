@@ -1,0 +1,335 @@
+# Translations template for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-09-25 09:06+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ckanext/harvest/helpers.py:107
+msgid "title"
+msgstr ""
+
+#: ckanext/harvest/utils.py:490
+msgid "Not authorized to see this page"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/create.py:34
+#: ckanext/harvest/logic/auth/delete.py:18 ckanext/harvest/logic/auth/get.py:32
+#: ckanext/harvest/logic/auth/update.py:19 ckanext/harvest/utils.py:501
+#: ckanext/harvest/utils.py:521 ckanext/harvest/utils.py:591
+#: ckanext/harvest/utils.py:609 ckanext/harvest/utils.py:643
+#: ckanext/harvest/utils.py:669 ckanext/harvest/utils.py:696
+msgid "Harvest source not found"
+msgstr ""
+
+#: ckanext/harvest/templates/source/job/list.html:12
+#: ckanext/harvest/utils.py:530
+msgid "No jobs yet for this source"
+msgstr ""
+
+#: ckanext/harvest/utils.py:563 ckanext/harvest/utils.py:622
+msgid "Harvest job not found"
+msgstr ""
+
+#: ckanext/harvest/utils.py:619
+msgid "Harvest job stopped"
+msgstr ""
+
+#: ckanext/harvest/utils.py:641
+msgid "Harvest will start shortly. Refresh this page for updates."
+msgstr ""
+
+#: ckanext/harvest/utils.py:648
+msgid ""
+"Cannot create new harvest jobs on inactive sources. First, please change "
+"the source status to \"active\"."
+msgstr ""
+
+#: ckanext/harvest/utils.py:653
+msgid "A harvest job has already been scheduled for this source"
+msgstr ""
+
+#: ckanext/harvest/utils.py:667
+msgid "Harvest source cleared"
+msgstr ""
+
+#: ckanext/harvest/utils.py:689
+msgid "Harvesting source successfully cleared"
+msgstr ""
+
+#: ckanext/harvest/utils.py:691
+msgid "Harvesting source successfully inactivated"
+msgstr ""
+
+#: ckanext/harvest/utils.py:720
+msgid "No content found"
+msgstr ""
+
+#: ckanext/harvest/logic/action/update.py:747
+msgid "Error Summary"
+msgstr ""
+
+#: ckanext/harvest/logic/action/update.py:748
+msgid "Document Error"
+msgstr ""
+
+#: ckanext/harvest/logic/action/update.py:749
+msgid "Job Errors"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/create.py:19
+msgid "User {0} not authorized to create harvest sources"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/create.py:42
+msgid "User not authorized to create a job for source {0}"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/create.py:52
+msgid "Only sysadmins can create harvest jobs for all sources"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/create.py:64
+msgid "Only the sysadmins can create harvest objects"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/delete.py:27
+msgid "User {0} not authorized to delete harvest source {1}"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/get.py:41
+msgid "User {0} not authorized to read harvest source {1}"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/get.py:83
+msgid "User {0} not authorized to see jobs from source {1}"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/get.py:105
+msgid "User {0} not authorized to list jobs for source {1}"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/update.py:28
+msgid "User {0} not authorized to update harvest source {1}"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/update.py:38
+msgid "Only sysadmins can clear history for all harvest jobs"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/update.py:59
+msgid "Only sysadmins can reimport all harvest objects"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/update.py:71
+msgid "Only sysadmins can run the pending harvest jobs"
+msgstr ""
+
+#: ckanext/harvest/logic/auth/update.py:103
+msgid "Only sysadmins can reindex all harvest sources"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/add_source_button.html:6
+msgid "Add Harvest Source"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/job_details.html:26
+#: ckanext/harvest/templates/source/job/list.html:43
+msgid "errors"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/job_details.html:41
+msgid "Details"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/job_details.html:48
+msgid "Id"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/job_details.html:52
+msgid "Created"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/job_details.html:60
+msgid "Started"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/job_details.html:68
+msgid "Finished"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/job_details.html:76
+msgid "Status"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/job_error_summary.html:18
+msgid "Count"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/job_error_summary.html:19
+msgid "Message"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/package_list_empty.html:1
+msgid "There are no datasets associated to this harvest source."
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/source_item.html:33
+msgid "Draft"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/source_item.html:35
+msgid "Deleted"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/source_item.html:42
+#: ckanext/harvest/templates/source/read_base.html:13
+msgid "There is no description for this harvest source"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/source_item.html:47
+#: ckanext/harvest/templates/source/read.html:5
+#: ckanext/harvest/templates/source/read_base.html:17
+#: ckanext/harvest/templates/source/read_base.html:38
+msgid "Datasets"
+msgstr ""
+
+#: ckanext/harvest/templates/snippets/source_item.html:50
+msgid "Organization"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:7
+#: ckanext/harvest/templates/source/read_base.html:32
+msgid "Admin"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:15
+msgid ""
+"This will re-run the harvesting for this source. Any updates at the "
+"source will overwrite the local datasets. Sources with a large number of "
+"datasets may take a significant amount of time to finish harvesting. "
+"Please confirm you would like us to start reharvesting."
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:17
+msgid "Start a new harvesting job for this harvest source now"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:19
+msgid "Reharvest"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:25
+msgid "Stop"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:28
+msgid ""
+"Warning: This will remove all datasets for this source, as well as all "
+"previous job reports. Are you sure you want to continue?"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:30
+msgid "Delete all harvest jobs and existing datasets from this source"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:31
+msgid "Clear"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:35
+msgid "View harvest source"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:41
+msgid "Dashboard"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:42
+msgid "Jobs"
+msgstr ""
+
+#: ckanext/harvest/templates/source/admin_base.html:43
+msgid "Edit"
+msgstr ""
+
+#: ckanext/harvest/templates/source/base.html:16
+msgid "Organizations"
+msgstr ""
+
+#: ckanext/harvest/templates/source/base.html:18
+#: ckanext/harvest/templates/source/base.html:21
+#: ckanext/harvest/templates/source/new.html:4
+msgid "Harvest Sources"
+msgstr ""
+
+#: ckanext/harvest/templates/source/edit.html:3
+msgid "Edit harvest source"
+msgstr ""
+
+#: ckanext/harvest/templates/source/new.html:5
+msgid "Create Harvest Source"
+msgstr ""
+
+#: ckanext/harvest/templates/source/new.html:11
+msgid "Create harvest source"
+msgstr ""
+
+#: ckanext/harvest/templates/source/new.html:23
+msgid "Harvest sources"
+msgstr ""
+
+#: ckanext/harvest/templates/source/new.html:26
+msgid ""
+"\n"
+"        Harvest sources allow importing remote metadata into this "
+"catalog.\n"
+"        Remote sources can be other catalogs such as other CKAN "
+"instances, CSW\n"
+"        servers or Web Accessible Folders (WAF) (depending on the actual\n"
+"        harvesters enabled for this instance).\n"
+"        "
+msgstr ""
+
+#: ckanext/harvest/templates/source/read_base.html:10
+msgid "read more"
+msgstr ""
+
+#: ckanext/harvest/templates/source/read_base.html:39
+msgid "About"
+msgstr ""
+
+#: ckanext/harvest/templates/source/job/list.html:4
+#: ckanext/harvest/templates/source/job/list.html:9
+msgid "Harvest Jobs"
+msgstr ""
+
+#: ckanext/harvest/templates/source/job/list.html:20
+msgid "Job: "
+msgstr ""
+
+#: ckanext/harvest/templates/source/job/list.html:27
+msgid "Started:"
+msgstr ""
+
+#: ckanext/harvest/templates/source/job/list.html:29
+#: ckanext/harvest/templates/source/job/list.html:34
+msgid "Not yet"
+msgstr ""
+
+#: ckanext/harvest/templates/source/job/list.html:32
+msgid "Finished:"
+msgstr ""
+
