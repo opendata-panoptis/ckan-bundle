@@ -102,8 +102,30 @@
               {% set group_type = h.default_group_type('group') %}
 
               {% set more_label = 'Περισσότερα' if h.lang() == 'el' else _('More') %}
+
+              {# Παραμετρικό dropdown για τα σύνολα δεδομένων #}
+              {% set dataset_menu_items = h.get_dataset_menu_items() %}
+              {# Ενεργό όταν βρισκόμαστε σε views των datasets ή των resources #}
+              {% set dataset_active = g.blueprint in ['dataset', 'resource'] %}
+
+              <li class="dropdown {% if dataset_active %}active{% endif %}">
+                <a href="{{ h.url_for('dataset.search') }}"
+                   class="dropdown-toggle js-dataset-dropdown-toggle"
+                   role="button"
+                   aria-haspopup="true"
+                   aria-expanded="false">
+                  {{ h.humanize_entity_type('package', 'dataset', 'main nav') or _('Datasets') }}
+                </a>
+                <ul class="dropdown-menu">
+                  {% for item in dataset_menu_items %}
+                    <li>
+                      <a class="dropdown-item" href="{{ item.url }}">{{ item.label }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </li>
+
               {{ h.build_nav_main(
-                ('dataset' ~ '.search', h.humanize_entity_type('package', 'dataset', 'main nav') or _('Datasets'), ["dataset", "resource"]),
                 ('data-service' ~ '.search', _('APIs'), ["data-service"]),
                 ('decision' ~ '.search', _('Decisions'), ["decision"]),
                 (org_type ~ '.index',
@@ -126,3 +148,80 @@
   </div>
 </header>
 {% endblock %}
+
+{# Συμπεριφορά dropdown για \"Σύνολα Δεδομένων\":
+   - Ανοίγει με κλικ στο tab (Bootstrap dropdown)
+   - Παραμένει ανοιχτό όσο ο κέρσορας είναι πάνω στο dropdown
+   - Κλείνει αυτόματα ΜΕΤΑ από μια μικρή καθυστέρηση όταν ο κέρσορας φύγει,
+     ώστε να προλαβαίνει ο χρήστης να επιλέξει στοιχείο χωρίς να κλείνει απότομα #}
+<script type="text/javascript">
+  (function () {
+    function attachDatasetDropdownHoverClose() {
+      var dropdown = document.querySelector('header.masthead .main-navbar .dropdown');
+      if (!dropdown) {
+        return;
+      }
+
+      var toggle = dropdown.querySelector('.js-dataset-dropdown-toggle');
+      var menu = dropdown.querySelector('.dropdown-menu');
+      if (!toggle || !menu) {
+        return;
+      }
+
+      var instance = null;
+      if (window.bootstrap && window.bootstrap.Dropdown) {
+        instance = window.bootstrap.Dropdown.getInstance(toggle);
+        if (!instance) {
+          // Απενεργοποιούμε το autoClose για να ελέγχουμε μόνοι μας το κλείσιμο
+          instance = new window.bootstrap.Dropdown(toggle, { autoClose: false });
+        }
+      }
+
+      var hideTimeout = null;
+
+      dropdown.addEventListener('mouseenter', function () {
+        if (hideTimeout) {
+          clearTimeout(hideTimeout);
+          hideTimeout = null;
+        }
+
+        try {
+          if (instance) {
+            instance.show();
+          } else {
+            dropdown.classList.add('show');
+            menu.classList.add('show');
+            toggle.setAttribute('aria-expanded', 'true');
+          }
+        } catch (e) {
+          // ignore
+        }
+      });
+
+      dropdown.addEventListener('mouseleave', function () {
+        if (hideTimeout) {
+          clearTimeout(hideTimeout);
+        }
+        hideTimeout = window.setTimeout(function () {
+          try {
+            if (instance) {
+              instance.hide();
+            } else {
+              dropdown.classList.remove('show');
+              menu.classList.remove('show');
+              toggle.setAttribute('aria-expanded', 'false');
+            }
+          } catch (e) {
+            // για να μην σπάσουμε την κεφαλίδα αν κάτι πάει στραβά
+          }
+        }, 150); // μικρή καθυστέρηση για να μην κλείνει \"στο τσακ\" πριν το click
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', attachDatasetDropdownHoverClose);
+    } else {
+      attachDatasetDropdownHoverClose();
+    }
+  })();
+</script>

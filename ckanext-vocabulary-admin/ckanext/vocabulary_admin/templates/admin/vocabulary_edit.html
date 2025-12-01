@@ -30,21 +30,23 @@
       </div>
     </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">{{ _('Ενημέρωση') }}</button>
-      <a href="{{ h.url_for('vocabularyadmin.vocabulary_admin') }}" class="btn">{{ _('Ακύρωση') }}</a>
-    </div>
-  </form>
-
-  <div class="vocabulary-tags-section">
+      <div class="vocabulary-tags-section">
     <h3>{{ _('Ετικέτες Λεξιλογίου') }}</h3>
     <p>{{ _('Ετικέτες που ανήκουν σε αυτό το λεξιλόγιο:') }}</p>
+    <p class="info-block">
+      <i class="fa fa-hand-pointer-o"></i>
+      {{ _('Σύρετε τις ετικέτες με το ποντίκι για να αλλάξετε τη σειρά εμφάνισης στις λίστες.') }}
+    </p>
 
     <div class="vocabulary-tags">
-      {% if vocabulary.tags.count() > 0 %}
-        {% for tag in vocabulary.tags %}
+      {% set tags = h.vocabularyadmin_get_tags(vocabulary.id) %}
+      {% if tags|length > 0 %}
+        <input type="hidden" name="tag_order" id="tag_order"
+               value="{% for tag in tags %}{{ tag.id }}{% if not loop.last %},{% endif %}{% endfor %}">
+        {% for tag in tags %}
           {% set metadata = h.vocabularyadmin_get_tag_metadata(tag.id) %}
           <div class="vocabulary-tag-container">
+            <span class="drag-handle"><i class="fa fa-bars"></i></span>
             <span class="vocabulary-tag" data-id="{{ tag.id }}" 
                   {% if metadata and metadata.value_uri %}data-uri="{{ metadata.value_uri }}"{% endif %}
                   {% if metadata and metadata.label_el %}data-label-el="{{ metadata.label_el }}"{% endif %}
@@ -67,10 +69,10 @@
               {% endif %}
             </span>
             <a href="{{ h.url_for('vocabularyadmin.tag_edit', tag_id=tag.id) }}" class="btn btn-default tag-edit-button" title="{{ _('Επεξεργασία') }}">
-              <i class="fa fa-pencil"></i>
+              <i class="fa fa-edit"></i>
             </a>
             <a href="{{ h.url_for('vocabularyadmin.tag_delete', tag_id=tag.id) }}" class="btn btn-danger tag-edit-button" title="{{ _('Διαγραφή') }}" onclick="return confirm('{{ _('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την ετικέτα; Αυτή η ενέργεια δεν αναιρείται.') }}');">
-              <i class="fa fa-trash"></i>
+              <i class="fa fa-trash-alt"></i>
             </a>
           </div>
         {% endfor %}
@@ -79,11 +81,17 @@
       {% endif %}
     </div>
 
-    <div class="tag-actions">
-      <a href="{{ h.url_for('vocabularyadmin.tag_create') }}" class="btn btn-success">
-        <i class="fa fa-plus"></i> {{ _('Προσθήκη Νέας Ετικέτας') }}
-      </a>
-    </div>
-  </div>
+      <div class="tag-actions">
+        <a href="{{ h.url_for('vocabularyadmin.tag_create') }}" class="btn btn-success">
+          <i class="fa fa-plus"></i> {{ _('Προσθήκη Νέας Ετικέτας') }}
+        </a>
+      </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{{ _('Ενημέρωση') }}</button>
+        <a href="{{ h.url_for('vocabularyadmin.vocabulary_admin') }}" class="btn">{{ _('Ακύρωση') }}</a>
+      </div>
+    </form>
   </div>
 {% endblock %}

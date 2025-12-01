@@ -207,5 +207,5 @@ def send_email(context, recipient, data_dict, showcase_url):
         recipient_name="",
         recipient_email=recipient,
         subject=f"DATA GOV GR: Δημιουργήθηκε Showcase: '{data_dict['name']}'",
-        body=f"Μια νέα εφαρμογή με όνομα '{data_dict['name']}' δημιουργήθηκε με επιτυχία. Μπορείτε να επισκεφθείτε την εφαρμογή σας εδώ για να ελέγξετε την κατάστασή της. URL: '{showcase_url}'"
+        body=f"Μια νέα εφαρμογή με όνομα '{data_dict['title']}' δημιουργήθηκε με επιτυχία. Μπορείτε να επισκεφθείτε την εφαρμογή σας εδώ για να ελέγξετε την κατάστασή της. URL: '{showcase_url}'"
     )

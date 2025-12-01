@@ -1,5 +1,11 @@
 {% ckan_extends %}
 
+{% block bodytag %}
+  {{ super() }}
+  {% set is_sysadmin = h.check_access('sysadmin') %}
+  data-is-sysadmin="{{ is_sysadmin | tojson }}"
+{% endblock %}
+
     {%- block custom_styles %}
       {%- if g.site_custom_css -%}
       <style>

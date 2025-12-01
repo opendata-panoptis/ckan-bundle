@@ -1,8 +1,219 @@
 {% ckan_extends %}
 
 {% block add_button %}
-  {# Hide the Add button if we only want one set of subfields #}
-  {% if not field.repeating_once %}
-     {{ super() }}
+  {# Check if dataset has publisher field data #}
+  {% set has_publisher_data = false %}
+  {% if data and data.get('publisher') %}
+    {% set has_publisher_data = true %}
+  {% endif %}
+
+  {# Hide the Add button if we only want one set of subfields,
+     unless this is the publisher field without data #}
+  {% if not field.repeating_once or (field.field_name == 'publisher' and not has_publisher_data) %}
+     <div class="add-button-container" data-field-name="{{ field.field_name }}" data-repeating-once="{{ field.repeating_once|default(false) }}">
+       {{ super() }}
+     </div>
+
+     {# Add JavaScript for publisher field only #}
+     {% if field.field_name == 'publisher' and field.repeating_once %}
+       <script type="text/javascript">
+         (function() {
+           // =================================================================
+           // PUBLISHER FIELD SINGLE ENTRY CONTROLLER
+           // =================================================================
+           // This script ensures that the publisher field (which has repeating_once: true)
+           // can only have one entry at a time by hiding/showing the "Add" button
+           // based on whether a publisher entry already exists.
+           //
+           // Functionality:
+           // - Hides "Add" button when publisher entry exists and has content
+           // - Shows "Add" button when no publisher entry exists
+           // - Monitors DOM changes for dynamic updates
+           // =================================================================
+
+           // DEBUG CONFIGURATION - Set to false to disable console logging
+           var DEBUG_ENABLED = false;
+
+           /**
+            * Debug logging function - only logs if DEBUG_ENABLED is true
+            * @param {string} message - The message to log
+            * @param {...any} args - Additional arguments to log
+            */
+           function debugLog(message) {
+             if (DEBUG_ENABLED) {
+               var args = Array.prototype.slice.call(arguments);
+               console.log.apply(console, args);
+             }
+           }
+
+           debugLog('Publisher script loaded for field:', '{{ field.field_name }}');
+
+           /**
+            * Initialize the publisher button control system
+            * This function sets up all the event listeners and observers needed
+            * to manage the Add button visibility for the publisher field
+            */
+           function initPublisherButtonControl() {
+             debugLog('Initializing publisher button control...');
+
+             // Find all add button containers for publisher fields with repeating_once=true
+             var addButtonContainers = document.querySelectorAll('.add-button-container[data-field-name="publisher"][data-repeating-once="True"]');
+             debugLog('Found add button containers:', addButtonContainers.length);
+
+             // Process each add button container (should be only one for publisher)
+             addButtonContainers.forEach(function(addButtonContainer, index) {
+               debugLog('Processing container', index, addButtonContainer);
+
+               // Find the actual Add button and the form container
+               var addButton = addButtonContainer.querySelector('.btn');
+               var fieldContainer = addButtonContainer.closest('.form-group');
+
+               debugLog('Add button found:', !!addButton);
+               debugLog('Field container found:', !!fieldContainer);
+
+               if (addButton && fieldContainer) {
+
+                 /**
+                  * Check if the Add button should be hidden or shown
+                  * Rules:
+                  * - Hide if there are publisher entries with actual content or visible fields
+                  * - Show if no publisher entries exist or all are empty
+                  */
+                 function checkAndHideButton() {
+                   debugLog('Checking publisher button visibility...');
+
+                   // Find all publisher subfield groups in the container
+                   var publisherFieldGroups = fieldContainer.querySelectorAll('.scheming-subfield-group');
+                   var hasContentGroups = 0;
+
+                   debugLog('Found publisher field groups:', publisherFieldGroups.length);
+
+                   // Check each group to determine if it has meaningful content
+                   publisherFieldGroups.forEach(function(group, groupIndex) {
+                     var inputs = group.querySelectorAll('input[type="text"], input[type="url"], input[type="email"], textarea, select');
+                     var hasContent = false;
+                     var valueCount = 0;
+
+                     // Check if any input field has a non-empty value
+                     inputs.forEach(function(input) {
+                       if (input.value && input.value.trim() !== '') {
+                         hasContent = true;
+                         valueCount++;
+                       }
+                     });
+
+                     // Also check if the group has visible form fields (indicating active structure)
+                     var visibleFields = group.querySelectorAll('.form-group:not([style*="display: none"])');
+
+                     debugLog('Group', groupIndex, '- inputs with values:', valueCount, 'visible fields:', visibleFields.length, 'has content:', hasContent);
+
+                     // Count this group as having content if it has values or visible structure
+                     if (hasContent || visibleFields.length > 0) {
+                       hasContentGroups++;
+                     }
+                   });
+
+                   debugLog('Groups with content/visible fields:', hasContentGroups);
+
+                   // Apply visibility rules
+                   if (hasContentGroups > 0) {
+                     debugLog('Hiding add button - publisher entries exist');
+                     addButtonContainer.style.display = 'none';
+                   } else {
+                     debugLog('Showing add button - no publisher entries');
+                     addButtonContainer.style.display = 'block';
+                   }
+                 }
+
+                 // ============================================================
+                 // EVENT LISTENERS SETUP
+                 // ============================================================
+
+                 // Initial check when the script loads
+                 debugLog('Running initial check...');
+                 setTimeout(checkAndHideButton, 100);
+
+                 // Listen for Add button clicks
+                 // When user adds a new publisher entry, we need to hide the button
+                 addButton.addEventListener('click', function() {
+                   debugLog('Add button clicked!');
+                   // Delay to allow DOM to update with new elements
+                   setTimeout(checkAndHideButton, 300);
+                 });
+
+                 // Listen for Remove button clicks within the field container
+                 // When user removes a publisher entry, we may need to show the button again
+                 fieldContainer.addEventListener('click', function(e) {
+                   if (e.target && (e.target.classList.contains('btn-repeating-remove') ||
+                                   e.target.closest('.btn-repeating-remove'))) {
+                     debugLog('Remove button clicked!');
+                     // Delay to allow DOM to update after removal
+                     setTimeout(checkAndHideButton, 300);
+                   }
+                 });
+
+                 // ============================================================
+                 // MUTATION OBSERVER SETUP
+                 // ============================================================
+                 // This provides backup monitoring for DOM changes that might
+                 // not be caught by the click event listeners above
+
+                 if (window.MutationObserver) {
+                   debugLog('Setting up MutationObserver...');
+
+                   var observer = new MutationObserver(function(mutations) {
+                     var shouldCheck = false;
+
+                     // Check if any mutations involved adding or removing elements
+                     mutations.forEach(function(mutation) {
+                       if (mutation.type === 'childList' &&
+                           (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)) {
+                         debugLog('DOM mutation detected:', mutation.type, 'added:', mutation.addedNodes.length, 'removed:', mutation.removedNodes.length);
+                         shouldCheck = true;
+                       }
+                     });
+
+                     // If relevant changes detected, recheck button visibility
+                     if (shouldCheck) {
+                       debugLog('Running check due to DOM mutation...');
+                       setTimeout(checkAndHideButton, 100);
+                     }
+                   });
+
+                   // Start observing the field container for changes
+                   observer.observe(fieldContainer, {
+                     childList: true,    // Monitor direct children changes
+                     subtree: true       // Monitor all descendant changes
+                   });
+
+                   debugLog('MutationObserver started - monitoring field container for changes');
+                 } else {
+                   debugLog('MutationObserver not available - using event listeners only');
+                 }
+
+                 debugLog('Publisher button control initialized successfully');
+
+               } else {
+                 debugLog('ERROR: Missing required elements - addButton:', !!addButton, 'fieldContainer:', !!fieldContainer);
+               }
+             });
+           }
+
+           // ================================================================
+           // INITIALIZATION
+           // ================================================================
+           // Initialize when DOM is ready, regardless of current document state
+
+           if (document.readyState === 'loading') {
+             debugLog('Document still loading, waiting for DOMContentLoaded...');
+             document.addEventListener('DOMContentLoaded', initPublisherButtonControl);
+           } else {
+             debugLog('Document already loaded, initializing immediately...');
+             initPublisherButtonControl();
+           }
+
+         })(); // End of immediate function execution
+       </script>
+     {% endif %}
   {% endif %}
 {% endblock %}

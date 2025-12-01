@@ -8,7 +8,7 @@
 <div class="group-details">
   <dl>
     {% for f in c.scheming_fields %}
-    {% if f.field_name != 'image' %}
+    {% if f.field_name != 'image' and (not f.hidden_in_public) %}
     <div class="field-container">
       <dt>{{ h.scheming_language_text(f.label) }}:</dt>
       <dd>

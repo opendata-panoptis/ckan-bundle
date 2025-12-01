@@ -64,26 +64,39 @@
 
     {% if not 'data-service' in request.path and not 'decision' in request.path %}
 
-      <!-- Περιοχή εμφάνισης του Leaflet χάρτη -->
-      <div id="map" style="height: 300px; margin-bottom: 15px;"></div>
+      <!-- Χωρικό Φίλτρο με τίτλο και εικονίδιο -->
+      <section class="module module-narrow module-shallow">
+        <h2 class="module-heading">
+          <i class="fa fa-filter"></i>
+          {{ _('Χωρική Αναζήτηση') }}
+        </h2>
 
-      <!-- Κουμπί ενεργοποίησης χωρικής αναζήτησης -->
-      <div style="text-align: center; margin-bottom: 10px;">
-        <div style="display: inline-flex; align-items: center; gap: 8px;">
-          <button type="button"
-                  class="btn btn-outline-secondary btn-md"
-                  id="map-search-button"
-                  style="padding: 6px 12px; font-size: 1.2rem;">
-            <i class="fa fa-map"></i>
-          </button>
-          <span style="font-size: 0.85rem; font-weight: bold; color: #333;">
-            Αναζήτηση με βάση την τρέχουσα προβολή του χάρτη
-          </span>
+        <div class="module-content">
+          <!-- Περιοχή εμφάνισης του Leaflet χάρτη -->
+          <div id="map"></div>
+
+          <!-- Κουμπί ενεργοποίησης χωρικής αναζήτησης -->
+          <div class="map-search-controls">
+            <div class="map-search-button-wrapper">
+              <button type="button" class="btn btn-outline-secondary btn-md map-search-button" id="map-search-button">
+                <i class="fa fa-map"></i>
+              </button>
+              <div class="map-search-text-container">
+                <span class="map-search-label">
+                  Αναζήτηση με βάση την τρέχουσα προβολή του χάρτη
+                </span>
+                <!-- Το κουμπί × μέσα στο text container -->
+                <a class="spatial-filter-close" href="#" title="Κατάργηση χωρικού φίλτρου" style="display: none;">
+                  <i class="fa fa-solid fa-circle-xmark"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Κρυφό πεδίο όπου αποθηκεύεται το ext_bbox -->
+          <input type="hidden" name="ext_bbox" id="ext_bbox_input" value="">
         </div>
-      </div>
-
-      <!-- Κρυφό πεδίο όπου αποθηκεύεται το ext_bbox (bounding box) -->
-      <input type="hidden" name="ext_bbox" id="ext_bbox_input" value="">
+      </section>
 
     {% endif %}
 
@@ -107,6 +120,9 @@
     <!-- Leaflet βιβλιοθήκες -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- Map Search CSS -->
+    <link rel="stylesheet" href="{{ h.url_for_static('/map_search.css') }}" />
 
     <script src="/map_search.js"></script>
 

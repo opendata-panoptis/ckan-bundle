@@ -1,0 +1,57 @@
+{% extends "page.html" %}
+
+{% block breadcrumb_content %}
+  <li><a href="{{ h.url_for('stats.index') }}">{{ _('Statistics') }}</a></li>
+  <li class="active">{{ _('Datasets vs Data Services') }}</li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module">
+    <section id="stats-datasets-vs-services" class="module-content">
+      <h2>{{ _('Datasets vs Data Services') }}</h2>
+
+      {% if datasets_vs_services %}
+        <button id="toggleDatasetsServicesView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+          <i class="fa fa-table"></i> {{ _('Switch to Table') }}
+        </button>
+
+        <div id="datasets-services-table-view" style="display: none;">
+          <table class="table table-chunky table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>{{ _('Type') }}</th>
+                <th class="metric">{{ _('Count') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ _('Datasets') }}</td>
+                <td class="metric">{{ datasets_vs_services.datasets }}</td>
+              </tr>
+              <tr>
+                <td>{{ _('Data Services') }}</td>
+                <td class="metric">{{ datasets_vs_services.data_services }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">{{ _('No data available') }}</p>
+      {% endif %}
+    </section>
+
+    {% if datasets_vs_services %}
+      <div id="datasets-vs-services-pie-chart" style="width: 100%; height: 400px;"></div>
+    {% endif %}
+  </article>
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet 'ckanext/stats/snippets/menu.html', active='datasets_vs_services' %}
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/stats/datasets-vs-services.js') }}"></script>
+{% endblock %}

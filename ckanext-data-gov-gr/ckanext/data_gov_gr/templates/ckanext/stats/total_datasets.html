@@ -1,0 +1,53 @@
+{% extends "page.html" %}
+
+{% block breadcrumb_content %}
+  <li><a href="{{ h.url_for('stats.index') }}">{{ _('Statistics') }}</a></li>
+  <li class="active">{{ _('Total Number of Packages') }}</li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module">
+    <section id="stats-total-datasets" class="module-content">
+      <h2>{{ _('Total Number of Packages') }}</h2>
+
+      <button id="toggleTotalDatasetsView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+        <i class="fa fa-table"></i> {{ _('Switch to Table') }}
+      </button>
+
+      <div id="total-datasets-table-view" style="display: none;">
+        {% set xaxis = {'mode': 'time', 'timeformat': '%y-%b'} %}
+        {% set yaxis = {'min': 0} %}
+        <table class="table table-chunky table-bordered table-striped" data-module="" data-module-xaxis="{{ h.dump_json(xaxis) }}" data-module-yaxis="{{ h.dump_json(yaxis) }}">
+          <thead>
+            <tr>
+              <th>{{ _("Date") }}</th>
+              <th>{{ _("Total datasets") }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in raw_packages_by_week %}
+              <tr>
+                <th data-type="date" data-value="{{ row.date.strftime("%s") }}"><time datetime="{{ row.date.isoformat() }}">{{ h.render_datetime(row.date) }}</time></th>
+                <td>{{ row.total_packages }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div id="total-datasets-line-chart" style="width: 100%; height: 500px;"
+         data-series-total="{{ _('Total datasets') }}"
+         data-ylabel="{{ _('Total datasets') }}"></div>
+  </article>
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet 'ckanext/stats/snippets/menu.html', active='total_datasets' %}
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/stats/total-datasets-line.js') }}"></script>
+{% endblock %}

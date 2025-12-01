@@ -37,6 +37,16 @@
     </div>
 
     <div class="control-group form-field-wrapper pb-2">
+      <label class="control-label" for="order_index">{{ _('Σειρά εμφάνισης / Order index') }}</label>
+      <div class="controls">
+        <input type="number" id="order_index" name="order_index" class="form-control" min="0">
+        <span class="info-block">
+          {{ _('Μικρότερη τιμή = εμφανίζεται πιο ψηλά στη λίστα. Προαιρετικό.') }}
+        </span>
+      </div>
+    </div>
+
+    <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="value_uri">{{ _('URI Τιμής') }}</label>
       <div class="controls">
         <input type="text" id="value_uri" name="value_uri" class="form-control">

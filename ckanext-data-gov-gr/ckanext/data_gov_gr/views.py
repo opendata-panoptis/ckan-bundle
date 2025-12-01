@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect
+from flask import Blueprint, Response, redirect, stream_with_context
 from flask.views import MethodView
 from typing import Dict, Any
 import time
@@ -9,13 +9,81 @@ from ckan.lib.base import render, abort
 from ckan.lib.helpers import lang
 from ckan.plugins import toolkit
 from ckan.logic import NotFound, NotAuthorized, get_action
-from ckanext.data_gov_gr.helpers import get_config_as_bool
+from ckanext.data_gov_gr.helpers import get_config_as_bool, get_powerbi_embed_url
 
 from ckanext.data_gov_gr.logic.mqa_calculator import MQACalculator
+from ckanext.data_gov_gr.stats import DataGovStats
+import requests
 
 log = logging.getLogger(__name__)
 
 blueprint = Blueprint('dataset_type', __name__)
+
+GITBOOK_PDF_ENDPOINT = 'https://api.gitbook.com/v1/spaces/{space_id}/pdf'
+GITBOOK_PDF_TIMEOUT = 60
+
+
+@blueprint.route('/guides/pdf')
+def download_guides_pdf():
+    space_id = config.get('ckanext.data_gov_gr.gitbook.space_id')
+    token = config.get('ckanext.data_gov_gr.gitbook.api_token')
+
+    if not space_id or not token:
+        log.warning('GitBook PDF download requested without configured credentials')
+        abort(404)
+
+    api_url = GITBOOK_PDF_ENDPOINT.format(space_id=space_id.strip())
+    headers = {
+        'Authorization': f'Bearer {token.strip()}',
+        'Accept': 'application/json, application/pdf'
+    }
+
+    try:
+        response = requests.get(api_url, headers=headers, stream=True, timeout=GITBOOK_PDF_TIMEOUT)
+    except requests.RequestException as exc:
+        log.error('GitBook PDF request failed: %s', exc)
+        abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
+
+    if response.status_code >= 400:
+        try:
+            error_preview = response.text[:500]
+        except Exception:
+            error_preview = '<binary>'
+        log.error('GitBook PDF request failed (%s): %s', response.status_code, error_preview)
+        abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
+
+    content_type = response.headers.get('Content-Type', '')
+    if 'application/json' in content_type.lower():
+        try:
+            payload = response.json()
+        except ValueError:
+            log.error('GitBook PDF JSON response could not be decoded')
+            abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
+
+        download_url = payload.get('url')
+        if download_url:
+            return redirect(download_url)
+
+        log.error('GitBook PDF JSON response did not include a download URL: %s', payload)
+        abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
+
+    def generate():
+        try:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    yield chunk
+        finally:
+            response.close()
+
+    response_headers = {
+        'Content-Type': content_type or 'application/pdf',
+        'Content-Disposition': response.headers.get(
+            'Content-Disposition',
+            f'attachment; filename="guides-{space_id.strip()}.pdf"'
+        )
+    }
+
+    return Response(stream_with_context(generate()), headers=response_headers)
 
 def redirect_to_dataset_type():
     current_lang = lang()
@@ -185,6 +253,149 @@ blueprint.add_url_rule(
     methods=['GET']
 )
 
+
+@blueprint.route('/stats/total-datasets')
+def stats_total_datasets():
+    stats = DataGovStats()
+    raw_packages_by_week = [
+        {
+            'date': toolkit.h.date_str_to_datetime(week_date),
+            'total_packages': cumulative_num_packages
+        }
+        for week_date, _num_packages, cumulative_num_packages in stats.get_num_packages_by_week()
+    ]
+
+    return render(
+        'ckanext/stats/total_datasets.html',
+        {
+            'raw_packages_by_week': raw_packages_by_week
+        }
+    )
+
+
+@blueprint.route('/stats/dataset-revisions')
+def stats_dataset_revisions():
+    stats = DataGovStats()
+
+    raw_all_package_revisions = [
+        {
+            'date': toolkit.h.date_str_to_datetime(week_date),
+            'total_revisions': num_revisions
+        }
+        for week_date, _pkgs, num_revisions, _cumulative in stats.get_by_week('package_revisions')
+    ]
+
+    raw_new_datasets = [
+        {
+            'date': toolkit.h.date_str_to_datetime(week_date),
+            'new_packages': num_packages
+        }
+        for week_date, _pkgs, num_packages, _cumulative in stats.get_by_week('new_packages')
+    ]
+
+    return render(
+        'ckanext/stats/dataset_revisions.html',
+        {
+            'raw_all_package_revisions': raw_all_package_revisions,
+            'raw_new_datasets': raw_new_datasets
+        }
+    )
+
+
+@blueprint.route('/stats/most-edited')
+def stats_most_edited():
+    stats = DataGovStats()
+    extra_vars = {
+        'most_edited_packages': stats.most_edited_packages()
+    }
+    return render('ckanext/stats/most_edited.html', extra_vars)
+
+
+@blueprint.route('/stats/largest-groups')
+def stats_largest_groups():
+    stats = DataGovStats()
+    extra_vars = {
+        'largest_groups': stats.largest_groups()
+    }
+    return render('ckanext/stats/largest_groups.html', extra_vars)
+
+
+@blueprint.route('/stats/top-tags')
+def stats_top_tags():
+    stats = DataGovStats()
+    extra_vars = {
+        'top_tags': stats.top_tags()
+    }
+    return render('ckanext/stats/top_tags.html', extra_vars)
+
+
+@blueprint.route('/stats/top-creators')
+def stats_top_creators():
+    stats = DataGovStats()
+    extra_vars = {
+        'top_package_creators': stats.top_package_creators()
+    }
+    return render('ckanext/stats/top_creators.html', extra_vars)
+
+
+@blueprint.route('/stats/datasets-by-publisher-type')
+def stats_datasets_by_publisher_type():
+    stats = DataGovStats()
+    extra_vars = {
+        'datasets_by_publisher_type': stats.datasets_by_publisher_type(),
+    }
+    return render('ckanext/stats/datasets_by_publisher_type.html', extra_vars)
+
+
+@blueprint.route('/stats/datasets-per-organization')
+def stats_datasets_per_organization():
+    stats = DataGovStats()
+    extra_vars = {
+        'datasets_by_organization': stats.datasets_by_organization(),
+    }
+    return render('ckanext/stats/datasets_by_organization.html', extra_vars)
+
+
+@blueprint.route('/stats/datasets-vs-services')
+def stats_datasets_vs_services():
+    stats = DataGovStats()
+    extra_vars = {
+        'datasets_vs_services': stats.datasets_vs_services(),
+    }
+    return render('ckanext/stats/datasets_vs_services.html', extra_vars)
+
+
+@blueprint.route('/stats/datasets-by-hvd-category')
+def stats_datasets_by_hvd_category():
+    stats = DataGovStats()
+    extra_vars = {
+        'datasets_by_hvd_category': stats.datasets_by_hvd_category(),
+    }
+    return render('ckanext/stats/datasets_by_hvd_category.html', extra_vars)
+
+
+@blueprint.route('/stats/powerbi')
+def stats_powerbi():
+    """
+    Render the Power BI statistics page.
+
+    The embed URL is provided via the admin-configurable
+    ``ckanext.data_gov_gr.powerbi_embed_url`` option if set in
+    ``/ckan-admin/config``. If it is not set there, this view will fall back
+    to the ``powerbi.embed_url`` option from the configuration file.
+    """
+    embed_url = get_powerbi_embed_url()
+
+    if not embed_url:
+        log.info('Power BI stats page requested but powerbi.embed_url is not configured')
+
+    return render(
+        'ckanext/stats/powerbi.html',
+        {
+            'powerbi_embed_url': embed_url
+        }
+    )
+
 def more_page():
     """Render the More page with content sections as cards"""
     template_name = 'more_base.html'
@@ -249,4 +460,3 @@ blueprint.add_url_rule("/more", view_func=more_page, endpoint='more_page')
 
 def get_blueprint():
     return blueprint
-

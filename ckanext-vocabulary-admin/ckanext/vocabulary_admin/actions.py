@@ -231,6 +231,14 @@ def vocabularyadmin_vocabulary_show(context, data_dict):
                 tag.update(metadata)
             enriched_active_tags.append(tag)
 
+    def _sort_key(t):
+        order_index = t.get('order_index')
+        name = t.get('display_name') or t.get('name') or ''
+        if order_index is not None:
+            return (0, order_index, name.lower())
+        return (1, name.lower())
+
+    enriched_active_tags.sort(key=_sort_key)
     vocabulary_data['tags'] = enriched_active_tags
 
     return vocabulary_data

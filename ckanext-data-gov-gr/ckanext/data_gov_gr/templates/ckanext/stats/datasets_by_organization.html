@@ -1,0 +1,57 @@
+{% extends "page.html" %}
+
+{% block breadcrumb_content %}
+  <li><a href="{{ h.url_for('stats.index') }}">{{ _('Statistics') }}</a></li>
+  <li class="active">{{ _('Datasets Per Organization') }}</li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module">
+    <section id="stats-datasets-by-organization" class="module-content">
+      <h2>{{ _('Datasets Per Organization') }}</h2>
+
+      {% if datasets_by_organization %}
+        <button id="toggleOrgDatasetsView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+          <i class="fa fa-table"></i> {{ _('Switch to Table') }}
+        </button>
+
+        <div id="org-datasets-table-view" style="display: none;">
+          <table class="table table-chunky table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>{{ _('Organization') }}</th>
+                <th class="metric">{{ _('Number of datasets') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for org_id, org_title, num_datasets in datasets_by_organization %}
+                <tr>
+                  <td>
+                    <a href="{{ h.url_for('dataset.search', fq='owner_org:' + org_id) }}">{{ org_title }}</a>
+                  </td>
+                  <td class="metric">{{ num_datasets }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">{{ _('No organizations found') }}</p>
+      {% endif %}
+    </section>
+
+    {% if datasets_by_organization %}
+      <div id="datasets-by-organization-bar-chart" style="width: 100%; height: 500px;"></div>
+    {% endif %}
+  </article>
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet 'ckanext/stats/snippets/menu.html', active='datasets_per_organization' %}
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/stats/datasets-by-organization.js') }}"></script>
+{% endblock %}

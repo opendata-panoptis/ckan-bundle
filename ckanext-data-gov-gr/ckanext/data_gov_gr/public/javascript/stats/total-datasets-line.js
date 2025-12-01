@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateChartLayout() {
         const isMobile = window.innerWidth < 768;
+        const seriesName = chartContainer.dataset.seriesTotal || 'Total Datasets';
+        const yLabel = chartContainer.dataset.ylabel || 'Total Datasets';
 
         const option = {
             title: {
@@ -21,12 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 trigger: 'axis',
                 formatter: function(params) {
                     const date = new Date(params[0].value[0]);
-                    return date.toLocaleDateString('el', {
+                    const formatted = date.toLocaleDateString(document.documentElement.lang || 'el', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
-                    }) + '<br/>' +
-                    'Πλήθος Συνόλων Δεδομένων: ' + params[0].value[1];
+                    });
+                    const label = chartContainer.dataset.ylabel || 'Total Datasets';
+                    return formatted + '<br/>' + label + ': ' + params[0].value[1];
                 },
                 axisPointer: {
                     type: 'line',
@@ -74,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             yAxis: {
                 type: 'value',
-                name: 'Total Datasets',
+                name: yLabel,
                 nameLocation: 'middle',
                 nameGap: 50,
                 axisLabel: {
@@ -82,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             },
             series: [{
-                name: 'Total Datasets',
+                name: seriesName,
                 type: 'line',
                 smooth: true,
                 symbol: 'circle',
@@ -116,8 +119,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Προσαρμογή ύψους του container
         chartContainer.style.height = isMobile ? '400px' : '500px';
 
-        chart.resize();
         chart.setOption(option);
+        chart.resize();
     }
 
     // Αρχική ρύθμιση
@@ -132,36 +135,39 @@ document.addEventListener('DOMContentLoaded', function() {
         if (showingLine) {
             chartContainer.style.display = 'none';
             tableView.style.display = 'block';
-            toggleBtn.innerHTML = '<i class="fa fa-chart-line"></i> ' + 'Switch to Chart';
+            const chartLabel = toggleBtn.dataset.chartLabel || 'Switch to Chart';
+            toggleBtn.innerHTML = '<i class="fa fa-chart-line"></i> ' + chartLabel;
         } else {
             chartContainer.style.display = 'block';
             tableView.style.display = 'none';
-            toggleBtn.innerHTML = '<i class="fa fa-table"></i> ' + 'Switch to Table';
+            const tableLabel = toggleBtn.dataset.tableLabel || 'Switch to Table';
+            toggleBtn.innerHTML = '<i class="fa fa-table"></i> ' + tableLabel;
             chart.resize();
         }
         showingLine = !showingLine;
     });
+
+    function checkVisibility() {
+        if (!showingLine) {
+            chartContainer.style.display = 'none';
+            return;
+        }
+
+        const hash = window.location.hash;
+        const isActive = !hash || hash === '#total-datasets' || hash === '#stats-total-datasets';
+        chartContainer.style.display = isActive ? 'block' : 'none';
+
+        if (isActive) {
+            chart.resize();
+        }
+    }
+
+    checkVisibility();
+    window.addEventListener('hashchange', checkVisibility);
 
     // Responsive behavior
     window.addEventListener('resize', function() {
         chart.resize();
         updateChartLayout();
     });
-});
-
-// Απόκρυψη και εμφάνιση του div του chart των συνολικών datasets
-document.addEventListener('DOMContentLoaded', function() {
-    checkTotalDatasetsVisibility();
-    window.addEventListener('hashchange', checkTotalDatasetsVisibility);
-
-    function checkTotalDatasetsVisibility() {
-        const hash = window.location.hash;
-        const lineChart = document.getElementById('total-datasets-line-chart');
-
-        // Έλεγχος αν είμαστε στο total datasets section
-        const isTotalDatasetsSection = hash === '#total-datasets' || hash === '#stats-total-datasets';
-
-        // Ρύθμιση ορατότητας
-        lineChart.style.display = isTotalDatasetsSection ? 'block' : 'none';
-    }
 });

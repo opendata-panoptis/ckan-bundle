@@ -214,6 +214,11 @@ class MQACalculator:
         Returns:
             A dictionary containing all MQA scores
         """
+        # Reset per-dataset URL tracking so that accessibility
+        # status code analytics are scoped to this dataset only.
+        self._access_urls = []
+        self._download_urls = []
+
         # Store the resources for this dataset, filtering out bulk download resources
         all_resources = dataset_dict.get('resources', [])
         self._resources = self._filter_bulk_download_resources(all_resources)
@@ -269,10 +274,6 @@ class MQACalculator:
         - Spatial information (dct:spatial) - 20 points
         - Temporal information (dct:temporal) - 20 points
         """
-        resources = dataset_dict.get('resources', [])
-        if not resources:
-            return 0.0
-
         # For dataset-level criteria, we use binary values (0 or 1) instead of percentages
         has_keywords = 1 if dataset_dict.get('tags') and len(dataset_dict.get('tags', [])) > 0 else 0
 
@@ -606,12 +607,13 @@ class MQACalculator:
         has_description = bool(dataset_dict.get('description') or dataset_dict.get('notes'))
 
         # If there are no resources, we only check title and description
-        resources = dataset_dict.get('resources', [])
+        # (the rest of the DCAT-AP structure is enforced by the schema).
+        resources = self._filter_bulk_download_resources(dataset_dict.get('resources', []))
         if not resources:
             return has_title and has_description
 
-        # If there are resources, check if at least one has an access URL
-        has_access_url = any(bool(r.get('url')) for r in resources)
+        # If there are resources, check that all of them have an access URL
+        has_access_url = all(bool(r.get('url')) for r in resources)
 
         return has_title and has_description and has_access_url
 
@@ -634,8 +636,14 @@ class MQACalculator:
         """
         resources = self._filter_bulk_download_resources(dataset_dict.get('resources', []))
         n = len(resources)
+
+        # Check for DCAT-AP compliance (dataset-level)
+        dcat_compliance = 1 if self._check_dcat_ap_compliance(dataset_dict) else 0
+
+        # If there are no resources, only the dataset-level DCAT-AP
+        # compliance can contribute to the score.
         if n == 0:
-            return 0.0
+            return dcat_compliance * 30.0
 
         # 1) Count how many resources satisfy each sub-criterion
         format_specified_count = sum(1 for r in resources if r.get('format'))
@@ -647,9 +655,6 @@ class MQACalculator:
 
         # For format/media type from vocabulary, we'll use the higher of the two counts
         format_vocab_count = max(format_from_vocab_count, media_type_from_vocab_count)
-
-        # Check for DCAT-AP compliance (dataset-level)
-        dcat_compliance = 1 if self._check_dcat_ap_compliance(dataset_dict) else 0
 
         # 2) Calculate score as (prevalence * sub-criterion weight) for each sub-criterion
         score = (
@@ -705,21 +710,49 @@ class MQACalculator:
 
     def _get_resource_license_url(self, resource: Dict[str, Any]) -> str:
         """
-        Return the license URL defined on a resource (empty string if not present).
+        Return an effective license value defined on a resource
+        (empty string if not present).
+
+        The value is used to determine whether a resource has *any* license.
+        We look at several common fields, **πάντα** με πρώτη προτεραιότητα
+        το ``license``:
+
+        - ``license`` (Scheming field backed by the ``Licence`` vocabulary)
+          → σημαίνει “έχει άδεια και είναι από ελεγχόμενο λεξιλόγιο”
+        - ``license_url`` (harvested / mapped datasets)
+        - ``license_id``
+        - ``license_title``
         """
-        value = resource.get('license_url')
-        if value:
+        for field in ('license', 'license_url', 'license_id', 'license_title'):
+            value = resource.get(field)
+            if not value:
+                continue
             value_str = str(value).strip()
             if value_str:
                 return value_str
         return ''
 
     def _resource_has_license(self, resource: Dict[str, Any]) -> bool:
+        """
+        Check if a resource has any license information, regardless of source.
+
+        This returns True if *any* of the common license fields is present
+        (license_url, license, license_id, license_title).
+        """
         return bool(self._get_resource_license_url(resource))
 
     def _resource_license_matches_vocabulary(self, resource: Dict[str, Any]) -> bool:
-        license_url = self._get_resource_license_url(resource)
-        return bool(license_url and self._license_in_registry(license_url))
+        """
+        Check if the resource license comes from the controlled vocabulary.
+
+        On this portal, resource-level licenses selected from the controlled
+        vocabulary are stored in the ``license`` field (Scheming + Vocabulary
+        admin). If this field is present, we consider the license to be from
+        the controlled vocabulary. Licenses provided only via ``license_url``,
+        ``license_id`` or ``license_title`` are treated as non-vocabulary
+        licenses.
+        """
+        return bool(resource.get('license'))
 
     def _add_known_license(self, value: Optional[str]) -> None:
         if not value:
@@ -825,20 +858,24 @@ class MQACalculator:
         """
         resources = self._filter_bulk_download_resources(dataset_dict.get('resources', []))
         n = len(resources)
-        if n == 0:
-            return 0.0
 
-        # Check license information at the resource level
-        license_count = sum(1 for r in resources if self._resource_has_license(r))
-        license_score = (license_count / n) * 20
+        # Resource-level license information contributes only when there
+        # are non-bulk resources. Dataset-level criteria are evaluated
+        # regardless of the presence of resources.
+        license_score = 0.0
+        license_vocab_score = 0.0
+        if n > 0:
+            # Check license information at the resource level
+            license_count = sum(1 for r in resources if self._resource_has_license(r))
+            license_score = (license_count / n) * 20
 
-        # Check license vocabulary at the resource level
-        license_vocab_count = sum(
-            1
-            for r in resources
-            if self._resource_license_matches_vocabulary(r)
-        )
-        license_vocab_score = (license_vocab_count / n) * 10
+            # Check license vocabulary at the resource level
+            license_vocab_count = sum(
+                1
+                for r in resources
+                if self._resource_license_matches_vocabulary(r)
+            )
+            license_vocab_score = (license_vocab_count / n) * 10
 
         # For dataset-level criteria, we use binary values (0 or 1) instead of percentages
         has_access_rights = 1 if dataset_dict.get('access_rights') else 0
@@ -886,8 +923,10 @@ class MQACalculator:
         # 1) Count how many resources satisfy each sub-criterion
         rights_count = sum(1 for r in resources if r.get('rights'))
         size_count = sum(1 for r in resources if r.get('size'))
-        issue_count = sum(1 for r in resources if r.get('created'))
-        mod_count = sum(1 for r in resources if r.get('metadata_modified') )
+        # Treat dct:issued as the primary issue date and fall back
+        # to the resource creation date if issued is not present.
+        issue_count = sum(1 for r in resources if r.get('issued') or r.get('created'))
+        mod_count = sum(1 for r in resources if r.get('metadata_modified'))
 
         # 2) Calculate score as (prevalence * sub-criterion weight) for each sub-criterion
         score = (
@@ -1113,16 +1152,21 @@ class MQACalculator:
         """
         score = 0
 
-        # Check for license (via license_url)
-        license_url = self._get_resource_license_url(resource)
-        if license_url:
+        # Check for license presence (any source)
+        license_value = self._get_resource_license_url(resource)
+        has_vocab_license = bool(resource.get('license'))
+
+        if license_value:
+            # Any license (license_url, license, id, title) -> +20 points
             score += 20
-            log.debug(f"Resource license URL: {license_url}")
-            if self._license_in_registry(license_url):
-                log.debug("License found in known licenses list")
+            log.debug(f"Resource license value: {license_value}")
+
+            # License from controlled vocabulary (resource.license) -> +10 points
+            if has_vocab_license:
+                log.debug("License comes from controlled vocabulary (resource.license)")
                 score += 10
             else:
-                log.debug("License not found in known licenses list")
+                log.debug("License does not come from controlled vocabulary field")
 
         return score
 
@@ -1152,11 +1196,11 @@ class MQACalculator:
         if resource.get('size'):
             score += 5
 
-        # Check for issue date
-        if resource.get('created'):
+        # Check for issue date (dct:issued), falling back to creation date
+        if resource.get('issued') or resource.get('created'):
             score += 5
 
-        # Check for modification date
+        # Check for modification date (metadata last updated)
         if resource.get('metadata_modified'):
             score += 5
 
@@ -1177,7 +1221,9 @@ class MQACalculator:
         format_in_vocab = bool(resource.get('format') and self._is_format_in_vocabulary(resource.get('format')))
         media_type_in_vocab = bool(resource.get('mimetype') and self._is_mimetype_in_vocabulary(resource.get('mimetype')))
 
-        license_url = self._get_resource_license_url(resource)
+        license_value = self._get_resource_license_url(resource)
+        has_license = bool(license_value)
+        has_license_in_vocab = bool(resource.get('license'))
 
         criteria = {
             # Accessibility criteria
@@ -1194,8 +1240,8 @@ class MQACalculator:
             'is_machine_readable': resource.get('format', '').lower() in self.machine_readable_formats,
 
             # Metadata completeness criteria
-            'has_license': bool(license_url),
-            'has_license_in_vocabulary': bool(license_url and self._license_in_registry(license_url)),
+            'has_license': has_license,
+            'has_license_in_vocabulary': has_license_in_vocab,
 
             # Documentation criteria
             'has_rights': bool(resource.get('rights')),

@@ -6,7 +6,9 @@
   {% endblock %}
 {% endmacro %}
 
-<div data-module="decision-visibility">
+<div data-module="decision-visibility"
+     data-allow-org-admins-public="{{ h.allow_org_admins_public_decisions() | tojson }}">
+
   {% snippet "scheming/form_snippets/_organization_select.html",
     field=field,
     data=data,
@@ -21,12 +23,10 @@
       <label for="field-private" class="control-label">{{ _('Visibility') }}</label>
       <div class="controls">
         <select id="field-private" name="private" class="form-control form-select">
-          {% if h.check_access('sysadmin') %}
-            {# Sysadmin βλέπει και Public και Private #}
-            <option value="True" {% if data.private|trim == True %} selected="selected"{% endif %}>{{ _('Private') }}</option>
-            <option value="False" {% if data.private|trim == False %} selected="selected"{% endif %}>{{ _('Public') }}</option>
+          {% if h.check_access('sysadmin') or h.allow_org_admins_public_decisions() %}
+            <option value="True">{{ _('Private') }}</option>
+            <option value="False">{{ _('Public') }}</option>
           {% else %}
-            {# Διαχειριστής Οργανισμού βλέπει μόνο Private #}
             <option value="True" selected="selected">{{ _('Private') }}</option>
           {% endif %}
         </select>

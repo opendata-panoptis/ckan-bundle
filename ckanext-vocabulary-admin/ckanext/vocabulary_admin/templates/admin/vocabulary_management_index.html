@@ -34,15 +34,16 @@
           </thead>
           <tbody>
             {% for vocabulary in data.vocabularies %}
+              {% set tags = h.vocabularyadmin_get_tags(vocabulary.id) %}
               <tr>
                 <td>
                   <div class="vocabulary-header">
                     <strong>{{ vocabulary.name }}</strong>
                     <a href="{{ h.url_for('vocabularyadmin.vocabulary_edit', vocabulary_id=vocabulary.id) }}" class="btn btn-xs btn-default vocab-action-btn" title="{{ _('Edit') }}">
-                      <i class="fa fa-pencil"></i>
+                      <i class="fa fa-edit"></i>
                     </a>
                     <a href="{{ h.url_for('vocabularyadmin.vocabulary_delete', vocabulary_id=vocabulary.id) }}" class="btn btn-danger vocab-action-btn" title="{{ _('Delete') }}" onclick="return confirm('{{ _('Are you sure you want to delete this vocabulary and all its tags? This action cannot be undone.') }}');">
-                      <i class="fa fa-trash"></i>
+                      <i class="fa fa-trash-alt"></i>
                     </a>
                   </div>
                   {% set description = h.vocabularyadmin_get_vocabulary_description(vocabulary.id) %}
@@ -58,11 +59,11 @@
                     {% endif %}
                   </div>
                 </td>
-                <td>{{ vocabulary.tags.count() }}</td>
+                <td>{{ tags|length }}</td>
                 <td>
                   <div class="vocabulary-tags">
-                    {% if vocabulary.tags.count() > 0 %}
-                      {% for tag in vocabulary.tags[:20] %}
+                    {% if tags|length > 0 %}
+                      {% for tag in tags[:20] %}
                         {% set metadata = h.vocabularyadmin_get_tag_metadata(tag.id) %}
                         <div class="vocabulary-tag-container">
                           <span class="vocabulary-tag" data-id="{{ tag.id }}" 
@@ -87,10 +88,10 @@
                             {% endif %}
                           </span>
                           <a href="{{ h.url_for('vocabularyadmin.tag_edit', tag_id=tag.id) }}" class="btn btn-default tag-edit-button" title="{{ _('Edit') }}">
-                            <i class="fa fa-pencil"></i>
+                            <i class="fa fa-edit"></i>
                           </a>
                           <a href="{{ h.url_for('vocabularyadmin.tag_delete', tag_id=tag.id) }}" class="btn btn-danger tag-edit-button" title="{{ _('Delete') }}" onclick="return confirm('{{ _('Are you sure you want to delete this tag? This action cannot be undone.') }}');">
-                            <i class="fa fa-trash"></i>
+                            <i class="fa fa-trash-alt"></i>
                           </a>
                         </div>
                       {% endfor %}

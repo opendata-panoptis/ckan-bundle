@@ -84,11 +84,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (showingPie) {
             chartContainer.style.display = 'none';
             tableView.style.display = 'block';
-            toggleBtn.innerHTML = '<i class="fa fa-chart-pie"></i> ' + 'Switch to Chart';
+            const chartLabel = toggleBtn.dataset.chartLabel || 'Switch to Chart';
+            toggleBtn.innerHTML = '<i class="fa fa-chart-pie"></i> ' + chartLabel;
         } else {
             chartContainer.style.display = 'block';
             tableView.style.display = 'none';
-            toggleBtn.innerHTML = '<i class="fa fa-table"></i> ' + 'Switch to Table';
+            const tableLabel = toggleBtn.dataset.tableLabel || 'Switch to Table';
+            toggleBtn.innerHTML = '<i class="fa fa-table"></i> ' + tableLabel;
             chart.resize();
         }
         showingPie = !showingPie;

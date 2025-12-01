@@ -1,0 +1,60 @@
+{% extends "page.html" %}
+
+{% block breadcrumb_content %}
+  <li><a href="{{ h.url_for('stats.index') }}">{{ _('Statistics') }}</a></li>
+  <li class="active">{{ _('Datasets Per High-Value Category') }}</li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module">
+    <section id="stats-datasets-per-hvd" class="module-content">
+      <h2>{{ _('Datasets Per High-Value Category') }}</h2>
+      {% if datasets_by_hvd_category %}
+        <button id="toggleHvdView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+          <i class="fa fa-table"></i> {{ _('Switch to Table') }}
+        </button>
+
+        <div id="hvd-table-view" style="display: none;">
+          <table class="table table-chunky table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>{{ _('Category Code') }}</th>
+                <th>{{ _('Category Name') }}</th>
+                <th class="metric">{{ _('Number of datasets') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for hvd_code, hvd_label, num_datasets in datasets_by_hvd_category %}
+                <tr>
+                  <td>
+                    <a href="{{ h.url_for('dataset.search', q='hvd_category:*' + hvd_code + '*') }}">
+                      {{ hvd_code }}
+                    </a>
+                  </td>
+                  <td>{{ hvd_label }}</td>
+                  <td class="metric">{{ num_datasets }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">{{ _('No categories found') }}</p>
+      {% endif %}
+    </section>
+
+    {% if datasets_by_hvd_category %}
+      <div class="hvd-content" id="hvd-pie-chart" style="display: block; width: 100%; height: 400px;"></div>
+    {% endif %}
+  </article>
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet 'ckanext/stats/snippets/menu.html', active='datasets_by_hvd_category' %}
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/stats/datasets-by-hvd-category.js') }}"></script>
+{% endblock %}

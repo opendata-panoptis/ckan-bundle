@@ -1,0 +1,18 @@
+{%- set values = data[field.field_name] -%}
+<ol>
+{%- for element in values -%}
+  <li>
+    {%- if field.field_name == 'landing_page' -%}
+      {%- set label = element -%}
+      {%- if label and label|length > 80 -%}
+        {%- set label = label|truncate(80, True) -%}
+      {%- endif -%}
+      <a href="{{ element }}" target="_blank" rel="noopener noreferrer">{{ label }}</a>
+    {%- elif field.field_name == 'applicable_legislation' and element.startswith('http') -%}
+      <a href="{{ element }}" target="_blank" rel="noopener noreferrer">{{ element }}</a>
+    {%- else -%}
+      {{ element }}
+    {%- endif -%}
+  </li>
+{%- endfor -%}
+</ol>

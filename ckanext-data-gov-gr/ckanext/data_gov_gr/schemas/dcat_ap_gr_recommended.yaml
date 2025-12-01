@@ -53,6 +53,8 @@ dataset_fields:
   required_languages: [ el ]  # <-- Νέο custom field
   required: true
   form_snippet: fluent_markdown.html
+  display_snippet: html.html
+
   fluent_help_text:
     el:
       el: H Περιγραφή ενός Συνόλου Δεδομένων σε ελεύθερο κείμενο στα Ελληνικά
@@ -80,6 +82,7 @@ dataset_fields:
 
     - field_name: uri
       label: URI
+      display_snippet: link.html
 
     - field_name: name
       label:
@@ -94,6 +97,7 @@ dataset_fields:
     
     - field_name: url
       label: URL
+      display_snippet: link.html
       help_text:
         el: Μια διεύθυνση URL που σχετίζεται με την επαφή
         en: A URL associated with the contact
@@ -111,6 +115,7 @@ dataset_fields:
 
     - field_name: uri
       label: URI
+      display_snippet: link.html
 
     - field_name: name
       label:
@@ -157,6 +162,83 @@ dataset_fields:
   help_text:
     el: Οντότητα υπεύθυνη για τη διάθεση του συνόλου δεδομένων
     en: Entity responsible for making the dataset available
+
+- field_name: creator
+  label:
+    el: Δημιουργός
+    en: Creator
+  repeating_label:
+    el: Δημιουργός
+    en: Creator
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+      display_snippet: link.html
+      help_text:
+        el: URI του δημιουργού, εάν είναι διαθέσιμο
+        en: URI of the creator, if available
+
+    - field_name: name
+      label:
+        el: Όνομα
+        en: Name
+      help_text:
+        el: Όνομα της οντότητας ή του ατόμου που δημιούργησε το σύνολο δεδομένων
+        en: Name of the entity or person who created the dataset
+
+    - field_name: description
+      label:
+        el: Περιγραφή
+        en: Description
+      form_snippet: markdown.html
+      form_placeholder:
+        el: Λίγες πληροφορίες για αυτόν τον δημιουργό
+        en: A little information about this creator
+      help_text:
+        el: Περιγραφή του δημιουργού σε ελεύθερο κείμενο
+        en: Free-text description of the creator
+
+    - field_name: email
+      label:
+        el: Ηλεκτρονικό Ταχυδρομείο
+        en: Email
+      display_snippet: email.html
+      help_text:
+        el: Email επικοινωνίας του δημιουργού
+        en: Contact email of the creator
+
+    - field_name: url
+      label: URL
+      display_snippet: link.html
+      help_text:
+        el: URL για περισσότερες πληροφορίες σχετικά με τον δημιουργό
+        en: URL for more information about the creator
+
+    - field_name: type
+      label:
+        el: Τύπος Δημιουργού
+        en: Creator Type
+      preset: select
+      choices_helper: vocabularyadmin_get_tags_for_scheming
+      form_choices_helper_kwargs:
+        vocabulary_id_or_name: "Publisher type"
+      required: false
+      help_text:
+        el: Επιλέξτε τον τύπο δημιουργού από την ελεγχόμενη λίστα
+        en: Select the Creator type from the controlled list
+
+    - field_name: identifier
+      label:
+        el: Αναγνωριστικό
+        en: Identifier
+      help_text:
+        el: Μοναδικό αναγνωριστικό για τον δημιουργό
+        en: Unique identifier for the creator
+
+  help_text:
+    el: Οντότητα ή άτομο υπεύθυνο για τη δημιουργία του συνόλου δεδομένων
+    en: Entity or person responsible for creating the dataset
 
 - field_name: owner_org
   label:
@@ -254,6 +336,7 @@ dataset_fields:
     el: Εφαρμοστέα Nομοθεσία
     en: Applicable Legislation
   preset: multiple_text
+  default_jinja2: "{{ h.get_dataset_legislation_default() }}"
   validators: ignore_missing scheming_multiple_text
   help_text:
     el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση του συνόλου δεδομένων
@@ -440,6 +523,7 @@ resource_fields:
   label:
     el: Διεύθυνση Πρόσβασης URL
     en: Access URL
+  display_snippet: link.html
   help_text:
     el: Διεύθυνση URL που δίνει πρόσβαση στο σύνολο δεδομένων (προεπιλογή το πρότυπο των πόρων URL)
     en: URL that gives access to the dataset (defaults to the standard resource URL)

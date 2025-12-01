@@ -1,0 +1,57 @@
+{% extends "page.html" %}
+
+{% block breadcrumb_content %}
+  <li><a href="{{ h.url_for('stats.index') }}">{{ _('Statistics') }}</a></li>
+  <li class="active">{{ _('Datasets Per Publisher Type') }}</li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module">
+    <section id="stats-datasets-per-publisher-type" class="module-content">
+      <h2>{{ _('Datasets Per Publisher Type') }}</h2>
+
+      {% if datasets_by_publisher_type %}
+        <button id="togglePublisherDatasetView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+          <i class="fa fa-table"></i> {{ _('Switch to Table') }}
+        </button>
+
+        <div id="publisher-type-datasets-table-view" style="display: none;">
+          <table class="table table-chunky table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>{{ _('Publisher Type Code') }}</th>
+                <th>{{ _('Publisher Type Name') }}</th>
+                <th class="metric">{{ _('Number of datasets') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for type_code, type_label, num_datasets in datasets_by_publisher_type %}
+                <tr>
+                  <td>{{ type_code }}</td>
+                  <td>{{ type_label }}</td>
+                  <td class="metric">{{ num_datasets }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty">{{ _('No publisher types found') }}</p>
+      {% endif %}
+    </section>
+
+    {% if datasets_by_publisher_type %}
+      <div class="publisher-content" id="publisher-type-datasets-pie-chart" style="width: 100%; height: 400px;"></div>
+    {% endif %}
+  </article>
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet 'ckanext/stats/snippets/menu.html', active='datasets_by_publisher_type' %}
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/stats/datasets-by-publisher-type.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% ckan_extends %}
+
+{% set enable_ckan_login = h.enable_internal_login() %}
+
+          {% block users_list_inner %}
+            {% for user in page.items %}
+              <li class="user-list-item">
+                <div class="user-card">
+                  {{ h.linked_user(user.name, maxlength=20) }}
+                </div>
+              </li>
+            {% endfor %}
+          {% endblock %}

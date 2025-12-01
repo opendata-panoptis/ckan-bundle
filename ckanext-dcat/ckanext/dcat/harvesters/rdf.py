@@ -249,10 +249,38 @@ class DCATRDFHarvester(DCATHarvester):
                             title = dataset['title_translated'].get('el') or dataset['title_translated'].get('en')
                         if not title:
                             title = dataset.get('identifier') or dataset.get('uri') or 'Untitled Dataset'
-                        dataset['name'] = self._gen_new_name(title)
+
+                        # Προσπάθεια παραγωγής name
+                        raw_name = self._gen_new_name(title)
+
+                        # Log αν γύρισε κενό/None και βάλε ένα basic fallback
+                        if not raw_name:
+                            log.warning(
+                                "Empty name from _gen_new_name for title=%r dataset=%r",
+                                title, dataset
+                            )
+                            raw_name = 'dataset'
+
+                        # Βάλε prefix το harvest name για να είναι πάντα μοναδικό ανά source
+                        harvest_prefix = None
+                        try:
+                            harvest_prefix = source_dataset.name if source_dataset.name else None
+                        except Exception:
+                            harvest_prefix = None
+
+                        if not harvest_prefix:
+                            harvest_prefix = 'unknown-source'
+
+                        dataset['name'] = u'%s-%s' % (harvest_prefix, raw_name)
+
                     if dataset['name'] in self._names_taken:
+                        log.warning(
+                            "Duplicate dataset name detected: %r (dataset=%r)",
+                            dataset['name'], dataset
+                        )
                         suffix = len([i for i in self._names_taken if i.startswith(dataset['name'] + '-')]) + 1
                         dataset['name'] = '{}-{}'.format(dataset['name'], suffix)
+
                     self._names_taken.append(dataset['name'])
 
                     # Unless already set by the parser, get the owner organization (if any)

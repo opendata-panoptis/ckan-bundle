@@ -11,6 +11,7 @@ from ckan.model import meta, domain_object
 from ckan.model import types as _types
 from ckan.model.vocabulary import Vocabulary as CkanVocabulary
 from ckan.model.tag import Tag as CkanTag
+from ckanext.vocabulary_admin.model.tag_metadata import get_tag_metadata as _get_tag_metadata
 
 log = logging.getLogger(__name__)
 
@@ -34,9 +35,24 @@ def get_tags(vocabulary_id_or_name):
     Get all tags for a vocabulary.
     """
     vocabulary = get_vocabulary(vocabulary_id_or_name)
-    if vocabulary:
-        return vocabulary.tags
-    return []
+    if not vocabulary:
+        return []
+
+    # Convert to list so we can sort in Python based on our custom
+    # metadata (order_index) without relying on DB-specific NULL handling.
+    tags = list(vocabulary.tags)
+
+    def _sort_key(tag):
+        metadata = _get_tag_metadata(tag.id)
+        order_index = metadata.get('order_index') if metadata else None
+        name = getattr(tag, 'display_name', None) or getattr(tag, 'name', None) or ''
+
+        if order_index is not None:
+            return (0, order_index, name.lower())
+        return (1, name.lower())
+
+    tags.sort(key=_sort_key)
+    return tags
 
 def get_vocabulary_count():
     """

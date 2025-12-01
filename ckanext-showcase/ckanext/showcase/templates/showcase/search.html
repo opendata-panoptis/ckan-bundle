@@ -48,6 +48,19 @@
 
 {% block secondary_content %}
 {{ h.snippet('showcase/snippets/helper.html') }}
+
+{% set showcase_disclaimer = config.get('ckanext.data_gov_gr.showcase.disclaimer') %}
+{% if showcase_disclaimer %}
+  <section class="module module-narrow module-shallow showcase-disclaimer">
+    <h2 class="module-heading">
+      <i class="fa fa-info-circle"></i> {{ _('Αποποίηση ευθύνης') }}
+    </h2>
+    <div class="module-content">
+      {{ h.literal(showcase_disclaimer) }}
+    </div>
+  </section>
+{% endif %}
+
 <div class="filters">
   <div>
   {% for facet in facet_titles %}

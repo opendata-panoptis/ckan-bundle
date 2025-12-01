@@ -31,7 +31,7 @@ def custom_name_validator(value: Any, context: Dict) -> Any:
     # Διαφορετικό pattern για users vs άλλες οντότητες
     if is_user_validation and allow_any_character:
         name_match = re.compile(r'^[a-z0-9_\-.@]*$')
-        name_match = re.compile(r"^[^\s]{3,255}$")
+        name_match = re.compile(r"^[\s\S]{3,255}$")
     else:
         name_match = re.compile(r'^[a-z0-9_\-]*$')
 
@@ -42,9 +42,10 @@ def custom_name_validator(value: Any, context: Dict) -> Any:
     if len(value) < 2:
         raise toolkit.Invalid(_('Must be at least %s characters long') % 2)
 
-    if len(value) > PACKAGE_NAME_MAX_LENGTH:
-        raise toolkit.Invalid(_('Name must be a maximum of %i characters long')
-                              % PACKAGE_NAME_MAX_LENGTH)
+    if not (is_user_validation and allow_any_character):
+        if len(value) > PACKAGE_NAME_MAX_LENGTH:
+            raise toolkit.Invalid(_('Name must be a maximum of %i characters long')
+                                  % PACKAGE_NAME_MAX_LENGTH)
 
     if not name_match.match(value):
         raise toolkit.Invalid(_('Must be purely lowercase alphanumeric '

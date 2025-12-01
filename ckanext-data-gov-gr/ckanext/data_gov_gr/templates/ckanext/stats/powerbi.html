@@ -1,0 +1,34 @@
+{% extends "page.html" %}
+
+{% block breadcrumb_content %}
+  <li><a href="{{ h.url_for('stats.index') }}">{{ _('Statistics') }}</a></li>
+  <li class="active">{{ _('Power BI Αναφορές') }}</li>
+{% endblock %}
+
+{% block primary %}
+  <article class="module" role="main">
+    <div class="module-content">
+      <h1 class="page-heading">{{ _('Power BI Αναφορές') }}</h1>
+
+      {% if powerbi_embed_url %}
+        <div class="powerbi-container">
+          <iframe
+            src="{{ powerbi_embed_url }}"
+            title="Power BI report"
+            frameborder="0"
+            style="width: 100%; min-height: 700px;"
+            allowfullscreen="true">
+          </iframe>
+        </div>
+      {% else %}
+        <p class="empty">
+          {{ _('Power BI report is not configured. Please set the powerbi.embed_url option in the configuration.') }}
+        </p>
+      {% endif %}
+    </div>
+  </article>
+{% endblock %}
+
+{# Full-width page: no left sidebar #}
+{% block secondary %}{% endblock %}
+

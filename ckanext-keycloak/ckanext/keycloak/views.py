@@ -20,6 +20,7 @@ realm_name = tk.config.get('ckanext.keycloak.realm_name', environ.get('CKANEXT__
 redirect_uri = tk.config.get('ckanext.keycloak.redirect_uri', environ.get('CKANEXT__KEYCLOAK__REDIRECT_URI'))
 client_secret_key = tk.config.get('ckanext.keycloak.client_secret_key', environ.get('CKANEXT__KEYCLOAK__CLIENT_SECRET_KEY'))
 allow_any_character = tk.asbool(tk.config.get('ckanext.data_gov_gr.user.allow_any_character_in_username', False))
+use_sub_as_name = tk.asbool(tk.config.get('ckanext.keycloak.use_sub_as_name', False))
 
 client = KeycloakClient(server_url, client_id, realm_name, client_secret_key)
 
@@ -74,9 +75,15 @@ def sso_login():
     userinfo = client.get_user_info(token)
     log.info("SSO Login: {}".format(userinfo))
     if userinfo:
+        # Επιλέγουμε το username βάσει config
+        if use_sub_as_name:
+            username = 'user_' + userinfo['sub']
+        else:
+            username = userinfo['preferred_username']
+
         user_dict = {
-            'name': userinfo['preferred_username'],
-            'email': userinfo['email'],
+            'name': username,
+            'email': userinfo.get('email', userinfo['sub']+'@localhost.gr'),
             'password': helpers.generate_password(),
             'fullname': userinfo['name'],
             'plugin_extras': {

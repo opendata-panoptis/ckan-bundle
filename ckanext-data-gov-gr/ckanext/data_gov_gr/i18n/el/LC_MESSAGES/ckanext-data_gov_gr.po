@@ -19,6 +19,64 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.15.0\n"
 
+# Stats additions
+#: ckanext/data_gov_gr/templates/ckanext/stats/index.html:10
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_by_publisher_type.html:6
+msgid "Datasets Per Publisher Type"
+msgstr "Σύνολα δεδομένων ανά τύπο φορέα"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/index.html:12
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_by_organization.html:6
+msgid "Datasets Per Organization"
+msgstr "Σύνολα δεδομένων ανά οργανισμό"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/index.html:14
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_vs_services.html:6
+msgid "Datasets vs Data Services"
+msgstr "Σύνολα δεδομένων έναντι Υπηρεσιών δεδομένων"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/index.html:16
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_by_hvd_category.html:6
+msgid "Datasets Per High-Value Category"
+msgstr "Σύνολα δεδομένων ανά κατηγορία υψηλής αξίας"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_vs_services.html:24
+msgid "Type"
+msgstr "Τύπος"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_vs_services.html:25
+msgid "Count"
+msgstr "Πλήθος"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_vs_services.html:34
+msgid "Datasets"
+msgstr "Σύνολα δεδομένων"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_vs_services.html:38
+#: ckanext/data_gov_gr/i18n/el/LC_MESSAGES/ckanext-data_gov_gr.po:518
+msgid "Data Services"
+msgstr "Υπηρεσίες δεδομένων"
+
+#: JS toggle labels used via data attributes
+msgid "Switch to Chart"
+msgstr "Εναλλαγή σε διάγραμμα"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_vs_services.html:52
+msgid "No data available"
+msgstr "Δεν υπάρχουν διαθέσιμα δεδομένα"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_by_hvd_category.html:39
+msgid "No categories found"
+msgstr "Δεν βρέθηκαν κατηγορίες"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_by_hvd_category.html:21
+msgid "Category Code"
+msgstr "Κωδικός κατηγορίας"
+
+#: ckanext/data_gov_gr/templates/ckanext/stats/datasets_by_hvd_category.html:22
+msgid "Category Name"
+msgstr "Όνομα κατηγορίας"
+
 #: ckanext/data_gov_gr/templates/scheming/form_snippets/location.html:177
 msgid "Search..."
 msgstr "Αναζήτηση..."
@@ -686,7 +744,7 @@ msgid "No themes found"
 msgstr "Δεν βρέθηκαν θέματα"
 
 msgid "Organizations Per Publisher Type"
-msgstr "Οργανισμοί ανά Τύπον Εκδότη"
+msgstr "Οργανισμοί ανά Τύπο Εκδότη"
 
 msgid "Total Organizations"
 msgstr "Συνολικοί Οργανισμοί"
@@ -705,6 +763,13 @@ msgstr "Αριθμός Οργανισμών"
 
 msgid "No publisher types found"
 msgstr "Δεν βρέθηκαν τύποι εκδοτών"
+
+msgid "No dataset revisions found"
+msgstr "Δεν βρέθηκαν αναθεωρήσεις συνόλων δεδομένων"
+
+msgid "Statistics Menu"
+msgstr "Μενού στατιστικών"
+
 msgid "Total Number of Packages"
 msgstr "Πλήθος συνόλων δεδομένων και APIs"
 
@@ -713,3 +778,51 @@ msgstr "Αναθεωρήσεις συνόλων δεδομένων και APIs �
 
 msgid "Most Edited Packages"
 msgstr "Περισσότερο επεξεργασμένα σύνολα δεδομένων και APIs "
+
+msgid "Largest Groups"
+msgstr "Μεγαλύτερες ομάδες"
+
+msgid "Top Tags"
+msgstr "Κορυφαίες ετικέτες"
+
+msgid "Users Creating Most Datasets"
+msgstr "Χρήστες που δημιουργούν τα περισσότερα σύνολα δεδομένων"
+
+msgid "No edited datasets"
+msgstr "Δεν βρέθηκαν επεξεργασμένα σύνολα δεδομένων"
+
+msgid "No groups"
+msgstr "Δεν βρέθηκαν ομάδες"
+
+msgid "No tags found"
+msgstr "Δεν βρέθηκαν ετικέτες"
+
+msgid "No users found"
+msgstr "Δεν βρέθηκαν χρήστες"
+
+msgid "Group"
+msgstr "Ομάδα"
+
+msgid "Tag Name"
+msgstr "Όνομα ετικέτας"
+
+msgid "Number of datasets"
+msgstr "Αριθμός συνόλων δεδομένων"
+
+msgid "Number of Datasets"
+msgstr "Αριθμός συνόλων δεδομένων"
+
+msgid "Number of edits"
+msgstr "Αριθμός επεξεργασιών"
+# Chart legends / labels
+msgid "All dataset revisions"
+msgstr "Σύνολο αναθεωρήσεων"
+
+msgid "New datasets"
+msgstr "Νέα σύνολα δεδομένων"
+
+msgid "Total datasets"
+msgstr "Σύνολα δεδομένων (σύνολο)"
+
+msgid "Source Code"
+msgstr "Πηγαίος κώδικας"

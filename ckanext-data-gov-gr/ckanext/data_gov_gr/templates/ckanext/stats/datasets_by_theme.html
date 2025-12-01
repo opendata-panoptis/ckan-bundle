@@ -10,7 +10,7 @@
     <section id="stats-datasets-per-theme" class="module-content">
       <h2>{{ _('Datasets Per Theme') }}</h2>
       {% if datasets_by_theme %}
-        <button id="toggleView" class="btn btn-default mb-5">
+        <button id="toggleView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
           <i class="fa fa-table"></i> {{ _('Switch to Table') }}
         </button>
 
@@ -50,34 +50,7 @@
 {% endblock %}
 
 {% block secondary_content %}
-  <section class="module module-narrow">
-    <h2 class="module-heading"><i class="fa fa-chart-bar"></i> {{ _('Statistics Menu') }}</h2>
-    <nav data-module="stats-nav">
-      <ul class="unstyled nav nav-simple">
-        <li class="nav-item active">
-          <a href="{{ h.url_for('stats.datasets_by_theme') }}">{{ _('Datasets Per Theme') }}</a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ h.url_for('stats.organizations_by_publisher_type') }}">{{ _('Organizations Per Publisher Type') }}</a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ h.url_for('stats.index') }}#stats-total-datasets">{{ _('Total Number of Packages') }}</a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ h.url_for('stats.index') }}#stats-dataset-revisions">{{ _('Package Revisions per Week') }}</a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ h.url_for('stats.index') }}#stats-most-edited">{{ _('Most Edited Packages') }}</a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ h.url_for('stats.index') }}#stats-largest-groups">{{ _('Largest Groups') }}</a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ h.url_for('stats.index') }}#stats-top-tags">{{ _('Top Tags') }}</a>
-        </li>
-      </ul>
-    </nav>
-  </section>
+  {% snippet 'ckanext/stats/snippets/menu.html', active='datasets_by_theme' %}
 {% endblock %}
 
 {% block scripts %}

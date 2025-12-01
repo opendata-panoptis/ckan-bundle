@@ -1,0 +1,49 @@
+<section class="module module-narrow">
+  <h2 class="module-heading"><i class="fa fa-chart-bar"></i> {{ _('Statistics Menu') }}</h2>
+  <nav data-module="stats-nav">
+    <ul class="unstyled nav nav-simple">
+      <li class="nav-item{% if active == 'datasets_by_theme' %} active{% endif %}">
+        <a href="{{ h.url_for('stats.datasets_by_theme') }}">{{ _('Datasets Per Theme') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'datasets_by_publisher_type' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_datasets_by_publisher_type') }}">{{ _('Datasets Per Publisher Type') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'datasets_per_organization' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_datasets_per_organization') }}">{{ _('Datasets Per Organization') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'datasets_vs_services' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_datasets_vs_services') }}">{{ _('Datasets vs Data Services') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'datasets_by_hvd_category' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_datasets_by_hvd_category') }}">{{ _('Datasets Per High-Value Category') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'organizations_by_publisher_type' %} active{% endif %}">
+        <a href="{{ h.url_for('stats.organizations_by_publisher_type') }}">{{ _('Organizations Per Publisher Type') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'total_datasets' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_total_datasets') }}">{{ _('Total Number of Packages') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'dataset_revisions' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_dataset_revisions') }}">{{ _('Package Revisions per Week') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'most_edited' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_most_edited') }}">{{ _('Most Edited Packages') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'largest_groups' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_largest_groups') }}">{{ _('Largest Groups') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'top_tags' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_top_tags') }}">{{ _('Top Tags') }}</a>
+      </li>
+      <li class="nav-item{% if active == 'top_creators' %} active{% endif %}">
+        <a href="{{ h.url_for('dataset_type.stats_top_creators') }}">{{ _('Users Creating Most Datasets') }}</a>
+      </li>
+      {% set powerbi_url = h.get_powerbi_embed_url() %}
+      {% if powerbi_url %}
+        <li class="nav-item{% if active == 'powerbi' %} active{% endif %}">
+          <a href="{{ h.url_for('dataset_type.stats_powerbi') }}">{{ _('Power BI Αναφορές') }}</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+</section>

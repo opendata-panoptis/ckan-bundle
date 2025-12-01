@@ -41,6 +41,21 @@ fields:
     en: Organization URL
     el: URL οργανισμού
   display_snippet: link.html
+
+- field_name: receive_dataset_email_updates
+  label:
+    en: Receive Email Updates for using Datasets in Applications
+    el: Λήψη Ενημερωτικών Email για χρήση Συνόλων Δεδομένων σε Εφαρμογές
+  preset: select
+  hidden_in_public: true
+  choices:
+    - value: true
+      label: "Ναι"
+    - value: false
+      label: "Όχι"
+  required: false
+  validators: scheming_required boolean_validator
+  output_validators: boolean_validator
   
 - field_name: publishertype
   label:

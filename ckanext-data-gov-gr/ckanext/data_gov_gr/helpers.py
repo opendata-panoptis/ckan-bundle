@@ -1,4 +1,5 @@
 import logging
+import json
 import ckan.plugins.toolkit as toolkit
 from ckan.lib import helpers as core_helpers
 from ckan.lib.helpers import lang
@@ -305,6 +306,23 @@ def get_access_rights_type():
     from ckan.common import request
     return request.params.get('access_rights_type', '')
 
+
+def get_dataset_legislation_default():
+    """
+    Επιστρέφει την προεπιλεγμένη τιμή για το πεδίο Εφαρμοστέα Νομοθεσία
+    κατά τη δημιουργία συνόλου δεδομένων, με βάση το access_rights_type.
+    """
+    access_type = get_access_rights_type()
+
+    if access_type == 'open':
+        # Προεπιλεγμένη νομοθεσία για ανοιχτά δεδομένα
+        return get_config_value('ckanext.data_gov_gr.dataset.legislation.open', '')
+    if access_type == 'protected':
+        # Προεπιλεγμένη νομοθεσία για προστατευόμενα δεδομένα
+        return get_config_value('ckanext.data_gov_gr.dataset.legislation.protected', 'DGA')
+
+    return ''
+
 def get_config_as_bool(key, default=False):
     """
     Get configuration value as boolean.
@@ -317,7 +335,19 @@ def get_config_as_bool(key, default=False):
         bool: Boolean value of the configuration
     """
     value = toolkit.config.get(key, default)
-    return toolkit.asbool(value)
+
+    # Some runtime-edited values can end up as lists (eg hidden+checkbox
+    # combinations). In that case, use the last submitted value.
+    if isinstance(value, list):
+        if not value:
+            return default
+        value = value[-1]
+
+    try:
+        return toolkit.asbool(value)
+    except Exception:
+        log.warning('Invalid boolean config %s=%r, using default=%r', key, value, default)
+        return default
 
 def get_config_value(key, default=""):
     """
@@ -325,6 +355,133 @@ def get_config_value(key, default=""):
     """
     value = toolkit.config.get(key)
     return value if value is not None else default
+
+
+def get_powerbi_embed_url():
+    """
+    Return the configured Power BI embed URL.
+
+    Priority:
+    1. Runtime-editable admin config: ``ckanext.data_gov_gr.powerbi_embed_url``
+    2. Fallback config file option: ``powerbi.embed_url``
+    """
+    # 1. Admin-configurable value from /ckan-admin/config
+    admin_value = toolkit.config.get('ckanext.data_gov_gr.powerbi_embed_url')
+    if admin_value:
+        return admin_value.strip()
+
+    # 2. Fallback to static config option in ckan.ini
+    ini_value = toolkit.config.get('powerbi.embed_url')
+    if ini_value:
+        return ini_value.strip()
+
+    return ""
+
+
+def _resolve_dataset_item_url(raw_value: str) -> str | None:
+    """
+    Μετατρέπει την τιμή του πεδίου \"query\" σε πλήρες URL.
+
+    Υποστηρίζει:
+      - Πλήρες URL (http/https) -> επιστρέφεται όπως είναι
+      - Σχετικό path που ξεκινά με \"/\" (π.χ. \"/dataset/?is_hvd=Yes\")
+      - Path χωρίς αρχικό \"/\" (π.χ. \"dataset/?is_hvd=Yes\") που
+        μετατρέπεται σε \"/dataset/?is_hvd=Yes\"
+      - Μόνο το query μέρος (π.χ. \"fq=is_hvd:true\" ή \"?fq=is_hvd:true\"),
+        οπότε το προσαρτά στο ``/dataset``.
+    """
+    raw = (raw_value or '').strip()
+    if not raw:
+        return None
+
+    lower = raw.lower()
+    if lower.startswith('http://') or lower.startswith('https://') or raw.startswith('/'):
+        return raw
+
+    # Υποστήριξη για τιμές τύπου \"dataset/?is_hvd=Yes\" χωρίς αρχικό '/'
+    if raw.startswith('dataset'):
+        return '/' + raw
+
+    base_url = core_helpers.url_for('dataset.search')
+    # Αφαιρούμε αρχικό '?' αν υπάρχει, για να ενώσουμε σωστά
+    if raw.startswith('?'):
+        raw = raw[1:]
+
+    sep = '&' if '?' in base_url else '?'
+    return f'{base_url}{sep}{raw}'
+
+def get_dataset_menu_items():
+    """
+    Επιστρέφει τις παραμετρικές επιλογές του dropdown για τα σύνολα δεδομένων,
+    όπως έχουν οριστεί από το /ckan-admin/config.
+
+    Προτεραιότητα πηγών:
+
+      1. Νέα JSON ρύθμιση ``ckanext.data_gov_gr.menu.dataset.items`` (δυναμικός αριθμός επιλογών),
+         π.χ. ::
+
+           [
+             {\"label\": \"HVDs\", \"query\": \"fq=is_hvd:true\"},
+             {\"label\": \"Ιστορικά\", \"query\": \"fq=dataset_type:historical\"}
+           ]
+
+         Όπου:
+           - ``label``: το κείμενο που θα εμφανιστεί στο dropdown
+           - ``query``: το κομμάτι του CKAN search query (π.χ. ``fq=...``)
+
+    Επιστρέφει λίστα από dictionaries με πεδία:
+      - ``label``: το κείμενο που θα εμφανιστεί
+      - ``url``: πλήρες URL (είτε όπως δόθηκε, είτε προσαρμοσμένο στο ``/dataset``)
+    """
+
+    # Δυναμική ρύθμιση με JSON
+    # Χρησιμοποιούμε το raw από το config ώστε να ξεχωρίζουμε
+    # την περίπτωση «δεν έχει οριστεί καθόλου» (None) από την
+    # περίπτωση «ορίστηκε αλλά είναι κενό/[]».
+    raw = toolkit.config.get('ckanext.data_gov_gr.menu.dataset.items')
+    if raw is not None:
+        raw_str = str(raw).strip()
+        if raw_str:
+            try:
+                parsed = json.loads(raw_str)
+                items = []
+                if isinstance(parsed, list):
+                    for entry in parsed:
+                        if not isinstance(entry, dict):
+                            continue
+                        label = (entry.get('label') or '').strip()
+                        query = (entry.get('query') or '').strip()
+                        if not label or not query:
+                            continue
+
+                        url = _resolve_dataset_item_url(query)
+                        if not url:
+                            continue
+
+                        items.append({'label': label, 'url': url})
+
+                # Ακόμη κι αν η λίστα είναι κενή, σεβόμαστε τη ρύθμιση JSON
+                return items
+            except Exception as e:
+                log.exception('Error parsing ckanext.data_gov_gr.menu.dataset.items JSON: %s', e)
+                # Σε περίπτωση σφάλματος επιστρέφουμε κενή λίστα
+                return []
+        else:
+            # Έχει οριστεί το key αλλά είναι κενό -> σημαίνει
+            # «καμία επιλογή» για το dropdown
+            return []
+
+    # Αν δεν έχει οριστεί καθόλου η JSON ρύθμιση, δεν εμφανίζονται επιλογές
+    return []
+
+
+def has_gitbook_pdf_export():
+    """
+    Check whether the GitBook PDF export configuration is complete.
+    """
+    space_id = get_config_value('ckanext.data_gov_gr.gitbook.space_id')
+    token = get_config_value('ckanext.data_gov_gr.gitbook.api_token')
+    return bool(space_id and token)
 
 
 def _localize_data_service_label(text):
@@ -450,6 +607,27 @@ def get_data_service_guides_url():
     """
     return get_config_value('ckanext.data_gov_gr.data_service_guides_url')
 
+
+def allow_org_admins_public_decisions():
+    """
+    Ελέγχει αν οι διαχειριστές οργανισμών και οι εκδότες, μπορούν να δημιουργούν δημόσια Decisions.
+    Αν η παράμετρος είναι κενή, σχόλιο, ή απουσιάζει, επιστρέφει True.
+    """
+    value = toolkit.config.get('ckanext.data_gov_gr.decision.allow_org_admins_public')
+
+    # Αν η παράμετρος απουσιάζει, είναι None, κενή string, ή περιέχει μόνο σχόλιο
+    if value is None:
+        return True
+
+    value_str = str(value).strip()
+
+    # Αν είναι κενή ή ξεκινά με # (σχόλιο)
+    if value_str == '' or value_str.startswith('#'):
+        return True
+
+    # Αν έχει τιμή, μετατρέπεται σε boolean
+    return toolkit.asbool(value)
+
 def get_helpers():
     return {
         "vocabulary_facet_item_label": vocabulary_facet_item_label,
@@ -459,13 +637,18 @@ def get_helpers():
         "fluent_language_is_required": fluent_language_is_required,
         "get_organizations_stats": get_organizations_stats,
         'get_access_rights_type': get_access_rights_type,
+        'get_dataset_legislation_default': get_dataset_legislation_default,
         'get_data_service_guides_url': get_data_service_guides_url,
         'get_config_as_bool': get_config_as_bool,
         'get_config_value': get_config_value,
+        'get_powerbi_embed_url': get_powerbi_embed_url,
+        'has_gitbook_pdf_export': has_gitbook_pdf_export,
         'humanize_entity_type': humanize_entity_type,
         'should_hide_mqa_tab': should_hide_mqa_tab,
         'should_disable_protected_data': should_disable_protected_data,
         'should_hide_azure_translation': should_hide_azure_translation,
         'should_show_decision_menu': should_show_decision_menu,
-        'should_show_decision_button': should_show_decision_button
+        'should_show_decision_button': should_show_decision_button,
+        'allow_org_admins_public_decisions': allow_org_admins_public_decisions,
+        'get_dataset_menu_items': get_dataset_menu_items
     }

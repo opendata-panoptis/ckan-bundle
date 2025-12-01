@@ -12,6 +12,11 @@ from ckan.model import meta, domain_object
 from ckan.model import types as _types
 from ckan.model.tag import Tag as CkanTag
 
+# Ειδική τιμή (sentinel) για να ξεχωρίζουμε
+# την περίπτωση «μην αλλάξεις το order_index»
+# από την περίπτωση «καθάρισε το order_index (None)».
+_ORDER_INDEX_SENTINEL = object()
+
 log = logging.getLogger(__name__)
 
 vocabulary_tag_metadata_table = Table('vocabulary_tag_metadata', meta.metadata,
@@ -23,6 +28,7 @@ vocabulary_tag_metadata_table = Table('vocabulary_tag_metadata', meta.metadata,
     Column('description_el', types.UnicodeText),
     Column('description_en', types.UnicodeText),
     Column('is_active', Boolean, default=True, nullable=False),
+    Column('order_index', types.Integer),
 )
 
 class VocabularyTagMetadata(domain_object.DomainObject):
@@ -45,8 +51,9 @@ class VocabularyTagMetadata(domain_object.DomainObject):
         return query.filter_by(**kwargs).first()
 
     @classmethod
-    def create(cls, tag_id, value_uri=None, label_el=None, label_en=None, 
-               description_el=None, description_en=None, is_active=True):
+    def create(cls, tag_id, value_uri=None, label_el=None, label_en=None,
+               description_el=None, description_en=None, is_active=True,
+               order_index=None):
         """
         Create a new tag metadata object.
         """
@@ -57,7 +64,8 @@ class VocabularyTagMetadata(domain_object.DomainObject):
             label_en=label_en,
             description_el=description_el,
             description_en=description_en,
-            is_active=is_active
+            is_active=is_active,
+            order_index=order_index
         )
 
         meta.Session.add(metadata)
@@ -66,8 +74,9 @@ class VocabularyTagMetadata(domain_object.DomainObject):
         return metadata
 
     @classmethod
-    def update(cls, tag_id, value_uri=None, label_el=None, label_en=None, 
-               description_el=None, description_en=None, is_active=None):
+    def update(cls, tag_id, value_uri=None, label_el=None, label_en=None,
+               description_el=None, description_en=None, is_active=None,
+               order_index=_ORDER_INDEX_SENTINEL):
         """
         Update an existing tag metadata object.
         """
@@ -81,7 +90,8 @@ class VocabularyTagMetadata(domain_object.DomainObject):
                 label_en=label_en,
                 description_el=description_el,
                 description_en=description_en,
-                is_active=True if is_active is None else is_active
+                is_active=True if is_active is None else is_active,
+                order_index=None if order_index is _ORDER_INDEX_SENTINEL else order_index
             )
 
         if value_uri is not None:
@@ -96,6 +106,13 @@ class VocabularyTagMetadata(domain_object.DomainObject):
             metadata.description_en = description_en
         if is_active is not None:
             metadata.is_active = is_active
+
+        # order_index:
+        # - αν ο caller δεν το δώσει καθόλου, το αφήνουμε όπως είναι
+        # - αν δώσει ακέραιο, αποθηκεύουμε αυτή την τιμή
+        # - αν δώσει ρητά None, καθαρίζουμε το πεδίο (το κάνουμε None)
+        if order_index is not _ORDER_INDEX_SENTINEL:
+            metadata.order_index = order_index
 
         meta.Session.add(metadata)
         meta.Session.commit()
@@ -122,7 +139,8 @@ def get_tag_metadata(tag_id):
         'label_en': metadata.label_en,
         'description_el': metadata.description_el,
         'description_en': metadata.description_en,
-        'is_active': metadata.is_active
+        'is_active': metadata.is_active,
+        'order_index': metadata.order_index
     }
 
 

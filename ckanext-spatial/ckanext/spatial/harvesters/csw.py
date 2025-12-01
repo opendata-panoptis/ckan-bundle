@@ -152,6 +152,20 @@ class CSWHarvester(SpatialHarvester, SingletonPlugin):
         log = logging.getLogger(__name__ + '.CSW.fetch')
         log.debug('CswHarvester fetch_stage for object: %s', harvest_object.id)
 
+        # The fetch stage runs in a separate process from gather stage,
+        # so we need to reload the harvest source configuration
+        if hasattr(harvest_object.job.source, 'config') and harvest_object.job.source.config:
+            try:
+                import json
+                self.source_config = json.loads(harvest_object.job.source.config)
+                log.debug('Loaded source config in fetch stage: %r', self.source_config)
+            except (ValueError, TypeError) as e:
+                log.warning('Invalid JSON in harvest source config, using defaults: %s', e)
+                self.source_config = {}
+        else:
+            self.source_config = {}
+            log.debug('No source config found in fetch stage, using defaults')
+
         url = harvest_object.source.url
         try:
             self._setup_csw_client(url)
@@ -270,4 +284,76 @@ class CSWHarvester(SpatialHarvester, SingletonPlugin):
             return None
 
     def _setup_csw_client(self, url):
-        self.csw = CswService(url)
+        """
+        Initializes the CSW client with optional SSL verification bypass.
+
+        SSL verification can be disabled per harvest source by setting:
+        "disable_ssl_verification": true in the harvest source configuration.
+
+        This method uses temporary monkey patching to disable SSL verification
+        only during CSW client creation, then restores normal behavior.
+
+        Args:
+            url (str): The CSW server URL
+
+        Raises:
+            Exception: If CSW client creation fails completely
+
+        Sets:
+            self.csw: The configured CSW client
+            self._custom_session: Requests session with SSL settings (or None)
+        """
+        import requests
+        import urllib3
+
+        log = logging.getLogger(__name__ + '.CSW.setup')
+
+        # STEP 1: Parse harvest source configuration for SSL verification setting
+        disable_ssl_verification = False
+        if hasattr(self, 'source_config') and self.source_config:
+            disable_ssl_verification = self.source_config.get('disable_ssl_verification', False)
+            # Handle string values: "true", "1", "yes", "on" -> True
+            if isinstance(disable_ssl_verification, str):
+                disable_ssl_verification = disable_ssl_verification.lower() in ('true', '1', 'yes', 'on')
+
+        if disable_ssl_verification:
+            log.warning('SSL verification disabled for CSW client: %s', url)
+
+            # STEP 2: Suppress SSL warnings to avoid log pollution
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+            # STEP 3: Create a dedicated requests Session with SSL verification disabled
+            # This session is stored for potential future use in custom GET requests
+            session = requests.Session()
+            session.verify = False  # Disable SSL certificate verification
+            self._custom_session = session
+
+            # STEP 4: Store original requests functions for restoration
+            original_request = requests.request
+
+            # Create temporary patched function that always disables SSL verification
+            def temp_patched_request(*args, **kwargs):
+                kwargs['verify'] = False
+                return original_request(*args, **kwargs)
+
+            # STEP 5: Apply temporary monkey patch
+            # This affects ONLY the CSW client creation process
+            requests.request = temp_patched_request
+
+            try:
+                # STEP 6: Create CSW client while monkey patch is active
+                # The client will be created with SSL verification disabled
+                self.csw = CswService(url)
+                log.info('CSW client created with SSL verification disabled')
+
+            finally:
+                # STEP 7: CRITICAL - Restore original functions immediately
+                # This ensures other parts of CKAN are not affected by our changes
+                requests.request = original_request
+                log.debug('Restored original requests functions after CSW client creation')
+
+        else:
+            # STEP 8: Normal SSL-enabled initialization
+            log.info('SSL verification enabled for CSW client: %s', url)
+            self.csw = CswService(url)
+            self._custom_session = None

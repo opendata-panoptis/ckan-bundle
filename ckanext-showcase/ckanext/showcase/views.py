@@ -523,8 +523,8 @@ def send_approved_showcase_email(context, recipient, data_dict, showcase_url):
     mail_recipient(
         recipient_name="",
         recipient_email=recipient,
-        subject=f"DATA GOV GR: Showcase Approved: '{data_dict['name']}'",
-        body=f"Showcase named '{data_dict['name']}' has been approved. You can visit your showcase here. URL: '{showcase_url}'"
+        subject=f"DATA GOV GR: Εγκεκριμένη Εφαρμογή: '{data_dict['title']}'",
+        body=f"Η εφαρμογή '{data_dict['title']}' εγκρίθηκε. Η εφαρμογή είναι διαθέσιμη εδώ. URL: '{showcase_url}'"
     )
 
 def get_email_from_id(context, user_id):

@@ -2,10 +2,13 @@
 
 import logging
 import json
+from typing import Optional
+from ckan import model
 from ckanext.dcat.harvesters.rdf import DCATRDFHarvester
 from ckanext.harvest.interfaces import IHarvester
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
+from ckanext.data_gov_gr import helpers as data_gov_helpers
 
 log = logging.getLogger(__name__)
 
@@ -91,6 +94,62 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
             log.error(f"Error loading vocabulary '{vocabulary_name}': {e}", exc_info=True)
             return set()
 
+    def _get_vocabulary_uri_map(self, vocabulary_name):
+        """
+        Return mapping CODE -> value (value_uri or name) for a controlled vocabulary.
+
+        This uses the same alias resolution as _get_vocabulary_valid_codes and
+        ensures that we always return the exact values that the scheming field
+        expects for a given vocabulary entry.
+        """
+        if not vocabulary_name:
+            return {}
+
+        alias_map = {
+            'access right': 'Access right',
+            'access rights': 'Access right',
+            'data theme': 'Data theme',
+            'dataset type': 'Dataset type',
+            'frequency': 'Frequency',
+            'high-value dataset categories': 'High-value dataset categories',
+            'language': 'Languages',
+            'languages': 'Languages',
+            'licence': 'Licence',
+            'license': 'Licence',
+            'media type': 'Media types',
+            'media types': 'Media types',
+            'mimetype': 'Media types',
+            'planned availability': 'Planned availability',
+            'publisher type': 'Publisher type',
+            'file type': 'File Type',
+            'file type - non proprietary format': 'File Type - Non Proprietary Format',
+            'machine readable file format': 'Machine Readable File Format',
+        }
+
+        lookup_name = alias_map.get(vocabulary_name.lower(), vocabulary_name)
+        try:
+            data = toolkit.get_action('vocabularyadmin_vocabulary_show')({}, {'id': lookup_name})
+            tags = data.get('tags', [])
+        except Exception:
+            log.warning(f"Could not load vocabulary '{lookup_name}' for URI map")
+            return {}
+
+        mapping = {}
+        for tag in tags:
+            if not isinstance(tag, dict):
+                continue
+            value_uri = tag.get('value_uri')
+            name = tag.get('name')
+            code = ''
+            if value_uri:
+                code = self._extract_code_from_identifier(value_uri)
+            if not code and name:
+                code = self._extract_code_from_identifier(name)
+            if code:
+                mapping[code.upper()] = value_uri or name
+
+        return mapping
+
     def _extract_code_from_identifier(self, value):
         """
         Normalize a vocabulary identifier (URI or plain string) to a comparable code.
@@ -128,6 +187,8 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
             log.info(f"[DATA.GOV.GR HARVESTER] Applying custom mapping to dataset: {package_dict.get('name', 'unknown')}")
             log.info(f"[DATA.GOV.GR HARVESTER] Original frequency value: {package_dict.get('frequency', 'NOT SET')}")
 
+            # Owner org is provided by each specific harvester (eg EKAN); no changes here
+
             # Extract source data from harvest object for metadata preservation
             source_data = self._extract_source_data_from_harvest_object(harvest_object)
 
@@ -164,6 +225,10 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
             # Fix 6: Ensure required translated fields exist for data.gov.gr
             self._fix_required_translated_fields(package_dict)
 
+            # Fix 6.1: Normalise spatial_coverage, enrich WKT polygons with
+            # bbox / centroid so that scheming + DCAT profiles can use them.
+            self._fix_spatial_coverage(package_dict)
+
             # Fix 7: Clean tag validation issues
             self._fix_tag_validation(package_dict)
 
@@ -183,6 +248,9 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
             # Fix 10: Handle data.gov.gr custom fields mapping
             # self._fix_custom_fields_mapping(package_dict)  # Method not implemented yet
 
+            # Ensure access_rights and applicable_legislation for PUBLIC datasets
+            self._ensure_access_rights_and_legislation(package_dict, source_data)
+
             log.info(f"Custom mapping applied to dataset: {package_dict.get('name', 'unknown')}")
 
         except Exception as e:
@@ -190,18 +258,128 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
 
         return package_dict
 
+    
+
     def _extract_source_data_from_harvest_object(self, harvest_object):
         """
-        Extract original source data from harvest object content
+        Extract original source data for *this* dataset from harvest object content.
+
+        For JSON-LD catalog sources (eg. POD data.json) the harvest object
+        content is usually the whole catalog. In that case, try to locate the
+        matching dataset entry using the harvest object's guid (typically the
+        DCAT identifier). For non-JSON content (eg. Turtle, RDF/XML), just
+        return an empty dict.
         """
         if not harvest_object or not hasattr(harvest_object, 'content') or not harvest_object.content:
             return {}
 
         try:
-            return json.loads(harvest_object.content)
+            raw = json.loads(harvest_object.content)
         except (json.JSONDecodeError, AttributeError):
-            log.warning("Could not parse source data from harvest object content")
+            # Non-JSON content (eg RDF/XML, Turtle), nothing to extract
+            log.debug("Harvest object content is not JSON; skipping source data extraction")
             return {}
+
+        guid = getattr(harvest_object, 'guid', None)
+
+        # If this looks like a DCAT/POD catalog, drill down to the dataset
+        # that matches this harvest object's guid.
+        if isinstance(raw, dict):
+            datasets = None
+            if isinstance(raw.get('dataset'), list):
+                datasets = raw.get('dataset')
+            elif isinstance(raw.get('@graph'), list):
+                # Some JSON-LD feeds use @graph instead of dataset[]
+                datasets = raw.get('@graph')
+
+            if datasets and guid:
+                for candidate in datasets:
+                    if not isinstance(candidate, dict):
+                        continue
+                    ident = candidate.get('identifier') or candidate.get('id') or candidate.get('@id')
+
+                    identifiers = []
+                    if isinstance(ident, list):
+                        identifiers = [str(v) for v in ident]
+                    elif ident is not None:
+                        identifiers = [str(ident)]
+
+                    for value in identifiers:
+                        # Match exact identifier or URIs that end with it
+                        if value == guid or (value.endswith(guid) and guid):
+                            return candidate
+
+        # Fallback: return the raw JSON (may still be useful for helpers)
+        return raw
+
+    def _ensure_access_rights_and_legislation(self, dataset_dict, source_data):
+        """
+        Ensure access_rights and applicable_legislation are populated for harvested
+        DCAT datasets.
+
+        Logic:
+        - access_rights:
+          * If already set after mapping, keep it.
+          * Else, if present in source_data, keep that.
+          * Else, set to PUBLIC authority URI.
+        - applicable_legislation:
+          * If already set on dataset, keep it.
+          * Else, if source_data provides applicable_legislation, copy it over.
+          * Else, if access_rights is PUBLIC, use the configured open-data
+            legislation (ckanext.data_gov_gr.dataset.legislation.open).
+        """
+        try:
+            if not isinstance(dataset_dict, dict):
+                return
+
+            # 1) access_rights
+            access_rights = dataset_dict.get('access_rights')
+            if not access_rights and isinstance(source_data, dict):
+                remote_access = source_data.get('access_rights')
+                if isinstance(remote_access, str) and remote_access.strip():
+                    dataset_dict['access_rights'] = remote_access.strip()
+                    access_rights = dataset_dict['access_rights']
+
+            if not dataset_dict.get('access_rights'):
+                public_uri = 'http://publications.europa.eu/resource/authority/access-right/PUBLIC'
+                dataset_dict['access_rights'] = public_uri
+                access_rights = public_uri
+
+            # 2) applicable_legislation
+            existing = dataset_dict.get('applicable_legislation')
+            if existing:
+                return
+
+            # Prefer values coming from the source dataset, if any
+            remote_values = None
+            if isinstance(source_data, dict):
+                remote_values = source_data.get('applicable_legislation')
+
+            values = None
+            if isinstance(remote_values, list):
+                values = [v.strip() for v in remote_values if isinstance(v, str) and v.strip()]
+            elif isinstance(remote_values, str):
+                candidate = remote_values.strip()
+                if candidate:
+                    values = [candidate]
+
+            if values:
+                dataset_dict['applicable_legislation'] = values
+                return
+
+            # Fallback: use configured open-data legislation when access_rights is PUBLIC
+            if isinstance(access_rights, str):
+                lowered = access_rights.strip().lower()
+                if lowered.endswith('/public') or 'access-right/public' in lowered:
+                    value = data_gov_helpers.get_config_value(
+                        'ckanext.data_gov_gr.dataset.legislation.open', ''
+                    )
+                    if isinstance(value, str):
+                        value = value.strip()
+                        if value:
+                            dataset_dict['applicable_legislation'] = [value]
+        except Exception as e:
+            log.error(f"Error ensuring access_rights/applicable_legislation: {e}", exc_info=True)
 
     def _preserve_license_information(self, dataset_dict, source_data):
         """
@@ -212,6 +390,97 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
 
         if source_data.get('license_id'):
             dataset_dict['license_id'] = source_data['license_id']
+
+    def _fix_spatial_coverage(self, dataset_dict):
+        """Enrich spatial_coverage entries with bbox/centroid when possible.
+
+        Many EKAN / NAP DCAT feeds provide a WKT POLYGON in the
+        spatial_coverage text. To align with the scheming DCAT profile
+        (which expects bbox/centroid fields), derive a simple envelope
+        and centroid from rectangular polygons. Existing bbox/centroid
+        values are left untouched.
+        """
+        spatial = dataset_dict.get('spatial_coverage')
+        if not isinstance(spatial, list) or not spatial:
+            return
+
+        for item in spatial:
+            if not isinstance(item, dict):
+                continue
+
+            # Skip if already enriched
+            if any(item.get(k) for k in ('bbox', 'centroid', 'geom')):
+                continue
+
+            text = item.get('text')
+            if not isinstance(text, str):
+                continue
+
+            coords = self._parse_wkt_polygon(text)
+            if not coords:
+                continue
+
+            xs = [x for x, _ in coords]
+            ys = [y for _, y in coords]
+            minx, maxx = min(xs), max(xs)
+            miny, maxy = min(ys), max(ys)
+
+            bbox = {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [minx, miny],
+                        [minx, maxy],
+                        [maxx, maxy],
+                        [maxx, miny],
+                        [minx, miny],
+                    ]
+                ],
+            }
+            centroid = {
+                "type": "Point",
+                "coordinates": [
+                    (minx + maxx) / 2.0,
+                    (miny + maxy) / 2.0,
+                ],
+            }
+
+            try:
+                item['bbox'] = json.dumps(bbox, ensure_ascii=False)
+                item['centroid'] = json.dumps(centroid, ensure_ascii=False)
+                # Preserve original WKT as geom and use a friendly label
+                item['geom'] = text.strip()
+                if text.strip().upper().startswith('POLYGON'):
+                    item['text'] = 'Γεωγραφική περιοχή'
+            except Exception as e:
+                log.warning(f"Error normalising spatial_coverage: {e}")
+
+    def _parse_wkt_polygon(self, wkt_text):
+        if not wkt_text or not isinstance(wkt_text, str):
+            return None
+        s = wkt_text.strip()
+        if not s.upper().startswith('POLYGON'):
+            return None
+        try:
+            start = s.find('((')
+            end = s.rfind('))')
+            if start == -1 or end == -1 or end <= start + 2:
+                return None
+            inner = s[start + 2 : end]
+            coords = []
+            for part in inner.split(','):
+                part = part.strip()
+                if not part:
+                    continue
+                tokens = part.split()
+                if len(tokens) < 2:
+                    continue
+                x = float(tokens[0])
+                y = float(tokens[1])
+                coords.append((x, y))
+            return coords or None
+        except Exception:
+            return None
             log.debug(f"Preserved license_id from source: {source_data['license_id']}")
 
         if source_data.get('license_title'):
@@ -498,9 +767,36 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                     if 'authority/data-theme/' in theme_value:
                         log.debug(f"Theme is already a valid authority URI: {theme_value}")
                     else:
-                        # If parsing fails and not valid URI, remove the field
-                        del dataset_dict['theme']
-                        log.debug(f"Removed invalid theme: {theme_value}")
+                        # If parsing fails and not valid URI, will move to tags below
+                        pass
+
+        # Move any remaining theme values to tags to avoid controlled vocabulary errors
+        if 'theme' in dataset_dict:
+            values = dataset_dict['theme']
+            if not isinstance(values, list):
+                values = [values]
+
+            # Prepare tag list on the dataset
+            existing_tags = set()
+            for t in dataset_dict.get('tags', []) or []:
+                if isinstance(t, dict) and 'name' in t and t['name']:
+                    existing_tags.add(t['name'].strip().lower())
+
+            for tv in values:
+                if not isinstance(tv, str) or not tv.strip():
+                    continue
+                label = tv
+                # If it's an authority URI, use the last segment as tag label
+                if 'authority/data-theme/' in tv:
+                    label = tv.rsplit('/', 1)[-1]
+                clean = label.strip()
+                if clean and clean.lower() not in existing_tags:
+                    dataset_dict.setdefault('tags', []).append({'name': clean})
+                    existing_tags.add(clean.lower())
+
+            # Remove theme field entirely to avoid "unexpected choice" validation
+            del dataset_dict['theme']
+            log.debug('Moved theme values to tags and removed theme field to satisfy controlled vocabulary')
 
     def _fix_authority_uri_field(self, dataset_dict, field_name, uri_base, valid_codes):
         """
@@ -574,6 +870,8 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
             if isinstance(frequency, str):
                 # Convert to uppercase - this handles "other" -> "OTHER", etc.
                 dataset_dict['frequency'] = frequency.strip().upper()
+
+        # (EKAN-specific mapping is handled upstream; no ISO mapping here)
 
         # Get valid codes from database vocabulary
         valid_frequency_codes = self._get_vocabulary_valid_codes('Frequency')
@@ -663,38 +961,18 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
     def _fix_mimetype_field(self, dataset_dict):
         """
         Handle mimetype field mapping using controlled vocabulary.
-        Loads valid codes from the 'Media types' vocabulary in the database.
+
+        In the DCAT-AP GR profiles used on data.gov.gr the mimetype
+        field is defined on resources, not at dataset level, so we
+        delegate to the resource-level helper.
         """
-        # Get valid codes from database vocabulary
-        valid_mimetype_codes = self._get_vocabulary_valid_codes('Media types')
+        if not isinstance(dataset_dict, dict):
+            return
 
-        # Handle mimetype field in main dataset
-        if 'mimetype' in dataset_dict:
-            mimetype_value = dataset_dict['mimetype']
-            if isinstance(mimetype_value, str):
-                normalized_code = self._extract_code_from_identifier(mimetype_value)
-                if normalized_code and normalized_code.upper() in valid_mimetype_codes:
-                    dataset_dict['mimetype'] = mimetype_value.strip()
-                    log.info(f"[MIMETYPE] Dataset mimetype kept as '{dataset_dict['mimetype']}'")
-                else:
-                    log.debug(f"[MIMETYPE] Removing unmapped dataset mimetype value '{mimetype_value}'")
-                    del dataset_dict['mimetype']
-            else:
-                del dataset_dict['mimetype']
-
-        # Handle mimetype in extras
-        for extra in dataset_dict.get('extras', []):
-            if extra['key'] == 'mimetype':
-                mimetype_value = extra['value']
-                if isinstance(mimetype_value, str):
-                    normalized_code = self._extract_code_from_identifier(mimetype_value)
-                    if normalized_code and normalized_code.upper() in valid_mimetype_codes:
-                        extra['value'] = mimetype_value.strip()
-                        log.info(f"[MIMETYPE] Kept mimetype in extras as '{extra['value']}'")
-                    else:
-                        log.debug(f"[MIMETYPE] Removing unmapped mimetype from extras: '{mimetype_value}'")
-                        dataset_dict['extras'].remove(extra)
-                break
+        # Ensure resource-level mimetype values are checked against the
+        # 'Media types' vocabulary and either normalised or preserved
+        # as fallbacks when not in the vocabulary.
+        self._fix_resource_mimetype_fields(dataset_dict)
 
     def _fix_language_field(self, dataset_dict):
         """
@@ -704,6 +982,32 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
         """
         # Get valid codes from database vocabulary
         valid_language_codes = self._get_vocabulary_valid_codes('Languages')
+
+        def normalize_language_value(value: str) -> Optional[str]:
+            if not value or not isinstance(value, str):
+                return None
+            candidate = value.strip()
+            if not candidate:
+                return None
+
+            alias_map = {
+                'EN': 'ENG',
+                'EL': 'ELL',
+                'GR': 'ELL',
+            }
+
+            if 'publications.europa.eu' in candidate:
+                code = candidate.split('/')[-1].upper()
+                code = alias_map.get(code, code)
+                if code not in valid_language_codes:
+                    return None
+                base = candidate.rsplit('/', 1)[0]
+                return f"{base}/{code}"
+
+            code = alias_map.get(candidate.upper(), candidate.upper())
+            if code not in valid_language_codes:
+                return None
+            return f"https://publications.europa.eu/resource/authority/language/{code}"
 
         # Handle language in extras (where it usually ends up from RDF)
         for extra in dataset_dict.get('extras', []):
@@ -719,33 +1023,23 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                             language_uri = language_array[0]
                             if isinstance(language_uri, str):
                                 # Extract code from URI (last part after /)
-                                language_code = language_uri.split('/')[-1].upper()
+                                normalized_uri = normalize_language_value(language_uri)
 
-                                if language_code in valid_language_codes:
-                                    # Move language from extras to main dataset field
-                                    dataset_dict['language'] = language_uri
-                                    log.info(f"[LANGUAGE] Moved valid language from extras: '{language_uri}' (code: {language_code})")
-                                    # Remove from extras since it's now in main field
-                                    dataset_dict['extras'].remove(extra)
+                                if normalized_uri:
+                                    dataset_dict['language'] = normalized_uri
+                                    log.info(f"[LANGUAGE] Moved valid language from extras: '{normalized_uri}'")
                                 else:
-                                    log.warning(f"[LANGUAGE] Language code '{language_code}' not in controlled vocabulary. URI: {language_uri}")
-                                    # Still remove from extras to avoid confusion
-                                    dataset_dict['extras'].remove(extra)
+                                    log.warning(f"[LANGUAGE] Language value '{language_uri}' not in controlled vocabulary")
+                                dataset_dict['extras'].remove(extra)
                     except (json.JSONDecodeError, IndexError):
                         # If not JSON, check if it's already a valid authority URI
-                        if 'publications.europa.eu' in language_value:
-                            language_code = language_value.split('/')[-1].upper()
-                            if language_code in valid_language_codes:
-                                # Move to main field
-                                dataset_dict['language'] = language_value
-                                log.info(f"[LANGUAGE] Moved valid language URI from extras: '{language_value}' (code: {language_code})")
-                                dataset_dict['extras'].remove(extra)
-                            else:
-                                log.warning(f"[LANGUAGE] Language code '{language_code}' not in controlled vocabulary. URI: {language_value}")
-                                dataset_dict['extras'].remove(extra)
+                        normalized_uri = normalize_language_value(language_value)
+                        if normalized_uri:
+                            dataset_dict['language'] = normalized_uri
+                            log.info(f"[LANGUAGE] Moved valid language URI from extras: '{normalized_uri}'")
                         else:
                             log.warning(f"[LANGUAGE] Invalid language format in extras: {language_value}")
-                            dataset_dict['extras'].remove(extra)
+                        dataset_dict['extras'].remove(extra)
                 break
 
         # Also check if language exists in main dataset fields
@@ -759,51 +1053,114 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                     if isinstance(language_array, list) and language_array:
                         language_uri = language_array[0]
                         if isinstance(language_uri, str):
-                            language_code = language_uri.split('/')[-1].upper()
-                            if language_code in valid_language_codes:
-                                dataset_dict['language'] = language_uri
-                                log.info(f"[LANGUAGE] Fixed language in main field: '{language_uri}' (code: {language_code})")
+                            normalized_uri = normalize_language_value(language_uri)
+                            if normalized_uri:
+                                dataset_dict['language'] = normalized_uri
+                                log.info(f"[LANGUAGE] Fixed language in main field: '{normalized_uri}'")
                             else:
-                                log.warning(f"[LANGUAGE] Language code '{language_code}' not in controlled vocabulary. Removing field.")
+                                log.warning(f"[LANGUAGE] Language value '{language_uri}' not in controlled vocabulary. Removing field.")
                                 del dataset_dict['language']
                 except (json.JSONDecodeError, IndexError):
-                    # Check if it's already a valid authority URI
-                    if 'publications.europa.eu' in language_value:
-                        language_code = language_value.split('/')[-1].upper()
-                        if language_code in valid_language_codes:
-                            log.info(f"[LANGUAGE] Language already valid: '{language_value}' (code: {language_code})")
-                        else:
-                            log.warning(f"[LANGUAGE] Language code '{language_code}' not in controlled vocabulary. Removing field.")
-                            del dataset_dict['language']
+                    normalized_uri = normalize_language_value(language_value)
+                    if normalized_uri:
+                        dataset_dict['language'] = normalized_uri
+                        log.info(f"[LANGUAGE] Normalized language in main field: '{normalized_uri}'")
                     else:
                         log.warning(f"[LANGUAGE] Invalid language format in main field: {language_value}")
                         del dataset_dict['language']
 
     def _fix_resource_mimetype_fields(self, dataset_dict):
         """
-        Handle mimetype fields in resources using controlled vocabulary.
+        Normalise resource mimetype values against the 'Media types' vocabulary.
+
+        - Accepts short codes (eg CSV), tokens (eg text/csv) or full IANA URLs.
+        - Converts valid values to the exact vocabulary value (value_uri or name),
+          so that scheming validation passes.
+        - When a value cannot be mapped to the vocabulary, removes it
+          from the resource but preserves it at dataset level via
+          extras and tags so the information is not lost.
         """
         if 'resources' not in dataset_dict or not dataset_dict['resources']:
             return
 
-        # Get valid codes from database vocabulary
-        valid_mimetype_codes = self._get_vocabulary_valid_codes('Media types')
+        def _record_unmapped_mimetype(raw_value, code=None):
+            """
+            Record an unmapped mimetype as a non-blocking fallback:
+            - add a tag with the extracted code (or original value)
+            """
+            if not raw_value or not isinstance(raw_value, str):
+                return
+
+            value = raw_value.strip()
+            if not value:
+                return
+
+            # Record in tags
+            tag_label_source = (code or value).strip()
+            if not tag_label_source:
+                return
+            tag_label = tag_label_source.lower()
+
+            tags = dataset_dict.get('tags')
+            if not isinstance(tags, list):
+                tags = []
+            existing = set()
+            for tag in tags:
+                if isinstance(tag, dict):
+                    name = tag.get('name')
+                    if isinstance(name, str):
+                        existing.add(name.strip().lower())
+
+            if tag_label not in existing:
+                tags.append({'name': tag_label})
+                dataset_dict['tags'] = tags
+
+        media_uri_map = self._get_vocabulary_uri_map('Media types')
+        if not media_uri_map:
+            # If vocabulary can't be loaded, drop mimetype to avoid validation errors
+            for resource in dataset_dict['resources']:
+                if isinstance(resource, dict):
+                    value = resource.get('mimetype')
+                    if isinstance(value, str) and value.strip():
+                        log.warning(
+                            "[RESOURCE MIMETYPE] Dropping mimetype '%s' for resource '%s' "
+                            "because 'Media types' vocabulary could not be loaded",
+                            value,
+                            resource.get('name', 'unnamed'),
+                        )
+                        _record_unmapped_mimetype(value)
+                    resource.pop('mimetype', None)
+            return
 
         for resource in dataset_dict['resources']:
             if not isinstance(resource, dict):
                 continue
 
-            # Handle resource mimetype
-            if 'mimetype' in resource and resource['mimetype']:
-                mimetype_value = resource['mimetype']
-                if isinstance(mimetype_value, str):
-                    normalized_code = self._extract_code_from_identifier(mimetype_value)
-                    if normalized_code and normalized_code.upper() in valid_mimetype_codes:
-                        resource['mimetype'] = mimetype_value.strip()
-                        log.info(f"[RESOURCE MIMETYPE] Kept mimetype '{resource['mimetype']}' for resource '{resource.get('name', 'unnamed')}'")
-                    else:
-                        log.debug(f"[RESOURCE MIMETYPE] Removing unmapped mimetype '{mimetype_value}' for resource '{resource.get('name', 'unnamed')}'")
-                        del resource['mimetype']
+            value = resource.get('mimetype')
+            if not isinstance(value, str) or not value.strip():
+                if 'mimetype' in resource and not value:
+                    resource.pop('mimetype', None)
+                continue
+
+            raw_value = value.strip()
+            code = self._extract_code_from_identifier(raw_value)
+            if not code:
+                _record_unmapped_mimetype(raw_value)
+                resource.pop('mimetype', None)
+                continue
+
+            uri_value = media_uri_map.get(code.upper())
+            if uri_value:
+                resource['mimetype'] = uri_value
+                log.info(
+                    "[RESOURCE MIMETYPE] Normalised mimetype for resource '%s' to '%s' (code '%s')",
+                    resource.get('name', 'unnamed'),
+                    uri_value,
+                    code.upper(),
+                )
+            else:
+                _record_unmapped_mimetype(raw_value, code.upper())
+                resource.pop('mimetype', None)
 
     def _fix_required_translated_fields(self, dataset_dict):
         """
@@ -911,8 +1268,17 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
 
             # Ensure required resource fields exist
             if not resource.get('url'):
-                log.warning(f"Resource missing URL, skipping: {resource.get('name', 'unnamed')}")
-                continue
+                fallback_url = (
+                    resource.get('download_url')
+                    or resource.get('access_url')
+                    or resource.get('foaf_page')
+                    or resource.get('uri')
+                )
+                if fallback_url:
+                    resource['url'] = fallback_url
+                else:
+                    log.warning(f"Resource missing URL, skipping: {resource.get('name', 'unnamed')}")
+                    continue
 
             # Fix resource name - required field
             if not resource.get('name') or not resource['name'].strip():

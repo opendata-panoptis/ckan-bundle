@@ -123,6 +123,12 @@ msgstr "Ενημέρωση Ετικέτας"
 msgid "Cancel"
 msgstr "Ακύρωση"
 
+msgid "Vocabulary created successfully"
+msgstr "Το λεξιλόγιο δημιουργήθηκε με επιτυχία"
+
+msgid "Tag created successfully"
+msgstr "Η ετικέτα δημιουργήθηκε με επιτυχία"
+
 msgid "Create Vocabulary"
 msgstr "Δημιουργία Λεξιλογίου"
 
@@ -140,6 +146,15 @@ msgstr "Δημιουργία Νέου Λεξιλογίου"
 
 msgid "Δημιουργία Νέας Ετικέτας"
 msgstr "Δημιουργία Νέας Ετικέτας"
+
+msgid "Vocabulary and all its tags deleted successfully"
+msgstr "Το λεξιλόγιο και όλες οι ετικέτες του διαγράφηκαν με επιτυχία"
+
+msgid "Tag deleted successfully"
+msgstr "Η ετικέτα διαγράφηκε με επιτυχία"
+
+msgid "Vocabulary updated successfully"
+msgstr "Το λεξιλόγιο ενημερώθηκε με επιτυχία"
 
 msgid "Όνομα"
 msgstr "Όνομα"

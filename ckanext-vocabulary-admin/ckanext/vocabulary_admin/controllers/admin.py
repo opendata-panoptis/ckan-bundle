@@ -97,6 +97,7 @@ def create_tag():
         name = request.form.get('name', '').strip()
         vocabulary_id = request.form.get('vocabulary_id', '').strip()
         value_uri = request.form.get('value_uri', '').strip()
+        order_index_raw = request.form.get('order_index', '').strip()
         label_el = request.form.get('label_el', '').strip()
         label_en = request.form.get('label_en', '').strip()
         description_el = request.form.get('description_el', '').strip()
@@ -110,6 +111,15 @@ def create_tag():
         if not vocabulary_id:
             flash(_('Please select a vocabulary'), 'error')
             return render_template('admin/tag_create.html', vocabularies=vocabularies)
+
+        # Validate order_index (optional integer)
+        order_index = None
+        if order_index_raw:
+            try:
+                order_index = int(order_index_raw)
+            except ValueError:
+                flash(_('The "Order index" must be an integer'), 'error')
+                return render_template('admin/tag_create.html', vocabularies=vocabularies)
 
         # Create tag
         try:
@@ -127,7 +137,8 @@ def create_tag():
                 label_en=label_en if label_en else None,
                 description_el=description_el if description_el else None,
                 description_en=description_en if description_en else None,
-                is_active=is_active
+                is_active=is_active,
+                order_index=order_index
             )
 
             flash(_('Tag created successfully'), 'alert-success')
@@ -170,6 +181,7 @@ def edit_tag(tag_id):
         name = request.form.get('name', '').strip()
         vocabulary_id = request.form.get('vocabulary_id', '').strip()
         value_uri = request.form.get('value_uri', '').strip()
+        order_index_raw = request.form.get('order_index', '').strip()
         label_el = request.form.get('label_el', '').strip()
         label_en = request.form.get('label_en', '').strip()
         description_el = request.form.get('description_el', '').strip()
@@ -190,6 +202,18 @@ def edit_tag(tag_id):
                                   tag_metadata=tag_metadata, 
                                   vocabularies=vocabularies)
 
+        # Validate order_index (optional integer)
+        order_index = None
+        if order_index_raw:
+            try:
+                order_index = int(order_index_raw)
+            except ValueError:
+                flash(_('The "Order index" must be an integer'), 'error')
+                return render_template('admin/tag_edit.html',
+                                       tag=tag,
+                                       tag_metadata=tag_metadata,
+                                       vocabularies=vocabularies)
+
         # Update tag
         try:
             data_dict = {
@@ -207,7 +231,8 @@ def edit_tag(tag_id):
                 label_en=label_en if label_en else None,
                 description_el=description_el if description_el else None,
                 description_en=description_en if description_en else None,
-                is_active=is_active
+                is_active=is_active,
+                order_index=order_index
             )
 
             flash(_('Tag updated successfully'), 'alert-success')
@@ -253,6 +278,7 @@ def edit_vocabulary(vocabulary_id):
         name = request.form.get('name', '').strip()
         description_el = request.form.get('description_el', '').strip()
         description_en = request.form.get('description_en', '').strip()
+        tag_order_raw = request.form.get('tag_order', '').strip()
 
         if not name:
             flash(_('Please enter a name for the vocabulary'), 'error')
@@ -275,6 +301,17 @@ def edit_vocabulary(vocabulary_id):
                 description_el=description_el if description_el else None,
                 description_en=description_en if description_en else None
             )
+
+            # Update tags order if provided
+            if tag_order_raw:
+                tag_ids = [tid for tid in tag_order_raw.split(',') if tid]
+                order_value = 1
+                for tid in tag_ids:
+                    VocabularyTagMetadata.update(
+                        tag_id=tid,
+                        order_index=order_value
+                    )
+                    order_value += 1
 
             flash(_('Vocabulary updated successfully'), 'alert-success')
             return redirect(url_for('vocabularyadmin.vocabulary_admin'))

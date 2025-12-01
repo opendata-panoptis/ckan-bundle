@@ -5,7 +5,7 @@
 {% block core_fields %}
   <fieldset>
     <legend>{{ _('Change details') }}</legend>
-    {% if g.userobj.sysadmin %}
+    {% if g.userobj.sysadmin and enable_ckan_login %}
       {{ form.input('name', label=_('Username'), id='field-username', value=data.name, error=errors.name, classes=['control-medium'], is_required=true) }}
     {% else %}
       {{ form.input('name', label=_('Username'), id='field-username', value=data.name, error=errors.name, classes=['control-medium'], attrs={'readonly': '', 'class': 'form-control'}) }}
@@ -30,6 +30,34 @@
 
     {{ form.image_upload(data, errors, is_upload_enabled=h.uploads_enabled(), is_url=is_url, is_upload=is_upload, upload_label=_('Profile picture'), url_label=_('Profile picture URL') ) }}
   </fieldset>
+{% endblock %}
+
+{% block sysadmin_password %}
+{% if enable_ckan_login %}
+  <fieldset>
+  <legend>{{ _('Change ' + data.name|capitalize + "'s" + ' password') }}</legend>
+  {{ form.input('password1', type='password', label=_('Password'), id='field-password', value=data.password1, error=errors.password1, classes=['control-medium'], attrs={'autocomplete': 'off', 'class': 'form-control'} ) }}
+  {{ form.input('password2', type='password', label=_('Confirm Password'), id='field-password-confirm', value=data.password2, error=errors.password2, classes=['control-medium'], attrs={'autocomplete': 'off', 'class': 'form-control'}) }}
+  </fieldset>
+{% endif %}
+{% endblock %}
+
+{% block sysadmin_old_password %}
+{% if enable_ckan_login %}
+  <fieldset>
+    <legend>{{ _('Sysadmin password') }}</legend>
+    {{ form.input('old_password',
+                  type='password',
+                  label=_('Sysadmin Password'),
+                  id='field-password-old',
+                  value=data.oldpassword,
+                  error=errors.oldpassword,
+                  classes=['control-medium'],
+                  attrs={'autocomplete': 'off', 'class': 'form-control'}
+                  ) }}
+
+  </fieldset>
+{% endif %}
 {% endblock %}
 
 {% block change_password %}

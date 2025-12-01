@@ -1,0 +1,126 @@
+/* Map Search CSS */
+#map {
+    height: 300px;
+    width: 100%;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Leaflet container styling */
+.leaflet-container {
+    height: 100%;
+    width: 100%;
+    border-radius: 3px;
+}
+
+/* Module content styling for proper alignment */
+.module.module-narrow.module-shallow .module-content {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+}
+
+/* Ensure the map container aligns properly */
+.filters .module {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Reduce space between title and map */
+.module.module-narrow.module-shallow .module-heading {
+    padding-bottom: 8px;
+    margin-bottom: 5px;
+}
+
+/* Map Search Controls Styling */
+.map-search-controls {
+    margin-bottom: 10px;
+}
+
+.map-search-button-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.map-search-button {
+    padding: 6px 12px;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    border: 1px solid #ced4da;
+    background-color: #f8f9fa;
+    color: #495057;
+    outline: none !important;
+}
+
+/* Hover state - darker gray */
+.map-search-button:hover {
+    background-color: #6c757d;
+    border-color: #495057;
+    color: white;
+}
+
+/* Focus state - no outline */
+.map-search-button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.map-search-text-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+    flex-grow: 1;
+    justify-content: center;
+    text-align: center;
+}
+
+.map-search-label {
+    font-size: 0.875rem;
+    font-weight: bold;
+    color: #333;
+    line-height: 1.2;
+    transition: font-size 0.2s ease;
+    text-align: center;
+    width: 100%;
+}
+
+/* Μικρότερο κείμενο όταν είναι ενεργό το φίλτρο */
+.map-search-text-container.active-spatial-filter .map-search-label {
+    color: #333; /* Παραμένει το ίδιο χρώμα */
+    font-weight: bold;
+    font-size: 0.75rem;
+}
+
+/* Spatial filter close button */
+.spatial-filter-close {
+    color: #ccc;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* Όταν είναι ενεργό το φίλτρο, μπλε φόντο ΜΟΝΟ στο κουμπί "×" */
+.map-search-text-container.active-spatial-filter .spatial-filter-close {
+    color: white;
+    display: block !important;
+    background-color: #003375 !important; /* Μπλε φόντο ΜΟΝΟ εδώ */
+    border: 1px solid #00285c;
+}
+
+.spatial-filter-close:hover {
+    color: white;
+    background-color: #00285c !important; /* Πιο σκούρο μπλε στο hover */
+}

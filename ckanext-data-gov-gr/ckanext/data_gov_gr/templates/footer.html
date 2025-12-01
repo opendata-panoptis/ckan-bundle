@@ -1,5 +1,6 @@
 {% set stats_destination_url = config.get('ckanext.data_gov_gr.stats.destination.url', '/') %}
 {% set footer_source_code_url = config.get('ckanext.data_gov_gr.footer.source_code_url') %}
+{% set user_survey_url = config.get('ckanext.data_gov_gr.user_survey.url') %}
 
 <footer class="site-footer" role="contentinfo">
   <div class="container">
@@ -14,7 +15,7 @@
             <li><a href="{{ 'https://data-gov-gr.gitbook.io/guides/texnika-egxeiridia' }}">{{ _('API Documentation') }}</a></li>
             <li><a href="{{ 'https://data.europa.eu/en' }}">{{ _('data.europa.eu') }}</a></li>
             {% if footer_source_code_url %}
-              <li><a href="{{ footer_source_code_url }}">{{ _('Πηγαιος κωδικας') }}</a></li>
+              <li><a href="{{ footer_source_code_url }}">{{ _('Source Code') }}</a></li>
             {% endif %}
           {% endblock %}
         </ul>
@@ -41,6 +42,13 @@
             <li><a href="{{ h.url_for('/more') }}">{{ _('Help') }}</a></li>
             <li><a href="{{ h.url_for('/blog') }}">{{ _('News') }}</a></li>
             <li><a href="{{ h.url_for(stats_destination_url) }}">{{ _('Statistics') }}</a></li>
+            {% if user_survey_url %}
+              <li>
+                <a href="{{ user_survey_url }}" target="_blank" rel="noopener noreferrer">
+                  {{ _('Πείτε μας τη γνώμη σας για την πύλη') }}
+                </a>
+              </li>
+            {% endif %}
           {% endblock %}
         </ul>
       </div>
@@ -85,7 +93,218 @@
 
   <!-- accessibility widget -->
   {% if h.get_config_as_bool('accessibility.widget.enabled') %}
-    <script src="https://website-widgets.pages.dev/dist/sienna.min.js" defer></script>
+<!--    <script src="https://website-widgets.pages.dev/dist/sienna.min.js" defer></script>-->
+    <script src="https://cdn.jsdelivr.net/gh/Arafeek/AccessWidget/dist/accesswidget.min.js" defer></script>
+  {% endif %}
+
+  {# Optional user satisfaction survey popup (shown only when URL is set) #}
+  {% if user_survey_url %}
+	    <style>
+	      .user-survey-backdrop {
+	        position: fixed;
+	        inset: 0;
+	        background: rgba(0, 0, 0, 0.35);
+	        z-index: 1050;
+	        display: none;
+	        align-items: center;
+	        justify-content: center;
+	      }
+
+	      .user-survey-modal {
+	        background-color: #ffffff;
+	        max-width: 520px;
+	        width: 90%;
+	        padding: 1.75rem 1.75rem 1.5rem;
+	        border-radius: 0.5rem;
+	        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+	        border-top: 4px solid var(--color-primary, #003476);
+	      }
+
+	      .user-survey-modal-title {
+	        margin-top: 0;
+	        margin-bottom: 0.75rem;
+	        font-size: 1.15rem;
+	        font-weight: 600;
+	        color: #212529;
+	      }
+
+	      .user-survey-modal p {
+	        margin-bottom: 0.5rem;
+	        color: #495057;
+	      }
+
+	      .user-survey-actions {
+	        margin-top: 0.75rem;
+	        display: flex;
+	        flex-wrap: wrap;
+	        gap: 0.5rem;
+	      }
+
+	      .user-survey-link {
+	        display: inline-block;
+	        padding: 0.45rem 0.9rem;
+	        border-radius: 999px;
+	        background-color: var(--color-primary, #003476);
+	        color: #fff !important;
+	        text-decoration: none;
+	        font-weight: 500;
+	        font-size: 0.95rem;
+	      }
+
+	      .user-survey-link:hover {
+	        background-color: var(--color-primary-light, #0056b3);
+	        text-decoration: none;
+	      }
+
+	      .user-survey-btn {
+	        border-radius: 999px;
+	        padding: 0.4rem 0.9rem;
+	        font-size: 0.9rem;
+	        cursor: pointer;
+	        border: 1px solid #ced4da;
+	        background-color: #f8f9fa;
+	        color: #495057;
+	      }
+
+	      .user-survey-btn:hover {
+	        background-color: #e9ecef;
+	      }
+
+	      .user-survey-close {
+	        border: none;
+	        background: transparent;
+	        font-size: 1.4rem;
+	        line-height: 1;
+	        float: right;
+	        cursor: pointer;
+	        color: #6c757d;
+	      }
+
+	      .user-survey-close:hover {
+	        color: #212529;
+	      }
+	    </style>
+
+    <div id="user-survey-backdrop" class="user-survey-backdrop" role="dialog" aria-modal="true" aria-labelledby="user-survey-title">
+      <div class="user-survey-modal">
+        <button type="button" class="user-survey-close" aria-label="{{ _('Κλείσιμο') }}">&times;</button>
+        <h5 id="user-survey-title" class="user-survey-modal-title">{{ _('Πείτε μας τη γνώμη σας για την πύλη') }}</h5>
+	        <p>{{ _('Βοηθήστε μας να βελτιώσουμε την Πύλη με τη συμμετοχή σας σε ένα σύντομο ερωτηματολόγιο.') }}</p>
+	        <div class="user-survey-actions">
+	          <a id="user-survey-participate"
+	             class="user-survey-link"
+	             href="{{ user_survey_url }}"
+	             target="_blank"
+	             rel="noopener noreferrer">
+	            {{ _('Άνοιγμα ερωτηματολογίου') }}
+	          </a>
+	          <button type="button"
+	                  id="user-survey-maybe-later"
+	                  class="user-survey-btn">
+	            {{ _('Ίσως αργότερα') }}
+	          </button>
+	          <button type="button"
+	                  id="user-survey-dont-ask"
+	                  class="user-survey-btn">
+	            {{ _('Να μην ερωτηθώ ξανά') }}
+	          </button>
+	        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var backdrop = document.getElementById('user-survey-backdrop');
+        if (!backdrop) {
+          return;
+        }
+
+	        function getCookie(name) {
+	          var value = '; ' + document.cookie;
+	          var parts = value.split('; ' + name + '=');
+	          if (parts.length === 2) {
+	            return parts.pop().split(';').shift();
+	          }
+	          return null;
+	        }
+
+	        function setCookie(name, value, days) {
+	          var expires = '';
+	          if (days) {
+	            var date = new Date();
+	            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+	            expires = '; expires=' + date.toUTCString();
+	          }
+	          document.cookie = name + '=' + (value || '') + expires + '; path=/';
+	        }
+
+	        // If the user has permanently opted out before (old or new cookie), do not show it again
+	        if (getCookie('userSurveyNoPrompt') === '1' || getCookie('userSurveyPopupClosed') === '1') {
+	          return;
+	        }
+
+	        try {
+	          if (window.sessionStorage && sessionStorage.getItem('userSurveyPopupDismissed') === '1') {
+	            return;
+	          }
+	        } catch (e) {
+	          // If sessionStorage is not available, ignore and show popup.
+	        }
+
+	        backdrop.style.display = 'flex';
+
+	        function closeForSession() {
+	          backdrop.style.display = 'none';
+	          try {
+	            if (window.sessionStorage) {
+	              sessionStorage.setItem('userSurveyPopupDismissed', '1');
+	            }
+	          } catch (e) {
+	            // Ignore sessionStorage errors
+	          }
+	        }
+
+	        function closeForever() {
+	          backdrop.style.display = 'none';
+	          // Remember the user's choice for a long period (effectively permanent)
+	          setCookie('userSurveyNoPrompt', '1', 3650);
+	        }
+
+	        var closeButton = backdrop.querySelector('.user-survey-close');
+	        if (closeButton) {
+	          closeButton.addEventListener('click', function () {
+	            closeForSession();
+	          });
+	        }
+
+	        backdrop.addEventListener('click', function (event) {
+	          if (event.target === backdrop) {
+	            closeForSession();
+	          }
+	        });
+
+	        var maybeLaterBtn = document.getElementById('user-survey-maybe-later');
+	        if (maybeLaterBtn) {
+	          maybeLaterBtn.addEventListener('click', function () {
+	            closeForSession();
+	          });
+	        }
+
+	        var dontAskBtn = document.getElementById('user-survey-dont-ask');
+	        if (dontAskBtn) {
+	          dontAskBtn.addEventListener('click', function () {
+	            closeForever();
+	          });
+	        }
+
+	        var participateLink = document.getElementById('user-survey-participate');
+	        if (participateLink) {
+	          participateLink.addEventListener('click', function () {
+	            closeForever();
+	          });
+	        }
+	      });
+	    </script>
   {% endif %}
 
 </footer>

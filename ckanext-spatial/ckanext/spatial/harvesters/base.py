@@ -261,6 +261,8 @@ class SpatialHarvester(HarvesterBase):
                 'notes': iso_values['abstract'],
                 'tags': tags,
                 'resources': [],
+                # AUTOMATIC ACCESS_RIGHTS SETTING - PUBLIC by default
+                'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC'
             }
 
             # Add default values for mandatory translated fields
@@ -505,7 +507,11 @@ class SpatialHarvester(HarvesterBase):
                     log.debug('Processing extra %s', key)
                     # Use new names for default extras
                     new_key = 'harvest_' + key if key in ['publisher', 'spatial_harvester'] else key
-                    if not new_key in extras or override_extras:
+
+                    # SPECIAL CASE: If access_rights is defined in default_extras, then it overrides the default PUBLIC value
+                    if key == 'access_rights':
+                        package_dict['access_rights'] = value
+                    elif not new_key in extras or override_extras:
                         # Look for replacement strings
                         if isinstance(value, str):
                             value = value.format(harvest_source_id=harvest_object.job.source.id,
@@ -1094,9 +1100,9 @@ class SpatialHarvester(HarvesterBase):
                         "type": "Point",
                         "coordinates": [centroid_lon, centroid_lat]
                     }),
-                    "geom": "",  # Can be populated later if needed
-                    "text": self._get_location_text(bbox),  # Human-readable location description
-                    "uri": ""  # Can be populated with GeoNames lookup if available
+                    "geom": "",
+                    "text": self._get_enhanced_location_text(west, east, south, north),  # Human-readable location description
+                    "uri": ""
                 }
 
                 spatial_coverage.append(coverage_entry)
@@ -1107,13 +1113,75 @@ class SpatialHarvester(HarvesterBase):
 
         return spatial_coverage
 
-    def _get_location_text(self, bbox):
+    def _get_enhanced_location_text(self, west: float, east: float, south: float, north: float) -> str:
         """
-        Attempts to generate human-readable location description from bounding box
-        Basic implementation - can be enhanced with reverse geocoding or region detection
+        Εκτίμηση περιοχής βάσει μεγέθους και γνωστών περιοχών
         """
-        # Basic implementation - can be enhanced with reverse geocoding
-        return "Geographic area"
+        try:
+            # 1. Πρώτα έλεγχος για συγκεκριμένες γνωστές περιοχές
+            specific_region = self._detect_specific_region(west, east, south, north)
+            if specific_region != "Γεωγραφική Περιοχή Ελλάδας":
+                return specific_region
+
+            # 2. Αν δεν βρέθηκε συγκεκριμένη περιοχή, εκτίμηση βάσει μεγέθους
+            return self._estimate_region_by_bbox_size(west, east, south, north)
+
+        except Exception as e:
+            log.warning(f"Error in enhanced location detection: {e}")
+            return "Γεωγραφική Περιοχή"
+
+    def _estimate_region_by_bbox_size(self, west: float, east: float,
+                                      south: float, north: float) -> str:
+        """
+        Εκτίμηση τύπου περιοχής βάσει μεγέθους bounding box
+        """
+        # Υπολογισμός διαστάσεων bbox (σε μοίρες)
+        width = east - west
+        height = north - south
+        area = width * height
+
+        # Προσδιορισμός τύπου περιοχής βάσει μεγέθους
+        if area < 0.01:  # Πολύ μικρή περιοχή (~1km²)
+            return "Τοπική Περιοχή"
+        elif area < 0.1:  # Μικρή περιοχή (~10km²)
+            return "Δημοτική/Κοινότητα"
+        elif area < 1.0:  # Μεσαία περιοχή (~100km²)
+            return "Νομαρχιακή Περιοχή"
+        elif area < 10.0:  # Ευρύτερη περιοχή (~1000km²)
+            return "Περιφερειακή Ενότητα"
+        else:  # Πολύ μεγάλη περιοχή
+            return "Ευρύτερη Γεωγραφική Περιοχή"
+
+    def _detect_specific_region(self, west: float, east: float,
+                                south: float, north: float) -> str:
+        """
+        Ανίχνευση συγκεκριμένων γνωστών περιοχών της Ελλάδας
+        """
+        # Κεντρική Αττική
+        if (23.0 <= west <= 24.1 and 37.5 <= south <= 38.2):
+            return "Αττική, Ελλάδα"
+
+        # Θεσσαλονίκη
+        elif (22.5 <= west <= 23.1 and 40.5 <= south <= 40.7):
+            return "Θεσσαλονίκη, Ελλάδα"
+
+        # Κρήτη
+        elif (23.0 <= west <= 26.5 and 34.8 <= south <= 35.7):
+            return "Κρήτη, Ελλάδα"
+
+        # Βόρειο Αιγαίο
+        elif (24.0 <= west <= 27.0 and 38.5 <= south <= 40.5):
+            return "Βόρειο Αιγαίο, Ελλάδα"
+
+        # Νότιο Αιγαίο
+        elif (24.0 <= west <= 28.0 and 36.0 <= south <= 38.0):
+            return "Νότιο Αιγαίο, Ελλάδα"
+
+        # Ιόνιο Πέλαγος
+        elif (19.0 <= west <= 21.5 and 37.5 <= south <= 40.0):
+            return "Ιόνιο Πέλαγος, Ελλάδα"
+
+        return "Γεωγραφική Περιοχή Ελλάδας"
 
     def _extract_contact_points(self, iso_values):
         """

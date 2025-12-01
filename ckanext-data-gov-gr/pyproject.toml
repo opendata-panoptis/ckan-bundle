@@ -23,6 +23,16 @@ Homepage = "https://github.com//ckanext-data-gov-gr"
 
 [project.entry-points."ckan.plugins"]
 data_gov_gr = "ckanext.data_gov_gr.plugin:DataGovGrPlugin"
+ core_ckan_harvester = "ckanext.data_gov_gr.harvesters.core_ckan_harvester:CoreCkanHarvester"
+custom_dcat_harvester = "ckanext.data_gov_gr.harvesters.custom_dcat_harvester:CustomDcatHarvester"
+ekan_dcat_harvester = "ckanext.data_gov_gr.harvesters.ekan_dcat_harvester:EkanDcatHarvester"
+dkan_ckan_harvester = "ckanext.data_gov_gr.harvesters.dkan_ckan_harvester:DkanCkanHarvester"
+
+[project.entry-points."ckan.harvesters"]
+CoreCkanHarvester = "ckanext.data_gov_gr.harvesters.core_ckan_harvester:CoreCkanHarvester"
+CustomDcatHarvester = "ckanext.data_gov_gr.harvesters.custom_dcat_harvester:CustomDcatHarvester"
+EkanDcatHarvester = "ckanext.data_gov_gr.harvesters.ekan_dcat_harvester:EkanDcatHarvester"
+DkanCkanHarvester = "ckanext.data_gov_gr.harvesters.dkan_ckan_harvester:DkanCkanHarvester"
 
 
 [build-system]

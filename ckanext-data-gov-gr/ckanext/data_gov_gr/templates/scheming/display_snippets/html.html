@@ -1,0 +1,11 @@
+{# Render field value as HTML, with optional multilingual support.
+   - If the value is a multilingual dict (from fluent_core_translated),
+     pick the appropriate language via scheming_language_text.
+   - Otherwise, treat it as a plain HTML string. #}
+{% set value = data[field.field_name] %}
+{% if value is mapping %}
+  {{ h.scheming_language_text(value) | safe }}
+{% else %}
+  {{ value | safe }}
+{% endif %}
+

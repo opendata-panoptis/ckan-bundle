@@ -1,5 +1,109 @@
 /* JavaScript for the vocabulary admin extension */
 
+function vocabularyadminUpdateTagOrderInput($container) {
+  const ids = [];
+
+  $container.find('.vocabulary-tag').each(function () {
+    const id = $(this).data('id');
+    if (id) {
+      ids.push(id);
+    }
+  });
+
+  $('#tag_order').val(ids.join(','));
+}
+
+function vocabularyadminInitTagDragAndDrop($container) {
+  if (!$container || !$container.length) {
+    return;
+  }
+
+  const $tagContainers = $container.find('.vocabulary-tag-container');
+  $tagContainers.attr('draggable', 'true');
+
+  let dragSrcEl = null;
+
+  function getDataTransfer(e) {
+    return e && e.originalEvent && e.originalEvent.dataTransfer
+      ? e.originalEvent.dataTransfer
+      : null;
+  }
+
+  // dragstart
+  $container.on('dragstart', '.vocabulary-tag-container', function (e) {
+    dragSrcEl = this;
+    const $this = $(this);
+    $this.addClass('dragging');
+
+    const dt = getDataTransfer(e);
+    if (dt) {
+      dt.effectAllowed = 'move';
+      dt.setData('text/plain', '');
+    }
+  });
+
+  // dragenter: highlight potential drop target
+  $container.on('dragenter', '.vocabulary-tag-container', function (e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    if (this !== dragSrcEl) {
+      $(this).addClass('drag-over');
+    }
+  });
+
+  // dragover: allow drop
+  $container.on('dragover', '.vocabulary-tag-container', function (e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    const dt = getDataTransfer(e);
+    if (dt) {
+      dt.dropEffect = 'move';
+    }
+    return false;
+  });
+
+  // dragleave: remove highlight
+  $container.on('dragleave', '.vocabulary-tag-container', function () {
+    $(this).removeClass('drag-over');
+  });
+
+  // drop
+  $container.on('drop', '.vocabulary-tag-container', function (e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+
+    $(this).removeClass('drag-over');
+
+    if (dragSrcEl && dragSrcEl !== this) {
+      const $drag = $(dragSrcEl);
+      const $target = $(this);
+
+      if ($drag.index() < $target.index()) {
+        $target.after($drag);
+      } else {
+        $target.before($drag);
+      }
+
+      vocabularyadminUpdateTagOrderInput($container);
+    }
+
+    return false;
+  });
+
+  // dragend
+  $container.on('dragend', '.vocabulary-tag-container', function () {
+    $(this).removeClass('dragging');
+    $container.find('.drag-over').removeClass('drag-over');
+    dragSrcEl = null;
+  });
+
+  // initial sync
+  vocabularyadminUpdateTagOrderInput($container);
+}
+
 // Wait for the DOM to be ready
 $(document).ready(function() {
   // Toggle hidden tags when clicking on the "more tags" message
@@ -87,5 +191,11 @@ $(document).ready(function() {
       alert('Παρακαλώ συμπληρώστε όλα τα υποχρεωτικά πεδία.');
     }
   });
+
+  // Initialize drag & drop ordering on vocabulary edit page
+  var $tagsContainer = $('.vocabulary-tags-section .vocabulary-tags');
+  if ($tagsContainer.length && $('#tag_order').length) {
+    vocabularyadminInitTagDragAndDrop($tagsContainer);
+  }
 
 });

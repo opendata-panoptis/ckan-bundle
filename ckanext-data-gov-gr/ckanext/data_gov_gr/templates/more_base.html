@@ -16,6 +16,8 @@
     .section-action { text-align: center; margin-top: auto; padding-bottom: 10px; }
     .section-action .btn { font-weight: 500; background-color: #0066b3; border-color: #0066b3; color: white; padding: 6px 12px; font-size: 14px; border-radius: 3px; }
     .section-action .btn:hover { background-color: #003375; border-color: #003375; }
+    .pdf-guides-module .module-heading { display: flex; align-items: center; gap: 6px; }
+    .pdf-guides-module .module-heading .fa { color: #ff9800; }
 
     .module { background: #ffffff; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e3e3e3; margin-bottom: 15px; }
     .module-content { padding: 15px; }
@@ -71,6 +73,20 @@
               <a href="{{ h.url_for('/blog') }}" class="btn btn-primary btn-sm"><i class="fa fa-newspaper-o"></i> Δείτε το Blog</a>
             </div>
           </aside>
+          {% if h.has_gitbook_pdf_export() %}
+            {% set pdf_module_title = 'Κατεβάστε τους οδηγούς (PDF)' if h.lang() == 'el' else _('Download guides (PDF)') %}
+            {% set pdf_module_description = 'Ανοίξτε σε νέα καρτέλα το αρχείο PDF που περιλαμβάνει όλους τους οδηγούς της πλατφόρμας.' if h.lang() == 'el' else _('Open in a new tab the PDF that contains all platform guides.') %}
+            {% set pdf_module_button = 'Λήψη PDF' if h.lang() == 'el' else _('Download PDF') %}
+            <aside class="module module-narrow module-shallow pdf-guides-module">
+              <h2 class="module-heading"><i class="fa fa-file-pdf-o"></i> {{ pdf_module_title }}</h2>
+              <div class="module-content">
+                <p>{{ pdf_module_description }}</p>
+                <a href="{{ h.url_for('dataset_type.download_guides_pdf') }}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">
+                  {{ pdf_module_button }} <i class="fa fa-external-link"></i>
+                </a>
+              </div>
+            </aside>
+          {% endif %}
         </aside>
 
         <div class="primary col-md-9 col-xs-12" role="main">

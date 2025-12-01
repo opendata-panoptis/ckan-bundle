@@ -42,8 +42,29 @@
               {% set showcase_route = 'showcase_blueprint.index' %}
 
               {% set more_label = 'Περισσότερα' if h.lang() == 'el' else _('More') %}
+
+              {# Παραμετρικό dropdown για τα σύνολα δεδομένων (όπως στο header.html) #}
+              {% set dataset_menu_items = h.get_dataset_menu_items() %}
+              {% set dataset_active = g.blueprint in ['dataset', 'resource'] %}
+
+              <li class="dropdown {% if dataset_active %}active{% endif %}">
+                <a href="{{ h.url_for('dataset.search') }}"
+                   class="dropdown-toggle js-dataset-dropdown-toggle"
+                   role="button"
+                   aria-haspopup="true"
+                   aria-expanded="false">
+                  {{ h.humanize_entity_type('package', 'dataset', 'main nav') or _('Datasets') }}
+                </a>
+                <ul class="dropdown-menu">
+                  {% for item in dataset_menu_items %}
+                    <li>
+                      <a class="dropdown-item" href="{{ item.url }}">{{ item.label }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </li>
+
               {{ h.build_nav_main(
-                ('dataset' ~ '.search', h.humanize_entity_type('package', 'dataset', 'main nav') or _('Datasets'), ["dataset", "resource"]),
                 ('data-service' ~ '.search', _('APIs'), ["data-service"]),
                 ('decision' ~ '.search', _('Decisions'), ["decision"]),
                 (org_type ~ '.index',
@@ -67,3 +88,75 @@
   </div>
 </header>
 {% endblock %}
+
+{# Ίδια συμπεριφορά dropdown με το header.html για \"Σύνολα Δεδομένων\" στην αρχική #}
+<script type="text/javascript">
+  (function () {
+    function attachDatasetDropdownHoverClose() {
+      var dropdown = document.querySelector('header.masthead .main-navbar .dropdown');
+      if (!dropdown) {
+        return;
+      }
+
+      var toggle = dropdown.querySelector('.js-dataset-dropdown-toggle');
+      var menu = dropdown.querySelector('.dropdown-menu');
+      if (!toggle || !menu) {
+        return;
+      }
+
+      var instance = null;
+      if (window.bootstrap && window.bootstrap.Dropdown) {
+        instance = window.bootstrap.Dropdown.getInstance(toggle);
+        if (!instance) {
+          instance = new window.bootstrap.Dropdown(toggle, { autoClose: false });
+        }
+      }
+
+      var hideTimeout = null;
+
+      dropdown.addEventListener('mouseenter', function () {
+        if (hideTimeout) {
+          clearTimeout(hideTimeout);
+          hideTimeout = null;
+        }
+
+        try {
+          if (instance) {
+            instance.show();
+          } else {
+            dropdown.classList.add('show');
+            menu.classList.add('show');
+            toggle.setAttribute('aria-expanded', 'true');
+          }
+        } catch (e) {
+          // ignore
+        }
+      });
+
+      dropdown.addEventListener('mouseleave', function () {
+        if (hideTimeout) {
+          clearTimeout(hideTimeout);
+        }
+        hideTimeout = window.setTimeout(function () {
+          try {
+            if (instance) {
+              instance.hide();
+            } else {
+              dropdown.classList.remove('show');
+              menu.classList.remove('show');
+              toggle.setAttribute('aria-expanded', 'false');
+            }
+          } catch (e) {
+            // για να μην σπάσουμε την κεφαλίδα αν κάτι πάει στραβά
+          }
+        }, 150);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', attachDatasetDropdownHoverClose);
+    } else {
+      attachDatasetDropdownHoverClose();
+    }
+  })();
+</script>

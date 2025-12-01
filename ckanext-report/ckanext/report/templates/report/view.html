@@ -239,6 +239,20 @@
       width: 100% !important;
     }
     
+    /* Ensure report filters (dropdowns) do not overflow to the right */
+    .report-view-section .control-organization {
+      display: inline-block;
+      max-width: 100%;
+      /* Remove custom dropdown arrow background from wrapper
+         so we only see the native select arrow */
+      background-image: none !important;
+    }
+    
+    .report-view-section .control-organization select {
+      max-width: 100%;
+      width: 100%;
+    }
+    
     /* Table wrapper for horizontal scrolling */
     .report-table-wrapper {
       overflow-x: auto;

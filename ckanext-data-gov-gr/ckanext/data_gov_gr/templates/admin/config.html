@@ -1,0 +1,287 @@
+{% ckan_extends %}
+
+{% import 'macros/form.html' as form %}
+
+{% block admin_form %}
+
+  {{ h.csrf_input() }}
+
+  {{ form.input(
+    'ckan.site_title',
+    id='field-ckan-site-title',
+    label=_('Site Title'),
+    value=data['ckan.site_title'],
+    error=errors['ckan.site_title'],
+    classes=['control-medium']
+  ) }}
+
+  {# Site logo (same behavior as core CKAN, kept here explicitly) #}
+  {% set field_url = 'ckan.site_logo' %}
+  {% set is_upload = data[field_url] and not data[field_url].startswith('http') %}
+  {% set is_url = data[field_url] and data[field_url].startswith('http') %}
+  {{ form.image_upload(
+    data,
+    errors,
+    is_upload_enabled=h.uploads_enabled(),
+    is_url=is_url,
+    is_upload=is_upload,
+    upload_label = _('Site logo'),
+    url_label=_('Site logo'),
+    field_url=field_url,
+    field_upload='logo_upload',
+    field_clear='clear_logo_upload'
+  ) }}
+
+  <h3>{{ _('Στατιστικά και Power BI') }}</h3>
+
+  {{ form.input(
+    'ckanext.data_gov_gr.powerbi_embed_url',
+    id='field-ckanext.data_gov_gr.powerbi_embed_url',
+    label=_('Σύνδεσμος ενσωμάτωσης Power BI'),
+    value=data['ckanext.data_gov_gr.powerbi_embed_url'],
+    error=errors['ckanext.data_gov_gr.powerbi_embed_url'],
+    placeholder='https://app.powerbi.com/view?r=...'
+  ) }}
+
+  <h3>{{ _('Αναδυόμενο ερωτηματολόγιο χρήστη') }}</h3>
+
+  {{ form.input(
+    'ckanext.data_gov_gr.user_survey.url',
+    id='field-ckanext.data_gov_gr.user_survey.url',
+    label=_('Σύνδεσμος ερωτηματολογίου χρήστη'),
+    value=data['ckanext.data_gov_gr.user_survey.url'],
+    error=errors['ckanext.data_gov_gr.user_survey.url'],
+    placeholder='https://example.com/your-survey?lang={locale}'
+  ) }}
+
+  <h3>{{ _('Σελίδα εφαρμογών (Showcases)') }}</h3>
+
+  {{ form.textarea(
+    'ckanext.data_gov_gr.showcase.disclaimer',
+    id='field-ckanext.data_gov_gr.showcase.disclaimer',
+    label=_('Κείμενο αποποίησης ευθύνης για τις εφαρμογές (HTML επιτρέπεται)'),
+    value=data['ckanext.data_gov_gr.showcase.disclaimer'],
+    error=errors['ckanext.data_gov_gr.showcase.disclaimer'],
+    placeholder=_('Εισάγετε εδώ το κείμενο αποποίησης ευθύνης για την σελίδα εφαρμογών / Showcases.')
+  ) }}
+
+  <h3>{{ _('Προεπιλεγμένη Εφαρμοστέα Νομοθεσία') }}</h3>
+
+  {{ form.input(
+    'ckanext.data_gov_gr.dataset.legislation.open',
+    id='field-ckanext.data_gov_gr.dataset.legislation.open',
+    label=_('Για Ανοικτά Δεδομένα (access_rights_type=open)'),
+    value=data['ckanext.data_gov_gr.dataset.legislation.open'],
+    error=errors['ckanext.data_gov_gr.dataset.legislation.open'],
+    placeholder='https://... (π.χ. οδηγία 2019/1024)'
+  ) }}
+
+  {{ form.input(
+    'ckanext.data_gov_gr.dataset.legislation.protected',
+    id='field-ckanext.data_gov_gr.dataset.legislation.protected',
+    label=_('Για Προστατευόμενα Δεδομένα (access_rights_type=protected)'),
+    value=data['ckanext.data_gov_gr.dataset.legislation.protected'],
+    error=errors['ckanext.data_gov_gr.dataset.legislation.protected'],
+    placeholder='https://... (π.χ. κανονισμός 2022/868)'
+  ) }}
+
+  <h3>{{ _('Μενού Συνόλων Δεδομένων (Dropdown)') }}</h3>
+
+  <p class="help-block">
+    {{ _('Ορίστε παραμετρικές επιλογές για το dropdown «Σύνολα δεδομένων» στην κεφαλίδα.') }}
+    {{ _('Κάθε γραμμή στον πίνακα αντιστοιχεί σε μία επιλογή (Ετικέτα + Query).') }}
+    {{ _('Χρησιμοποιήστε το κουμπί \"+\" για να προσθέσετε νέες επιλογές μία-μία και το \"−\" για να αφαιρέσετε κάποια. ') }}
+    {{ _('Στο πεδίο \"Query\" μπορείτε είτε να επικολλήσετε απευθείας το URL από τη σελίδα αναζήτησης (π.χ. /dataset/?is_hvd=Yes), είτε μόνο το query μέρος (π.χ. fq=is_hvd:true).') }}
+  </p>
+
+  {# Κρυφό textarea που αποθηκεύει τη JSON αναπαράσταση των επιλογών #}
+  <div style="display:none;">
+    {{ form.textarea(
+      'ckanext.data_gov_gr.menu.dataset.items',
+      id='field-ckanext.data_gov_gr.menu.dataset.items',
+      label=_('Επιλογές dropdown (JSON)'),
+      value=data['ckanext.data_gov_gr.menu.dataset.items'],
+      error=errors['ckanext.data_gov_gr.menu.dataset.items']
+    ) }}
+  </div>
+
+  <table class="table table-striped" id="dataset-menu-items-editor">
+    <thead>
+      <tr>
+        <th>{{ _('Ετικέτα') }}</th>
+        <th>{{ _('Query') }}</th>
+        <th style="width: 3rem; text-align: center;">{{ _('Ενέργειες') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {# Γεμίζει δυναμικά με JavaScript βάσει του JSON #}
+    </tbody>
+  </table>
+  <button type="button" class="btn btn-default" data-role="add-item">
+    +
+  </button>
+
+  <script type="text/javascript">
+    (function () {
+      function getTextarea() {
+        return document.getElementById('field-ckanext.data_gov_gr.menu.dataset.items');
+      }
+
+      function parseItems() {
+        var textarea = getTextarea();
+        if (!textarea) return [];
+        var raw = textarea.value || '';
+        if (!raw.trim()) return [];
+        try {
+          var parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [];
+          return parsed.filter(function (item) {
+            return item && (item.label || item.query);
+          });
+        } catch (e) {
+          console && console.warn && console.warn('Invalid dataset menu JSON', e);
+          return [];
+        }
+      }
+
+      function serializeItems(tbody) {
+        var rows = tbody.querySelectorAll('tr');
+        var items = [];
+        rows.forEach(function (row) {
+          var labelInput = row.querySelector('input[data-field=\"label\"]');
+          var queryInput = row.querySelector('input[data-field=\"query\"]');
+          if (!labelInput || !queryInput) return;
+          var label = labelInput.value.trim();
+          var query = queryInput.value.trim();
+          if (label || query) {
+            items.push({label: label, query: query});
+          }
+        });
+        var textarea = getTextarea();
+        if (textarea) {
+          textarea.value = JSON.stringify(items);
+        }
+      }
+
+      function addRow(tbody, item) {
+        var tr = document.createElement('tr');
+
+        var tdLabel = document.createElement('td');
+        var inputLabel = document.createElement('input');
+        inputLabel.type = 'text';
+        inputLabel.className = 'form-control';
+        inputLabel.setAttribute('data-field', 'label');
+        inputLabel.value = item && item.label || '';
+        tdLabel.appendChild(inputLabel);
+
+        var tdQuery = document.createElement('td');
+        var inputQuery = document.createElement('input');
+        inputQuery.type = 'text';
+        inputQuery.className = 'form-control';
+        inputQuery.setAttribute('data-field', 'query');
+        inputQuery.placeholder = 'dataset/?is_hvd=Yes ή fq=is_hvd:true';
+        inputQuery.value = item && item.query || '';
+        tdQuery.appendChild(inputQuery);
+
+        var tdActions = document.createElement('td');
+        tdActions.style.textAlign = 'center';
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn btn-default';
+        removeBtn.textContent = '−';
+        removeBtn.onclick = function () {
+          tr.parentNode.removeChild(tr);
+          serializeItems(tbody);
+        };
+        tdActions.appendChild(removeBtn);
+
+        tr.appendChild(tdLabel);
+        tr.appendChild(tdQuery);
+        tr.appendChild(tdActions);
+
+        [inputLabel, inputQuery].forEach(function (input) {
+          input.addEventListener('input', function () {
+            serializeItems(tbody);
+          });
+        });
+
+        tbody.appendChild(tr);
+      }
+
+      function initEditor() {
+        var editor = document.getElementById('dataset-menu-items-editor');
+        if (!editor) return;
+        var tbody = editor.querySelector('tbody');
+        var addBtn = document.querySelector('#dataset-menu-items-editor + button[data-role=\"add-item\"]');
+        if (!tbody || !addBtn) return;
+
+        var items = parseItems();
+        if (items.length === 0) {
+          // Ξεκινάμε με μια κενή γραμμή για ευκολία
+          addRow(tbody, {label: '', query: ''});
+        } else {
+          items.forEach(function (item) {
+            addRow(tbody, item);
+          });
+        }
+
+        addBtn.onclick = function (e) {
+          e.preventDefault();
+          addRow(tbody, {label: '', query: ''});
+          serializeItems(tbody);
+        };
+      }
+
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        initEditor();
+      } else {
+        document.addEventListener('DOMContentLoaded', initEditor);
+      }
+    })();
+  </script>
+
+{% endblock %}
+
+{% block admin_form_help %}
+
+  <p>
+    <strong>{{ _('Site Title') }}:</strong>
+    {{ _('Ο τίτλος της πύλης, όπως εμφανίζεται στην κεφαλίδα και σε διάφορα σημεία του CKAN.') }}
+  </p>
+
+  <p>
+    <strong>{{ _('Site logo') }}:</strong>
+    {{ _('Το λογότυπο που εμφανίζεται στην κεφαλίδα όλων των σελίδων της πύλης (μπορεί να δοθεί ως URL ή να ανέβει ως εικόνα).') }}
+  </p>
+
+  <p>
+    <strong>{{ _('Σύνδεσμος ενσωμάτωσης Power BI') }}:</strong>
+    {{ _('Πλήρες iframe src URL από το Power BI (\"Publish to web\" ή \"Embed → Website or portal\"). Αν οριστεί εδώ, υπερισχύει της τιμής powerbi.embed_url στο configuration file.') }}
+  </p>
+
+  <p>
+    <strong>{{ _('Σύνδεσμος ερωτηματολογίου χρήστη') }}:</strong>
+    {{ _('Διεύθυνση (URL) του εξωτερικού ερωτηματολογίου, που χρησιμοποιείται τόσο στο link του footer όσο και στο αναδυόμενο παράθυρο αξιολόγησης.') }}
+    {{ _('Μπορείτε να χρησιμοποιήσετε παραμετρικό link εδώ (π.χ. με τη γλώσσα: ?lang=el).') }}
+  </p>
+
+  <p>
+    <strong>{{ _('Κείμενο αποποίησης ευθύνης για τις εφαρμογές') }}:</strong>
+    {{ _('Κείμενο αποποίησης ευθύνης (disclaimer) που εμφανίζεται στη σελίδα ευρετηρίου των εφαρμογών (showcases).') }}
+    {{ _('Υποστηρίζει απλό HTML για συνδέσμους ή μορφοποίηση.') }}
+  </p>
+
+  <p>
+    <strong>{{ _('Προεπιλεγμένη Εφαρμοστέα Νομοθεσία') }}:</strong>
+    {{ _('Συνδέσμοι νομοθεσίας που προ-συμπληρώνονται στο πεδίο «Εφαρμοστέα Νομοθεσία» κατά τη δημιουργία συνόλου δεδομένων, ανάλογα με τον τύπο πρόσβασης (open / protected).') }}
+    {{ _('Αν τα πεδία μείνουν κενά, δεν θα προ-συμπληρώνεται τιμή.') }}
+  </p>
+
+  <p>
+    <strong>{{ _('Μενού Συνόλων Δεδομένων (Dropdown)') }}:</strong>
+    {{ _('Οι επιλογές που ορίζονται εδώ εμφανίζονται ως υπο-μενού κάτω από το «Σύνολα δεδομένων».') }}
+    {{ _('Κάθε σειρά του πίνακα είναι μία επιλογή του dropdown· αν κάποια σειρά μείνει κενή (χωρίς Ετικέτα και Query), δεν θα εμφανιστεί στο μενού.') }}
+    {{ _('Μπορείτε να προσθέτετε ή να αφαιρείτε επιλογές μία-μία, χωρίς σταθερό μέγιστο αριθμό.') }}
+  </p>
+
+{% endblock %}
