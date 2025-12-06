@@ -11,6 +11,7 @@ Example:
   {% snippet 'snippets/package_item.html', package=c.datasets[0] %}
 
 #}
+{% ckan_extends %}
 {% set title = package.title or package.name %}
 {% set notes = h.markdown_extract(package.notes, extract_length=180) %}
 
@@ -31,9 +32,7 @@ Example:
                 {% endif %}
               {% endblock %}
               {% block heading_title %}
-      <a href="{{ h.url_for('%s.read' % package.type, id=package.name) }}" title="{{ title }}">
-        {{title|truncate(80)}}
-      </a>
+                  {{ super() }}
               {% endblock %}
               {% block heading_meta %}
                 {% if package.get('state', '').startswith('draft') %}

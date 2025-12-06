@@ -1,11 +1,28 @@
 {# Render field value as HTML, with optional multilingual support.
    - If the value is a multilingual dict (from fluent_core_translated),
      pick the appropriate language via scheming_language_text.
-   - Otherwise, treat it as a plain HTML string. #}
-{% set value = data[field.field_name] %}
-{% if value is mapping %}
-  {{ h.scheming_language_text(value) | safe }}
-{% else %}
-  {{ value | safe }}
+   - For description fields (notes/notes_translated), αφαιρούμε τυχόν iframe
+     και:
+       * αν το σώμα μοιάζει ήδη με HTML, το εμφανίζουμε όπως είναι
+       * αλλιώς, το κάνουμε render ως markdown
+   - Για όλα τα άλλα, το θεωρούμε ήδη HTML. #}
+{% set raw_value = data[field.field_name] %}
+
+{# Υποστήριξη μεταφρασμένων πεδίων #}
+{% if raw_value is mapping %}
+  {% set raw_value = h.scheming_language_text(raw_value) %}
 {% endif %}
 
+{# Ειδικός χειρισμός για την Περιγραφή #}
+{% if field.field_name in ['notes_translated', 'notes'] and raw_value %}
+  {% set parts = h.extract_iframe_from_html(raw_value) %}
+  {% set body = parts.body %}
+  {# Αν μοιάζει ήδη με HTML, μην το ξαναπεράσουμε από markdown #}
+  {% if '<' in body and '>' in body %}
+    {{ body | safe }}
+  {% else %}
+    {{ h.render_markdown(body) | safe }}
+  {% endif %}
+{% else %}
+  {{ raw_value | safe }}
+{% endif %}

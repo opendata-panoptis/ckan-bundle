@@ -202,8 +202,9 @@ def _create_user(userinfo):
     created_user_dict = tk.get_action(
         u'user_create'
     )(context, userinfo)
-    
-    return _get_user_by_email(created_user_dict['email'])
+
+    sub = userinfo.get('plugin_extras', {}).get('sub')
+    return _get_user_by_sub(sub)
 
 
 def button_style():

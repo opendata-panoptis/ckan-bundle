@@ -14,7 +14,7 @@
     h.scheming_field_by_name(schema.dataset_fields, 'notes_translated')) and
     pkg.notes%}
     <div class="notes embedded-content">
-      {{ h.render_markdown(h.get_translated(pkg, 'notes')) }}
+      {{ h.render_markdown(data=h.get_translated(pkg, 'notes'), allow_html=True) }}
     </div>
   {% endif %}
 {% endblock %}

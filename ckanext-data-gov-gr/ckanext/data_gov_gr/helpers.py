@@ -1,9 +1,12 @@
 import logging
 import json
+import re
 import ckan.plugins.toolkit as toolkit
 from ckan.lib import helpers as core_helpers
 from ckan.lib.helpers import lang
 from ckan.plugins.toolkit import _ # Import για το σύστημα μετάφρασης
+from flask_login import current_user as _cu
+from typing import (cast, Union)
 
 log = logging.getLogger(__name__)
 
@@ -323,6 +326,26 @@ def get_dataset_legislation_default():
 
     return ''
 
+
+def data_gov_gr_get_organizations():
+    """
+    Επιστρέφει λίστα οργανισμών για dropdown (id, name, title).
+    """
+    try:
+        orgs = toolkit.get_action('organization_list')(
+            {'ignore_auth': True},
+            {'all_fields': True, 'include_extras': False}
+        )
+        # ταξινόμηση αλφαβητικά με βάση το title ή name
+        orgs_sorted = sorted(
+            orgs,
+            key=lambda o: (o.get('title') or o.get('name') or '').lower()
+        )
+        return orgs_sorted
+    except Exception as e:
+        log.error(f'Error loading organizations for contact form: {e}')
+        return []
+
 def get_config_as_bool(key, default=False):
     """
     Get configuration value as boolean.
@@ -628,6 +651,92 @@ def allow_org_admins_public_decisions():
     # Αν έχει τιμή, μετατρέπεται σε boolean
     return toolkit.asbool(value)
 
+def extract_iframe_from_html(html):
+    """
+    Επιστρέφει ένα dict με:
+    - body: το HTML χωρίς το πρώτο <iframe>...</iframe>
+    - iframe: το πρώτο iframe μπλοκ (ή κενό string αν δεν βρεθεί)
+    """
+    if not isinstance(html, str) or '<iframe' not in html.lower():
+        return {
+            'body': html,
+            'iframe': '',
+        }
+
+    pattern = re.compile(r'<iframe\b[^>]*>.*?</iframe>', re.IGNORECASE | re.DOTALL)
+    match = pattern.search(html)
+    if not match:
+        return {
+            'body': html,
+            'iframe': '',
+        }
+
+    iframe_html = match.group(0)
+    body_html = pattern.sub('', html, count=1)
+
+    return {
+        'body': body_html,
+        'iframe': iframe_html,
+    }
+
+# ---------------------------------------------------------------------------------------
+
+def is_email_changed(data_dict, current_user):
+    """
+    Helper function to check if the email in data_dict differs from current user's email.
+
+    Args:
+        data_dict: Dictionary containing form data with email field
+        current_user: Current logged in user object
+
+    Returns:
+        bool: True if email has changed, False otherwise
+    """
+    if not data_dict or not current_user:
+        return False
+
+    new_email = data_dict.get('email', '').strip()
+    current_email = getattr(current_user, 'email', '').strip()
+
+    return new_email != current_email
+
+def should_show_update_button_in_user_profile(data_dict):
+    """
+    Καθορίζει αν πρέπει να εμφανιστούν τα κουμπιά διαχείρισης στο edit profile.
+
+    Λογική:
+    - Αν το email δεν έχει αλλάξει, εμφανίζονται τα κουμπιά
+    - Αν το email έχει αλλάξει, κρύβονται τα κουμπιά
+
+    Args:
+        data_dict: Λεξικό με τα δεδομένα της φόρμας
+
+    Returns:
+        bool: True αν πρέπει να εμφανιστούν τα κουμπιά διαχείρισης
+    """
+
+    # Έλεγχος αν το internal login είναι απενεργοποιημένο
+    try:
+        # Κλήση του helper από το keycloak plugin
+        if toolkit.h.enable_internal_login():
+            return True  # Εμφάνισε πάντα τα κουμπιά αν υπάρχει internal login
+    except (AttributeError, KeyError):
+        # Το keycloak plugin δεν είναι εγκατεστημένο ή ο helper δεν είναι διαθέσιμος
+        pass
+
+    # Λήψη του τρέχοντος συνδεδεμένου χρήστη
+    current_user = cast(Union["Model.User", "Model.AnonymousUser"], _cu)
+
+    # If email hasn't changed, show buttons
+    # Η λογική έχει αντληθεί από το main ckan, δες ckan/common.py
+    if not is_email_changed(data_dict, current_user):
+        return True
+
+    # Hide buttons if email changed
+    return False
+
+# ---------------------------------------------------------------------------------------
+
 def get_helpers():
     return {
         "vocabulary_facet_item_label": vocabulary_facet_item_label,
@@ -638,6 +747,7 @@ def get_helpers():
         "get_organizations_stats": get_organizations_stats,
         'get_access_rights_type': get_access_rights_type,
         'get_dataset_legislation_default': get_dataset_legislation_default,
+        'data_gov_gr_get_organizations': data_gov_gr_get_organizations,
         'get_data_service_guides_url': get_data_service_guides_url,
         'get_config_as_bool': get_config_as_bool,
         'get_config_value': get_config_value,
@@ -650,5 +760,7 @@ def get_helpers():
         'should_show_decision_menu': should_show_decision_menu,
         'should_show_decision_button': should_show_decision_button,
         'allow_org_admins_public_decisions': allow_org_admins_public_decisions,
-        'get_dataset_menu_items': get_dataset_menu_items
+        'should_show_update_button_in_user_profile': should_show_update_button_in_user_profile,
+        'get_dataset_menu_items': get_dataset_menu_items,
+        'extract_iframe_from_html': extract_iframe_from_html,
     }

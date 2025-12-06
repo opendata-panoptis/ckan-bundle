@@ -593,8 +593,8 @@ resource_fields:
     - field_name: uri
       label: URI
       help_text:
-        el: Το μοναδικό URI της περιγραφής της υπηρεσίας δεδομένων στο data.gov.gr
-        en: The unique URI of the dataservice description in the data.gov.gr
+        el: Το μοναδικό URI της περιγραφής της υπηρεσίας δεδομένων στο σύστημα
+        en: The unique URI of the dataservice description in the system
 
   help_text:
     el: Μια υπηρεσία δεδομένων που παρέχει πρόσβαση στον πόρο

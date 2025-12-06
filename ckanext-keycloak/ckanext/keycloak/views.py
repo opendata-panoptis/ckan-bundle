@@ -92,16 +92,41 @@ def sso_login():
             }
         }
         context = {"model": model, "session": model.Session}
-        g.user_obj = helpers.process_user(user_dict)
-        g.user = g.user_obj.name
-        context['user'] = g.user
-        context['auth_user_obj'] = g.user_obj
 
-        response = tk.redirect_to(tk.url_for('user.me', context))
+        try:
+            g.user_obj = helpers.process_user(user_dict)
+            g.user = g.user_obj.name
+            context['user'] = g.user
+            context['auth_user_obj'] = g.user_obj
 
-        _log_user_into_ckan(response)
-        log.info("Logged in success")
-        return response
+            response = tk.redirect_to(tk.url_for('user.me', context))
+
+            _log_user_into_ckan(response)
+            log.info("Logged in success")
+            return response
+
+        except tk.ValidationError as e:
+            log.error(f"ValidationError during SSO login process: {e}")
+            # Εξάγουμε το πρώτο μήνυμα από το ValidationError
+            if hasattr(e, 'error_dict') and e.error_dict:
+                # Παίρνουμε το πρώτο error message από το error_dict
+                first_key = next(iter(e.error_dict))
+                error_messages = e.error_dict[first_key]
+                if error_messages and len(error_messages) > 0:
+                    error_message = error_messages[0]
+                else:
+                    error_message = 'Παρουσιάστηκε πρόβλημα κατά τη σύνδεση. Παρακαλώ δοκιμάστε ξανά.'
+            else:
+                error_message = 'Παρουσιάστηκε πρόβλημα κατά τη σύνδεση. Παρακαλώ δοκιμάστε ξανά.'
+
+            h.flash_error(error_message)
+            return tk.redirect_to(tk.url_for('user.login'))
+
+        except Exception as e:
+            log.error(f"Error during SSO login process: {e}")
+            h.flash_error('Παρουσιάστηκε πρόβλημα κατά τη σύνδεση. Παρακαλώ δοκιμάστε ξανά.')
+            return tk.redirect_to(tk.url_for('user.login'))
+
     else:
         return tk.redirect_to(tk.url_for('user.login'))
 

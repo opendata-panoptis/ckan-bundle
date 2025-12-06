@@ -76,6 +76,8 @@
     placeholder='https://... (π.χ. οδηγία 2019/1024)'
   ) }}
 
+  {% if not h.should_disable_protected_data() %}
+
   {{ form.input(
     'ckanext.data_gov_gr.dataset.legislation.protected',
     id='field-ckanext.data_gov_gr.dataset.legislation.protected',
@@ -84,6 +86,8 @@
     error=errors['ckanext.data_gov_gr.dataset.legislation.protected'],
     placeholder='https://... (π.χ. κανονισμός 2022/868)'
   ) }}
+
+  {% endif %}
 
   <h3>{{ _('Μενού Συνόλων Δεδομένων (Dropdown)') }}</h3>
 
