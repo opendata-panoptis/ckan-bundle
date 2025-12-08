@@ -171,7 +171,7 @@ def broken_links_for_organization(organization):
             archived_resource = resource
 
         row_data = OrderedDict((
-            ('dataset_title', pkg.title),
+            ('dataset_title', lib.resolve_dataset_title(pkg)),
             ('dataset_name', pkg.name),
             ('dataset_notes', lib.dataset_notes(pkg)),
             ('organization_title', org.title),

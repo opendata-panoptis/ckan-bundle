@@ -12,9 +12,9 @@
           {% block footer_about %}
             <li><a href="{{ h.url_for('/pages/about-portal') }}">{{ _('About the Portal') }}</a></li>
             <li><a href="https://www.cityofathens.gr">{{ _('About the Municipality') }}</a></li>
-            <li><a href="https://www.data.gov.gr">{{ _('Open Data Gov') }}</a></li>
+            <li><a href="https://www.data.gov.gr">{{ _('Data.gov.gr') }}</a></li>
             {% if footer_source_code_url %}
-              <li><a href="{{ footer_source_code_url }}">{{ _('Πηγαιος κωδικας') }}</a></li>
+              <li><a href="{{ footer_source_code_url }}">{{ _('Source Code') }}</a></li>
             {% endif %}
 
           {% endblock %}
@@ -28,7 +28,7 @@
             <li><a href="{{ h.url_for('dataset.search') }}">{{ _('Datasets') }}</a></li>
             <li><a href="{{ h.url_for('/data-service') }}">{{ _('Data services') }}</a></li>
             <li><a href="{{ h.url_for('organization.index') }}">{{ _('Organizations') }}</a></li>
-            <li><a href="{{ 'https://documenter.getpostman.com/view/46464335/2sB3QJNqnE' }}">{{ _('API Guide') }}</a></li>
+            <li><a href="{{ 'https://opendata-cityofathens-gr.gitbook.io/guides/texnika-egxeiridia' }}">{{ _('API Guide') }}</a></li>
           {% endblock %}
         </ul>
       </div>
@@ -38,10 +38,9 @@
         <ul class="list-unstyled">
           {% block footer_community %}
             <li><a href="{{ h.url_for('/blog') }}">{{ _('News') }}</a></li>
-            <li><a href="{{ h.url_for('/pages/faq') }}">{{ _('FAQ') }}</a></li>
-            <li><a href="{{ h.url_for('/pages/privacy') }}">{{ _('Privacy Policy') }}</a></li>
+            <li><a href="{{ 'https://opendata-cityofathens-gr.gitbook.io/guides/syxnes-erotiseis' }}">{{ _('FAQ') }}</a></li>
             <li><a href="{{ h.url_for('/stats') }}">{{ _('Statistics') }}</a></li>
-            <li><a href="https://www.cityofathens.gr/contact">{{ _('Contact Us') }}</a></li>
+            <li><a href="{{ h.url_for('/contact') }}">{{ _('Contact Us') }}</a></li>
           {% endblock %}
         </ul>
       </div>
