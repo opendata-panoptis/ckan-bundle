@@ -14,6 +14,7 @@ from ckan.model import Session
 from ckan.plugins.toolkit import config
 from ckanext.harvest.harvesters.ckanharvester import CKANHarvester
 from ckanext.harvest.model import HarvestObject
+from ckanext.data_gov_gr import helpers as data_gov_helpers
 
 log = logging.getLogger(__name__)
 
@@ -1038,7 +1039,21 @@ class AtticaOpenDataHarvester(CKANHarvester):
         """
         package_dict['landing_page'] = dataset_data['url']
         package_dict['access_rights'] = 'http://publications.europa.eu/resource/authority/access-right/PUBLIC'
-        package_dict['applicable_legislation'] = ['https://eur-lex.europa.eu/eli/dir/2019/1024/oj/eng']
+
+        # Εφαρμοστέα νομοθεσία: παραμετρική, με default την 2019/1024
+        try:
+            legislation_value = data_gov_helpers.get_config_value(
+                'ckanext.data_gov_gr.dataset.legislation.open',
+                'https://eur-lex.europa.eu/eli/dir/2019/1024/oj/eng'
+            )
+            if isinstance(legislation_value, str):
+                legislation_value = legislation_value.strip()
+        except Exception:
+            legislation_value = 'https://eur-lex.europa.eu/eli/dir/2019/1024/oj/eng'
+
+        if legislation_value:
+            package_dict['applicable_legislation'] = [legislation_value]
+
         package_dict['language_options'] = ['http://publications.europa.eu/resource/authority/language/ELL']
 
         # Contact

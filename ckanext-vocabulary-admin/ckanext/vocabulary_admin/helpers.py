@@ -33,6 +33,9 @@ def _get_label_by_language(tag):
 
     return tag.get('display_name')
 
+_VOCAB_CHOICES_CACHE = {}
+
+
 def vocabularyadmin_get_tags_for_scheming(field):
     """
     Retrieves tags from a specific vocabulary and formats them
@@ -53,6 +56,10 @@ def vocabularyadmin_get_tags_for_scheming(field):
                     u"`form_choices_helper_kwargs`.".format(field.get('field_name')))
         return []
 
+    cache_key = str(vocabulary_id_or_name)
+    if cache_key in _VOCAB_CHOICES_CACHE:
+        return _VOCAB_CHOICES_CACHE[cache_key]
+
     try:
         log.debug(u'Fetching tags for vocabulary: {0}'.format(vocabulary_id_or_name))
         vocabulary_data = toolkit.get_action('vocabularyadmin_vocabulary_show')(
@@ -65,13 +72,13 @@ def vocabularyadmin_get_tags_for_scheming(field):
 
         log.debug(u'Found {0} choices for vocabulary {1}'.format(len(choices), vocabulary_id_or_name))
 
+        _VOCAB_CHOICES_CACHE[cache_key] = choices
+
         return choices
 
     except toolkit.ObjectNotFound:
-        # If the vocabulary is not found, return an empty list
-        log.warning(
-            u'Vocabulary not found: "{0}"'.format(vocabulary_id_or_name)
-        )
+        # Vocabulary missing - avoid noisy logs on repeated lookups
+        log.info(u'Vocabulary not found: "{0}"'.format(vocabulary_id_or_name))
         return []
     except Exception:
         log.exception(

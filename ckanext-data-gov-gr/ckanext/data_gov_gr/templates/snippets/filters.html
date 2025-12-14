@@ -11,19 +11,63 @@
 {% endif %}
 
 <div id="filters">
-    {% for vocab in current_vocabs %}
-        <div class="mb-3">
-            <label for="field-{{ vocab }}" class="form-label">{{ h.vocabulary_facet_title(vocab) }}</label>
-            <select id="field-{{ vocab }}" class="form-select" name="{{ vocab }}" multiple aria-label="multiple select for {{ vocab }}">
-                {% for option in h.vocabularyadmin_get_tags_for_scheming({'form_choices_helper_kwargs': {'vocabulary_id_or_name': h.get_vocabulary_id_for_field(vocab)}}) %}
-                    <option value="{{ option.value }}">{{ option.label }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    {% endfor %}
+    <div class="accordion" id="filters-accordion">
+        {% for vocab in current_vocabs %}
+            {% set vocab_title = h.vocabulary_facet_title(vocab) %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-{{ vocab }}">
+                    <button
+                        class="accordion-button{% if not loop.first %} collapsed{% endif %}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapse-{{ vocab }}"
+                        aria-expanded="{% if loop.first %}true{% else %}false{% endif %}"
+                        aria-controls="collapse-{{ vocab }}"
+                    >
+                        {{ vocab_title }}
+                        <span class="filters-summary" data-summary-for="{{ vocab }}"></span>
+                    </button>
+                </h2>
+                <div
+                    id="collapse-{{ vocab }}"
+                    class="accordion-collapse collapse{% if loop.first %} show{% endif %}"
+                    aria-labelledby="heading-{{ vocab }}"
+                    data-bs-parent="#filters-accordion"
+                >
+                    <div class="accordion-body">
+                        {% if vocab == 'license' %}
+                            <div class="mb-2">
+                                <label for="license-filter-input" class="visually-hidden">
+                                    {{ _('Αναζήτηση στις άδειες') }}
+                                </label>
+                                <input
+                                    type="text"
+                                    id="license-filter-input"
+                                    class="form-control form-control-sm"
+                                    placeholder="{{ _('Αναζήτηση άδειας') }}"
+                                >
+                            </div>
+                        {% endif %}
+                        <label for="field-{{ vocab }}" class="visually-hidden">{{ vocab_title }}</label>
+                        <select
+                            id="field-{{ vocab }}"
+                            class="form-select"
+                            name="{{ vocab }}"
+                            multiple
+                            aria-label="multiple select for {{ vocab }}"
+                        >
+                            {% for option in h.vocabularyadmin_get_tags_for_scheming({'form_choices_helper_kwargs': {'vocabulary_id_or_name': h.get_vocabulary_id_for_field(vocab)}}) %}
+                                <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 
     <!-- Νέο πεδίο Input για το query -->
-    <div class="mb-3">
+    <div class="mb-3 mt-3">
         <label for="additionalInput" class="form-label">{{ _('Επιπλέον Φίλτρο') }}</label>
         <input type="text" id="additionalInput" class="form-control" placeholder="{{ _('Προσθέστε φίλτρο') }}">
     </div>

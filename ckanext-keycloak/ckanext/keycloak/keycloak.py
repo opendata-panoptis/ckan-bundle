@@ -17,12 +17,12 @@ class KeycloakClient:
             server_url=self.server_url, client_id=self.client_id, realm_name=self.realm_name, client_secret_key=self.client_secret_key
         )
 
-    def get_auth_url(self, redirect_uri, max_age=None, prompt=None):
+    def get_auth_url(self, redirect_uri, max_age=None, prompt=None, state=None):
         """
         Generate authorization URL with optional OIDC parameters
         """
         # Δημιουργία βασικού URL
-        base_auth_url = self.get_keycloak_client().auth_url(redirect_uri=redirect_uri, scope="openid profile email")
+        base_auth_url = self.get_keycloak_client().auth_url(redirect_uri=redirect_uri, scope="openid profile email", state=state or "")
 
         if force_keycloak_reauth():
 

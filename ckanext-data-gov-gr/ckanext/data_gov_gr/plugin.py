@@ -244,6 +244,18 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         - data-service: is_hvd, publishertype
         - decision: καμία επέμβαση
         """
+        # Deduplicate res_license to prevent Solr 32KB limit overflow
+        # Keep only unique values instead of repeating for each resource
+        if 'res_license' in pkg_dict:
+            res_license = pkg_dict['res_license']
+            if isinstance(res_license, list):
+                # Keep only unique values
+                unique_licenses = list(set(res_license))
+                pkg_dict['res_license'] = unique_licenses
+            elif isinstance(res_license, str) and len(res_license) > 30000:
+                # If it's already a huge string, take just the first license
+                pkg_dict['res_license'] = res_license[:500]
+
         pkg_type = pkg_dict.get('type')
 
         # Καμία επέμβαση για αποφάσεις
@@ -288,10 +300,59 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
             extra_resource_fields = model.Resource.get_extra_columns()
             for field in extra_resource_fields:
                 res_extras_key = f'res_extras_{field}'
-                if res_extras_key in pkg_dict:
-                    values = pkg_dict[res_extras_key]
-                    if values:
-                        pkg_dict[f'res_{field}'] = str(values)
+                if res_extras_key not in pkg_dict:
+                    continue
+
+                values = pkg_dict[res_extras_key]
+                if not values:
+                    continue
+
+                # Special handling for license: index all unique values in a bounded string for Solr
+                if field == 'license':
+                    # Flatten nested lists/tuples just in case
+                    items = []
+                    if isinstance(values, (list, tuple)):
+                        for v in values:
+                            if isinstance(v, (list, tuple)):
+                                items.extend(v)
+                            else:
+                                items.append(v)
+                    else:
+                        items = [values]
+
+                    cleaned = []
+                    seen = set()
+                    for item in items:
+                        if item is None:
+                            continue
+                        s = str(item).strip()
+                        if not s:
+                            continue
+                        key = s.lower()
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        cleaned.append(s)
+
+                    if cleaned:
+                        # Δημιουργούμε string τύπου Python list, ώστε τα υπάρχοντα
+                        # patterns αναζήτησης (π.χ. *ID'*) να συνεχίσουν να δουλεύουν.
+                        res_license_value = "['" + "', '".join(cleaned) + "']"
+                        max_len = 30000  # με ασφάλεια κάτω από το όριο 32KB του Solr
+                        if len(res_license_value) > max_len:
+                            log.warning(
+                                "Truncating res_license for %s from %d to %d chars (too many unique licences)",
+                                pkg_dict.get('name'),
+                                len(res_license_value),
+                                max_len,
+                            )
+                            res_license_value = res_license_value[:max_len]
+
+                        pkg_dict['res_license'] = res_license_value
+                    else:
+                        pkg_dict.pop('res_license', None)
+                else:
+                    pkg_dict[f'res_{field}'] = str(values)
 
         return pkg_dict
 
@@ -382,6 +443,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         return {
             'check_user_org_permission': auth.check_user_org_permission,
             'user_organization_capacity': auth.user_organization_capacity_auth,
+            'user_reset': auth.user_reset_override,
             'organization_list_with_user_extras': auth.organization_list_with_user_extras_auth
         }
 
@@ -396,7 +458,18 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         }
 
         if not enable_internal_login():
-            exposed_actions['user_invite'] = actions.user_invite_notify
+
+            # Ανάγνωση παραμέτρου από ckan.ini για την επιλογή μεθόδου user_invite
+            user_invite_method = config.get('ckanext.data_gov_gr.user_invite_method', 'notify')
+
+            if user_invite_method == 'notify':
+                exposed_actions['user_invite'] = actions.user_invite_notify
+            elif user_invite_method == 'waiting_keycloak':
+                exposed_actions['user_invite'] = actions.user_invite_waiting_keycloak_user
+            else:
+                # Προεπιλογή σε περίπτωση λάθους στη παράμετρο
+                exposed_actions['user_invite'] = actions.user_invite_notify
+
             exposed_actions['organization_member_create'] = actions.organization_member_create_custom
 
         return exposed_actions

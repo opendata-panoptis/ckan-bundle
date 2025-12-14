@@ -66,6 +66,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Αναζήτηση μέσα στις άδειες
+    const licenseSearchInput = document.getElementById('license-filter-input');
+    const licenseSelect = document.getElementById('field-license');
+
+    if (licenseSearchInput && licenseSelect) {
+        const licenseOptions = Array.from(licenseSelect.options);
+
+        licenseSearchInput.addEventListener('input', function() {
+            const term = licenseSearchInput.value.trim().toLowerCase();
+
+            licenseOptions.forEach(function(option) {
+                const text = option.textContent.toLowerCase();
+                const matches = !term || text.includes(term);
+                option.hidden = !matches;
+            });
+        });
+    }
+
+    // Ενημέρωση σύνοψης επιλεγμένων φίλτρων στα headers
+    const filtersContainer = document.getElementById('filters');
+    if (filtersContainer) {
+        filtersContainer.addEventListener('change', function(event) {
+            const target = event.target;
+            if (target && target.tagName === 'SELECT' && target.multiple) {
+                updateFilterSummaries();
+            }
+        });
+
+        // Αρχικοποίηση περιλήψεων κατά την φόρτωση
+        updateFilterSummaries();
+    }
+});
+
 // Τα dropdowns πλέον γεμίζουν δυναμικά με τα δεδομένα από τα λεξιλόγια
 // Η λογική φόρτωσης έχει μεταφερθεί στο template snippets/filters.html
 
@@ -215,57 +249,70 @@ function findFilters() {
         // Αποκωδικοποιούμε το query string (αν περιέχει ειδικούς χαρακτήρες όπως %20 για κενό)
         const decodedQuery = decodeURIComponent(query);
 
-        // Αναλύουμε το query string σε παραμέτρους
-        // Χρησιμοποιούμε regex για να χειριστούμε σωστά τις παρενθέσεις και τα AND
+        // Αναλύουμε το query string σε tokens (χωρίζουμε σε παρενθέσεις ή διαστήματα)
         const queryParams = decodedQuery.match(/(\([^)]+\)|[^( )]+)/g) || [];
 
-        let freeTextParts = []; // Για να μαζέψουμε το ελεύθερο κείμενο
-        // Για κάθε παράμετρο στο query string, εξετάζουμε αν αντιστοιχεί σε φίλτρο και το επιλέγουμε
-        queryParams.forEach(param => {
+        const freeTextTokens = [];
+        let index = 0;
+
+        // Διατρέχουμε τα tokens από την αρχή και "τρώνε" τα κομμάτια
+        // που αντιστοιχούν στα γνωστά φίλτρα (Κατηγορίες, HVD, Τύποι, Άδειες).
+        // Μόλις βρούμε κάτι που δεν αναγνωρίζουμε, θεωρούμε ότι από εκεί και πέρα
+        // είναι το ελεύθερο κείμενο (Επιπλέον φίλτρο).
+        while (index < queryParams.length) {
+            const param = queryParams[index];
             const normalizedParam = param.replace(/^[()]+/, '').replace(/[()]+$/, '');
 
-            // Ελέγχουμε για το hvd_category
+            // hvd_category
             if (normalizedParam.startsWith('hvd_category:*')) {
-                const value = normalizedParam.split(':')[1].replaceAll('*', '');  // Παίρνουμε το μέρος μετά το 'hvd_category:*'
-                const baseUri = 'http://data.europa.eu/bna/'; // βασικό URI
-                const fullValue = baseUri + value; // Το πλήρες URI για σύγκριση
+                const value = normalizedParam.split(':')[1].replaceAll('*', '');
+                const baseUri = 'http://data.europa.eu/bna/';
+                const fullValue = baseUri + value;
                 const categorySelect = document.getElementById('field-hvd_category');
-                const option = Array.from(categorySelect.options).find(option => option.value === fullValue);
+                const option = categorySelect
+                    ? Array.from(categorySelect.options).find(o => o.value === fullValue)
+                    : null;
                 if (option) {
                     option.selected = true;
                 }
-                return;
+                index += 1;
+                continue;
             }
 
-            // Ελέγχουμε για το theme
+            // theme
             if (normalizedParam.startsWith('theme:*')) {
-                const value = normalizedParam.split(':')[1].replaceAll('*', '');  // Παίρνουμε το μέρος μετά το 'theme:*'
-                const baseUri = 'http://publications.europa.eu/resource/authority/data-theme/'; // βασικό URI
-                const fullValue = baseUri + value; // Το πλήρες URI για σύγκριση
+                const value = normalizedParam.split(':')[1].replaceAll('*', '');
+                const baseUri = 'http://publications.europa.eu/resource/authority/data-theme/';
+                const fullValue = baseUri + value;
                 const themeSelect = document.getElementById('field-theme');
-                const option = Array.from(themeSelect.options).find(option => option.value === fullValue);
+                const option = themeSelect
+                    ? Array.from(themeSelect.options).find(o => o.value === fullValue)
+                    : null;
                 if (option) {
                     option.selected = true;
                 }
-                return;
+                index += 1;
+                continue;
             }
 
-            // Ελέγχουμε για το dcat_type
+            // dcat_type
             if (normalizedParam.startsWith('dcat_type:*')) {
-                const value = normalizedParam.split(':')[1].replaceAll('*', '');  // Παίρνουμε το μέρος μετά το 'dcat_type:*'
-                const baseUri = 'http://publications.europa.eu/resource/authority/dataset-type/'; // βασικό URI
-                const fullValue = baseUri + value; // Το πλήρες URI για σύγκριση
+                const value = normalizedParam.split(':')[1].replaceAll('*', '');
+                const baseUri = 'http://publications.europa.eu/resource/authority/dataset-type/';
+                const fullValue = baseUri + value;
                 const dcatSelect = document.getElementById('field-dcat_type');
-                const option = Array.from(dcatSelect.options).find(option => option.value === fullValue);
+                const option = dcatSelect
+                    ? Array.from(dcatSelect.options).find(o => o.value === fullValue)
+                    : null;
                 if (option) {
                     option.selected = true;
                 }
-                return;
+                index += 1;
+                continue;
             }
 
-            // Ελέγχουμε για τις άδειες (dataset ή resource level)
+            // Άδειες (dataset ή resource level)
             if (normalizedParam.startsWith(`${licenseSolrField}:`)) {
-                // Επιλέγουμε regex ανάλογα με το query που δημιουργήθηκε (dataset ή data-service)
                 const pattern = isDataServiceSearch ? /\*([^*]+)\*/ : /\*([^\*']+)'/;
                 const match = normalizedParam.match(pattern);
 
@@ -273,22 +320,81 @@ function findFilters() {
                     const licenseId = match[1];
                     const licenseSelect = document.getElementById('field-license');
                     if (licenseSelect) {
-                        const option = Array.from(licenseSelect.options).find(opt => opt.value.endsWith(licenseId));
+                        const option = Array.from(licenseSelect.options).find(opt =>
+                            opt.value.endsWith(licenseId)
+                        );
                         if (option) {
                             option.selected = true;
                         }
                     }
                 }
-                return;
+                index += 1;
+                continue;
             }
 
-            freeTextParts.push(param);
-        });
+            // Συνδετικές λέξεις ανάμεσα στα φίλτρα
+            if (normalizedParam === 'AND' || normalizedParam === 'OR') {
+                index += 1;
+                continue;
+            }
+
+            // Οτιδήποτε άλλο θεωρείται αρχή του "Επιπλέον φίλτρου"
+            freeTextTokens.push(...queryParams.slice(index));
+            break;
+        }
 
         // Συμπληρώνουμε το πεδίο ελεύθερου κειμένου με ό,τι βρήκαμε
         const additionalInput = document.getElementById('additionalInput');
-        if (additionalInput && freeTextParts.length > 0) {
-            additionalInput.value = freeTextParts.join(' AND '); // Το ξαναενώνουμε σε περίπτωση που το ελεύθερο κείμενο περιείχε "AND"
+        if (additionalInput) {
+            if (freeTextTokens.length > 0) {
+                additionalInput.value = freeTextTokens.join(' ');
+            } else {
+                additionalInput.value = '';
+            }
         }
     }
+
+    // Αφού ρυθμιστούν οι επιλογές από το URL, ενημερώνουμε τις σύνοψεις
+    updateFilterSummaries();
+}
+
+function updateFilterSummaries() {
+    const filtersContainer = document.getElementById('filters');
+    if (!filtersContainer) {
+        return;
+    }
+
+    const selects = filtersContainer.querySelectorAll('select[multiple]');
+    selects.forEach(function(select) {
+        const fieldName = select.name;
+        const summaryElement = document.querySelector(
+            '.filters-summary[data-summary-for="' + fieldName + '"]'
+        );
+
+        if (!summaryElement) {
+            return;
+        }
+
+        const selectedOptions = Array.from(select.selectedOptions);
+        if (!selectedOptions.length) {
+            summaryElement.textContent = '';
+            summaryElement.classList.remove('has-selection');
+            return;
+        }
+
+        if (selectedOptions.length === 1) {
+            summaryElement.textContent = selectedOptions[0].textContent;
+        } else if (selectedOptions.length === 2) {
+            summaryElement.textContent = selectedOptions[0].textContent +
+                ', ' + selectedOptions[1].textContent;
+        } else {
+            const firstLabel = selectedOptions[0].textContent;
+            const secondLabel = selectedOptions[1].textContent;
+            const remainingCount = selectedOptions.length - 2;
+            summaryElement.textContent = firstLabel + ', ' + secondLabel +
+                ' +' + remainingCount;
+        }
+
+        summaryElement.classList.add('has-selection');
+    });
 }

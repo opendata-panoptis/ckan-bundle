@@ -199,6 +199,17 @@ def _create_user(userinfo):
     context = {
         u'ignore_auth': True,
     }
+
+    # Ελέγχουμε αν υπάρχει χρήστης σε κατάσταση pending με το ίδιο email
+    email = userinfo.get('email')
+    if email:
+        pending_user = _get_pending_user_by_email(email)
+        if pending_user:
+            log.info(f'Found pending user with email {email}, updating existing user')
+            # Ενημερώνουμε τον pending χρήστη με τα νέα στοιχεία από το Keycloak
+            return _update_pending_user(pending_user, userinfo)
+
+    # Αν δεν βρεθεί pending χρήστης, δημιουργούμε νέο
     created_user_dict = tk.get_action(
         u'user_create'
     )(context, userinfo)
@@ -206,6 +217,86 @@ def _create_user(userinfo):
     sub = userinfo.get('plugin_extras', {}).get('sub')
     return _get_user_by_sub(sub)
 
+
+def _get_pending_user_by_email(email):
+    """
+    Εύρεση χρήστη σε κατάσταση pending με βάση το email
+    """
+    try:
+        # Βρίσκουμε χρήστες με το συγκεκριμένο email που είναι σε κατάσταση pending
+        users = model.Session.query(model.User).filter(
+            model.User.email == email,
+            model.User.state == model.State.PENDING
+        ).all()
+
+        if users:
+            return users[0]
+    except Exception as e:
+        log.error(f"Error searching for pending user by email: {e}")
+
+    return None
+
+def _update_pending_user(user, userinfo):
+    """
+    Ενημέρωση pending χρήστη με στοιχεία από το Keycloak και ενεργοποίησή του
+    """
+    try:
+        context = {
+            'ignore_auth': True,
+        }
+
+        # Προετοιμάζουμε τα δεδομένα για ενημέρωση
+        patch_data = {'id': user.id}
+
+        # Στέλνουμε πάντα το email αν υπάρχει στο userinfo
+        if userinfo.get('email'):
+            patch_data['email'] = userinfo['email']
+
+        # Ενημερώνουμε το username αν είναι διαφορετικό
+        new_name = userinfo.get('name')
+        if new_name and new_name != user.name:
+            # Ελέγχουμε αν το νέο name είναι διαθέσιμο
+            if not model.User.get(new_name):
+                patch_data['name'] = new_name
+            else:
+                # Αν το username υπάρχει, δημιουργούμε ένα μοναδικό από το email
+                if userinfo.get('email'):
+                    unique_name = ensure_unique_username_from_email(userinfo['email'])
+                    patch_data['name'] = unique_name
+                    log.info(f'Username {new_name} already exists. Using {unique_name} instead')
+
+        # Ενημερώνουμε το fullname αν υπάρχει
+        if userinfo.get('fullname'):
+            patch_data['fullname'] = userinfo['fullname']
+
+        # Ενημερώνουμε το password αν υπάρχει
+        if userinfo.get('password'):
+            patch_data['password'] = userinfo['password']
+
+        # Ενημερώνουμε τα plugin_extras με τα στοιχεία από το Keycloak
+        plugin_extras = userinfo.get('plugin_extras', {})
+        if plugin_extras:
+            current_extras = user.plugin_extras or {}
+            current_extras.update(plugin_extras)
+            patch_data['plugin_extras'] = current_extras
+
+        # Ενεργοποιούμε τον χρήστη (αλλάζουμε το state από pending σε active)
+        patch_data['state'] = model.State.ACTIVE
+
+        # Εκτελούμε την ενημέρωση
+        log.debug(f'Calling user_patch for pending user with data: {patch_data}')
+        tk.get_action('user_patch')(context, patch_data)
+        changed_fields = [k for k in patch_data.keys() if k != 'id']
+        log.info(f'Pending user {user.name} updated and activated with Keycloak data')
+
+        # Επιστρέφουμε τον ενημερωμένο και ενεργοποιημένο χρήστη
+        updated_user = model.User.get(user.id)
+        return updated_user
+
+    except Exception as e:
+        log.error(f"Error updating pending user {user.name}: {e}")
+        # Αν αποτύχει η ενημέρωση, επιστρέφουμε τον αρχικό χρήστη
+        raise
 
 def button_style():
 

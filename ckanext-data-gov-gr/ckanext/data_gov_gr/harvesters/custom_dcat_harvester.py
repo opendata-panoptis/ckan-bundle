@@ -165,7 +165,9 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
         if 'media-types/' in lowered:
             return trimmed.split('media-types/', 1)[-1].strip('/').strip()
 
-        if trimmed.startswith('http://') or trimmed.startswith('https://'):
+        # Make HTTP scheme check case-insensitive so we correctly extract the
+        # last path segment even if the URI was uppercased earlier in the flow.
+        if lowered.startswith('http://') or lowered.startswith('https://'):
             return trimmed.rstrip('/').split('/')[-1]
 
         return trimmed
@@ -372,7 +374,8 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                 lowered = access_rights.strip().lower()
                 if lowered.endswith('/public') or 'access-right/public' in lowered:
                     value = data_gov_helpers.get_config_value(
-                        'ckanext.data_gov_gr.dataset.legislation.open', ''
+                        'ckanext.data_gov_gr.dataset.legislation.open',
+                        'https://eur-lex.europa.eu/eli/dir/2019/1024/oj/eng'
                     )
                     if isinstance(value, str):
                         value = value.strip()
@@ -688,6 +691,8 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
         """
         Handle theme fields that come as arrays or authority URIs
         """
+        valid_theme_codes = self._get_vocabulary_valid_codes('Data theme')
+
         # Find theme in extras
         for extra in dataset_dict.get('extras', []):
             if extra['key'] == 'theme':
@@ -731,9 +736,15 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                 # Keep all themes as array (data.gov.gr structure)
                 cleaned_themes = []
                 for theme in theme_value:
-                    if isinstance(theme, str) and 'authority/data-theme/' in theme:
+                    if not isinstance(theme, str):
+                        continue
+                    if 'authority/data-theme/' in theme:
+                        code = self._extract_code_from_identifier(theme).upper()
+                        if valid_theme_codes and code not in valid_theme_codes:
+                            log.debug(f"Skipping invalid theme code '{code}' not in vocabulary")
+                            continue
                         cleaned_themes.append(theme)
-                    elif isinstance(theme, str):
+                    else:
                         cleaned_themes.append(theme)
 
                 if cleaned_themes:
@@ -770,7 +781,7 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                         # If parsing fails and not valid URI, will move to tags below
                         pass
 
-        # Move any remaining theme values to tags to avoid controlled vocabulary errors
+        # Move any remaining theme values to tags; keep valid authority URIs
         if 'theme' in dataset_dict:
             values = dataset_dict['theme']
             if not isinstance(values, list):
@@ -782,6 +793,7 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                 if isinstance(t, dict) and 'name' in t and t['name']:
                     existing_tags.add(t['name'].strip().lower())
 
+            valid_themes = []
             for tv in values:
                 if not isinstance(tv, str) or not tv.strip():
                     continue
@@ -789,14 +801,23 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                 # If it's an authority URI, use the last segment as tag label
                 if 'authority/data-theme/' in tv:
                     label = tv.rsplit('/', 1)[-1]
+                    code = self._extract_code_from_identifier(tv).upper()
+                    if valid_theme_codes and code not in valid_theme_codes:
+                        log.debug(f"Skipping theme URI with invalid code '{code}'")
+                        continue
+                    valid_themes.append(tv.strip())
                 clean = label.strip()
                 if clean and clean.lower() not in existing_tags:
                     dataset_dict.setdefault('tags', []).append({'name': clean})
                     existing_tags.add(clean.lower())
 
-            # Remove theme field entirely to avoid "unexpected choice" validation
-            del dataset_dict['theme']
-            log.debug('Moved theme values to tags and removed theme field to satisfy controlled vocabulary')
+            # Keep theme if we have valid authority URIs; otherwise drop to avoid validation errors
+            if valid_themes:
+                dataset_dict['theme'] = valid_themes
+                log.debug('Kept valid authority theme URIs and added tag labels')
+            else:
+                del dataset_dict['theme']
+                log.debug('Moved theme values to tags and removed theme field to satisfy controlled vocabulary')
 
     def _fix_authority_uri_field(self, dataset_dict, field_name, uri_base, valid_codes):
         """
@@ -1137,12 +1158,24 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                 continue
 
             value = resource.get('mimetype')
-            if not isinstance(value, str) or not value.strip():
-                if 'mimetype' in resource and not value:
+
+            # 1. Drop all non-string mimetype values (eg lists from RDF)
+            if not isinstance(value, str):
+                if value is not None:
+                    # Optionally record as tag; keep behaviour minimal for now
+                    pass
+                if 'mimetype' in resource:
                     resource.pop('mimetype', None)
                 continue
 
+            # 2. Drop empty strings
             raw_value = value.strip()
+            if not raw_value:
+                if 'mimetype' in resource:
+                    resource.pop('mimetype', None)
+                continue
+
+            # From here on, keep existing mapping logic
             code = self._extract_code_from_identifier(raw_value)
             if not code:
                 _record_unmapped_mimetype(raw_value)
@@ -1300,7 +1333,6 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
                 # Try to guess format from URL
                 url = resource.get('url', '').lower()
 
-                # Enhanced format detection
                 if '/csv/' in url or url.endswith('.csv'):
                     resource['format'] = 'CSV'
                 elif '/json-stat/' in url:
@@ -1370,11 +1402,6 @@ class CustomDcatHarvester(DCATRDFHarvester, IHarvester):
             url = resource.get('url', '').strip()
             if url:
                 resource['url'] = url
-
-            # Keep all fields - don't delete anything
-            # The validation should handle any issues, and we want to preserve all metadata
-            # Note: We previously deleted resource_locator_function, hash_algorithm, conforms_to
-            # but now we keep everything to avoid losing information
 
             # Ensure size is reasonable if present
             if 'size' in resource and resource['size']:

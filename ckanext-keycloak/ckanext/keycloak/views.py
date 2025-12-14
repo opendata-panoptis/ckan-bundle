@@ -1,13 +1,14 @@
 import logging
-from flask import Blueprint
+from flask import Blueprint, session
 from ckan.plugins import toolkit as tk
 import ckan.lib.helpers as h
 import ckan.model as model
 from ckan.common import g
-from ckan.views.user import set_repoze_user, RequestResetView
+from ckan.views.user import set_repoze_user, RequestResetView, login as original_login
 from ckanext.keycloak.keycloak import KeycloakClient
 import ckanext.keycloak.helpers as helpers
 from os import environ
+import secrets
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ redirect_uri = tk.config.get('ckanext.keycloak.redirect_uri', environ.get('CKANE
 client_secret_key = tk.config.get('ckanext.keycloak.client_secret_key', environ.get('CKANEXT__KEYCLOAK__CLIENT_SECRET_KEY'))
 allow_any_character = tk.asbool(tk.config.get('ckanext.data_gov_gr.user.allow_any_character_in_username', False))
 use_sub_as_name = tk.asbool(tk.config.get('ckanext.keycloak.use_sub_as_name', False))
+enable_state_check = tk.asbool(tk.config.get('ckanext.keycloak.enable_state_check', True))
 
 client = KeycloakClient(server_url, client_id, realm_name, client_secret_key)
 
@@ -46,6 +48,11 @@ def _log_user_into_ckan(resp):
 
 def sso():
     log.info("SSO Login")
+
+    state = secrets.token_urlsafe(32)
+    if enable_state_check:
+        session["oidc_state"] = state
+
     auth_url = None
     try:
         max_age_str = tk.config.get('ckanext.keycloak.max_age', environ.get('CKANEXT__KEYCLOAK__MAX_AGE'))
@@ -59,7 +66,8 @@ def sso():
         auth_url = client.get_auth_url(
             redirect_uri=redirect_uri,
             max_age=max_age,
-            prompt=prompt
+            prompt=prompt,
+            state=state if enable_state_check else None
         )
 
         log.info(f"Auth URL generated with max_age={max_age}, prompt={prompt}")
@@ -70,6 +78,19 @@ def sso():
     return tk.redirect_to(auth_url)
 
 def sso_login():
+
+    # Ελέγχουμε το state μόνο αν είναι ενεργοποιημένος ο έλεγχος
+    if enable_state_check:
+        returned_state = tk.request.args.get("state")
+        original_state = session.pop("oidc_state", None)
+
+        if not returned_state or returned_state != original_state:
+            log.error("OIDC state mismatch")
+            h.flash_error("Σφάλμα OIDC state mismatch στη σύνδεση. Παρακαλώ ξαναπροσπαθήστε.")
+            return tk.redirect_to(tk.url_for('user.login'))
+    else:
+        log.info("OIDC state check is disabled - skipping state validation")
+
     data = tk.request.args
     token = client.get_token(data['code'], redirect_uri)
     userinfo = client.get_user_info(token)
@@ -147,9 +168,27 @@ def reset_password():
         return tk.redirect_to(tk.url_for('user.login'))
     return RequestResetView().post()
 
+def force_sso_login():
+    """Κλείνει εντελώς το standard login - επιτρέπει μόνο SSO,
+    αν το internal login δεν είναι ενεργοποιημένο, δηλαδή
+    ckanext.keycloak.enable_ckan_internal_login = false
+    """
+
+    # Αν το internal login είναι ενεργοποιημένο, χρησιμοποίησε την αρχική CKAN login function
+    if helpers.enable_internal_login():
+        return original_login()
+
+    if not helpers.enable_internal_login() and tk.request.method == 'POST':
+        # Αν κάποιος προσπαθήσει POST, επιστρέφουμε error ή redirect
+        log.warning('Standard login attempt blocked - SSO is required. Redirecting to SSO.')
+        return tk.redirect_to('/user/sso')
+
+    return original_login()
+
 keycloak.add_url_rule('/sso', view_func=sso)
 keycloak.add_url_rule('/sso_login', view_func=sso_login)
-keycloak.add_url_rule('/reset_password', view_func=reset_password, methods=['POST'])
+keycloak.add_url_rule('/login', view_func=force_sso_login, methods=['GET','POST'])
+# keycloak.add_url_rule('/reset_password', view_func=reset_password, methods=['POST'])
 
 def get_blueprint():
     return keycloak

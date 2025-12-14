@@ -311,8 +311,6 @@ class MQACalculator:
         if not self.check_urls:
             return True
 
-        log.debug(f"Checking accessibility for {url!r}")
-
         # First, try to use the archiver plugin's Archival model if it's available
         try:
             from ckanext.archiver.model import Archival, Status
@@ -355,7 +353,6 @@ class MQACalculator:
             response = requests.head(url, timeout=self.url_check_timeout, allow_redirects=True)
             # Consider 2xx and 3xx status codes as accessible
             result = 200 <= response.status_code < 400
-            log.debug(f"→ status_code = {response.status_code}")
             self._status_code_cache[url] = response.status_code
 
             # Cache the result
@@ -1372,11 +1369,16 @@ class MQACalculator:
         Returns:
             The quality level: 'excellent', 'good', 'sufficient', or 'poor'
         """
-        if percentage >= 80:
+        # Align thresholds with official MQA methodology:
+        # - Excellent:   86.4–100
+        # - Good:        54.3–<86.4
+        # - Sufficient:  29.6–<54.3
+        # - Poor:        0–<29.6
+        if percentage >= 86.4:
             return 'excellent'
-        elif percentage >= 60:
+        elif percentage >= 54.3:
             return 'good'
-        elif percentage >= 40:
+        elif percentage >= 29.6:
             return 'sufficient'
         else:
             return 'poor'

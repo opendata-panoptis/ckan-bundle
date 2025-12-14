@@ -22,7 +22,7 @@
       {% snippet "user/snippets/recaptcha.html", public_key=g.recaptcha_publickey %}
     {% endif %}
   {% else %}
-    <p>You need to login in order to continue.</p>
+    <p>{{ _('You need to login in order to continue.') }}</p>
   {% endif %}
 
   <div class="form-actions">

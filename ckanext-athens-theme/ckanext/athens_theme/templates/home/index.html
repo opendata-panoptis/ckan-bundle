@@ -17,7 +17,7 @@
         <div class="container">
           <div class="hero-badge">Πύλη Ανοικτών Δεδομένων</div>
           <h1>Δήμος Αθηναίων</h1>
-          <p class="hero-subtitle">Αποκτήστε πρόσβαση και εξερευνήστε σύνολα δεδομένων, υπηρεσίες και πόρους του Δήμου Αθηναίων</p>
+          <p class="hero-subtitle">Αποκτήστε πρόσβαση και εξερευνήστε σύνολα δεδομένων και υπηρεσίες του Δήμου Αθηναίων</p>
 
           <div class="hero-features">
             <div class="hero-feature">
@@ -49,6 +49,77 @@
         </div>
       </div>
     </section>
+
+    {% set users_guide = config.get('ckanext.athens_theme.guides.users') %}
+    {% set publishers_guide = config.get('ckanext.athens_theme.guides.publishers') %}
+
+    {% if users_guide or publishers_guide %}
+    <section class="guides-section">
+      <div class="container">
+        <h2 class="section-title">
+          Πώς να αξιοποιήσετε την Πύλη Ανοιχτών Δεδομένων
+        </h2>
+
+        <p class="section-subtitle">
+          Ανάλογα με τον ρόλο σας, δείτε τον αντίστοιχο οδηγό για να ξεκινήσετε εύκολα.
+        </p>
+
+        <div class="guides-grid">
+
+          {% if users_guide %}
+          <!-- Κάρτα: Πολίτες -->
+          <div class="guide-card">
+            <div class="guide-icon">
+              <i class="fa fa-user"></i>
+            </div>
+
+            <div class="guide-content">
+              <h3>Είστε πολίτης, ερευνητής ή επιχείρηση;</h3>
+              <p>
+                Μάθετε πώς να αναζητάτε σύνολα δεδομένων, να χρησιμοποιείτε APIs
+                και να αξιοποιείτε τις διαθέσιμες οπτικοποιήσεις.
+              </p>
+            </div>
+
+            <div class="guide-action">
+              <a href="{{ users_guide }}"
+                 class="btn btn-outline-primary"
+                 target="_blank" rel="noopener">
+                Οδηγός χρήσης της Πύλης
+              </a>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if publishers_guide %}
+          <!-- Κάρτα: Φορείς -->
+          <div class="guide-card">
+            <div class="guide-icon">
+              <i class="fa fa-building"></i>
+            </div>
+
+            <div class="guide-content">
+              <h3>Είστε φορέας ή διαχειριστής δεδομένων;</h3>
+              <p>
+                Δείτε πώς να δημοσιεύετε σύνολα δεδομένων, να περιγράφετε μεταδεδομένα
+                και να διαχειρίζεστε υπηρεσίες δεδομένων σύμφωνα με τα πρότυπα.
+              </p>
+            </div>
+
+            <div class="guide-action">
+              <a href="{{ publishers_guide }}"
+                 class="btn btn-outline-primary"
+                 target="_blank" rel="noopener">
+                Οδηγός για φορείς &amp; διαχειριστές
+              </a>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </section>
+    {% endif %}
 
     {% block stats %}
       {# Remove this block as the snippet doesn't exist #}

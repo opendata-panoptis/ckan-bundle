@@ -1,6 +1,12 @@
 import ckan.plugins.toolkit as toolkit
 from typing import Any, Dict
 import logging
+from ckan.types import Context, DataDict
+from ckan.types.logic import ActionResult
+import ckan.logic as logic
+import ckan.lib.mailer as mailer
+import ckan.lib.dictization.model_dictize as model_dictize
+from socket import error as socket_error
 
 from ckan import authz
 from ckan.lib.api_token import get_user_from_token
@@ -12,6 +18,11 @@ import ckan.lib.helpers as h
 
 log = logging.getLogger(__name__)
 
+# Define some shortcuts
+_get_action = logic.get_action
+_check_access = logic.check_access
+ValidationError = logic.ValidationError
+NotFound = logic.NotFound
 
 def organization_list_with_user_extras(context: Dict[str, Any], data_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -214,6 +225,133 @@ def user_invite_notify(context, data_dict):
         message = _('Error sending registration notification email: {0}').format(error)
         raise toolkit.ValidationError(message)
 
+def user_invite_waiting_keycloak_user(context: Context,
+                                      data_dict: DataDict) -> ActionResult.UserInvite:
+    '''Invite a new user.
+
+    You must be authorized to create group members.
+
+    :param email: the email of the user to be invited to the group
+    :type email: string
+    :param group_id: the id or name of the group
+    :type group_id: string
+    :param role: role of the user in the group. One of ``member``, ``editor``,
+        or ``admin``
+    :type role: string
+
+    :returns: the newly created user
+    :rtype: dictionary
+    '''
+    _check_access('user_invite', context, data_dict)
+
+    schema = context.get('schema',
+                         ckan.logic.schema.default_user_invite_schema())
+    data, errors = _validate(data_dict, schema, context)
+    if errors:
+        raise ValidationError(errors)
+
+    model = context['model']
+    group = model.Group.get(data['group_id'])
+    if not group:
+        raise NotFound()
+
+    # name = _get_random_username_from_email(data['email'])
+    name = data['email']
+
+    data['name'] = name
+    # send the proper schema when creating a user from here
+    # so the password field would be ignored.
+    invite_schema = ckan.logic.schema.create_user_for_user_invite_schema()
+
+    data['state'] = model.State.PENDING
+    user_dict = _get_action('user_create')(
+        Context(context, schema=invite_schema, ignore_auth=True),
+        data)
+    user = model.User.get(user_dict['id'])
+    assert user
+    member_dict = {
+        'username': user.id,
+        'id': data['group_id'],
+        'role': data['role']
+    }
+
+    org_or_group = 'organization' if group.is_organization else 'group'
+    _get_action(f'{org_or_group}_member_create')(context, member_dict)
+    group_dict = _get_action(f'{org_or_group}_show')(
+        context, {'id': data['group_id']})
+
+    try:
+        _send_invite_email_waiting_keycloak_user(user, group_dict, data['role'])
+    except (socket_error, mailer.MailerException) as error:
+        # Email could not be sent, delete the pending user
+
+        _get_action('user_delete')(context, {'id': user.id})
+
+        message = _(
+            'Error sending the invite email, '
+            'the user was not created: {0}').format(error)
+        raise ValidationError(message)
+
+    # Role στα ελληνικά
+    role_translations = {
+        'member': 'Μέλος',
+        'editor': 'Συντάκτης',
+        'admin': 'Διαχειριστής'
+    }
+    role_gr = role_translations.get(data['role'], data['role'])
+
+    h.flash_success(_('Το email ένταξης με ρόλο "{0}" στάλθηκε επιτυχώς στο {1}. Μόλις ο χρήστης '
+                      'εγγραφεί/συνδεθεί με το συγκεκριμένο email που προσκλήθηκε '
+                      'θα έχει τα δικαιώματα του ρόλου με τον οποίο προσκλήθηκε.').format(role_gr, data['email']))
+
+    return model_dictize.user_dictize(user, context)
+
+def _send_invite_email_waiting_keycloak_user(user, group_dict, role):
+    '''Στέλνει email πρόσκλησης για χρήστη με ενεργό membership που θα συνδεθεί μέσω keycloak '''
+
+    # Πληροφορίες οργανισμού
+    org_name = group_dict.get('display_name', group_dict.get('title', group_dict.get('name', '')))
+    org_type = 'οργανισμό' if group_dict.get('is_organization') else 'ομάδα'
+    contact_email = _get_organization_contact_email(group_dict)
+    org_url = group_dict.get('url', '')
+
+    # Role στα ελληνικά
+    role_translations = {
+        'member': 'μέλος',
+        'editor': 'συντάκτης',
+        'admin': 'διαχειριστής'
+    }
+    role_gr = role_translations.get(role, role)
+
+    site_name = toolkit.config.get('ckan.site_title', '')
+
+    # Template variables
+    extra_vars = {
+        'user_name': user.name,
+        'user_display_name': user.display_name or user.fullname or user.name,
+        'user_email': user.email,
+        'org_name': org_name,
+        'org_type': org_type,
+        'contact_email': contact_email,
+        'org_url': org_url,
+        'role_gr': role_gr,
+        'site_name': site_name,
+        'site_url': toolkit.config.get('ckan.site_url', ''),
+        'login_url': toolkit.url_for('/user/sso', _external=True)
+    }
+
+    subject = f"Έχετε προσκληθεί στον {org_type} {org_name} - {site_name}"
+
+    # Render το template
+    body = toolkit.render('emails/user_invite_waiting_keycloak.txt', extra_vars)
+
+    mail_recipient(
+        recipient_name=user.display_name or user.fullname or user.name,
+        recipient_email=user.email,
+        subject=subject,
+        body=body
+    )
+
 def _send_registration_notification_email(recipient_email, group_dict, role):
     '''Στέλνει το email ειδοποίησης'''
 
@@ -230,6 +368,7 @@ def _send_registration_notification_email(recipient_email, group_dict, role):
         'admin': 'διαχειριστής'
     }
     role_gr = role_translations.get(role, role)
+    site_name = toolkit.config.get('ckan.site_title', '')
 
     # Template variables
     extra_vars = {
@@ -237,10 +376,11 @@ def _send_registration_notification_email(recipient_email, group_dict, role):
         'org_type': org_type,
         'contact_email': contact_email,
         'org_url': org_url,
-        'role_gr': role_gr
+        'role_gr': role_gr,
+        'site_name': site_name
     }
 
-    subject = f"Πρόσκληση εγγραφής στην πλατφόρμα DATA.GOV.GR - {org_name}"
+    subject = f"Πρόσκληση εγγραφής στην πλατφόρμα { site_name } - {org_name}"
 
     # Render το template
     body = toolkit.render('emails/user_invite_notification.txt', extra_vars)

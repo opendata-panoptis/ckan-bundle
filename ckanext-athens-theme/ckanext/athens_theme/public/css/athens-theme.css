@@ -199,6 +199,33 @@ body {
   color: white;
 }
 
+/* Footer tweaks for light background */
+.site-footer {
+  background-color: #ffffff;
+}
+
+.site-footer .attribution,
+.site-footer .attribution p,
+.site-footer .attribution span {
+  color: var(--athens-gray);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+.site-footer .attribution a {
+  color: var(--primary-blue);
+}
+
+.site-footer .attribution a:hover {
+  color: var(--primary-blue);
+  text-decoration: underline;
+}
+
+.powered-by-ckan-logo {
+  height: 24px;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.55)) contrast(1.2) brightness(0.95);
+}
+
 .btn-accent {
   background-color: var(--athens-gold);
   border-color: var(--athens-gold);
@@ -652,3 +679,83 @@ li#simple-tab.active a, li#advanced-tab.active a {
   min-height: 44px !important;
   line-height: 1.2 !important;
 }
+
+/* -------------------------------------------------------------------- */
+/* guides section landing page */
+
+.guides-section {
+  padding: 4rem 0;
+  background-color: #f8f9fa;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-bottom: 2.5rem;
+}
+
+.guides-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+/* Κάρτα: 2 στήλες (icon | content) και το κουμπί κάτω δεξιά */
+.guide-card {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+
+  display: grid;
+  grid-template-columns: auto 1fr; /* icon | content */
+  grid-template-rows: auto auto;   /* content row | action row */
+  column-gap: 1.5rem;
+  row-gap: 1rem;
+  align-items: start;
+}
+
+.guide-icon {
+  font-size: 2rem;
+  color: #0d6efd;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.guide-content {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.guide-content h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.guide-content p {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+  color: #555;
+
+  /* αφήνουμε το κείμενο να πιάσει όλο το διαθέσιμο πλάτος */
+  max-width: none;
+}
+
+/* Κουμπί κάτω δεξιά (κάτω από τίτλο+περιγραφή) */
+.guide-action {
+  grid-column: 2;
+  grid-row: 2;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------------- */

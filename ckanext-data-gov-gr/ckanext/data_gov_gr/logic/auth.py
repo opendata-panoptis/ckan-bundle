@@ -1,4 +1,5 @@
 from typing import Dict, Any
+from ckanext.keycloak.helpers import enable_internal_login
 
 import ckan.plugins.toolkit as toolkit
 
@@ -24,3 +25,10 @@ def check_user_org_permission(context: Dict[str, Any], data_dict: Dict[str, Any]
     Επιτρέπει ανώνυμη πρόσβαση καθώς ο έλεγχος εξουσιοδότησης γίνεται εσωτερικά.
     """
     return {'success': True}
+
+def user_reset_override(context, data_dict):
+    """Override της user_reset function που ελέγχει αν είναι ενεργοποιημένο το internal login"""
+    if not enable_internal_login():
+        return {'success': False, 'msg': 'Password reset is disabled when internal login is not enabled'}
+    else:
+        return {'success': True}
