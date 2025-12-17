@@ -17,6 +17,11 @@
 
     {% endblock %}
 
+  {% block head_extras %}
+    {{ super() }}
+    {{ h.google_analytics_snippet() }}
+  {% endblock %}
+
   {% block scripts %}
     {{ super() }}
       <!-- Load jQuery from CDN before other scripts -->

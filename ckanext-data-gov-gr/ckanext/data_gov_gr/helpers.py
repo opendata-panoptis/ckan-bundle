@@ -4,11 +4,18 @@ import re
 import ckan.plugins.toolkit as toolkit
 from ckan.lib import helpers as core_helpers
 from ckan.lib.helpers import lang
-from ckan.plugins.toolkit import _ # Import για το σύστημα μετάφρασης
+from ckan.plugins.toolkit import render_snippet, _ # Import για το σύστημα μετάφρασης
 from flask_login import current_user as _cu
 from typing import (cast, Union)
 
 log = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------------------
+
+def google_analytics_snippet():
+    return render_snippet("google_analytics/snippets/google_analytics.html")
+
+# ---------------------------------------------------------------------------------------
 
 # Αποθηκεύουμε τα δεδομένα από τη βάση σε ένα cache για καλύτερη απόδοση
 _vocabulary_cache = {}
@@ -742,6 +749,7 @@ def get_helpers():
         "vocabulary_facet_item_label": vocabulary_facet_item_label,
         "vocabulary_facet_title": vocabulary_facet_title,
         "get_vocabulary_id_for_field": get_vocabulary_id_for_field,
+        "google_analytics_snippet": google_analytics_snippet,
         "build_mqa_nav_icon": build_mqa_nav_icon,
         "fluent_language_is_required": fluent_language_is_required,
         "get_organizations_stats": get_organizations_stats,

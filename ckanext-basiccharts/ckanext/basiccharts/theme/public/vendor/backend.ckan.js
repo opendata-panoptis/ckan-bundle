@@ -8,7 +8,7 @@ this.recline.Backend.Ckan = this.recline.Backend.Ckan || {};
   // This provides connection to the CKAN DataStore (v2)
   //
   // General notes
-  // 
+  //
   // We need 2 things to make most requests:
   //
   // 1. CKAN API endpoint
@@ -16,17 +16,16 @@ this.recline.Backend.Ckan = this.recline.Backend.Ckan || {};
   //
   // There are 2 ways to specify this information.
   //
-  // EITHER (checked in order): 
+  // EITHER (checked in order):
   //
   // * Every dataset must have an id equal to its resource id on the CKAN instance
   // * The dataset has an endpoint attribute pointing to the CKAN API endpoint
   //
   // OR:
-  // 
+  //
   // Set the url attribute of the dataset to point to the Resource on the CKAN instance. The endpoint and id will then be automatically computed.
 
   my.__type__ = 'ckan';
-
 
   // use either jQuery or Underscore Deferred depending on what is available
   var underscoreOrJquery = this.jQuery || this._;
@@ -46,6 +45,15 @@ this.recline.Backend.Ckan = this.recline.Backend.Ckan || {};
   //
   // DEPRECATION: this will be removed in v0.7. Please set endpoint attribute on dataset instead
   my.API_ENDPOINT = 'http://datahub.io/api';
+
+  // Function to get CSRF token from meta tags
+  function getCSRFToken() {
+    var csrfFieldName = jQuery('meta[name=csrf_field_name]').attr('content');
+    if (csrfFieldName) {
+      return jQuery('meta[name=' + csrfFieldName + ']').attr('content');
+    }
+    return null;
+  }
 
   // ### fetch
   my.fetch = function(dataset) {
@@ -69,7 +77,7 @@ this.recline.Backend.Ckan = this.recline.Backend.Ckan || {};
         fields: fields,
         useMemoryStore: false
       };
-      dfd.resolve(out);  
+      dfd.resolve(out);
     });
     return dfd.promise();
   };
@@ -118,7 +126,7 @@ this.recline.Backend.Ckan = this.recline.Backend.Ckan || {};
         total: results.result.total,
         hits: results.result.records
       };
-      dfd.resolve(out);  
+      dfd.resolve(out);
     });
     return dfd.promise();
   };
@@ -148,28 +156,50 @@ this.recline.Backend.Ckan = this.recline.Backend.Ckan || {};
   // Simple wrapper around the CKAN DataStore API
   //
   // @param endpoint: CKAN api endpoint (e.g. http://datahub.io/api)
-  my.DataStore = function(endpoint) { 
+  my.DataStore = function(endpoint) {
     var that = {endpoint: endpoint || my.API_ENDPOINT};
 
     that.search = function(data) {
       var searchUrl = that.endpoint + '/3/action/datastore_search';
-      var jqxhr = jQuery.ajax({
+
+      var ajaxOptions = {
         url: searchUrl,
         type: 'POST',
         data: encodeURIComponent(JSON.stringify(data))
-      });
+      };
+
+      // Add CSRF token to headers if available
+      var csrfToken = getCSRFToken();
+      if (csrfToken) {
+        ajaxOptions.headers = {
+          'X-CSRFToken': csrfToken
+        };
+      }
+
+      var jqxhr = jQuery.ajax(ajaxOptions);
       return jqxhr;
     };
 
     that.search_sql = function(sql) {
       var searchUrl = that.endpoint + '/3/action/datastore_search_sql';
-      var jqxhr = jQuery.ajax({
+
+      var ajaxOptions = {
         url: searchUrl,
         type: 'GET',
         data: encodeURIComponent({
           sql: sql
         })
-      });
+      };
+
+      // Add CSRF token to headers if available
+      var csrfToken = getCSRFToken();
+      if (csrfToken) {
+        ajaxOptions.headers = {
+          'X-CSRFToken': csrfToken
+        };
+      }
+
+      var jqxhr = jQuery.ajax(ajaxOptions);
       return jqxhr;
     }
 

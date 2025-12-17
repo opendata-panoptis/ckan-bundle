@@ -1,0 +1,20 @@
+{#
+Display a hierarchical tree of organizations
+
+
+Example:
+
+{% snippet "organization/snippets/organization_list.html" %}
+
+#}
+
+{% if q is not defined %}{% set q = c.q %}{% endif %}
+
+<div id="publisher-tree">
+     {% if q %}
+     	{% set top_nodes = h.group_tree_highlight(organizations, h.group_tree(type_='organization')) %}
+     {% else %}
+     	{% set top_nodes = h.group_tree(organizations=organizations, type_='organization') %}
+     {% endif %}
+     {% snippet 'organization/snippets/organization_tree.html', top_nodes=top_nodes, use_longnames=True %}
+</div>

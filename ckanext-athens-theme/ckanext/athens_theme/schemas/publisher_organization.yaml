@@ -1,0 +1,80 @@
+scheming_version: 2
+about_url: http://github.com/ckan/ckanext-dcat
+organization_type: organization
+description: >
+  An organization schema that implements the properties supported
+  by default in the dct:publisher property of a dcat:Dataset
+
+fields:
+    
+- field_name: title
+  label:
+    en: Organization name
+    el: Όνομα οργανισμού
+  validators: ignore_missing unicode_safe
+  form_snippet: large_text.html
+  form_attrs: {data-module: slug-preview-target}
+  
+- field_name: name
+  label:
+    en: Organization identifier
+    el: Αναγνωριστικό οργανισμού
+  validators: not_empty unicode_safe name_validator group_name_validator
+  form_snippet: slug.html
+  form_placeholder: my-theme
+  
+- field_name: description
+  label:
+    en: Description
+    el: Περιγραφή οργανισμού
+  form_snippet: markdown.html
+  form_placeholder: A little information about this organization.
+  
+- field_name: email
+  label:
+    en: Contact email
+    el: Email επικοινωνίας
+  display_snippet: email.html
+  
+- field_name: url
+  label:
+    en: Organization URL
+    el: URL οργανισμού
+  display_snippet: link.html
+
+- field_name: receive_dataset_email_updates
+  label:
+    en: Receive Email Updates for using Datasets in Applications
+    el: Λήψη Ενημερωτικών Email για χρήση Συνόλων Δεδομένων σε Εφαρμογές
+  preset: select
+  hidden_in_public: true
+  choices:
+    - value: true
+      label: "Ναι"
+    - value: false
+      label: "Όχι"
+  required: false
+  validators: scheming_required boolean_validator
+  output_validators: boolean_validator
+  
+- field_name: publishertype
+  label:
+    en: Organization Type
+    el: Τύπος οργανισμού
+  preset: select
+  choices_helper: vocabularyadmin_get_tags_for_scheming
+  form_choices_helper_kwargs:
+    vocabulary_id_or_name: "Publisher type"
+  required: false
+  help_text: Select the Publisher type  for this resource from the controlled list.
+
+- field_name: image
+  label: Image URL
+  display_snippet: null
+  preset: organization_url_upload
+
+- field_name: parent_organization
+  label: Parent organization
+  display_snippet: null
+  form_snippet: org_hierarchy.html
+  validators: ignore_missing

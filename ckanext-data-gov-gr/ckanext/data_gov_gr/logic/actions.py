@@ -313,7 +313,11 @@ def _send_invite_email_waiting_keycloak_user(user, group_dict, role):
     org_name = group_dict.get('display_name', group_dict.get('title', group_dict.get('name', '')))
     org_type = 'οργανισμό' if group_dict.get('is_organization') else 'ομάδα'
     contact_email = _get_organization_contact_email(group_dict)
-    org_url = group_dict.get('url', '')
+
+    # Δημιουργία URL για τη σελίδα του οργανισμού στο CKAN
+    site_url = toolkit.config.get('ckan.site_url', '').rstrip('/')
+    org_name_for_url = group_dict.get('name', '')
+    org_url = f"{site_url}/organization/{org_name_for_url}" if org_name_for_url else ''
 
     # Role στα ελληνικά
     role_translations = {

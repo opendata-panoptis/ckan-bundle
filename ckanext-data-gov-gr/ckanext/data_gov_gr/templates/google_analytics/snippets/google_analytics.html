@@ -1,0 +1,18 @@
+{# Google Analytics - Only load if enabled in configuration #}
+{% set ga_enabled = config.get('ckan.google_analytics.enabled', 'false').lower() == 'true' %}
+{% if ga_enabled %}
+  <!-- Google Analytics Code -->
+  <!-- Google tag (gtag.js) -->
+  {% set ga_tracking_id = config.get('ckan.google_analytics.tracking_id') %}
+  {% if ga_tracking_id %}
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_tracking_id }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ ga_tracking_id }}');
+    </script>
+  {% endif %}
+  <!-- End Google Analytics Code -->
+{% endif %}

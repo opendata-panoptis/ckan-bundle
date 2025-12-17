@@ -759,3 +759,79 @@ li#simple-tab.active a, li#advanced-tab.active a {
 }
 
 /* -------------------------------------------------------------------- */
+/* organization_tree */
+
+/* Wrapper: no card/border */
+.org-tree-wrap { margin: 0; padding: 0; }
+
+/* Remove default list bullets */
+.org-tree { list-style: none; margin: 0; padding: 0; }
+
+/* Make every node look like a row with a border */
+.org-tree-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e6e9ef;
+  border-radius: 10px;
+  background: #fff;
+}
+
+/* Space between rows */
+.org-tree-item{ margin: 6px 0; }
+
+/* Hover: subtle */
+.org-tree-row:hover{ background: #f5f7fb; }
+
+/* Active/highlighted */
+.org-tree-item.is-active > .org-tree-branch > .org-tree-row,
+.org-tree-item.is-active > .org-tree-row{
+  background: #eaf2ff;
+  border-color: rgba(0, 85, 164, .35);
+  box-shadow: inset 3px 0 0 rgba(0, 85, 164, .9);
+}
+
+/* SUMMARY marker removal */
+.org-tree-summary::-webkit-details-marker { display: none; }
+.org-tree-summary::marker { content: ""; }
+
+/* Toggle: μόνο για branches (μικρό chevron box) */
+.org-tree-toggle{
+  width: 18px;
+  height: 18px;
+  border-radius: 8px;
+  background: #eef2f7;
+  position: relative;
+  flex: 0 0 18px;
+}
+
+.org-tree-toggle::before{
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid #3b4b63;
+  border-bottom: 2px solid #3b4b63;
+  transform: rotate(-45deg);
+}
+
+details[open] > .org-tree-summary .org-tree-toggle::before{
+  transform: rotate(45deg);
+  top: 4px;
+}
+
+/* Nested indentation – χωρίς αριστερή γραμμή */
+.org-tree--nested{
+  margin: 6px 0 0 18px;
+  padding: 0 0 0 12px;
+  border-left: 0;
+}
+
+/* Links */
+.org-tree a{ text-decoration: none; }
+.org-tree a:hover{ text-decoration: underline; }
+
+/* -------------------------------------------------------------------- */
