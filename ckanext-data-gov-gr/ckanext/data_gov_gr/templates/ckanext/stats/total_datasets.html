@@ -10,7 +10,13 @@
     <section id="stats-total-datasets" class="module-content">
       <h2>{{ _('Total Number of Packages') }}</h2>
 
-      <button id="toggleTotalDatasetsView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+      <button id="toggleTotalDatasetsView"
+              class="btn btn-default mb-5"
+              data-toggle-chart="#total-datasets-line-chart"
+              data-toggle-table="#total-datasets-table-view"
+              data-chart-icon="fa-chart-line"
+              data-chart-label="{{ _('Switch to Chart') }}"
+              data-table-label="{{ _('Switch to Table') }}">
         <i class="fa fa-table"></i> {{ _('Switch to Table') }}
       </button>
 
@@ -36,9 +42,20 @@
       </div>
     </section>
 
-    <div id="total-datasets-line-chart" style="width: 100%; height: 500px;"
-         data-series-total="{{ _('Total datasets') }}"
-         data-ylabel="{{ _('Total datasets') }}"></div>
+    {% if weekly_numbers %}
+      {% set stat_chart = h.get_stat_data('total_datasets', weekly_numbers, variant='full') %}
+      {% if stat_chart %}
+        <div id="total-datasets-line-chart"
+             data-module="common-stats-charts"
+             data-module-type="{{ stat_chart.type }}"
+             data-module-data="{{ h.dump_json(stat_chart.data) }}"
+             data-module-title="{{ stat_chart.title }}"
+             data-module-variant="full"
+             data-module-height="500px"
+             style="width: 100%;">
+        </div>
+      {% endif %}
+    {% endif %}
   </article>
 {% endblock %}
 
@@ -48,6 +65,5 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-  <script src="{{ url_for('static', filename='javascript/stats/total-datasets-line.js') }}"></script>
+  {% asset 'data_gov_gr/stats_charts' %}
 {% endblock %}

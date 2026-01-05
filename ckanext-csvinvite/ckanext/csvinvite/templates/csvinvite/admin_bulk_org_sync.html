@@ -1,0 +1,387 @@
+{% extends "admin/base.html" %}
+
+{% block primary_content_inner %}
+  <h1 class="page-heading">{{ _('Bulk sync organization members') }}</h1>
+
+  <div class="alert alert-info">
+    <strong>{{ _('CSV columns:') }}</strong>
+    <code>org</code>, <code>username</code> (optional), <code>email</code> (optional), <code>role</code>.
+    <br/>
+    <strong>{{ _('org can be organization id or name/slug.') }}</strong>
+  </div>
+
+  {% if error %}
+    <div class="alert alert-danger">
+      {{ error }}
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="form-horizontal">
+    {{ h.csrf_input() }}
+    <div class="form-group">
+      <label class="control-label col-md-2">{{ _('CSV file') }}</label>
+      <div class="col-md-8">
+        <input type="file" name="file" accept=".csv" class="form-control"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-8">
+        <label class="checkbox">
+          <input type="checkbox" name="dry_run" value="on" checked/>
+          {{ _('Dry run (preview only)') }}
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="remove_missing" value="on"/>
+          {{ _('Remove members missing from CSV (dangerous)') }}
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-8">
+        <a class="btn btn-default" href="{% url_for 'csvinvite.admin_user_management_get' %}">{{ _('Back') }}</a>
+        <button class="btn btn-primary" type="submit">{{ _('Run') }}</button>
+        {% if report %}
+          <a class="btn btn-default" href="{% url_for 'csvinvite.admin_bulk_org_sync_export' %}">
+            {{ _('Export plan CSV') }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+
+  <form method="post" action="{% url_for 'csvinvite.admin_bulk_org_sync_reset' %}" style="display:inline;">
+    {{ h.csrf_input() }}
+    <button class="btn btn-warning" type="submit">{{ _('Reset results') }}</button>
+  </form>
+
+  {% if report %}
+    <hr/>
+
+    <h2>{{ _('Report') }}</h2>
+    <p class="muted">
+      {{ _('Organizations:') }} {{ report.total_orgs }} |
+      {{ _('Rows:') }} {{ report.total_rows }} |
+      {{ _('Dry run:') }} {{ report.dry_run }} |
+      {{ _('Remove missing:') }} {{ report.remove_missing }} |
+      {{ _('Errors:') }} {{ report.errors }} |
+      {{ _('Warnings:') }} {{ report.warnings }}
+    </p>
+
+    {% set REASON_GR = {
+      'sysadmin': 'Sysadmin (προστατευμένος)',
+      'current_user': 'Συνδεδεμένος χρήστης (προστατευμένος)'
+    } %}
+
+    {% for orgb in report.orgs %}
+      <div class="module module-narrow module-shallow"
+           style="background:#fff;border:1px solid #ddd;border-radius:6px;margin-bottom:12px;">
+        <div class="module-heading">
+          <strong>{{ _('Org') }}:</strong>
+          <code>{{ orgb.org_ref }}</code>
+          {% if orgb.org_name %}
+            — {{ orgb.org_name }}
+          {% endif %}
+        </div>
+
+        <div class="module-content">
+          {% if orgb.status != 'ok' %}
+            <div class="alert alert-danger">
+              {{ orgb.message }}
+            </div>
+          {% else %}
+            {% set plan = orgb.plan %}
+
+            {% if plan.warnings %}
+              <div class="alert alert-warning">
+                <ul>
+                  {% for w in plan.warnings %}
+                    <li>{{ w }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+            {% if orgb.apply_error %}
+              <div class="alert alert-danger">
+                <strong>{{ _('Apply error:') }}</strong> {{ orgb.apply_error }}
+              </div>
+            {% elif orgb.applied %}
+              <div class="alert alert-success">
+                <strong>{{ _('Applied:') }}</strong>
+                {{ _('removed') }}={{ orgb.applied.removed }},
+                {{ _('updated') }}={{ orgb.applied.updated }},
+                {{ _('created') }}={{ orgb.applied.created }}
+              </div>
+            {% elif report.dry_run %}
+              <div class="alert alert-info">
+                {{ _('Dry-run: no changes applied.') }}
+              </div>
+            {% endif %}
+
+            <div class="well">
+              <p><strong>{{ _('Totals') }}</strong></p>
+              <ul>
+                <li>{{ _('Existing members:') }} {{ plan.existing_count }}</li>
+                <li>{{ _('CSV rows:') }} {{ plan.csv_count }}</li>
+                <li>{{ _('Additions:') }} {{ plan.creations|length }}</li>
+                <li>{{ _('Role updates:') }} {{ plan.role_updates|length }}</li>
+                <li>{{ _('Unchanged:') }} {{ plan.unchanged|length }}</li>
+                <li>{{ _('Protected skips:') }} {{ plan.protected_skips|length }}</li>
+                <li>{{ _('Removals:') }} {{ plan.removals|length }}</li>
+                <li>{{ _('Pending invites:') }} {{ plan.pending_invites|length }}</li>
+              </ul>
+            </div>
+
+            <details style="margin-top: 8px;">
+              <summary><strong>{{ _('Show detailed per-user changes') }}</strong></summary>
+
+              <h3 style="margin-top: 12px;">{{ _('Additions') }}</h3>
+              {% if plan.creations and plan.creations|length %}
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr><th>Line</th><th>Username</th><th>Email</th><th>Role</th></tr>
+                  </thead>
+                  <tbody>
+                    {% for r in plan.creations %}
+                      <tr><td>{{ r.line }}</td><td>{{ r.username }}</td><td>{{ r.email }}</td><td>{{ r.role }}</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p>{{ _('None.') }}</p>
+              {% endif %}
+
+              <h3>{{ _('Role updates') }}</h3>
+              {% if plan.role_updates and plan.role_updates|length %}
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr><th>Username</th><th>Email</th><th>Old</th><th>New</th></tr>
+                  </thead>
+                  <tbody>
+                    {% for r in plan.role_updates %}
+                      <tr>
+                        <td>{{ r.member.username }}</td>
+                        <td>{{ r.member.email }}</td>
+                        <td>{{ r.member.role }}</td>
+                        <td>{{ r.new_role }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p>{{ _('None.') }}</p>
+              {% endif %}
+
+              <h3>{{ _('Unchanged') }}</h3>
+              {% if plan.unchanged and plan.unchanged|length %}
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr><th>Username</th><th>Email</th><th>Role</th></tr>
+                  </thead>
+                  <tbody>
+                    {% for r in plan.unchanged %}
+                      <tr><td>{{ r.username }}</td><td>{{ r.email }}</td><td>{{ r.role }}</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p>{{ _('None.') }}</p>
+              {% endif %}
+
+              <h3>{{ _('Protected skips') }}</h3>
+              {% if plan.protected_skips and plan.protected_skips|length %}
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr><th>Username</th><th>Email</th><th>Role</th><th>Reason</th></tr>
+                  </thead>
+                  <tbody>
+                    {% for r in plan.protected_skips %}
+                      <tr>
+                        <td>{{ r.member.username }}</td>
+                        <td>{{ r.member.email }}</td>
+                        <td>{{ r.member.role }}</td>
+                        <td>{{ REASON_GR.get(r.reason, r.reason) }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p>{{ _('None.') }}</p>
+              {% endif %}
+
+              <h3>{{ _('Removals') }}</h3>
+              {% if plan.removals and plan.removals|length %}
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr><th>Username</th><th>Email</th><th>Role</th></tr>
+                  </thead>
+                  <tbody>
+                    {% for r in plan.removals %}
+                      <tr><td>{{ r.username }}</td><td>{{ r.email }}</td><td>{{ r.role }}</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p>{{ _('None.') }}</p>
+              {% endif %}
+
+              <h3>{{ _('Pending invites (user not found)') }}</h3>
+
+              {% if plan.pending_invites and plan.pending_invites|length %}
+                <div class="alert alert-info">
+                  <p style="margin-bottom: 0;">
+                    Για τους παρακάτω χρήστες δεν βρέθηκε υπάρχων λογαριασμός στο CKAN.
+                    Σε αυτή την περίπτωση πρέπει να ακολουθήσετε τη ροή <strong>Invite</strong> από τη διακριτή admin διεπαφή.
+                    Μεταβείτε
+                    <a
+                      href="{% url_for 'csvinvite.admin_bulk_org_invite_get' %}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >εδώ</a>
+                    (ανοίγει σε νέο tab) για να προχωρήσετε με invitations/pending memberships.
+                  </p>
+                </div>
+              {% endif %}
+
+              {% if plan.pending_invites and plan.pending_invites|length %}
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr><th>Line</th><th>Username</th><th>Email</th><th>Role</th><th>Reason</th></tr>
+                  </thead>
+                  <tbody>
+                    {% for r in plan.pending_invites %}
+                      <tr>
+                        <td>{{ r.line }}</td>
+                        <td>{{ r.username }}</td>
+                        <td>{{ r.email }}</td>
+                        <td>{{ r.role }}</td>
+                        <td>{{ r.reason }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p>{{ _('None.') }}</p>
+              {% endif %}
+            </details>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endblock %}
+
+
+{% block secondary_content %}
+  {{ super() }}
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-download"></i>
+      {{ _('CSV template') }}
+    </h2>
+    <div class="module-content">
+      <p class="muted">
+        {{ _('Download a ready-to-use CSV template (headers + one example row).') }}
+      </p>
+
+      <p style="margin: 10px 0 0 0;">
+        <a class="btn btn-default btn-sm"
+           href="{{ h.url_for('csvinvite.admin_bulk_org_sync_template_csv') }}">
+          {{ _('Download CSV template') }}
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-info-circle"></i>
+      {{ _('Quick guide') }}
+    </h2>
+    <div class="module-content">
+      <ol style="margin-bottom: 0;">
+        <li>{{ _('Prepare your CSV with the required columns.') }}</li>
+        <li>{{ _('Start with Dry run to preview the plan (no changes applied).') }}</li>
+        <li>{{ _('If the plan looks correct, uncheck Dry run and Run.') }}</li>
+        <li>{{ _('Optionally export the plan CSV after a run to review or archive it.') }}</li>
+      </ol>
+      <p class="muted" style="margin-top: 10px; margin-bottom: 0;">
+        {{ _('Tip: test first with 1–2 organizations before syncing a large file.') }}
+      </p>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-table"></i>
+      {{ _('CSV format') }}
+    </h2>
+    <div class="module-content">
+      <p class="muted" style="margin-bottom: 6px;">
+        {{ _('Columns:') }} <code>org</code>, <code>username</code> (optional), <code>email</code> (optional), <code>role</code>
+      </p>
+
+      <ul style="margin-bottom: 10px;">
+        <li><code>org</code>: {{ _('organization id or name/slug') }}</li>
+        <li><code>username</code>/<code>email</code>: {{ _('at least one should be provided to identify the user') }}</li>
+        <li><code>role</code>: {{ _('member/editor/admin') }}</li>
+      </ul>
+
+      <p class="muted" style="margin-bottom: 6px;">
+        {{ _('Example:') }}
+      </p>
+
+      <pre style="white-space: pre; overflow: auto; margin-bottom: 0;">org,username,email,role
+ministry-of-data,,user1@example.gr,member
+ministry-of-data,user2,,editor
+open-team,user3,,admin</pre>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-shield"></i>
+      {{ _('Roles & permissions') }}
+    </h2>
+    <div class="module-content">
+      <p class="muted">
+        {{ _('Roles define what a user can do within an organization. Ensure the role value in the CSV is valid.') }}
+      </p>
+      <ul style="margin-bottom: 0;">
+        <li><strong>member</strong>: {{ _('basic access') }}</li>
+        <li><strong>editor</strong>: {{ _('can create/edit datasets') }}</li>
+        <li><strong>admin</strong>: {{ _('full organization management') }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-exclamation-triangle"></i>
+      {{ _('Important notes') }}
+    </h2>
+    <div class="module-content">
+      <ul style="margin-bottom: 0;">
+        <li>
+          <strong>{{ _('Dry run:') }}</strong>
+          {{ _('When enabled, no changes are applied; you only get a preview plan and warnings.') }}
+        </li>
+        <li>
+          <strong>{{ _('Remove missing:') }}</strong>
+          {{ _('If enabled, members not present in the CSV may be removed from the organization. Use with extreme caution.') }}
+        </li>
+        <li>
+          <strong>{{ _('Protected members:') }}</strong>
+          {{ _('Some accounts may be skipped (e.g. sysadmins or the current user).') }}
+        </li>
+        <li>
+          <strong>{{ _('Org matching:') }}</strong>
+          {{ _('Double-check org values, especially when using slugs, to avoid syncing the wrong organization.') }}
+        </li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}

@@ -27,6 +27,7 @@ log = logging.getLogger(__name__)
 
 class DataGovGrPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
+    plugins.implements(plugins.IConfigDeclaration)
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.ITranslation)
@@ -80,6 +81,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         """
         ignore_missing = toolkit.get_validator('ignore_missing')
         unicode_safe = toolkit.get_validator('unicode_safe')
+        boolean_validator = toolkit.get_validator('boolean_validator')
 
         schema.update({
             'ckanext.data_gov_gr.powerbi_embed_url': [ignore_missing, unicode_safe],
@@ -89,9 +91,91 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
             'ckanext.data_gov_gr.dataset.legislation.protected': [ignore_missing, unicode_safe],
             # Νέα, JSON παραμετρικές επιλογές για dropdown συνόλων δεδομένων
             'ckanext.data_gov_gr.menu.dataset.items': [ignore_missing, unicode_safe],
+            # Ρυθμίσεις αρχικής σελίδας (στατιστικά, showcases)
+            'ckanext.data_gov_gr.home.stats.item1': [ignore_missing, unicode_safe],
+            'ckanext.data_gov_gr.home.stats.item2': [ignore_missing, unicode_safe],
+            'ckanext.data_gov_gr.home.stats.item3': [ignore_missing, unicode_safe],
+            'ckanext.data_gov_gr.home.stats.item4': [ignore_missing, unicode_safe],
+            'ckanext.data_gov_gr.home.featured_dataset_views.ids': [ignore_missing, unicode_safe],
+            'ckanext.data_gov_gr.home.portal_numbers.enabled': [ignore_missing, boolean_validator],
+            'ckanext.data_gov_gr.home.showcases.ids': [ignore_missing, unicode_safe],
         })
 
         return schema
+
+    # IConfigDeclaration
+
+    def declare_config_options(self, declaration, key):
+        """
+        Declare config options to avoid 'Option ... is not declared' warnings.
+
+        These options are typically edited via /ckan-admin/config, not only via
+        ckan.ini.
+        """
+        declaration.annotate("data.gov.gr (ckanext-data-gov-gr)")
+
+        root = key.ckanext.data_gov_gr
+        home = root.home
+        config_ui = root.config_ui
+
+        declaration.declare(root.powerbi_embed_url, "").set_description(
+            "Power BI embed URL (used on /stats/powerbi and home previews)."
+        )
+        declaration.declare(root.user_survey.url, "").set_description(
+            "User survey URL (supports {locale} placeholder)."
+        )
+        declaration.declare(root.showcase.disclaimer, "").set_description(
+            "Showcases disclaimer text (HTML allowed)."
+        )
+        declaration.declare(root.dataset.legislation.open, "").set_description(
+            "Default applicable legislation URL for open datasets."
+        )
+        declaration.declare(root.dataset.legislation.protected, "").set_description(
+            "Default applicable legislation URL for protected datasets."
+        )
+        declaration.declare(root.menu.dataset.items, "").set_description(
+            "JSON list for the dataset dropdown menu items."
+        )
+
+        declaration.annotate("Home page configuration")
+        declaration.declare(home.portal_numbers.enabled, "no").set_description(
+            "Show the 'Portal in numbers' counters on the home page."
+        )
+        declaration.declare(home.stats.item1, "").set_description(
+            "Home stats tile 1 (stats id)."
+        )
+        declaration.declare(home.stats.item2, "").set_description(
+            "Home stats tile 2 (stats id)."
+        )
+        declaration.declare(home.stats.item3, "").set_description(
+            "Home stats tile 3 (stats id)."
+        )
+        declaration.declare(home.stats.item4, "").set_description(
+            "Home stats tile 4 (stats id)."
+        )
+        declaration.declare(home.featured_dataset_views.ids, "").set_description(
+            "Selected dataset resource view IDs (one per line, up to 6) for the home page."
+        )
+        declaration.declare(home.showcases.ids, "").set_description(
+            "Selected showcases IDs (one per line, up to 3) for the home page."
+        )
+
+        declaration.annotate("Config UI visibility (ini-only feature flags)")
+        declaration.declare(config_ui.stats_powerbi.enabled, "no").set_description(
+            "Show 'Στατιστικά και Power BI' section in /ckan-admin/config."
+        )
+        declaration.declare(config_ui.home_stats.enabled, "no").set_description(
+            "Show 'Στατιστικά αρχικής σελίδας' section in /ckan-admin/config."
+        )
+        declaration.declare(config_ui.home_featured_datasets.enabled, "no").set_description(
+            "Show 'Επιλεγμένα datasets στην αρχική σελίδα' section in /ckan-admin/config."
+        )
+        declaration.declare(config_ui.home_showcases.enabled, "no").set_description(
+            "Show 'Εφαρμογές στην αρχική σελίδα (Showcases)' section in /ckan-admin/config."
+        )
+        declaration.declare(config_ui.dataset_menu.enabled, "no").set_description(
+            "Show 'Μενού Συνόλων Δεδομένων (Dropdown)' section in /ckan-admin/config."
+        )
 
     # IBlueprint
 

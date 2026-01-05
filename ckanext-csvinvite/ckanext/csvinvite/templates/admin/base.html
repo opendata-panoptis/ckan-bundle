@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+{% block content_primary_nav %}
+  {{ super() }}
+  {% if h.csvinvite_show_user_management_tab() %}
+    {{ h.build_nav_icon('csvinvite.admin_user_management_get', _('User management'), icon='users') }}
+  {% endif %}
+{% endblock %}

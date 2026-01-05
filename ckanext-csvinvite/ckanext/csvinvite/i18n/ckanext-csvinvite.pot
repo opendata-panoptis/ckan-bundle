@@ -1,0 +1,795 @@
+# Translations template for ckanext-csvinvite.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the ckanext-csvinvite
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-csvinvite 0.0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-01-05 11:39+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ckanext/csvinvite/views.py:71
+msgid "Sysadmin only"
+msgstr ""
+
+#: ckanext/csvinvite/views.py:592 ckanext/csvinvite/views.py:651
+#: ckanext/csvinvite/views.py:666 ckanext/csvinvite/views.py:677
+msgid "Unauthorized to import members"
+msgstr ""
+
+#: ckanext/csvinvite/views.py:604 ckanext/csvinvite/views.py:840
+#: ckanext/csvinvite/views.py:855 ckanext/csvinvite/views.py:866
+#: ckanext/csvinvite/views.py:945
+msgid "Unauthorized to sync members"
+msgstr ""
+
+#: ckanext/csvinvite/views.py:680 ckanext/csvinvite/views.py:780
+#: ckanext/csvinvite/views.py:869 ckanext/csvinvite/views.py:948
+msgid "Service unavailable"
+msgstr ""
+
+#: ckanext/csvinvite/views.py:777
+msgid "Unauthorized"
+msgstr ""
+
+#: ckanext/csvinvite/views.py:810
+msgid "Not authorized to export member results"
+msgstr ""
+
+#: ckanext/csvinvite/views.py:814 ckanext/csvinvite/views.py:989
+msgid "No data to export"
+msgstr ""
+
+#: ckanext/csvinvite/views.py:819
+msgid "Invalid data format"
+msgstr ""
+
+#: ckanext/csvinvite/views.py:985
+msgid "Not authorized"
+msgstr ""
+
+#: ckanext/csvinvite/views.py:994
+msgid "Invalid JSON"
+msgstr ""
+
+#: ckanext/csvinvite/templates/admin/base.html:6
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:4
+#: ckanext/csvinvite/views.py:1820
+msgid "User management"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:4
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:24
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:132
+msgid "Bulk invite to organizations"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:17
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:22
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:9
+msgid "CSV file"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:24
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:32
+msgid "Dry run (preview only)"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:29
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:43
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:15
+msgid "Back"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:30
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:44
+msgid "Run"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:36
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:56
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:29
+#: ckanext/csvinvite/templates/csvinvite/import_members_result.html:50
+#: ckanext/csvinvite/templates/csvinvite/sync_members_result.html:179
+msgid "Reset results"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:42
+msgid "Results"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:44
+msgid "Total"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:46
+msgid "Would be invited"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:48
+msgid "Invited"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:50
+msgid "Errors"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:54
+msgid "Export results (CSV)"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:61
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:74
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:88
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:100
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:112
+msgid "Line"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:62
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:81
+msgid "Org"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:63
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:74
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:88
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:100
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:112
+msgid "Email"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:64
+msgid "Role"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:65
+msgid "Status"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:66
+msgid "Message"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:92
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:266
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:135
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_invite_sidebar.html:30
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_sync_sidebar.html:31
+msgid "CSV template"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:96
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:270
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:139
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_invite_sidebar.html:34
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_sync_sidebar.html:35
+msgid "Download a ready-to-use CSV template (headers + one example row)."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:102
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:276
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:145
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_invite_sidebar.html:40
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_sync_sidebar.html:41
+msgid "Download CSV template"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:111
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:285
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:154
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:113
+msgid "Quick guide"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:115
+msgid "Prepare your CSV with the required headers."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:116
+msgid "Start with Dry run to preview results."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:117
+msgid "When everything looks good, uncheck Dry run and Run."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:120
+msgid "Tip: test first with 2–3 rows before inviting hundreds of users."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:128
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:303
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:172
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:128
+msgid "CSV format"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:132
+msgid "Headers:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:136
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:317
+msgid "Example:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:145
+msgid "Role is optional; if omitted it defaults to"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:153
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:330
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:161
+msgid "Roles & permissions"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:157
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:337
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:168
+msgid "basic access"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:158
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:338
+msgid "can create/edit datasets"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:159
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:339
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:170
+msgid "full organization management"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:167
+msgid "Common issues"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:171
+msgid "Org not found: ensure the org value matches the organization id/slug."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_invite.html:172
+msgid "Invalid email: check for spaces or missing domain."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:4
+msgid "Bulk sync organization members"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:7
+msgid "CSV columns:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:10
+msgid "org can be organization id or name/slug."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:36
+msgid "Remove members missing from CSV (dangerous)"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:47
+msgid "Export plan CSV"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:62
+msgid "Report"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:64
+msgid "Organizations:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:65
+msgid "Rows:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:66
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:352
+msgid "Dry run:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:67
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:356
+msgid "Remove missing:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:68
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:47
+msgid "Errors:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:69
+msgid "Warnings:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:108
+msgid "Apply error:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:112
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:57
+msgid "Applied:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:113
+msgid "removed"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:114
+msgid "updated"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:115
+msgid "created"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:119
+msgid "Dry-run: no changes applied."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:124
+msgid "Totals"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:126
+msgid "Existing members:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:127
+msgid "CSV rows:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:128
+msgid "Additions:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:129
+msgid "Role updates:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:130
+msgid "Unchanged:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:131
+msgid "Protected skips:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:132
+msgid "Removals:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:133
+msgid "Pending invites:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:138
+msgid "Show detailed per-user changes"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:140
+msgid "Additions"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:153
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:174
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:190
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:211
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:227
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:249
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:82
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:95
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:107
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:119
+msgid "None."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:156
+msgid "Role updates"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:177
+msgid "Unchanged"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:193
+msgid "Protected skips"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:214
+msgid "Removals"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:230
+msgid "Pending invites (user not found)"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:289
+msgid "Prepare your CSV with the required columns."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:290
+msgid "Start with Dry run to preview the plan (no changes applied)."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:291
+msgid "If the plan looks correct, uncheck Dry run and Run."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:292
+msgid "Optionally export the plan CSV after a run to review or archive it."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:295
+msgid "Tip: test first with 1–2 organizations before syncing a large file."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:307
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:11
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:134
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:141
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:149
+msgid "Columns:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:311
+msgid "organization id or name/slug"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:312
+msgid "at least one should be provided to identify the user"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:313
+msgid "member/editor/admin"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:334
+msgid ""
+"Roles define what a user can do within an organization. Ensure the role value"
+" in the CSV is valid."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:347
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:195
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:180
+msgid "Important notes"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:353
+msgid ""
+"When enabled, no changes are applied; you only get a preview plan and "
+"warnings."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:357
+msgid ""
+"If enabled, members not present in the CSV may be removed from the "
+"organization. Use with extreme caution."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:360
+msgid "Protected members:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:361
+msgid "Some accounts may be skipped (e.g. sysadmins or the current user)."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:364
+msgid "Org matching:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_org_sync.html:365
+msgid ""
+"Double-check org values, especially when using slugs, to avoid syncing the "
+"wrong organization."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:4
+msgid "Bulk delete users"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:11
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:176
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:149
+msgid "and/or"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:16
+msgid "Preview"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:20
+msgid "Are you sure you want to delete these users?"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:21
+msgid "Apply deletion"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:37
+msgid "Summary"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:41
+msgid "Total CSV rows:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:42
+msgid "Would delete:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:43
+msgid "Protected (skipped):"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:44
+msgid "Already deleted:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:45
+msgid "Not found:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:57
+msgid "errors"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:71
+msgid "Would be deleted"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:74
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:88
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:100
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:112
+msgid "Username"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:85
+msgid "Protected (skipped)"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:88
+msgid "Reason"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:97
+msgid "Not found"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:109
+msgid "Already deleted"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:123
+msgid "Download results CSV"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:158
+msgid "Delete/disable the user in Keycloak first."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:159
+msgid "Upload your CSV and click “Preview”."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:160
+msgid "Review the preview table carefully."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:161
+msgid "Only then click “Apply deletion”."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:164
+msgid "Tip: start with 1–2 rows to confirm the matching logic."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:176
+msgid "Accepted columns:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:177
+msgid "You may provide either one per row."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:180
+msgid "Example"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:186
+msgid "Leave empty values blank (do not write \"null\")."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:187
+msgid "Avoid duplicate rows; keep one user per line."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:200
+msgid "Irreversible:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:201
+msgid "User deletion cannot be undone. Always use Preview first."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:204
+msgid "Protected accounts:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:205
+msgid "Some users may be blocked from deletion by safety rules (e.g. sysadmins)."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:208
+msgid "Matching:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:209
+msgid "Provide a correct username or email to avoid “Not found” rows."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:13
+msgid "No user-management tools are enabled."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:28
+msgid "Invite users to multiple organizations using a CSV (org,email,role)."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:31
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:51
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:74
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:93
+msgid "Open"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:44
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:139
+msgid "Bulk org member sync"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:48
+msgid ""
+"Sync members for multiple organizations using a CSV "
+"(org,username/email,role). org can be id or slug."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:64
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:147
+msgid "Bulk user deletion"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:68
+msgid "Delete multiple users using a CSV file."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:70
+msgid "Note: First delete the user from Keycloak."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:86
+msgid "Members"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:117
+msgid ""
+"These tools are for sysadmins and help you perform bulk actions (invites, "
+"member sync, deletions) via CSV files."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:120
+msgid ""
+"Tip: start with a small sample (e.g. 2–3 rows) before running a full bulk "
+"action."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:142
+msgid "(org can be an id or slug)"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:150
+msgid "(you may provide either one)."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:165
+msgid ""
+"Roles define what a user can do within an organization. Make sure the role "
+"value in the CSV is valid."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:169
+msgid "edit content"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:186
+msgid "Deletions:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:187
+msgid "Delete the user in Keycloak first, then proceed here."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:193
+msgid "Sync:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:194
+msgid "May add/update members depending on the CSV rows."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:200
+msgid "Check:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:201
+msgid "Ensure org points to the correct organization (especially when using slugs)."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_invite_sidebar.html:4
+msgid "Bulk invite new members"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_invite_sidebar.html:8
+msgid "Upload a CSV with emails to invite new members to the organization"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_invite_sidebar.html:10
+msgid "if they do not already exist as users."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_invite_sidebar.html:14
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_sync_sidebar.html:13
+msgid "CSV headers:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_invite_sidebar.html:16
+msgid "Roles:"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_invite_sidebar.html:22
+msgid "Tip: try first with 2–3 rows before uploading a large file."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_sync_sidebar.html:4
+msgid "Bulk sync members"
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_sync_sidebar.html:9
+msgid ""
+"Upload a CSV to sync the organization members list (add/update roles and "
+"optionally remove missing)."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_sync_sidebar.html:16
+msgid ""
+"Note: role is required. Provide username and/or email (email is required if "
+"username is missing)."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/snippets/bulk_sync_sidebar.html:23
+msgid "Tip: keep Dry-run enabled first to preview changes."
+msgstr ""
+
+#: ckanext/csvinvite/templates/organization/manage_members.html:9
+msgid "Import from CSV"
+msgstr ""
+
+#: ckanext/csvinvite/templates/organization/manage_members.html:15
+msgid "Sync from CSV"
+msgstr ""
+

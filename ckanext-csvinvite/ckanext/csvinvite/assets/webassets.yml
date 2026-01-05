@@ -1,0 +1,14 @@
+# csvinvite-js:
+#   filter: rjsmin
+#   output: ckanext-csvinvite/%(version)s-csvinvite.js
+#   contents:
+#     - js/csvinvite.js
+#   extra:
+#     preload:
+#       - base/main
+
+# csvinvite-css:
+#   filter: cssrewrite
+#   output: ckanext-csvinvite/%(version)s-csvinvite.css
+#   contents:
+#     - css/csvinvite.css

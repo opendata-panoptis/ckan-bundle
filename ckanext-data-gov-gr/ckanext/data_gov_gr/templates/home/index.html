@@ -221,6 +221,41 @@
     </div>
   </section>
 
+  {% set featured_dataset_views = h.get_home_featured_dataset_views(6) %}
+  {% if featured_dataset_views %}
+  <section class="featured-dataset-views-section">
+    <div class="container">
+      <h2 class="section-title">{{ _('Επιλεγμένα datasets') }}</h2>
+      <div class="featured-dataset-views-grid">
+        {% for item in featured_dataset_views %}
+          <div class="featured-dataset-view-card">
+            <a class="featured-dataset-view-clickarea" href="{{ item.link }}" aria-label="{{ item.title }}"></a>
+            <div class="featured-dataset-view-heading">{{ item.title }}</div>
+            {% if item.description %}
+              <div class="featured-dataset-view-summary">{{ h.render_markdown(item.description) }}</div>
+            {% endif %}
+            <div class="featured-dataset-view-chart">
+              {% if item.iframed and item.embed_src %}
+                <iframe
+                  src="{{ item.embed_src }}"
+                  title="{{ item.title }}"
+                  frameborder="0"
+                  loading="lazy">
+                </iframe>
+              {% else %}
+                {{ h.rendered_resource_view(item.view, item.resource, item.package) }}
+              {% endif %}
+            </div>
+            {% if item.dataset_title %}
+              <div class="featured-dataset-view-dataset">{{ item.dataset_title }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
   <div class="data-section">
     <h2 class="section-title">Δεδομένα και Υπηρεσίες</h2>
     <div class="data-cards">
@@ -251,57 +286,175 @@
           </svg>
         </div>
         <h3>Αποφάσεις</h3>
-        <p>Πρόσβαση σε αποφάσεις και διοικητικά έγγραφα</p>
+        <p>Πρόσβαση σε αποφάσεις φορέων που αποτυπώνουν και ταξινομούν τα σύνολα δεδομένων τους</p>
       </a>
     </div>
   </div>
 
-  <section class="showcase-section">
+  {# "The portal in numbers" (EU-style) counters on the home page #}
+  {% set portal_numbers = h.get_home_portal_numbers() %}
+  {% if portal_numbers %}
+  <section class="portal-numbers-section">
     <div class="container">
-      <h2 class="section-title">Αξιοποίηση Δεδομένων</h2>
-      <div class="showcase-cards">
-        <a href="/showcase" class="showcase-card">
-          <div class="card-content">
-            <div class="card-icon">
-              <svg viewBox="0 0 24 24">
-                <path d="M21,8C19.5,8 18.7,9.4 19.1,10.5L15.5,14.1C15.2,14 14.8,14 14.5,14.1L11.9,11.5C12.3,10.4 11.5,9 10,9C8.6,9 7.7,10.4 8.1,11.5L3.5,16C2.4,15.7 1,16.5 1,18C1,19.1 1.9,20 3,20C4.4,20 5.3,18.6 4.9,17.5L9.4,12.9C9.7,13 10.1,13 10.4,12.9L13,15.5C12.7,16.5 13.5,18 15,18C16.5,18 17.3,16.6 16.9,15.5L20.5,11.9C21.6,12.2 23,11.4 23,10C23,8.9 22.1,8 21,8M15,9L15.9,6.9L18,6L15.9,5.1L15,3L14.1,5.1L12,6L14.1,6.9L15,9M3.5,11L4,9L6,8.5L4,8L3.5,6L3,8L1,8.5L3,9L3.5,11Z"/>
-              </svg>
-            </div>
-            <div class="card-text">
-              <h3>Εφαρμογές και Υπηρεσίες</h3>
-              <p>Ανακαλύψτε πώς αξιοποιούνται τα ανοικτά δεδομένα</p>
-            </div>
-          </div>
-          <div class="card-arrow">
-            <svg viewBox="0 0 24 24">
-              <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
-            </svg>
-          </div>
-        </a>
+      <h2 class="section-title">{{ _('Η πύλη σε αριθμούς') }}</h2>
+      <p class="portal-numbers-subtitle">
+        {{ _('Κατανοήστε τον πλούτο της διαθέσιμης πληροφορίας.') }}
+      </p>
+      <div class="portal-numbers-grid">
+        {% for item in portal_numbers %}
+          <a class="portal-number-card" href="{{ item.link }}">
+            <div class="portal-number-value">{{ item.value }}</div>
+            <div class="portal-number-label">{{ item.label }}</div>
+          </a>
+        {% endfor %}
       </div>
     </div>
   </section>
+  {% endif %}
 
-  <section class="news-section">
+  {# Παραμετρική ενότητα στατιστικών: μέχρι τέσσερα πλακίδια που δείχνουν σε σελίδες /stats #}
+  {% set home_stats_tiles = h.get_home_stats_tiles() %}
+  {% if home_stats_tiles %}
+  <section class="home-stats-section">
     <div class="container">
-      <h2 class="section-title">Νέα & Ανακοινώσεις</h2>
-      <div class="news-grid">
-        <a href="/blog" class="news-card main-card">
-          <div class="card-overlay"></div>
-          <div class="card-content">
-            <h3>Τελευταία Νέα</h3>
-            <p>Μείνετε ενημερωμένοι για τις τελευταίες εξελίξεις και ανακοινώσεις</p>
-            <div class="card-action">
-              <span>Δείτε όλα τα νέα</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24">
-                <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
-              </svg>
+      <h2 class="section-title">{{ _('Στατιστικά') }}</h2>
+      <div class="home-stats-cards">
+        {% for tile in home_stats_tiles %}
+          {% set stat_preview = h.get_stat_data(tile.id, variant='preview') %}
+          {% set stat_link = (stat_preview.link if stat_preview else None) or h.url_for(tile.route) %}
+          <a class="home-stat-card home-stat-card-link" href="{{ stat_link }}">
+            <div class="home-stat-label">
+              {% if tile.icon %}
+                <i class="{{ tile.icon }}"></i>
+              {% endif %}
+              {{ tile.title }}
             </div>
-          </div>
-        </a>
+            <div class="home-stat-frame">
+              {% if stat_preview %}
+                <div class="home-stat-chart"
+                     data-module="common-stats-charts"
+                     data-module-type="{{ stat_preview.type }}"
+                     data-module-data="{{ h.dump_json(stat_preview.data) }}"
+                     data-module-title="{{ stat_preview.title }}"
+                     data-module-variant="preview"
+                     data-module-height="260px">
+                </div>
+              {% else %}
+                <iframe
+                  src="{{ h.url_for(tile.route) }}"
+                  title="{{ tile.title }}"
+                  frameborder="0"
+                  style="width: 100%; min-height: 280px;"
+                  loading="lazy">
+                </iframe>
+              {% endif %}
+            </div>
+            {% if tile.description %}
+              <div class="home-stat-description">{{ tile.description }}</div>
+            {% endif %}
+          </a>
+        {% endfor %}
       </div>
     </div>
   </section>
+  {% endif %}
+
+	  {% set home_showcases = h.get_home_showcases(3) %}
+	  <section class="showcase-hero-section">
+	    <div class="container">
+	      <h2 class="section-title">Αξιοποίηση Δεδομένων</h2>
+	    </div>
+	  </section>
+
+	  <section class="showcase-selected-section">
+	    <div class="container">
+	      <div class="showcase-selected-header">
+	        <h2 class="section-title">{{ _('Επιλεγμένες εφαρμογές') }}</h2>
+	        <a class="showcase-all-link" href="{{ h.url_for('showcase_blueprint.index') }}">
+	          {{ _('Όλες οι εφαρμογές') }}
+	        </a>
+	      </div>
+
+	      {% if home_showcases %}
+	        <div class="showcase-cards">
+	          {% for showcase in home_showcases %}
+	            <a href="{{ h.url_for('showcase_blueprint.read', id=showcase.name) }}" class="showcase-card">
+	              <div class="card-content">
+	                <div class="showcase-thumb">
+	                  {% if showcase.image_url %}
+	                    <img src="{{ showcase.image_url }}" alt="" loading="lazy">
+	                  {% else %}
+	                    <svg viewBox="0 0 24 24" aria-hidden="true">
+	                      <path d="M21,8C19.5,8 18.7,9.4 19.1,10.5L15.5,14.1C15.2,14 14.8,14 14.5,14.1L11.9,11.5C12.3,10.4 11.5,9 10,9C8.6,9 7.7,10.4 8.1,11.5L3.5,16C2.4,15.7 1,16.5 1,18C1,19.1 1.9,20 3,20C4.4,20 5.3,18.6 4.9,17.5L9.4,12.9C9.7,13 10.1,13 10.4,12.9L13,15.5C12.7,16.5 13.5,18 15,18C16.5,18 17.3,16.6 16.9,15.5L20.5,11.9C21.6,12.2 23,11.4 23,10C23,8.9 22.1,8 21,8M15,9L15.9,6.9L18,6L15.9,5.1L15,3L14.1,5.1L12,6L14.1,6.9L15,9M3.5,11L4,9L6,8.5L4,8L3.5,6L3,8L1,8.5L3,9L3.5,11Z"/>
+	                    </svg>
+	                  {% endif %}
+	                </div>
+	                <div class="card-text">
+	                  <h3>{{ showcase.title }}</h3>
+	                  {% if showcase.notes %}
+	                    <p>{{ showcase.notes|truncate(140, True, '...') }}</p>
+	                  {% endif %}
+	                </div>
+	              </div>
+	              <div class="card-arrow" aria-hidden="true">
+	                <svg viewBox="0 0 24 24">
+	                  <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
+	                </svg>
+	              </div>
+	            </a>
+	          {% endfor %}
+	        </div>
+	      {% endif %}
+	    </div>
+	  </section>
+
+		  <section class="news-section">
+		    <div class="container">
+		      <div class="news-header">
+		        <div class="news-header-text">
+		          <h2 class="section-title">Νέα & Ανακοινώσεις</h2>
+		          <p class="news-subtitle">Μείνετε ενημερωμένοι για τις τελευταίες εξελίξεις και ανακοινώσεις</p>
+		        </div>
+		        <a href="{{ h.url_for('pages.blog_index') }}" class="news-more-link">
+		          <span>Δείτε όλα τα νέα</span>
+		          <svg class="news-more-arrow" viewBox="0 0 24 24" aria-hidden="true">
+		            <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"/>
+		          </svg>
+		        </a>
+		      </div>
+
+		      {% set news_items = h.get_home_news_items(3) %}
+		      {% if news_items %}
+		        <div class="news-items">
+			          {% for item in news_items %}
+			            <a href="{{ item.link }}" class="news-item">
+			              {% if item.date_day or item.date_short %}
+			                <div class="news-date-card" aria-hidden="true">
+			                  <div class="news-date-top">
+			                    {% if item.date_day and item.date_month %}
+			                      <div class="news-date-day">{{ item.date_day }}</div>
+			                      <div class="news-date-month">{{ item.date_month }}</div>
+			                    {% else %}
+			                      <div class="news-date-day">{{ item.date_short }}</div>
+			                    {% endif %}
+			                  </div>
+			                  {% if item.date_year %}
+			                    <div class="news-date-bottom">{{ item.date_year }}</div>
+			                  {% endif %}
+			                </div>
+			              {% endif %}
+			              <div class="news-item-content">
+			                <h3 class="news-item-title">{{ item.title }}</h3>
+			                {% if item.summary %}
+			                  <p class="news-item-summary">{{ item.summary|truncate(140, True, '...') }}</p>
+			                {% endif %}
+			              </div>
+			            </a>
+			          {% endfor %}
+			        </div>
+			      {% endif %}
+			    </div>
+			  </section>
 
   <section class="guides-section">
     <div class="container">
@@ -412,4 +565,9 @@
   {% block primary_content %}
   {% endblock %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  {% asset 'data_gov_gr/stats_charts' %}
 {% endblock %}

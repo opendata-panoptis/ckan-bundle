@@ -139,6 +139,10 @@ def make_csv_from_dicts(rows):
     import csv
 
     csvout = StringIO()
+
+    # Προσθήκη BOM για σωστή εμφάνιση των Ελληνικών στο Excel
+    csvout.write('\N{BOM}')
+
     csvwriter = csv.writer(
         csvout,
         dialect='excel',

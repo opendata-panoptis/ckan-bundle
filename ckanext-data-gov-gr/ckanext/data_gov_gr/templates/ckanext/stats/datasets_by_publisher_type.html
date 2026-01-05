@@ -11,7 +11,13 @@
       <h2>{{ _('Datasets Per Publisher Type') }}</h2>
 
       {% if datasets_by_publisher_type %}
-        <button id="togglePublisherDatasetView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+        <button id="togglePublisherDatasetView"
+                class="btn btn-default mb-5"
+                data-toggle-chart="#publisher-type-datasets-pie-chart"
+                data-toggle-table="#publisher-type-datasets-table-view"
+                data-chart-icon="fa-chart-pie"
+                data-chart-label="{{ _('Switch to Chart') }}"
+                data-table-label="{{ _('Switch to Table') }}">
           <i class="fa fa-table"></i> {{ _('Switch to Table') }}
         </button>
 
@@ -41,7 +47,19 @@
     </section>
 
     {% if datasets_by_publisher_type %}
-      <div class="publisher-content" id="publisher-type-datasets-pie-chart" style="width: 100%; height: 400px;"></div>
+      {% set stat_chart = h.get_stat_data('datasets_by_publisher_type', datasets_by_publisher_type, variant='full') %}
+      {% if stat_chart %}
+        <div class="publisher-content"
+             id="publisher-type-datasets-pie-chart"
+             data-module="common-stats-charts"
+             data-module-type="{{ stat_chart.type }}"
+             data-module-data="{{ h.dump_json(stat_chart.data) }}"
+             data-module-title="{{ stat_chart.title }}"
+             data-module-variant="full"
+             data-module-height="400px"
+             style="width: 100%;">
+        </div>
+      {% endif %}
     {% endif %}
   </article>
 {% endblock %}
@@ -52,6 +70,5 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-  <script src="{{ url_for('static', filename='javascript/stats/datasets-by-publisher-type.js') }}"></script>
+  {% asset 'data_gov_gr/stats_charts' %}
 {% endblock %}

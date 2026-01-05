@@ -10,7 +10,13 @@
     <section id="stats-datasets-per-theme" class="module-content">
       <h2>{{ _('Datasets Per Theme') }}</h2>
       {% if datasets_by_theme %}
-        <button id="toggleView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+        <button id="toggleView"
+                class="btn btn-default mb-5"
+                data-toggle-chart="#theme-pie-chart"
+                data-toggle-table="#theme-table-view"
+                data-chart-icon="fa-chart-pie"
+                data-chart-label="{{ _('Switch to Chart') }}"
+                data-table-label="{{ _('Switch to Table') }}">
           <i class="fa fa-table"></i> {{ _('Switch to Table') }}
         </button>
 
@@ -44,7 +50,20 @@
     </section>
 
     {% if datasets_by_theme %}
-      <div class="theme-content" id="theme-pie-chart" style="display: block; width: 100%; height: 400px;"></div>
+      {% set stat_chart = h.get_stat_data('datasets_by_theme', datasets_by_theme, variant='full') %}
+      {% if stat_chart %}
+        <div class="theme-content">
+          <div id="theme-pie-chart"
+               data-module="common-stats-charts"
+               data-module-type="{{ stat_chart.type }}"
+               data-module-data="{{ h.dump_json(stat_chart.data) }}"
+               data-module-title="{{ stat_chart.title }}"
+               data-module-variant="full"
+               data-module-height="420px"
+               style="display: block; width: 100%;">
+          </div>
+        </div>
+      {% endif %}
     {% endif %}
   </article>
 {% endblock %}
@@ -55,6 +74,5 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-  <script src="{{ url_for('static', filename='javascript/stats/datasets-by-theme.js') }}"></script>
+  {% asset 'data_gov_gr/stats_charts' %}
 {% endblock %}

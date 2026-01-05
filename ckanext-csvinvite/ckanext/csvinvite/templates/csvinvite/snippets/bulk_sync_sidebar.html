@@ -1,0 +1,45 @@
+<div class="module module-narrow module-shallow">
+  <h2 class="module-heading">
+    <i class="fa fa-refresh"></i>
+    {{ _('Bulk sync members') }}
+  </h2>
+
+  <div class="module-content">
+    <p class="muted">
+      {{ _('Upload a CSV to sync the organization members list (add/update roles and optionally remove missing).') }}
+    </p>
+
+    <p class="muted" style="margin-bottom: 8px;">
+      <strong>{{ _('CSV headers:') }}</strong> <code>role</code>, <code>username</code>, <code>email</code>
+      <br/>
+      <small class="text-muted">
+        {{ _('Note: role is required. Provide username and/or email (email is required if username is missing).') }}
+      </small>
+    </p>
+
+    <hr style="margin: 10px 0;"/>
+
+    <p class="muted">
+      {{ _('Tip: keep Dry-run enabled first to preview changes.') }}
+    </p>
+  </div>
+</div>
+
+<div class="module module-narrow module-shallow">
+  <h2 class="module-heading">
+    <i class="fa fa-download"></i>
+    {{ _('CSV template') }}
+  </h2>
+  <div class="module-content">
+    <p class="muted">
+      {{ _('Download a ready-to-use CSV template (headers + one example row).') }}
+    </p>
+
+    <p style="margin: 10px 0 0 0;">
+      <a class="btn btn-default btn-sm"
+         href="{{ h.url_for('csvinvite.sync_members_template_csv', org_id=org.id) }}">
+        {{ _('Download CSV template') }}
+      </a>
+    </p>
+  </div>
+</div>

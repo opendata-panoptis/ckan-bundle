@@ -1,0 +1,19 @@
+{% ckan_extends %}
+
+{% block page_primary_action %}
+  {{ super() }}
+
+  {% if h.check_access('organization_update', {'id': organization.id}) %}
+    {% if h.csvinvite_enable_invite_process() %}
+      <a class="btn btn-default" href="{{ h.url_for('csvinvite.import_members_get', org_id=organization.id) }}">
+        {{ _('Import from CSV') }}
+      </a>
+    {% endif %}
+
+    {% if h.csvinvite_enable_sync_process() %}
+      <a class="btn btn-default" href="{{ h.url_for('csvinvite.sync_members_get', org_id=organization.id) }}">
+        {{ _('Sync from CSV') }}
+      </a>
+    {% endif %}
+  {% endif %}
+{% endblock %}

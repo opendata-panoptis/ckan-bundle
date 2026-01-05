@@ -200,3 +200,52 @@ msgstr "Αρ. αποτυχιών"
 msgid "Broken datasets"
 msgstr "Προβληματικά σύνολα δεδομένων"
 
+# Additional archiver error messages
+#: ckanext/archiver/tasks.py:562
+msgid "Missing downloaded file information"
+msgstr "Λείπουν πληροφορίες για το ληφθέν αρχείο"
+
+#: ckanext/archiver/tasks.py:576
+msgid "Azure upload failed"
+msgstr "Η αποστολή στο Azure απέτυχε"
+
+#: ckanext/archiver/tasks.py:976
+#, python-format
+msgid "Server returned HTTP error status: %s %s"
+msgstr "Ο διακομιστής επέστρεψε κατάσταση σφάλματος HTTP: %s %s"
+
+#: ckanext/archiver/tasks.py:453
+#, python-format
+msgid "Server reported status error: %s %s"
+msgstr "Ο διακομιστής ανέφερε σφάλμα HTTP: %s %s"
+
+# Archiver status labels
+msgid "Archived successfully"
+msgstr "Αρχειοθετήθηκε με επιτυχία"
+
+msgid "Content has not changed"
+msgstr "Το περιεχόμενο δεν έχει αλλάξει"
+
+msgid "URL invalid"
+msgstr "Μη έγκυρο URL"
+
+msgid "URL request failed"
+msgstr "Αποτυχία αιτήματος URL"
+
+msgid "Download error"
+msgstr "Σφάλμα λήψης"
+
+msgid "Chose not to download"
+msgstr "Επιλέχθηκε να μη γίνει λήψη"
+
+msgid "Download failure"
+msgstr "Αποτυχία λήψης"
+
+msgid "System error during archival"
+msgstr "Σφάλμα συστήματος κατά την αρχειοθέτηση"
+
+msgid "not recorded"
+msgstr "δεν έχει καταγραφεί"
+
+msgid "Max retries exceeded with url"
+msgstr "Έγιναν υπερβολικά πολλές προσπάθειες για το URL"

@@ -1,0 +1,224 @@
+{% extends "page.html" %}
+
+{% block subtitle %}Αποτέλεσμα συγχρονισμού - {{ org.title }}{% endblock %}
+
+{% block primary_content %}
+<h1 class="page-heading">Αποτέλεσμα συγχρονισμού</h1>
+
+<p>Οργάνωση: <strong>{{ org.title }}</strong></p>
+
+{% if plan.warnings and plan.warnings|length %}
+  <div class="alert alert-warning">
+    <ul>
+      {% for w in plan.warnings %}
+        <li>{{ w }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+{% if apply_error %}
+  <div class="alert alert-danger">{{ apply_error }}</div>
+{% endif %}
+
+{% if not dry_run and applied %}
+  <div class="alert alert-success">
+    Εφαρμόστηκαν αλλαγές: Εντάχθηκαν {{ applied.created }}, ενημερώθηκαν {{ applied.updated }}, αφαιρέθηκαν {{ applied.removed }}.
+  </div>
+{% elif dry_run %}
+  <div class="alert alert-info">
+    Dry-run: δεν εφαρμόστηκαν αλλαγές.
+  </div>
+{% endif %}
+
+<div class="well">
+  <p><strong>Σύνολα</strong></p>
+  <ul>
+    <li>Υπάρχοντα μέλη οργανισμού: {{ plan.existing_count }}</li>
+    <li>Γραμμές CSV: {{ plan.csv_count }}</li>
+    <li>Προσθήκες (υπάρχοντες χρήστες CKAN): {{ plan.creations|length }}</li>
+    <li>Αλλαγές ρόλων: {{ plan.role_updates|length }}</li>
+    <li>Χωρίς αλλαγές: {{ plan.unchanged|length }}</li>
+    <li>Προστατευμένα που παραλείφθηκαν: {{ plan.protected_skips|length }}</li>
+    <li>Αφαιρέσεις: {{ plan.removals|length }}</li>
+    <li>Χρήστες που δεν βρέθηκαν / χρειάζονται invite flow: {{ plan.missing_users|length }}</li>
+  </ul>
+</div>
+
+<h3>Προσθήκες</h3>
+{% if plan.creations|length %}
+<table class="table table-bordered table-striped">
+  <thead><tr><th>Line</th><th>Username</th><th>Email</th><th>Role</th></tr></thead>
+  <tbody>
+    {% for r in plan.creations %}
+      <tr><td>{{ r.line }}</td><td>{{ r.username }}</td><td>{{ r.email }}</td><td>{{ r.role }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Καμία.</p>
+{% endif %}
+
+<h3>Αλλαγές ρόλων</h3>
+{% if plan.role_updates|length %}
+<table class="table table-bordered table-striped">
+  <thead><tr><th>Username</th><th>Email</th><th>Old</th><th>New</th></tr></thead>
+  <tbody>
+    {% for r in plan.role_updates %}
+      <tr>
+        <td>{{ r.member.username }}</td>
+        <td>{{ r.member.email }}</td>
+        <td>{{ r.member.role }}</td>
+        <td>{{ r.new_role }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Καμία.</p>
+{% endif %}
+
+<h3>Χωρίς αλλαγές</h3>
+{% if plan.unchanged and plan.unchanged|length %}
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in plan.unchanged %}
+      <tr>
+        <td>{{ r.username }}</td>
+        <td>{{ r.email }}</td>
+        <td>{{ r.role }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Κανένας.</p>
+{% endif %}
+
+{% set REASON_GR = {
+  'sysadmin': 'Sysadmin (προστατευμένος)',
+  'current_user': 'Συνδεδεμένος χρήστης (προστατευμένος)',
+  'org_admin': 'Διαχειριστής οργανισμού (προστατευμένος)'
+} %}
+
+<h3>Προστατευμένα (δεν πειράχτηκαν)</h3>
+{% if plan.protected_skips and plan.protected_skips|length %}
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in plan.protected_skips %}
+      <tr>
+        <td>{{ r.member.username }}</td>
+        <td>{{ r.member.email }}</td>
+        <td>{{ r.member.role }}</td>
+        <td>{{ REASON_GR.get(r.reason, r.reason) }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Κανένας.</p>
+{% endif %}
+
+<h3>Αφαιρέσεις</h3>
+{% if plan.removals|length %}
+<table class="table table-bordered table-striped">
+  <thead><tr><th>Username</th><th>Email</th><th>Role</th></tr></thead>
+  <tbody>
+    {% for r in plan.removals %}
+      <tr><td>{{ r.username }}</td><td>{{ r.email }}</td><td>{{ r.role }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Καμία.</p>
+{% endif %}
+
+<h3>Missing users (οδήγησε τους στη ροή invite/pending)</h3>
+
+{% if plan.pending_invites and plan.pending_invites|length %}
+  <div class="alert alert-info">
+    <p>
+      Για τους παρακάτω χρήστες δεν βρέθηκε υπάρχων λογαριασμός στο CKAN.
+      Σε αυτή την περίπτωση πρέπει να ακολουθήσετε τη ροή <strong>Invite</strong> από τη διακριτή διεπαφή.
+      Μεταβείτε
+      <a
+        href="{{ h.url_for('csvinvite.import_members_get', org_id=org.id) }}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >εδώ</a>
+      (ανοίγει σε νέο tab) για να προχωρήσετε με invitations/pending memberships.
+    </p>
+  </div>
+{% endif %}
+
+{% if plan.pending_invites|length %}
+<table class="table table-bordered table-striped">
+  <thead><tr><th>Line</th><th>Username</th><th>Email</th><th>Role</th><th>Reason</th></tr></thead>
+  <tbody>
+    {% for r in plan.pending_invites %}
+      <tr>
+        <td>{{ r.line }}</td>
+        <td>{{ r.username }}</td>
+        <td>{{ r.email }}</td>
+        <td>{{ r.role }}</td>
+        <td>{{ r.reason }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Κανένας.</p>
+{% endif %}
+
+<form method="post" action="{{ h.url_for('csvinvite.export_sync_plan_csv', org_id=org.id) }}" style="display:inline;">
+  {{ h.csrf_input() }}
+  <input type="hidden" name="plan_data" value='{{ plan | tojson }}'>
+  <button class="btn btn-default" type="submit">Export plan as CSV</button>
+</form>
+
+<form method="post" action="{{ h.url_for('csvinvite.sync_members_reset', org_id=org.id) }}" style="display:inline;">
+  {{ h.csrf_input() }}
+  <button class="btn btn-warning" type="submit">{{ _('Reset results') }}</button>
+</form>
+<br>
+<br>
+
+<form method="post" action="{{ h.url_for('csvinvite.sync_members_post', org_id=org.name) }}" enctype="multipart/form-data">
+  {{ h.csrf_input() }}
+
+  {# Για apply, ξανα-ανεβάζουμε το αρχείο (απλό και ασφαλές). #}
+  <div class="form-group">
+    <label for="file">CSV αρχείο (ξανά)</label>
+    <input id="file" name="file" type="file" accept=".csv,text/csv" class="form-control"/>
+  </div>
+
+  <input type="hidden" name="remove_missing" value="{{ 'on' if remove_missing else '' }}">
+  <input type="hidden" name="dry_run" value="">
+
+  <button class="btn btn-danger" type="submit">
+    Εφαρμογή αλλαγών
+  </button>
+  <a class="btn btn-default" href="{{ h.url_for('organization.manage_members', id=org.name) }}">Πίσω στα μέλη</a>
+  <a class="btn btn-primary" href="{{ h.url_for('csvinvite.sync_members_get', org_id=org.id) }}">Νέος συγχρονισμός</a>
+</form>
+{% endblock %}
+
+{% block secondary_content %}
+  {{ super() }}
+  {% include "csvinvite/snippets/bulk_sync_sidebar.html" %}
+{% endblock %}

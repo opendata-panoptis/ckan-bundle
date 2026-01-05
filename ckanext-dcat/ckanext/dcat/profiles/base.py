@@ -804,6 +804,7 @@ class RDFProfile(object):
         if isinstance(value, list):
             items = value
         elif value and isinstance(value, str):
+            # και λίστα να μην στείλεις το γυρίζει σαν λίστα
             try:
                 items = json.loads(value)
                 if isinstance(items, ((int, float, complex))):

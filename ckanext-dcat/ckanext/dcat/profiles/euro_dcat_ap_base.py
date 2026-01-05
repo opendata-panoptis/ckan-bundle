@@ -345,7 +345,6 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         items = [
             (title_key, DCT.title, None, Literal),
             (notes_key, DCT.description, None, Literal),
-            ("url", DCAT.landingPage, None, URIRef, FOAF.Document),
             ("identifier", DCT.identifier, ["guid", "id"], URIRefOrLiteral),
             ("version", OWL.versionInfo, ["dcat_version"], Literal),
             ("version_notes", ADMS.versionNotes, None, Literal),
@@ -369,8 +368,17 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         ]
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
+        # Κατασκευή του URL ως εναλλακτική λύση για landing page (fallback)
+        site_url = config.get("ckan.site_url", "").rstrip("/")
+        dataset_name = dataset_dict.get("name")
+        if site_url and dataset_name:
+            # Το βάζουμε στο dataset_dict με ένα προσωρινό κλειδί
+            # και λίστα να μην στείλεις το γυρίζει σαν λίστα εκεί που μετατρέπει τις τιμές για να εμφανιστούν στον γράφο
+            dataset_dict["_generated_url"] = f"{site_url}/dataset/{dataset_name}"
+
         #  Lists
         items = [
+            ("landing_page", DCAT.landingPage, ["_generated_url"], URIRef, FOAF.Document),
             ("dcat_type", DCT.type, None, URIRefOrLiteral),
             ("language", DCT.language, None, URIRefOrLiteral, DCT.LinguisticSystem),
             ("theme", DCAT.theme, None, URIRef),

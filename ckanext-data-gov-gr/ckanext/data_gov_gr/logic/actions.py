@@ -238,6 +238,8 @@ def user_invite_waiting_keycloak_user(context: Context,
     :param role: role of the user in the group. One of ``member``, ``editor``,
         or ``admin``
     :type role: string
+    :param send_email: (optional) αν θα σταλεί email πρόσκλησης (default: False)
+    :type send_email: bool
 
     :returns: the newly created user
     :rtype: dictionary
@@ -249,6 +251,19 @@ def user_invite_waiting_keycloak_user(context: Context,
     data, errors = _validate(data_dict, schema, context)
     if errors:
         raise ValidationError(errors)
+
+    # 1. Ελέγχουμε αν υπάρχει ορισμένη τιμή στο ckan.ini
+    config_send_email = toolkit.config.get('ckanext.data_gov_gr.user_invite.waiting_keycloak.send_email')
+
+    if config_send_email is not None:
+        # Αν υπάρχει στο config, την επιβάλλουμε (υπερτερεί όλων)
+        send_email = toolkit.asbool(config_send_email)
+    else:
+        # 2. Αν δεν υπάρχει στο config, κοιτάμε το data_dict
+        # Αν δεν δοθεί, προεπιλογή False
+        extras = data.get('__extras') or {}
+        send_email_raw = extras.get('send_email', False)
+        send_email = toolkit.asbool(send_email_raw)
 
     model = context['model']
     group = model.Group.get(data['group_id'])
@@ -280,17 +295,18 @@ def user_invite_waiting_keycloak_user(context: Context,
     group_dict = _get_action(f'{org_or_group}_show')(
         context, {'id': data['group_id']})
 
-    try:
-        _send_invite_email_waiting_keycloak_user(user, group_dict, data['role'])
-    except (socket_error, mailer.MailerException) as error:
-        # Email could not be sent, delete the pending user
+    if send_email:
+        try:
+            _send_invite_email_waiting_keycloak_user(user, group_dict, data['role'])
+        except (socket_error, mailer.MailerException) as error:
+            # Email could not be sent, delete the pending user
 
-        _get_action('user_delete')(context, {'id': user.id})
+            _get_action('user_delete')(context, {'id': user.id})
 
-        message = _(
-            'Error sending the invite email, '
-            'the user was not created: {0}').format(error)
-        raise ValidationError(message)
+            message = _(
+                'Error sending the invite email, '
+                'the user was not created: {0}').format(error)
+            raise ValidationError(message)
 
     # Role στα ελληνικά
     role_translations = {
@@ -300,9 +316,12 @@ def user_invite_waiting_keycloak_user(context: Context,
     }
     role_gr = role_translations.get(data['role'], data['role'])
 
-    h.flash_success(_('Το email ένταξης με ρόλο "{0}" στάλθηκε επιτυχώς στο {1}. Μόλις ο χρήστης '
-                      'εγγραφεί/συνδεθεί με το συγκεκριμένο email που προσκλήθηκε '
-                      'θα έχει τα δικαιώματα του ρόλου με τον οποίο προσκλήθηκε.').format(role_gr, data['email']))
+    if send_email:
+        h.flash_success(_('Το email ένταξης με ρόλο "{0}" στάλθηκε επιτυχώς στο {1}. Μόλις ο χρήστης '
+                          'εγγραφεί/συνδεθεί με το συγκεκριμένο email που προσκλήθηκε '
+                          'θα έχει τα δικαιώματα του ρόλου με τον οποίο προσκλήθηκε.').format(role_gr, data['email']))
+    else:
+        h.flash_success(_('Ο χρήστης δημιουργήθηκε με ρόλο "{0}" χωρίς αποστολή email στο {1}.').format(role_gr, data['email']))
 
     return model_dictize.user_dictize(user, context)
 

@@ -450,7 +450,7 @@ def download(context, resource, url_timeout=30,
             raise NotChanged("etag suggests content has not changed")
 
     if not res.ok:  # i.e. 404 or something
-        raise DownloadError('Server reported status error: %s %s' %
+        raise DownloadError(_('Server reported status error: %s %s') %
                             (res.status_code, res.reason),
                             url_redirected_to)
     log.info('GET started successfully. Content headers: %r', res.headers)

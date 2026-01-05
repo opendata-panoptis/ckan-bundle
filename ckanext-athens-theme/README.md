@@ -17,7 +17,7 @@ ckan.plugins = ... athens_theme ...
 
 ```ini
 # Athens Theme Settings
-ckan.site_title = Δήμος Αθηναίων
+ckan.site_title = Opendata.cityofathens
 ckan.site_description = Πύλη Ανοικτών Δεδομένων Δήμου Αθηναίων
 ```
 

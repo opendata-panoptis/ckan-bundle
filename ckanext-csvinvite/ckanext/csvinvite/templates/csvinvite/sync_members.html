@@ -1,0 +1,57 @@
+{% extends "page.html" %}
+
+{% block subtitle %}Συγχρονισμός μελών από CSV - {{ org.title }}{% endblock %}
+
+{% block primary_content %}
+<h1 class="page-heading">Συγχρονισμός μελών από CSV</h1>
+
+<p>Οργάνωση: <strong>{{ org.title }}</strong></p>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<div class="alert alert-info">
+  <p><strong>Μορφή CSV</strong></p>
+  <ul>
+    <li>Header: <code>role</code> (member/editor/admin)</li>
+    <li>Header: <code>username</code> (προαιρετικό)</li>
+    <li>Header: <code>email</code> (προαιρετικό, αλλά απαιτείται αν λείπει το username)</li>
+  </ul>
+  <p>Παράδειγμα:</p>
+  <pre>username,email,role
+jdoe,jdoe@example.gr,editor
+,other@example.gr,member</pre>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+  {{ h.csrf_input() }}
+
+  <div class="form-group">
+    <label for="file">CSV αρχείο</label>
+    <input id="file" name="file" type="file" accept=".csv,text/csv" class="form-control"/>
+  </div>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="dry_run" checked>
+      Dry-run (προεπισκόπηση αλλαγών — δεν εφαρμόζει αλλαγές)
+    </label>
+  </div>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="remove_missing" checked>
+      Αφαίρεση μελών που δεν υπάρχουν στο αρχείο
+    </label>
+  </div>
+
+  <button class="btn btn-primary" type="submit">Συνέχεια</button>
+  <a class="btn btn-default" href="{{ h.url_for('organization.manage_members', id=org.name) }}">Άκυρο</a>
+</form>
+{% endblock %}
+
+{% block secondary_content %}
+  {{ super() }}
+  {% include "csvinvite/snippets/bulk_sync_sidebar.html" %}
+{% endblock %}

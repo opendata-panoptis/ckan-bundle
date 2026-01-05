@@ -4,3 +4,7 @@ syntax: glob
 *.swp
 *~
 build
+
+# IDE
+.idea
+

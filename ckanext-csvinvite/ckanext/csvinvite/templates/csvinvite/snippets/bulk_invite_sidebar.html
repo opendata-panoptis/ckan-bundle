@@ -1,0 +1,44 @@
+<div class="module module-narrow module-shallow">
+  <h2 class="module-heading">
+    <i class="fa fa-users"></i>
+    {{ _('Bulk invite new members') }}
+  </h2>
+  <div class="module-content">
+    <p class="muted">
+      {{ _('Upload a CSV with emails to invite new members to the organization') }}
+      <strong>{{ org.title }}</strong>,
+      {{ _('if they do not already exist as users.') }}
+    </p>
+
+    <p class="muted" style="margin-bottom: 8px;">
+      <strong>{{ _('CSV headers:') }}</strong> <code>email</code>, <code>role</code>
+      <br/>
+      <strong>{{ _('Roles:') }}</strong> <code>member</code>, <code>editor</code>, <code>admin</code>
+    </p>
+
+    <hr style="margin: 10px 0;"/>
+
+    <p class="muted">
+      {{ _('Tip: try first with 2–3 rows before uploading a large file.') }}
+    </p>
+  </div>
+</div>
+
+<div class="module module-narrow module-shallow">
+  <h2 class="module-heading">
+    <i class="fa fa-download"></i>
+    {{ _('CSV template') }}
+  </h2>
+  <div class="module-content">
+    <p class="muted">
+      {{ _('Download a ready-to-use CSV template (headers + one example row).') }}
+    </p>
+
+    <p style="margin: 10px 0 0 0;">
+      <a class="btn btn-default btn-sm"
+         href="{{ h.url_for('csvinvite.import_members_template_csv', org_id=org.id) }}">
+        {{ _('Download CSV template') }}
+      </a>
+    </p>
+  </div>
+</div>

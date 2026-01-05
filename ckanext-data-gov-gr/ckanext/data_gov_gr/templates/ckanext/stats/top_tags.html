@@ -10,7 +10,13 @@
     <section id="stats-top-tags" class="module-content">
       <h2>{{ _('Top Tags') }}</h2>
       {% if top_tags %}
-        <button id="toggleTopTagsView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+        <button id="toggleTopTagsView"
+                class="btn btn-default mb-5"
+                data-toggle-chart="#top-tags-bar-chart"
+                data-toggle-table="#top-tags-table-view"
+                data-chart-icon="fa-chart-bar"
+                data-chart-label="{{ _('Switch to Chart') }}"
+                data-table-label="{{ _('Switch to Table') }}">
           <i class="fa fa-table"></i> {{ _('Switch to Table') }}
         </button>
 
@@ -37,7 +43,18 @@
           </table>
         </div>
 
-        <div id="top-tags-bar-chart" style="width: 100%; height: 500px;"></div>
+        {% set stat_chart = h.get_stat_data('top_tags', top_tags, variant='full') %}
+        {% if stat_chart %}
+          <div id="top-tags-bar-chart"
+               data-module="common-stats-charts"
+               data-module-type="{{ stat_chart.type }}"
+               data-module-data="{{ h.dump_json(stat_chart.data) }}"
+               data-module-title="{{ stat_chart.title }}"
+               data-module-variant="full"
+               data-module-height="500px"
+               style="width: 100%;">
+          </div>
+        {% endif %}
       {% else %}
         <p class="empty">{{ _('No tags found') }}</p>
       {% endif %}
@@ -51,6 +68,5 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-  <script src="{{ url_for('static', filename='javascript/stats/top-tags.js') }}"></script>
+  {% asset 'data_gov_gr/stats_charts' %}
 {% endblock %}

@@ -215,6 +215,10 @@ class OLGeoView(GeoViewMixin, GeoViewBase):
         }
 
     def can_view(self, data_dict):
+        resource = data_dict["resource"]
+        if not resource.get("url"):
+            return False
+
         format_lower = data_dict["resource"].get("format", "").lower()
         same_domain = on_same_domain(data_dict)
 
@@ -595,6 +599,8 @@ class GeoJSONView(GeoViewBase):
 
     def can_view(self, data_dict):
         resource = data_dict["resource"]
+        if not resource.get("url"):
+            return False
 
         format_lower = resource.get("format", "").lower()
         original_format = format_lower
@@ -838,6 +844,9 @@ class WMTSView(GeoViewBase):
 
     def can_view(self, data_dict):
         resource = data_dict["resource"]
+        if not resource.get("url"):
+            return False
+
         format_lower = resource.get("format", "").lower()
         same_domain = on_same_domain(data_dict)
 
@@ -885,6 +894,9 @@ class SHPView(GeoViewBase):
 
     def can_view(self, data_dict):
         resource = data_dict["resource"]
+        if not resource.get("url"):
+            return False
+
         format_lower = resource.get("format", "").lower()
         name_lower = resource.get("name", "").lower()
         same_domain = on_same_domain(data_dict)

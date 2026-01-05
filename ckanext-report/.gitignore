@@ -4,3 +4,6 @@
 *.swo
 
 ckanext/report/i18n/_reused_translations.pot
+
+# IDE
+.idea

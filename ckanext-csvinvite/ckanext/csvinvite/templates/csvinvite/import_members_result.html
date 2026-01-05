@@ -1,0 +1,67 @@
+{% extends "page.html" %}
+
+{% block subtitle %}Αποτελέσματα εισαγωγής - {{ org.title }}{% endblock %}
+
+{% block primary_content %}
+<h1 class="page-heading">Αποτελέσματα εισαγωγής</h1>
+
+<p>
+  Οργάνωση: <strong>{{ org.title }}</strong>
+</p>
+
+<div class="well">
+  <ul>
+    <li>Σύνολο γραμμών: <strong>{{ results.total }}</strong></li>
+    <li>Προσκλήσεις / pending: <strong>{{ results.invited }}</strong></li>
+    <li>Παραλείφθηκαν (invalid): <strong>{{ results.skipped_invalid }}</strong></li>
+    <li>Errors: <strong>{{ results.errors }}</strong></li>
+  </ul>
+</div>
+
+<table class="table table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>Line</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Status</th>
+      <th>Message</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for r in results.rows %}
+    <tr class="{% if r.status=='ok' %}success{% elif r.status=='skip' %}warning{% else %}danger{% endif %}">
+      <td>{{ r.line }}</td>
+      <td>{{ r.email }}</td>
+      <td>{{ r.role }}</td>
+      <td>{{ r.status }}</td>
+      <td style="white-space: pre-wrap;">{{ r.message }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<a class="btn btn-default" href="{{ h.url_for('organization.manage_members', id=org.name) }}">Πίσω στα μέλη</a>
+<a class="btn btn-primary" href="{{ h.url_for('csvinvite.import_members_get', org_id=org.id) }}">Νέα εισαγωγή</a>
+
+<form action="{{ h.url_for('csvinvite.import_members_reset', org_id=org.id) }}" method="POST" style="display:inline;">
+  {{ h.csrf_input() }}
+  <button type="submit" class="btn btn-warning">
+    {{ _('Reset results') }}
+  </button>
+</form>
+
+<form action="{{ h.url_for('csvinvite.export_results_csv', org_id=org.id) }}" method="POST" style="display:inline;">
+  {{ h.csrf_input() }}
+  <input type="hidden" name="results_data" value='{{ results.rows | tojson }}'>
+  <button type="submit" class="btn btn-success">
+    <i class="fa fa-download"></i> Λήψη CSV
+  </button>
+</form>
+
+{% endblock %}
+
+{% block secondary_content %}
+  {{ super() }}
+  {% include "csvinvite/snippets/bulk_invite_sidebar.html" %}
+{% endblock %}

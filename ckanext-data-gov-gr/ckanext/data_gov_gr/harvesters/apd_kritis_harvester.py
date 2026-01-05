@@ -183,6 +183,40 @@ class ApdKritisHarvester(CustomDcatHarvester):
                 exc_info=True,
             )
 
+        # APD Kritis POD descriptions include embedded images with root-relative
+        # URLs, eg: <img src="/sites/default/...">. Make them absolute by
+        # prefixing the APD Kritis domain.
+        try:
+            apd_domain = "https://data.apdkritis.gov.gr"
+
+            def _fix_img_src(value):
+                if not isinstance(value, str):
+                    return value
+                if 'src="/' in value:
+                    value = value.replace('src="/', f'src="{apd_domain}/')
+                if "src='/" in value:
+                    value = value.replace("src='/", f"src='{apd_domain}/")
+                return value
+
+            if "notes" in package_dict:
+                package_dict["notes"] = _fix_img_src(package_dict.get("notes"))
+
+            notes_translated = package_dict.get("notes_translated")
+            if isinstance(notes_translated, dict):
+                for lang, val in list(notes_translated.items()):
+                    notes_translated[lang] = _fix_img_src(val)
+
+            # If the base harvester already produced flattened fields, update them too.
+            for key in ("notes_translated-el", "notes_translated-en"):
+                if key in package_dict:
+                    package_dict[key] = _fix_img_src(package_dict.get(key))
+        except Exception as e:
+            log.error(
+                "[APD KRITIS HARVESTER] Error fixing embedded image URLs in description: %s",
+                e,
+                exc_info=True,
+            )
+
         return package_dict
 
     # ------------------------------------------------------------------

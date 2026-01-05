@@ -1,0 +1,176 @@
+{% extends "admin/base.html" %}
+
+{% block primary_content_inner %}
+  <h1 class="page-heading">{{ _('Bulk invite to organizations') }}</h1>
+
+  <p class="muted">
+    CSV headers: <code>org,email,role</code> (role optional, defaults to <code>member</code>).
+  </p>
+
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {{ h.csrf_input() }}
+    <div class="form-group">
+      <label for="file">{{ _('CSV file') }}</label>
+      <input id="file" class="form-control" type="file" name="file" accept=".csv,text/csv" required>
+    </div>
+
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" name="dry_run" value="on" checked>
+        {{ _('Dry run (preview only)') }}
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-default" href="{% url_for 'csvinvite.admin_user_management_get' %}">{{ _('Back') }}</a>
+      <button class="btn btn-primary" type="submit">{{ _('Run') }}</button>
+    </div>
+  </form>
+
+  <form method="post" action="{% url_for 'csvinvite.admin_bulk_org_invite_reset' %}" style="display:inline;">
+    {{ h.csrf_input() }}
+    <button class="btn btn-warning" type="submit">{{ _('Reset results') }}</button>
+  </form>
+
+  {% if results %}
+    <hr />
+
+    <h2>{{ _('Results') }}</h2>
+    <ul>
+      <li>{{ _('Total') }}: <strong>{{ results.total }}</strong></li>
+      {% if results.dry_run %}
+        <li>{{ _('Would be invited') }}: <strong>{{ results.would_invite }}</strong></li>
+      {% else %}
+        <li>{{ _('Invited') }}: <strong>{{ results.invited }}</strong></li>
+      {% endif %}
+      <li>{{ _('Errors') }}: <strong>{{ results.errors }}</strong></li>
+    </ul>
+
+    <a class="btn btn-default" href="{% url_for 'csvinvite.admin_bulk_org_invite_export' %}">
+      {{ _('Export results (CSV)') }}
+    </a>
+
+    <div class="table-responsive" style="margin-top: 12px;">
+      <table class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>{{ _('Line') }}</th>
+            <th>{{ _('Org') }}</th>
+            <th>{{ _('Email') }}</th>
+            <th>{{ _('Role') }}</th>
+            <th>{{ _('Status') }}</th>
+            <th>{{ _('Message') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in results.rows %}
+            <tr>
+              <td>{{ r.line }}</td>
+              <td>{{ r.org }}</td>
+              <td>{{ r.email }}</td>
+              <td>{{ r.role }}</td>
+              <td>{{ r.status }}</td>
+              <td style="white-space: pre-wrap;">{{ r.message }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block secondary_content %}
+  {{ super() }}
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-download"></i>
+      {{ _('CSV template') }}
+    </h2>
+    <div class="module-content">
+      <p class="muted">
+        {{ _('Download a ready-to-use CSV template (headers + one example row).') }}
+      </p>
+
+      <p style="margin: 10px 0 0 0;">
+        <a class="btn btn-default btn-sm"
+           href="{{ h.url_for('csvinvite.admin_bulk_org_invite_template_csv') }}">
+          {{ _('Download CSV template') }}
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-info-circle"></i>
+      {{ _('Quick guide') }}
+    </h2>
+    <div class="module-content">
+      <ol style="margin-bottom: 0;">
+        <li>{{ _('Prepare your CSV with the required headers.') }}</li>
+        <li>{{ _('Start with Dry run to preview results.') }}</li>
+        <li>{{ _('When everything looks good, uncheck Dry run and Run.') }}</li>
+      </ol>
+      <p class="muted" style="margin-top: 10px; margin-bottom: 0;">
+        {{ _('Tip: test first with 2–3 rows before inviting hundreds of users.') }}
+      </p>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-table"></i>
+      {{ _('CSV format') }}
+    </h2>
+    <div class="module-content">
+      <p class="muted" style="margin-bottom: 6px;">
+        {{ _('Headers:') }} <code>org,email,role</code>
+      </p>
+
+      <p class="muted" style="margin-bottom: 6px;">
+        {{ _('Example:') }}
+      </p>
+
+      <pre style="white-space: pre; overflow: auto; margin-bottom: 0;">org,email,role
+  ministry-of-data,user1@example.gr,member
+  ministry-of-data,user2@example.gr,editor
+  open-team,user3@example.gr,admin</pre>
+
+      <p class="muted" style="margin-top: 10px; margin-bottom: 0;">
+        {{ _('Role is optional; if omitted it defaults to') }} <code>member</code>.
+      </p>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-shield"></i>
+      {{ _('Roles & permissions') }}
+    </h2>
+    <div class="module-content">
+      <ul style="margin-bottom: 0;">
+        <li><strong>member</strong>: {{ _('basic access') }}</li>
+        <li><strong>editor</strong>: {{ _('can create/edit datasets') }}</li>
+        <li><strong>admin</strong>: {{ _('full organization management') }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-exclamation-triangle"></i>
+      {{ _('Common issues') }}
+    </h2>
+    <div class="module-content">
+      <ul style="margin-bottom: 0;">
+        <li>{{ _('Org not found: ensure the org value matches the organization id/slug.') }}</li>
+        <li>{{ _('Invalid email: check for spaces or missing domain.') }}</li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}

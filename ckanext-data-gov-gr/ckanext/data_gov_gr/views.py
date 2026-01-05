@@ -257,18 +257,20 @@ blueprint.add_url_rule(
 @blueprint.route('/stats/total-datasets')
 def stats_total_datasets():
     stats = DataGovStats()
+    weekly_numbers = stats.get_num_packages_by_week()
     raw_packages_by_week = [
         {
             'date': toolkit.h.date_str_to_datetime(week_date),
             'total_packages': cumulative_num_packages
         }
-        for week_date, _num_packages, cumulative_num_packages in stats.get_num_packages_by_week()
+        for week_date, _num_packages, cumulative_num_packages in weekly_numbers
     ]
 
     return render(
         'ckanext/stats/total_datasets.html',
         {
-            'raw_packages_by_week': raw_packages_by_week
+            'raw_packages_by_week': raw_packages_by_week,
+            'weekly_numbers': weekly_numbers,
         }
     )
 
@@ -277,12 +279,15 @@ def stats_total_datasets():
 def stats_dataset_revisions():
     stats = DataGovStats()
 
+    all_revisions_by_week = stats.get_by_week('package_revisions')
+    new_packages_by_week = stats.get_by_week('new_packages')
+
     raw_all_package_revisions = [
         {
             'date': toolkit.h.date_str_to_datetime(week_date),
             'total_revisions': num_revisions
         }
-        for week_date, _pkgs, num_revisions, _cumulative in stats.get_by_week('package_revisions')
+        for week_date, _pkgs, num_revisions, _cumulative in all_revisions_by_week
     ]
 
     raw_new_datasets = [
@@ -290,14 +295,16 @@ def stats_dataset_revisions():
             'date': toolkit.h.date_str_to_datetime(week_date),
             'new_packages': num_packages
         }
-        for week_date, _pkgs, num_packages, _cumulative in stats.get_by_week('new_packages')
+        for week_date, _pkgs, num_packages, _cumulative in new_packages_by_week
     ]
 
     return render(
         'ckanext/stats/dataset_revisions.html',
         {
             'raw_all_package_revisions': raw_all_package_revisions,
-            'raw_new_datasets': raw_new_datasets
+            'raw_new_datasets': raw_new_datasets,
+            'all_revisions_by_week': all_revisions_by_week,
+            'new_packages_by_week': new_packages_by_week,
         }
     )
 

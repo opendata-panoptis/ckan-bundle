@@ -1,0 +1,214 @@
+{% extends "admin/base.html" %}
+
+{% block primary_content_inner %}
+  <h1 class="page-heading">{{ _('Bulk delete users') }}</h1>
+
+  <form method="post" enctype="multipart/form-data">
+    {{ h.csrf_input() }}
+    <div class="form-group">
+      <label>{{ _('CSV file') }}</label>
+      <input type="file" name="file" class="form-control" accept=".csv" required>
+      <p class="help-block">{{ _('Columns:') }} <code>username</code> {{ _('and/or') }} <code>email</code></p>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-default" href="{% url_for 'csvinvite.admin_user_management_get' %}">{{ _('Back') }}</a>
+      <button class="btn btn-primary" type="submit">{{ _('Preview') }}</button>
+
+      {% if plan and plan.to_delete and plan.to_delete|length %}
+        <button class="btn btn-danger" name="apply" value="1"
+                onclick="return confirm('{{ _('Are you sure you want to delete these users?') }}');">
+          {{ _('Apply deletion') }}
+        </button>
+      {% endif %}
+    </div>
+  </form>
+
+  <form method="post" action="{% url_for 'csvinvite.admin_bulk_user_delete_reset' %}" style="display:inline;">
+    {{ h.csrf_input() }}
+    <button class="btn btn-warning" type="submit">{{ _('Reset results') }}</button>
+  </form>
+
+  {% if plan %}
+    <hr>
+
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <strong>{{ _('Summary') }}</strong>
+      </div>
+      <div class="panel-body">
+        <ul class="list-unstyled">
+          <li><strong>{{ _('Total CSV rows:') }}</strong> {{ plan.csv_count }}</li>
+          <li><strong>{{ _('Would delete:') }}</strong> {{ plan.to_delete | length }}</li>
+          <li><strong>{{ _('Protected (skipped):') }}</strong> {{ plan.protected_skips | length }}</li>
+          <li><strong>{{ _('Already deleted:') }}</strong> {{ plan.already_deleted | length }}</li>
+          <li><strong>{{ _('Not found:') }}</strong> {{ plan.not_found | length }}</li>
+          {% if plan.errors %}
+            <li><strong>{{ _('Errors:') }}</strong> {{ plan.errors | length }}</li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <hr>
+
+    {% if plan.applied %}
+      <div class="alert alert-info">
+        {{ _('Applied:') }} deleted={{ plan.applied.deleted }}, {{ _('errors') }}={{ plan.applied.errors }}
+      </div>
+    {% endif %}
+
+    {% if plan.errors and plan.errors|length %}
+      <div class="alert alert-danger">
+        <ul>
+          {% for e in plan.errors %}
+            <li>{{ e.error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <h3>{{ _('Would be deleted') }}</h3>
+    {% if plan.to_delete and plan.to_delete|length %}
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>{{ _('Username') }}</th><th>{{ _('Email') }}</th><th>{{ _('Line') }}</th></tr></thead>
+        <tbody>
+          {% for u in plan.to_delete %}
+            <tr><td>{{ u.username }}</td><td>{{ u.email }}</td><td>{{ u.line }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>{{ _('None.') }}</p>
+    {% endif %}
+
+    <h3>{{ _('Protected (skipped)') }}</h3>
+    {% if plan.protected_skips and plan.protected_skips|length %}
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>{{ _('Username') }}</th><th>{{ _('Email') }}</th><th>{{ _('Reason') }}</th><th>{{ _('Line') }}</th></tr></thead>
+        <tbody>
+          {% for x in plan.protected_skips %}
+            <tr><td>{{ x.username }}</td><td>{{ x.email }}</td><td>{{ x.reason }}</td><td>{{ x.line }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}<p>{{ _('None.') }}</p>{% endif %}
+
+    <h3>{{ _('Not found') }}</h3>
+    {% if plan.not_found and plan.not_found|length %}
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>{{ _('Username') }}</th><th>{{ _('Email') }}</th><th>{{ _('Line') }}</th></tr></thead>
+        <tbody>
+          {% for x in plan.not_found %}
+            <tr><td>{{ x.username }}</td><td>{{ x.email }}</td><td>{{ x.line }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}<p>{{ _('None.') }}</p>{% endif %}
+
+    <h3>{{ _('Already deleted') }}</h3>
+    {% if plan.already_deleted and plan.already_deleted|length %}
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>{{ _('Username') }}</th><th>{{ _('Email') }}</th><th>{{ _('Line') }}</th></tr></thead>
+        <tbody>
+          {% for x in plan.already_deleted %}
+            <tr><td>{{ x.username }}</td><td>{{ x.email }}</td><td>{{ x.line }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}<p>{{ _('None.') }}</p>{% endif %}
+
+    <p>
+      <a class="btn btn-default" href="{{ h.url_for('csvinvite.admin_bulk_user_delete_export') }}">
+        {{ _('Download results CSV') }}
+      </a>
+    </p>
+  {% endif %}
+{% endblock %}
+
+{% block secondary_content %}
+  {{ super() }}
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-download"></i>
+      {{ _('CSV template') }}
+    </h2>
+    <div class="module-content">
+      <p class="muted">
+        {{ _('Download a ready-to-use CSV template (headers + one example row).') }}
+      </p>
+
+      <p style="margin: 10px 0 0 0;">
+        <a class="btn btn-default btn-sm"
+           href="{{ h.url_for('csvinvite.admin_bulk_user_delete_template_csv') }}">
+          {{ _('Download CSV template') }}
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-info-circle"></i>
+      {{ _('Quick guide') }}
+    </h2>
+    <div class="module-content">
+      <ol class="list-unstyled" style="margin-bottom: 0;">
+        <li><strong>1.</strong> {{ _('Delete/disable the user in Keycloak first.') }}</li>
+        <li><strong>2.</strong> {{ _('Upload your CSV and click “Preview”.') }}</li>
+        <li><strong>3.</strong> {{ _('Review the preview table carefully.') }}</li>
+        <li><strong>4.</strong> {{ _('Only then click “Apply deletion”.') }}</li>
+      </ol>
+      <p class="muted" style="margin-top: 10px;">
+        {{ _('Tip: start with 1–2 rows to confirm the matching logic.') }}
+      </p>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-table"></i>
+      {{ _('CSV format') }}
+    </h2>
+    <div class="module-content">
+      <p class="muted">
+        {{ _('Accepted columns:') }} <code>username</code> {{ _('and/or') }} <code>email</code>.
+        {{ _('You may provide either one per row.') }}
+      </p>
+
+      <p><strong>{{ _('Example') }}</strong></p>
+      <pre style="white-space: pre; overflow: auto;"><code>username,email
+user_a,person@example.org
+user_b,user_b@example.org</code></pre>
+
+      <ul class="muted" style="margin-bottom: 0;">
+        <li>{{ _('Leave empty values blank (do not write "null").') }}</li>
+        <li>{{ _('Avoid duplicate rows; keep one user per line.') }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-exclamation-triangle"></i>
+      {{ _('Important notes') }}
+    </h2>
+    <div class="module-content">
+      <ul style="margin-bottom: 0;">
+        <li>
+          <strong>{{ _('Irreversible:') }}</strong>
+          {{ _('User deletion cannot be undone. Always use Preview first.') }}
+        </li>
+        <li>
+          <strong>{{ _('Protected accounts:') }}</strong>
+          {{ _('Some users may be blocked from deletion by safety rules (e.g. sysadmins).') }}
+        </li>
+        <li>
+          <strong>{{ _('Matching:') }}</strong>
+          {{ _('Provide a correct username or email to avoid “Not found” rows.') }}
+        </li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}

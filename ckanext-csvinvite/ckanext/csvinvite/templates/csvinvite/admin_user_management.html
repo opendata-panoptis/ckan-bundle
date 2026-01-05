@@ -1,0 +1,208 @@
+{% extends "admin/base.html" %}
+
+{% block primary_content_inner %}
+  <h1 class="page-heading">{{ page_title or _('User management') }}</h1>
+
+  {% set has_any_card = h.csvinvite_enable_bulk_user_delete()
+                        or h.csvinvite_enable_bulk_org_invite()
+                        or h.csvinvite_enable_bulk_org_sync()
+                        or True %}
+
+  {% if not has_any_card %}
+    <div class="alert alert-info">
+      {{ _('No user-management tools are enabled.') }}
+    </div>
+  {% endif %}
+
+  <div class="row">
+    {% if h.csvinvite_enable_bulk_org_invite() %}
+      <div class="col-md-4 col-sm-6">
+        <div class="module module-narrow module-shallow"
+             style="background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.10); margin-bottom: 16px;">
+          <h2 class="module-heading">
+            <i class="fa fa-envelope"></i>
+            {{ _('Bulk invite to organizations') }}
+          </h2>
+          <div class="module-content">
+            <p class="muted">
+              {{ _('Invite users to multiple organizations using a CSV (org,email,role).') }}
+            </p>
+            <a class="btn btn-primary" href="{% url_for 'csvinvite.admin_bulk_org_invite_get' %}">
+              {{ _('Open') }}
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if h.csvinvite_enable_bulk_org_sync() %}
+      <div class="col-md-4 col-sm-6">
+        <div class="module module-narrow module-shallow"
+             style="background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.10); margin-bottom: 16px;">
+          <h2 class="module-heading">
+            <i class="fa fa-refresh"></i>
+            {{ _('Bulk org member sync') }}
+          </h2>
+          <div class="module-content">
+            <p class="muted">
+              {{ _('Sync members for multiple organizations using a CSV (org,username/email,role). org can be id or slug.') }}
+            </p>
+            <a class="btn btn-primary" href="{% url_for 'csvinvite.admin_bulk_org_sync_get' %}">
+              {{ _('Open') }}
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if h.csvinvite_enable_bulk_user_delete() %}
+      <div class="col-md-4 col-sm-6">
+        <div class="module module-narrow module-shallow"
+             style="background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.10); margin-bottom: 16px;">
+          <h2 class="module-heading">
+            <i class="fa fa-users"></i>
+            {{ _('Bulk user deletion') }}
+          </h2>
+          <div class="module-content">
+            <p class="muted">
+              {{ _('Delete multiple users using a CSV file.') }}
+              <small class="text-muted">
+                {{ _('Note: First delete the user from Keycloak.') }}
+              </small>
+            </p>
+            <a class="btn btn-primary" href="{% url_for 'csvinvite.admin_bulk_user_delete_get' %}">
+              {{ _('Open') }}
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="col-md-4 col-sm-6">
+      <div class="module module-narrow module-shallow"
+           style="background: #fff; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.10); margin-bottom: 16px;">
+        <h2 class="module-heading">
+          <i class="fa fa-user"></i>
+          {{ _('Members') }}
+        </h2>
+        <div class="module-content">
+          <p class="muted">
+            Ως κεντρικοί διαχειριστές μπορείτε να εντοπίσετε χρήστη αναζητώντας με email ή ονοματεπώνυμο.
+          </p>
+          <a class="btn btn-primary" href="/user">
+            {{ _('Open') }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block secondary_content %}
+  {{ super() }}
+
+  {% set show_bulk_org_invite = h.csvinvite_enable_bulk_org_invite() %}
+  {% set show_bulk_org_sync = h.csvinvite_enable_bulk_org_sync() %}
+  {% set show_bulk_user_delete = h.csvinvite_enable_bulk_user_delete() %}
+  {% set show_any_csv_tool = show_bulk_org_invite or show_bulk_org_sync or show_bulk_user_delete %}
+
+  {% if show_any_csv_tool %}
+    <div class="module module-narrow module-shallow">
+      <h2 class="module-heading">
+        <i class="fa fa-info-circle"></i>
+        {{ _('Quick guide') }}
+      </h2>
+      <div class="module-content">
+        <p>
+          {{ _('These tools are for sysadmins and help you perform bulk actions (invites, member sync, deletions) via CSV files.') }}
+        </p>
+        <p class="muted">
+          {{ _('Tip: start with a small sample (e.g. 2–3 rows) before running a full bulk action.') }}
+        </p>
+      </div>
+    </div>
+
+    <div class="module module-narrow module-shallow">
+      <h2 class="module-heading">
+        <i class="fa fa-table"></i>
+        {{ _('CSV format') }}
+      </h2>
+      <div class="module-content">
+        {% if show_bulk_org_invite %}
+          <p><strong>{{ _('Bulk invite to organizations') }}</strong></p>
+          <p class="muted">
+            {{ _('Columns:') }} <code>org,email,role</code>
+          </p>
+        {% endif %}
+
+        {% if show_bulk_org_sync %}
+          <p><strong>{{ _('Bulk org member sync') }}</strong></p>
+          <p class="muted">
+            {{ _('Columns:') }} <code>org,username/email,role</code>
+            {{ _('(org can be an id or slug)') }}
+          </p>
+        {% endif %}
+
+        {% if show_bulk_user_delete %}
+          <p><strong>{{ _('Bulk user deletion') }}</strong></p>
+          <p class="muted">
+            {{ _('Columns:') }} <code>email</code> {{ _('and/or') }} <code>username</code>
+            {{ _('(you may provide either one).') }}
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if show_bulk_org_invite or show_bulk_org_sync %}
+    <div class="module module-narrow module-shallow">
+      <h2 class="module-heading">
+        <i class="fa fa-shield"></i>
+        {{ _('Roles & permissions') }}
+      </h2>
+      <div class="module-content">
+        <p>
+          {{ _('Roles define what a user can do within an organization. Make sure the role value in the CSV is valid.') }}
+        </p>
+        <ul>
+          <li><strong>Member</strong>: {{ _('basic access') }}</li>
+          <li><strong>Editor</strong>: {{ _('edit content') }}</li>
+          <li><strong>Admin</strong>: {{ _('full organization management') }}</li>
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if show_bulk_org_invite or show_bulk_org_sync or show_bulk_user_delete %}
+    <div class="module module-narrow module-shallow">
+      <h2 class="module-heading">
+        <i class="fa fa-exclamation-triangle"></i>
+        {{ _('Important notes') }}
+      </h2>
+      <div class="module-content">
+        <ul>
+          {% if show_bulk_user_delete %}
+            <li>
+              <strong>{{ _('Deletions:') }}</strong>
+              {{ _('Delete the user in Keycloak first, then proceed here.') }}
+            </li>
+          {% endif %}
+
+          {% if show_bulk_org_sync %}
+            <li>
+              <strong>{{ _('Sync:') }}</strong>
+              {{ _('May add/update members depending on the CSV rows.') }}
+            </li>
+          {% endif %}
+
+          {% if show_bulk_org_invite or show_bulk_org_sync %}
+            <li>
+              <strong>{{ _('Check:') }}</strong>
+              {{ _('Ensure org points to the correct organization (especially when using slugs).') }}
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

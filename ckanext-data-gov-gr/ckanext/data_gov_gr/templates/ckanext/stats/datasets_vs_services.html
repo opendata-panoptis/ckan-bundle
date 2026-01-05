@@ -11,7 +11,13 @@
       <h2>{{ _('Datasets vs Data Services') }}</h2>
 
       {% if datasets_vs_services %}
-        <button id="toggleDatasetsServicesView" class="btn btn-default mb-5" data-chart-label="{{ _('Switch to Chart') }}" data-table-label="{{ _('Switch to Table') }}">
+        <button id="toggleDatasetsServicesView"
+                class="btn btn-default mb-5"
+                data-toggle-chart="#datasets-vs-services-pie-chart"
+                data-toggle-table="#datasets-services-table-view"
+                data-chart-icon="fa-chart-pie"
+                data-chart-label="{{ _('Switch to Chart') }}"
+                data-table-label="{{ _('Switch to Table') }}">
           <i class="fa fa-table"></i> {{ _('Switch to Table') }}
         </button>
 
@@ -41,7 +47,18 @@
     </section>
 
     {% if datasets_vs_services %}
-      <div id="datasets-vs-services-pie-chart" style="width: 100%; height: 400px;"></div>
+      {% set stat_chart = h.get_stat_data('datasets_vs_services', datasets_vs_services, variant='full') %}
+      {% if stat_chart %}
+        <div id="datasets-vs-services-pie-chart"
+             data-module="common-stats-charts"
+             data-module-type="{{ stat_chart.type }}"
+             data-module-data="{{ h.dump_json(stat_chart.data) }}"
+             data-module-title="{{ stat_chart.title }}"
+             data-module-variant="full"
+             data-module-height="400px"
+             style="width: 100%;">
+        </div>
+      {% endif %}
     {% endif %}
   </article>
 {% endblock %}
@@ -52,6 +69,5 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-  <script src="{{ url_for('static', filename='javascript/stats/datasets-vs-services.js') }}"></script>
+  {% asset 'data_gov_gr/stats_charts' %}
 {% endblock %}
