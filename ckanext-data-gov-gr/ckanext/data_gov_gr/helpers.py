@@ -538,6 +538,19 @@ def get_config_value(key, default=""):
     value = toolkit.config.get(key)
     return value if value is not None else default
 
+def should_include_relationships_in_show():
+    """
+    Feature flag: whether to enrich package_show output with relationships
+    when they are missing/empty due to Solr cached dict.
+
+    Default: True (enabled).
+    Config key:
+      - ckanext.data_gov_gr.include_relationships_in_show
+    """
+    return get_config_as_bool(
+        'ckanext.data_gov_gr.include_relationships_in_show',
+        default=True,
+    )
 
 def get_powerbi_embed_url():
     """
@@ -1583,10 +1596,21 @@ def should_show_update_button_in_user_profile(data_dict):
     # Hide buttons if email changed
     return False
 
+def is_url_field(field_name, value):
+    """
+    Ελέγχει αν ένα πεδίο πρέπει να εμφανίζεται ως URL.
+    """
+    url_fields = ['applicable_legislation', 'endpoint_description', 'endpoint_url', 'documentation']
+
+    if field_name in url_fields and isinstance(value, str) and value.startswith('http'):
+        return True
+    return False
+
 # ---------------------------------------------------------------------------------------
 
 def get_helpers():
     return {
+        "is_url_field": is_url_field,
         "vocabulary_facet_item_label": vocabulary_facet_item_label,
         "vocabulary_facet_title": vocabulary_facet_title,
         "get_vocabulary_id_for_field": get_vocabulary_id_for_field,
@@ -1600,6 +1624,7 @@ def get_helpers():
         'get_data_service_guides_url': get_data_service_guides_url,
         'get_config_as_bool': get_config_as_bool,
         'get_config_value': get_config_value,
+        'should_include_relationships_in_show': should_include_relationships_in_show,
         'get_powerbi_embed_url': get_powerbi_embed_url,
         'get_home_stats_tiles': get_home_stats_tiles,
         'get_home_datasets_vs_services': get_home_datasets_vs_services,

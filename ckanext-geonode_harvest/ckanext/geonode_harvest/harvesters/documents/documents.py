@@ -1,0 +1,628 @@
+import json
+import logging
+import re
+from html import unescape
+import ckan.logic as logic
+
+import requests
+from ckan.plugins import toolkit
+from ckanext.harvest.harvesters.base import HarvesterBase
+from ckanext.harvest.model import HarvestObject
+from ckanext.data_gov_gr import helpers as data_gov_helpers
+
+log = logging.getLogger(__name__)
+
+# =============================================================================
+# Constants / Vocab mappings
+# =============================================================================
+
+IANA_MEDIA_TYPES_BASE = "https://www.iana.org/assignments/media-types/"
+
+EU_THEME_URI = {
+    "AGRI": "http://publications.europa.eu/resource/authority/data-theme/AGRI",
+    "EDUC": "http://publications.europa.eu/resource/authority/data-theme/EDUC",
+    "ENER": "http://publications.europa.eu/resource/authority/data-theme/ENER",
+    "ENVI": "http://publications.europa.eu/resource/authority/data-theme/ENVI",
+    "GOVE": "http://publications.europa.eu/resource/authority/data-theme/GOVE",
+    "HEAL": "http://publications.europa.eu/resource/authority/data-theme/HEAL",
+    "INTR": "http://publications.europa.eu/resource/authority/data-theme/INTR",
+    "JUST": "http://publications.europa.eu/resource/authority/data-theme/JUST",
+    "REGI": "http://publications.europa.eu/resource/authority/data-theme/REGI",
+    "SOCI": "http://publications.europa.eu/resource/authority/data-theme/SOCI",
+    "TECH": "http://publications.europa.eu/resource/authority/data-theme/TECH",
+    "TRAN": "http://publications.europa.eu/resource/authority/data-theme/TRAN",
+    "ECON": "http://publications.europa.eu/resource/authority/data-theme/ECON",
+}
+
+# ISO 19115 / INSPIRE TopicCategory -> EU Publications Office data-theme (codes)
+TOPICCATEGORY_TO_EU_THEME = {
+    "biota": ["ENVI"],
+    "climatologyMeteorologyAtmosphere": ["ENVI"],
+    "environment": ["ENVI"],
+    "geoscientificInformation": ["ENVI"],
+    "elevation": ["ENVI"],
+    "inlandWaters": ["ENVI"],
+    "oceans": ["ENVI"],
+    "imageryBaseMapsEarthCover": ["REGI"],
+    "farming": ["AGRI"],
+    "society": ["SOCI"],
+    "health": ["HEAL"],
+    "economy": ["ECON"],
+    "transportation": ["TRAN"],
+    "planningCadastre": ["REGI"],
+    "boundaries": ["REGI"],
+    "location": ["REGI"],
+    "structure": ["REGI"],
+    "intelligenceMilitary": ["GOVE"],
+    "utilitiesCommunication": ["ENER", "TECH"],
+}
+
+# ISO 19115-1 MD_MaintenanceFrequencyCode -> EU frequency URI
+ISO_MAINTFREQ_TO_EU_FREQ_URI = {
+    "annually":     "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+    "biannually":   "http://publications.europa.eu/resource/authority/frequency/ANNUAL_2",
+    "biennially":   "http://publications.europa.eu/resource/authority/frequency/BIENNIAL",
+    "continual":    "http://publications.europa.eu/resource/authority/frequency/CONT",
+    "daily":        "http://publications.europa.eu/resource/authority/frequency/DAILY",
+    "fortnightly":  "http://publications.europa.eu/resource/authority/frequency/BIWEEKLY",
+    "irregular":    "http://publications.europa.eu/resource/authority/frequency/IRREG",
+    "monthly":      "http://publications.europa.eu/resource/authority/frequency/MONTHLY",
+    "notPlanned":   "http://publications.europa.eu/resource/authority/frequency/NOT_PLANNED",
+    "periodic":     "http://publications.europa.eu/resource/authority/frequency/OTHER",
+    "quarterly":    "http://publications.europa.eu/resource/authority/frequency/QUARTERLY",
+    "semimonthly":  "http://publications.europa.eu/resource/authority/frequency/MONTHLY_2",
+    "unknown":      "http://publications.europa.eu/resource/authority/frequency/UNKNOWN",
+    "weekly":       "http://publications.europa.eu/resource/authority/frequency/WEEKLY",
+    "asNeeded":     "http://publications.europa.eu/resource/authority/frequency/AS_NEEDED",
+}
+
+GEONODE_LICENCE_TO_EU_URI = {
+    "odbl": "http://publications.europa.eu/resource/authority/licence/ODC_BL",
+}
+
+# =============================================================================
+# Pure helpers (string/html/tags/ids)
+# =============================================================================
+
+def _clean_tag_string_value(s):
+    if not s:
+        return ""
+    s = s.strip()
+    s = re.sub(r"[^0-9A-Za-zΑ-Ωα-ωΆΈΉΊΌΎΏάέήίόύώϊϋΐΰ ._-]+", " ", s)
+    s = re.sub(r"\s{2,}", " ", s).strip()
+    return s
+
+
+def _strip_html(html):
+    if not html:
+        return ""
+    txt = re.sub(r"<[^>]+>", "", html)
+    return unescape(txt).strip()
+
+
+def _safe_notes_el(doc):
+    raw = (doc.get("raw_abstract") or "").strip()
+    if not raw or raw.lower() == "no abstract provided":
+        sup = (doc.get("raw_supplemental_information") or "").strip()
+        if sup and sup != "Δεν παρέχεται καμία πληροφορία":
+            return sup
+        return "Δεν παρέχεται περιγραφή"
+    if "<" in raw and ">" in raw:
+        return _strip_html(raw)
+    return raw
+
+
+def _person_label(u: dict) -> str:
+    if not u:
+        return ""
+    fn = (u.get("first_name") or "").strip()
+    ln = (u.get("last_name") or "").strip()
+    if (fn or ln):
+        return (fn + " " + ln).strip()
+    return (u.get("username") or "").strip()
+
+
+def _map_topiccategory_to_theme_values(topiccategory: str, use_uri: bool = False) -> list[str]:
+    tc = (topiccategory or "").strip()
+    codes = TOPICCATEGORY_TO_EU_THEME.get(tc, [])
+    if not use_uri:
+        return codes
+    return [EU_THEME_URI[c] for c in codes if c in EU_THEME_URI]
+
+
+def _map_maintenance_frequency_to_eu_uri(value: str) -> str:
+    v = (value or "").strip()
+    if not v:
+        return ""
+    return ISO_MAINTFREQ_TO_EU_FREQ_URI.get(v, "")
+
+
+def map_geonode_licence_to_eu_uri(value: str | None) -> str | None:
+    if not value:
+        return None
+
+    v = value.strip().lower()
+
+    if v == "not_specified":
+        return None
+
+    return GEONODE_LICENCE_TO_EU_URI.get(v)
+
+
+def to_iana_mimetype(value: str | None) -> str | None:
+    """
+    Input:  'image/jpeg' OR already-iana 'https://www.iana.org/assignments/media-types/image/jpeg'
+    Output: always IANA URI, or None
+    """
+    if not value:
+        return None
+    v = value.strip()
+
+    if v.startswith(IANA_MEDIA_TYPES_BASE):
+        return v
+
+    v = v.split(";", 1)[0].strip()
+    v = v.lower()
+
+    if "/" not in v or v.startswith("/") or v.endswith("/"):
+        return None
+
+    return f"{IANA_MEDIA_TYPES_BASE}{v}"
+
+
+def _extras_put(extras, key, value):
+    """Store extras only if value is meaningful. Always stringifies non-str."""
+    if value is None:
+        return
+    if isinstance(value, str):
+        v = value.strip()
+        if not v or v.lower() in ("not_specified", "none", "null"):
+            return
+        extras.append({"key": key, "value": v})
+        return
+
+    try:
+        extras.append({"key": key, "value": json.dumps(value, ensure_ascii=False)})
+    except Exception:
+        extras.append({"key": key, "value": str(value)})
+
+
+# =============================================================================
+# Harvester
+# =============================================================================
+
+class GeonodeDocumentsHarvester(HarvesterBase):
+
+    # -------------------------------------------------------------------------
+    # CKAN context / upsert
+    # -------------------------------------------------------------------------
+
+    def _site_user_context(self):
+        site_user = toolkit.get_action("get_site_user")({"ignore_auth": True}, {})
+        return {"user": site_user["name"]}
+
+    def _upsert_package(self, package_dict):
+        """
+        Create or update dataset by name, running as site user (avoids auth-wrapper errors).
+        """
+        context = self._site_user_context()
+        name = package_dict["name"]
+
+        try:
+            existing = toolkit.get_action("package_show")(context.copy(), {"id": name})
+            package_dict["id"] = existing["id"]
+
+            existing_by_url = {r.get("url"): r.get("id") for r in existing.get("resources", [])}
+            for r in package_dict.get("resources", []) or []:
+                rid = existing_by_url.get(r.get("url"))
+                if rid:
+                    r["id"] = rid
+
+            return toolkit.get_action("package_update")(context.copy(), package_dict)
+
+        except (logic.NotFound, toolkit.ObjectNotFound):
+            return toolkit.get_action("package_create")(context.copy(), package_dict)
+
+    # -------------------------------------------------------------------------
+    # Harvester interface
+    # -------------------------------------------------------------------------
+
+    def info(self):
+        return {
+            "name": "geonode_documents",
+            "title": "GeoNode Documents (API v2)",
+            "description": "Harvest GeoNode documents via harvest source URL (e.g. /api/v2/documents)",
+        }
+
+    # -------------------------------------------------------------------------
+    # Source config / org / session
+    # -------------------------------------------------------------------------
+
+    def _get_source_owner_org(self, harvest_source_id):
+        src = toolkit.get_action("package_show")(
+            {"ignore_auth": True},
+            {"id": harvest_source_id},
+        )
+        return src.get("owner_org")
+
+    def _get_source_config(self, harvest_source):
+        try:
+            return json.loads(harvest_source.config or "{}")
+        except Exception:
+            return {}
+
+    def _is_cityofathens_source(self, harvest_source) -> bool:
+        """
+        True μόνο αν το harvest_source.url περιέχει 'cityofathens' (case-insensitive).
+        Δεν κοιτάμε config ή άλλα πεδία.
+        """
+        u = (getattr(harvest_source, "url", None) or "")
+        return "cityofathens" in str(u).lower()
+
+    def _session(self):
+        s = requests.Session()
+        s.headers.update({"Accept": "application/json"})
+        return s
+
+    # -------------------------------------------------------------------------
+    # GeoNode URL helpers
+    # -------------------------------------------------------------------------
+
+    def _get_documents_list_base(self, harvest_source):
+        """
+        Αναμένουμε ότι στο UI URL θα βάλεις:
+          http://gis.cityofathens.gr/api/v2/documents
+        """
+        return (harvest_source.url or "").rstrip("/")
+
+    def _get_api_base_from_documents_url(self, documents_url):
+        """
+        Από .../api/v2/documents -> .../api/v2
+        """
+        u = documents_url.rstrip("/")
+        if u.endswith("/documents"):
+            return u[: -len("/documents")]
+        return u.rsplit("/", 1)[0]
+
+    def _iter_document_list_items(self, sess, documents_base):
+        """
+        Generator που φέρνει όλα τα list-items (με pagination).
+        """
+        url = f"{documents_base}?format=json&page=1"
+        while url:
+            r = sess.get(url, timeout=60)
+            r.raise_for_status()
+            payload = r.json()
+
+            for doc in payload.get("documents", []) or []:
+                yield doc
+
+            url = (payload.get("links") or {}).get("next")
+
+    def _fetch_document_detail(self, sess, api_base, pk):
+        detail_url = f"{api_base}/documents/{pk}?format=json"
+        r = sess.get(detail_url, timeout=60)
+        r.raise_for_status()
+        payload = r.json()
+        return payload.get("document") or payload
+
+    # -------------------------------------------------------------------------
+    # gather/fetch
+    # -------------------------------------------------------------------------
+
+    def gather_stage(self, harvest_job):
+        source = harvest_job.source
+        cfg = self._get_source_config(source)
+        only_published = cfg.get("only_published", True)
+
+        documents_base = self._get_documents_list_base(source)
+        if not documents_base:
+            raise Exception("Harvest source URL is empty. Set it to .../api/v2/documents")
+
+        sess = self._session()
+
+        object_ids = []
+        for doc in self._iter_document_list_items(sess, documents_base):
+            if only_published and not (doc.get("is_published") and doc.get("is_approved")):
+                continue
+
+            guid = doc.get("uuid") or f"pk:{doc.get('pk')}"
+            ho = HarvestObject(guid=guid, job=harvest_job)
+            ho.content = json.dumps(doc)  # list-item, για pk
+            ho.save()
+            object_ids.append(ho.id)
+
+        log.info("GeonodeDocumentsHarvester gathered %s objects", len(object_ids))
+        return object_ids
+
+    def fetch_stage(self, harvest_object):
+        """
+        Fetches full document JSON for the HarvestObject (detail endpoint).
+        Note: 'only_published' filtering is applied in gather_stage, so no need here.
+        """
+        documents_base = self._get_documents_list_base(harvest_object.source)
+        api_base = self._get_api_base_from_documents_url(documents_base)
+        sess = self._session()
+
+        doc_list_item = json.loads(harvest_object.content or "{}")
+        pk = doc_list_item.get("pk")
+        if not pk:
+            return True
+
+        doc = self._fetch_document_detail(sess, api_base, pk)
+
+        harvest_object.content = json.dumps(doc)
+        harvest_object.save()
+        return True
+
+    # -------------------------------------------------------------------------
+    # import mapping builders
+    # -------------------------------------------------------------------------
+
+    def _build_identity(self, doc):
+        uuid = doc.get("uuid")
+        pk = doc.get("pk")
+        title = (doc.get("title") or doc.get("name") or uuid or str(pk)).strip()
+
+        if uuid:
+            name = f"geonode-doc-{uuid}"
+        else:
+            name = f"geonode-doc-pk-{pk}"
+        name = name.lower()
+
+        title_translated = {"el": title, "en": title}
+
+        notes_el = _safe_notes_el(doc)
+        notes_translated = {"el": notes_el, "en": notes_el}
+
+        return uuid, pk, name, title_translated, notes_translated
+
+    def _build_tags(self, doc):
+        kw_names = []
+        for kw in (doc.get("keywords") or []):
+            nm = _clean_tag_string_value(kw.get("name") or "")
+            if nm:
+                kw_names.append(nm)
+        return ", ".join(kw_names)
+
+    def _build_agents(self, doc, *, is_cityofathens_source: bool = False):
+        poc = doc.get("poc") or {}
+        owner = doc.get("owner") or {}
+        meta_author = doc.get("metadata_author") or {}
+
+        contact_name = _person_label(poc)
+        creator_name = _person_label(meta_author) or _person_label(owner)
+
+        contact = []
+        if contact_name:
+            contact.append({
+                "name": contact_name,
+                "email": "",
+                "url": doc.get("detail_url") or "",
+                "uri": f"urn:geonode:user:{poc.get('pk')}" if poc.get("pk") else "",
+            })
+
+        creator = []
+        if creator_name:
+            creator.append({
+                "name": creator_name,
+                "email": "",
+                "url": "",
+                "uri": f"urn:geonode:user:{meta_author.get('pk')}" if meta_author.get("pk") else "",
+                "type": "",
+                "identifier": "",
+                "description": "",
+            })
+
+        group = doc.get("group") or {}
+        publisher = []
+        if group.get("name"):
+            publ = {
+                "name": group.get("name"),
+                "email": "",
+                "url": "",
+                "uri": f"urn:geonode:group:{group.get('pk')}" if group.get("pk") else "",
+                "type": "",
+                "identifier": "",
+                "description": "",
+            }
+
+            # ΜΟΝΟ για City of Athens sources + group pk=4
+            if is_cityofathens_source and str(group.get("pk")) == "4":
+                publ["name"] = "Τμήμα Διαχείρισης Γεωχωρικών Δεδομένων Πόλεως"
+                publ["email"] = "t.gis@athens.gr"
+                publ["url"] = "http://gis.cityofathens.gr/"
+                publ["description"] = "Τμήμα Διαχείρισης Γεωχωρικών Δεδομένων Πόλεως"
+
+            publisher.append(publ)
+
+        return contact, creator, publisher
+
+    def _build_resources(self, doc, landing):
+        href = doc.get("href")  # direct download
+        ext = (doc.get("extension") or "").upper()
+        raw_mime = doc.get("mime_type") or None
+        iana_mime = to_iana_mimetype(raw_mime)
+
+        licence_uri = map_geonode_licence_to_eu_uri(
+            (doc.get("license") or {}).get("identifier")
+        )
+
+        resources = []
+        if href:
+            res = {
+                "url": href,
+                "access_url": landing,
+                "download_url": href,
+                "format": ext,
+                "name_translated": {"el": "Λήψη", "en": "Download"},
+                "description_translated": {"el": "", "en": ""},
+            }
+
+            if licence_uri:
+                res["license"] = licence_uri
+
+            if iana_mime:
+                res["mimetype"] = iana_mime
+
+            resources.append(res)
+
+        return resources
+
+    def _build_spatial_temporal(self, doc):
+        spatial_coverage = []
+        poly = doc.get("ll_bbox_polygon") or doc.get("bbox_polygon")
+        if poly and isinstance(poly, dict) and poly.get("type") == "Polygon":
+            coords = poly.get("coordinates") or []
+            world = [[[-180.0, -90.0], [-180.0, 90.0], [180.0, 90.0], [180.0, -90.0], [-180.0, -90.0]]]
+            if coords != world:
+                spatial_coverage = [{"geom": json.dumps(poly)}]
+
+        temporal_coverage = []
+        ts = doc.get("temporal_extent_start")
+        te = doc.get("temporal_extent_end")
+        if ts or te:
+            temporal_coverage = [{"start": ts, "end": te}]
+
+        return spatial_coverage, temporal_coverage
+
+    def _build_extras_and_provenance(self, doc, uuid, pk):
+        extras = [
+            {"key": "geonode_uuid", "value": uuid},
+            {"key": "geonode_pk", "value": pk},
+            {"key": "geonode_last_updated", "value": doc.get("last_updated")},
+            {"key": "geonode_doc_type", "value": doc.get("doc_type")},
+            {"key": "geonode_extension", "value": doc.get("extension")},
+            {"key": "geonode_mime_type", "value": doc.get("mime_type")},
+            {"key": "geonode_group", "value": (doc.get("group") or {}).get("name")},
+        ]
+
+        USED_DOC_KEYS = {
+            "pk", "uuid", "title", "name", "abstract", "raw_abstract",
+            "supplemental_information", "raw_supplemental_information",
+            "detail_url", "href",
+            "keywords",
+            "extension", "mime_type", "doc_type",
+            "category", "maintenance_frequency",
+            "temporal_extent_start", "temporal_extent_end",
+            "ll_bbox_polygon", "bbox_polygon", "srid",
+            "license",
+            "language",
+            "owner", "poc", "metadata_author", "group",
+            "last_updated",
+        }
+
+        unmapped = {}
+        for k, v in (doc or {}).items():
+            if k in USED_DOC_KEYS:
+                continue
+            unmapped[k] = v
+
+        _extras_put(extras, "geonode_provenance_unmapped", unmapped)
+
+        # _extras_put(extras, "geonode_provenance_raw", doc)
+
+        return extras
+
+    def _build_theme_and_frequency(self, doc, extras):
+        topiccategory = (doc.get("category") or {}).get("identifier")
+        use_theme_uri = True
+        theme = _map_topiccategory_to_theme_values(topiccategory, use_uri=use_theme_uri)
+
+        extras.append({"key": "geonode_topiccategory", "value": topiccategory})
+        extras.append({"key": "geonode_topiccategory_uri",
+                       "value": f"http://inspire.ec.europa.eu/metadata-codelist/TopicCategory/{topiccategory}" if topiccategory else ""})
+
+        iso_freq = doc.get("maintenance_frequency")
+        eu_freq_uri = _map_maintenance_frequency_to_eu_uri(iso_freq)
+
+        extras.append({"key": "geonode_maintenance_frequency_raw", "value": iso_freq or ""})
+        if eu_freq_uri:
+            extras.append({"key": "geonode_maintenance_frequency_eu_uri", "value": eu_freq_uri})
+
+        return theme, eu_freq_uri
+
+    def _get_legislation_value(self):
+        try:
+            legislation_value = data_gov_helpers.get_config_value(
+                'ckanext.data_gov_gr.dataset.legislation.open',
+                'https://eur-lex.europa.eu/eli/dir/2019/1024/oj/eng'
+            )
+            if isinstance(legislation_value, str):
+                legislation_value = legislation_value.strip()
+        except Exception:
+            legislation_value = 'https://eur-lex.europa.eu/eli/dir/2019/1024/oj/eng'
+        return legislation_value
+
+    # -------------------------------------------------------------------------
+    # import_stage
+    # -------------------------------------------------------------------------
+
+    def import_stage(self, harvest_object):
+        if not harvest_object.content:
+            return False
+
+        doc = json.loads(harvest_object.content)
+        owner_org = self._get_source_owner_org(harvest_object.source.id)
+
+        uuid, pk, name, title_translated, notes_translated = self._build_identity(doc)
+        tag_string = self._build_tags(doc)
+
+        landing = doc.get("detail_url")
+
+        is_cityofathens_source = self._is_cityofathens_source(harvest_object.source)
+        contact, creator, publisher = self._build_agents(
+            doc,
+            is_cityofathens_source=is_cityofathens_source,
+        )
+        resources = self._build_resources(doc, landing)
+
+        spatial_coverage, temporal_coverage = self._build_spatial_temporal(doc)
+        extras = self._build_extras_and_provenance(doc, uuid, pk)
+
+        theme, eu_freq_uri = self._build_theme_and_frequency(doc, extras)
+
+        dcat_type = "http://publications.europa.eu/resource/authority/dataset-type/GEOSPATIAL"
+        access_rights = 'http://publications.europa.eu/resource/authority/access-right/PUBLIC'
+
+        legislation_value = self._get_legislation_value()
+
+        package_dict = {
+            "name": name,
+            "owner_org": owner_org,
+            "title_translated": title_translated,
+            "notes_translated": notes_translated,
+            "tag_string": tag_string,
+            "url": landing,
+            "landing_page": [landing] if landing else [],
+            "access_rights": access_rights,
+            "dcat_type": dcat_type,
+            "spatial_coverage": spatial_coverage,
+            "temporal_coverage": temporal_coverage,
+            "theme": theme,
+            "publisher": publisher,
+            "creator": creator,
+            "contact": contact,
+            "resources": resources,
+            "extras": extras,
+        }
+
+        if eu_freq_uri:
+            package_dict["frequency"] = eu_freq_uri
+
+        if legislation_value:
+            package_dict['applicable_legislation'] = [legislation_value]
+
+        package_dict['language_options'] = ['http://publications.europa.eu/resource/authority/language/ELL']
+
+        try:
+            result = self._upsert_package(package_dict)
+            harvest_object.package_id = result["id"]
+            harvest_object.current = True
+            harvest_object.save()
+            return True
+        except Exception as e:
+            log.exception("Import failed for %s: %s", harvest_object.guid, e)
+            harvest_object.current = False
+            harvest_object.save()
+            return False

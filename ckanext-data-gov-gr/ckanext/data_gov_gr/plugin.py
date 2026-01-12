@@ -19,6 +19,8 @@ import json
 from ckanext.keycloak.helpers import enable_internal_login
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 
+import ckan.logic as logic
+
 plugin_dir = os.path.dirname(sys.modules[__name__].__file__)
 import ckanext.data_gov_gr.helpers as helpers
 
@@ -728,3 +730,24 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
 
         # Οποιαδήποτε άλλη κλήση την αγνοούμε σιωπηλά
         return
+
+    def after_dataset_show(self, context, package_dict):
+        # Feature flag (default True): allow disabling via ckan.ini if ever needed
+        if not helpers.should_include_relationships_in_show():
+            return package_dict
+
+        # Ελέγχουμε αν η λίστα είναι κενή ή λείπει (συμβαίνει όταν το αποτέλεσμα έρχεται από Solr cache)
+        if not package_dict.get('relationships_as_subject'):
+            try:
+                # Καλούμε το action του relationships plugin που φέρνει και τα external URIs
+                relationships = logic.get_action('package_relationships_list')(
+                    context, {'id': package_dict['id']}
+                )
+
+                if relationships:
+                    package_dict['relationships_as_subject'] = relationships
+
+            except Exception as e:
+                log.error("Error updating relationships in after_dataset_show: %s", str(e))
+
+        return package_dict

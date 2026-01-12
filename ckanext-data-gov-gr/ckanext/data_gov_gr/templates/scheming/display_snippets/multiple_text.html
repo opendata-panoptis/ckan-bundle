@@ -8,7 +8,7 @@
         {%- set label = label|truncate(80, True) -%}
       {%- endif -%}
       <a href="{{ element }}" target="_blank" rel="noopener noreferrer">{{ label }}</a>
-    {%- elif field.field_name == 'applicable_legislation' and element.startswith('http') -%}
+    {%- elif h.is_url_field(field.field_name, element) -%}
       <a href="{{ element }}" target="_blank" rel="noopener noreferrer">{{ element }}</a>
     {%- else -%}
       {{ element }}

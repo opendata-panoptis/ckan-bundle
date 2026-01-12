@@ -54,6 +54,7 @@ dataset_fields:
 
     - field_name: uri
       label: URI
+      display_snippet: link.html
 
     - field_name: name
       label: Name
@@ -144,6 +145,7 @@ dataset_fields:
 
     - field_name: uri
       label: URI
+      display_snippet: link.html
 
     - field_name: name
       label: Name
@@ -154,6 +156,7 @@ dataset_fields:
 
     - field_name: url
       label: URL
+      display_snippet: link.html
       help_text:
         en: A URL associated with the contact
         el: Μια διεύθυνση URL που σχετίζεται με την επαφή

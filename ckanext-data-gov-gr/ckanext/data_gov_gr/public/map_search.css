@@ -18,7 +18,7 @@
 }
 
 /* Module content styling for proper alignment */
-.module.module-narrow.module-shallow .module-content {
+.module.module-narrow.module-shallow .module-content.module-content--search {
     padding-left: 0;
     padding-right: 0;
     padding-top: 0;

@@ -8,524 +8,981 @@
 {% set show_home_featured_datasets_section = h.get_config_as_bool('ckanext.data_gov_gr.config_ui.home_featured_datasets.enabled', False) %}
 {% set show_home_showcases_section = h.get_config_as_bool('ckanext.data_gov_gr.config_ui.home_showcases.enabled', False) %}
 {% set show_dataset_menu_section = h.get_config_as_bool('ckanext.data_gov_gr.config_ui.dataset_menu.enabled', False) %}
+{% set show_guides_section = h.get_config_as_bool('ckanext.data_gov_gr.config_ui.guides.enabled', False) %}
+{% set contact_gitbook_embed_items_raw = config.get('ckanext.data_gov_gr.contact.gitbook_embed_items') %}
+{% set contact_gitbook_embed_has_value = contact_gitbook_embed_items_raw is not none %}
 
 {% block admin_form %}
 
   {{ h.csrf_input() }}
 
-  {{ form.input(
-    'ckan.site_title',
-    id='field-ckan-site-title',
-    label=_('Site Title'),
-    value=data['ckan.site_title'],
-    error=errors['ckan.site_title'],
-    classes=['control-medium']
-  ) }}
+  <div id="dg-config-content">
+      <section id="dg-config-general" class="dg-config-section" data-dg-section="dg-config-general">
+        <h3>{{ _('Γενικά') }}</h3>
 
-  {# Site logo (same behavior as core CKAN, kept here explicitly) #}
-  {% set field_url = 'ckan.site_logo' %}
-  {% set is_upload = data[field_url] and not data[field_url].startswith('http') %}
-  {% set is_url = data[field_url] and data[field_url].startswith('http') %}
-  {{ form.image_upload(
-    data,
-    errors,
-    is_upload_enabled=h.uploads_enabled(),
-    is_url=is_url,
-    is_upload=is_upload,
-    upload_label = _('Site logo'),
-    url_label=_('Site logo'),
-    field_url=field_url,
-    field_upload='logo_upload',
-    field_clear='clear_logo_upload'
-  ) }}
+        {{ form.input(
+          'ckan.site_title',
+          id='field-ckan-site-title',
+          label=_('Site Title'),
+          value=data['ckan.site_title'],
+          error=errors['ckan.site_title'],
+          classes=['control-medium']
+        ) }}
 
-  {% if show_stats_powerbi_section %}
-    <h3>{{ _('Στατιστικά και Power BI') }}</h3>
+        {# Site logo (same behavior as core CKAN, kept here explicitly) #}
+        {% set field_url = 'ckan.site_logo' %}
+        {% set is_upload = data[field_url] and not data[field_url].startswith('http') %}
+        {% set is_url = data[field_url] and data[field_url].startswith('http') %}
+        {{ form.image_upload(
+          data,
+          errors,
+          is_upload_enabled=h.uploads_enabled(),
+          is_url=is_url,
+          is_upload=is_upload,
+          upload_label = _('Site logo'),
+          url_label=_('Site logo'),
+          field_url=field_url,
+          field_upload='logo_upload',
+          field_clear='clear_logo_upload'
+        ) }}
+      </section>
 
-    {{ form.input(
-      'ckanext.data_gov_gr.powerbi_embed_url',
-      id='field-ckanext.data_gov_gr.powerbi_embed_url',
-      label=_('Σύνδεσμος ενσωμάτωσης Power BI'),
-      value=data['ckanext.data_gov_gr.powerbi_embed_url'],
-      error=errors['ckanext.data_gov_gr.powerbi_embed_url'],
-      placeholder='https://app.powerbi.com/view?r=...'
-    ) }}
-  {% endif %}
+      <section id="dg-config-home" class="dg-config-section" data-dg-section="dg-config-home">
+        <h3>{{ _('Αρχική') }}</h3>
 
-  {% if show_home_stats_section %}
-    <h3>{{ _('Στατιστικά αρχικής σελίδας') }}</h3>
+        {% if show_home_stats_section %}
+          <h4>{{ _('Στατιστικά αρχικής σελίδας') }}</h4>
 
-    {% call form.checkbox(
-      'ckanext.data_gov_gr.home.portal_numbers.enabled',
-      id='field-ckanext.data_gov_gr.home.portal_numbers.enabled',
-      label=_('Εμφάνιση ενότητας «Η πύλη σε αριθμούς» στην αρχική'),
-      value='true',
-      checked=h.get_config_as_bool('ckanext.data_gov_gr.home.portal_numbers.enabled', False)
-    ) %}
-      <p class="help-block">
-        {{ _('Εμφανίζει συνοπτικούς μετρητές (σύνολα δεδομένων, APIs, αποφάσεις, φορείς, εφαρμογές, δημοσιεύσεις).') }}
-      </p>
-    {% endcall %}
+          {% call form.checkbox(
+            'ckanext.data_gov_gr.home.portal_numbers.enabled',
+            id='field-ckanext.data_gov_gr.home.portal_numbers.enabled',
+            label=_('Εμφάνιση ενότητας «Η πύλη σε αριθμούς» στην αρχική'),
+            value='true',
+            checked=h.get_config_as_bool('ckanext.data_gov_gr.home.portal_numbers.enabled', False)
+          ) %}
+            <p class="help-block">
+              {{ _('Εμφανίζει συνοπτικούς μετρητές (σύνολα δεδομένων, APIs, αποφάσεις, φορείς, εφαρμογές, δημοσιεύσεις).') }}
+            </p>
+          {% endcall %}
 
-    {% set stats_items = [
-      {'value': '', 'text': _('— Καμία επιλογή —')},
-      {'value': 'datasets_by_theme', 'text': _('Σύνολα δεδομένων ανά θεματική κατηγορία')},
-      {'value': 'datasets_by_publisher_type', 'text': _('Σύνολα δεδομένων ανά τύπο εκδότη')},
-      {'value': 'datasets_by_organization', 'text': _('Σύνολα δεδομένων ανά οργανισμό')},
-      {'value': 'datasets_vs_services', 'text': _('Σύνολα δεδομένων vs Υπηρεσίες δεδομένων')},
-      {'value': 'datasets_by_hvd_category', 'text': _('Σύνολα δεδομένων ανά κατηγορία HVD')},
-      {'value': 'organizations_by_publisher_type', 'text': _('Οργανισμοί ανά τύπο εκδότη')},
-      {'value': 'total_datasets', 'text': _('Συνολικός αριθμός πακέτων')},
-      {'value': 'dataset_revisions', 'text': _('Εξελίξεις πακέτων ανά εβδομάδα')},
-      {'value': 'most_edited', 'text': _('Περισσότερο επεξεργασμένα πακέτα')},
-      {'value': 'largest_groups', 'text': _('Μεγαλύτερες ομάδες')},
-      {'value': 'top_tags', 'text': _('Δημοφιλέστερες ετικέτες')},
-      {'value': 'top_creators', 'text': _('Χρήστες με τα περισσότερα σύνολα δεδομένων')},
-      {'value': 'powerbi', 'text': _('Power BI αναφορές')}
-    ] %}
+          {% set stats_items = [
+            {'value': '', 'text': _('— Καμία επιλογή —')},
+            {'value': 'datasets_by_theme', 'text': _('Σύνολα δεδομένων ανά θεματική κατηγορία')},
+            {'value': 'datasets_by_publisher_type', 'text': _('Σύνολα δεδομένων ανά τύπο εκδότη')},
+            {'value': 'datasets_by_organization', 'text': _('Σύνολα δεδομένων ανά οργανισμό')},
+            {'value': 'datasets_vs_services', 'text': _('Σύνολα δεδομένων vs Υπηρεσίες δεδομένων')},
+            {'value': 'datasets_by_hvd_category', 'text': _('Σύνολα δεδομένων ανά κατηγορία HVD')},
+            {'value': 'organizations_by_publisher_type', 'text': _('Οργανισμοί ανά τύπο εκδότη')},
+            {'value': 'total_datasets', 'text': _('Συνολικός αριθμός πακέτων')},
+            {'value': 'dataset_revisions', 'text': _('Εξελίξεις πακέτων ανά εβδομάδα')},
+            {'value': 'most_edited', 'text': _('Περισσότερο επεξεργασμένα πακέτα')},
+            {'value': 'largest_groups', 'text': _('Μεγαλύτερες ομάδες')},
+            {'value': 'top_tags', 'text': _('Δημοφιλέστερες ετικέτες')},
+            {'value': 'top_creators', 'text': _('Χρήστες με τα περισσότερα σύνολα δεδομένων')},
+            {'value': 'powerbi', 'text': _('Power BI αναφορές')}
+          ] %}
 
-    {{ form.select(
-      'ckanext.data_gov_gr.home.stats.item1',
-      id='field-ckanext.data_gov_gr.home.stats.item1',
-      label=_('Στατιστικό πλακίδιο 1'),
-      options=stats_items,
-      selected=data['ckanext.data_gov_gr.home.stats.item1'],
-      error=errors['ckanext.data_gov_gr.home.stats.item1'],
-      classes=['control-medium']
-    ) }}
+          {{ form.select(
+            'ckanext.data_gov_gr.home.stats.item1',
+            id='field-ckanext.data_gov_gr.home.stats.item1',
+            label=_('Στατιστικό πλακίδιο 1'),
+            options=stats_items,
+            selected=data['ckanext.data_gov_gr.home.stats.item1'],
+            error=errors['ckanext.data_gov_gr.home.stats.item1'],
+            classes=['control-medium']
+          ) }}
 
-    {{ form.select(
-      'ckanext.data_gov_gr.home.stats.item2',
-      id='field-ckanext.data_gov_gr.home.stats.item2',
-      label=_('Στατιστικό πλακίδιο 2'),
-      options=stats_items,
-      selected=data['ckanext.data_gov_gr.home.stats.item2'],
-      error=errors['ckanext.data_gov_gr.home.stats.item2'],
-      classes=['control-medium']
-    ) }}
+          {{ form.select(
+            'ckanext.data_gov_gr.home.stats.item2',
+            id='field-ckanext.data_gov_gr.home.stats.item2',
+            label=_('Στατιστικό πλακίδιο 2'),
+            options=stats_items,
+            selected=data['ckanext.data_gov_gr.home.stats.item2'],
+            error=errors['ckanext.data_gov_gr.home.stats.item2'],
+            classes=['control-medium']
+          ) }}
 
-    {{ form.select(
-      'ckanext.data_gov_gr.home.stats.item3',
-      id='field-ckanext.data_gov_gr.home.stats.item3',
-      label=_('Στατιστικό πλακίδιο 3'),
-      options=stats_items,
-      selected=data['ckanext.data_gov_gr.home.stats.item3'],
-      error=errors['ckanext.data_gov_gr.home.stats.item3'],
-      classes=['control-medium']
-    ) }}
+          {{ form.select(
+            'ckanext.data_gov_gr.home.stats.item3',
+            id='field-ckanext.data_gov_gr.home.stats.item3',
+            label=_('Στατιστικό πλακίδιο 3'),
+            options=stats_items,
+            selected=data['ckanext.data_gov_gr.home.stats.item3'],
+            error=errors['ckanext.data_gov_gr.home.stats.item3'],
+            classes=['control-medium']
+          ) }}
 
-    {{ form.select(
-      'ckanext.data_gov_gr.home.stats.item4',
-      id='field-ckanext.data_gov_gr.home.stats.item4',
-      label=_('Στατιστικό πλακίδιο 4'),
-      options=stats_items,
-      selected=data['ckanext.data_gov_gr.home.stats.item4'],
-      error=errors['ckanext.data_gov_gr.home.stats.item4'],
-      classes=['control-medium']
-    ) }}
-  {% endif %}
+          {{ form.select(
+            'ckanext.data_gov_gr.home.stats.item4',
+            id='field-ckanext.data_gov_gr.home.stats.item4',
+            label=_('Στατιστικό πλακίδιο 4'),
+            options=stats_items,
+            selected=data['ckanext.data_gov_gr.home.stats.item4'],
+            error=errors['ckanext.data_gov_gr.home.stats.item4'],
+            classes=['control-medium']
+          ) }}
+        {% endif %}
 
-  {% if show_home_featured_datasets_section %}
-    <h3>{{ _('Επιλεγμένα datasets στην αρχική σελίδα') }}</h3>
+        {% if show_home_featured_datasets_section %}
+          <h4>{{ _('Επιλεγμένα datasets στην αρχική σελίδα') }}</h4>
 
-    {# Επιλεγμένες προβολές (resource views) από datasets: έως 6 IDs (ένα ανά γραμμή) #}
-    {% set raw_featured_dataset_views = h.get_config_value('ckanext.data_gov_gr.home.featured_dataset_views.ids', '') %}
-    {% if raw_featured_dataset_views is not string and raw_featured_dataset_views %}
-      {% set raw_featured_dataset_views = raw_featured_dataset_views[-1] %}
-    {% endif %}
-    {% if raw_featured_dataset_views %}
-      {% set raw_featured_dataset_views = raw_featured_dataset_views.replace('\\n', '\n') %}
-    {% endif %}
+          {# Επιλεγμένες προβολές (resource views) από datasets: έως 6 IDs (ένα ανά γραμμή) #}
+          {% set raw_featured_dataset_views = h.get_config_value('ckanext.data_gov_gr.home.featured_dataset_views.ids', '') %}
+          {% if raw_featured_dataset_views is not string and raw_featured_dataset_views %}
+            {% set raw_featured_dataset_views = raw_featured_dataset_views[-1] %}
+          {% endif %}
+          {% if raw_featured_dataset_views %}
+            {% set raw_featured_dataset_views = raw_featured_dataset_views.replace('\\n', '\n') %}
+          {% endif %}
 
-    {{ form.textarea(
-      'ckanext.data_gov_gr.home.featured_dataset_views.ids',
-      id='field-ckanext.data_gov_gr.home.featured_dataset_views.ids',
-      label=_('Resource view IDs για την αρχική (ένα ανά γραμμή, έως 6)'),
-      value=raw_featured_dataset_views,
-      error=errors['ckanext.data_gov_gr.home.featured_dataset_views.ids'],
-      placeholder='a1b2c3d4-....\ne5f6g7h8-....\n...'
-    ) }}
-    <p class="help-block">
-      {{ _('Εισάγετε τα IDs των προβολών (views) από datasets που θέλετε να εμφανίζονται στην αρχική. ') }}
-      {{ _('Θα βρείτε το view ID στο URL της προβολής (…/resource/<RESOURCE_ID>?view_id=<VIEW_ID> ή …/resource/<RESOURCE_ID>/view/<VIEW_ID>).') }}
-    </p>
-  {% endif %}
-
-  <h3>{{ _('Αναδυόμενο ερωτηματολόγιο χρήστη') }}</h3>
-
-  {{ form.input(
-    'ckanext.data_gov_gr.user_survey.url',
-    id='field-ckanext.data_gov_gr.user_survey.url',
-    label=_('Σύνδεσμος ερωτηματολογίου χρήστη'),
-    value=data['ckanext.data_gov_gr.user_survey.url'],
-    error=errors['ckanext.data_gov_gr.user_survey.url'],
-    placeholder='https://example.com/your-survey?lang={locale}'
-  ) }}
-
-  <h3>{{ _('Σελίδα εφαρμογών (Showcases)') }}</h3>
-
-  {{ form.textarea(
-    'ckanext.data_gov_gr.showcase.disclaimer',
-    id='field-ckanext.data_gov_gr.showcase.disclaimer',
-    label=_('Κείμενο αποποίησης ευθύνης για τις εφαρμογές (HTML επιτρέπεται)'),
-    value=data['ckanext.data_gov_gr.showcase.disclaimer'],
-    error=errors['ckanext.data_gov_gr.showcase.disclaimer'],
-    placeholder=_('Εισάγετε εδώ το κείμενο αποποίησης ευθύνης για την σελίδα εφαρμογών / Showcases.')
-  ) }}
-
-  {% if show_home_showcases_section %}
-    <h3>{{ _('Εφαρμογές στην αρχική σελίδα (Showcases)') }}</h3>
-
-    {# Δυναμική λίστα διαθέσιμων showcases για εύκολη επιλογή #}
-    {# Χρησιμοποιούμε απευθείας το config για να εμφανίζεται πάντα η αποθηκευμένη τιμή #}
-    {% set raw_home_showcases = h.get_config_value('ckanext.data_gov_gr.home.showcases.ids', '') %}
-    {% if raw_home_showcases is not string and raw_home_showcases %}
-      {% set raw_home_showcases = raw_home_showcases[-1] %}
-    {% endif %}
-    {% set selected_home_showcases = [] %}
-    {% if raw_home_showcases %}
-      {% set selected_home_showcases = raw_home_showcases.splitlines() %}
-    {% endif %}
-
-    {% set available_showcases = h.get_available_showcases() %}
-    {% if available_showcases %}
-      <div class="control-group">
-        <label class="control-label" for="home-showcases-select">
-          {{ _('Διαθέσιμα showcases') }}
-        </label>
-        <div class="controls">
-          <select id="home-showcases-select" multiple="multiple" size="8" class="control-medium">
-            {% for sc in available_showcases %}
-              {% set sc_id = sc.name %}
-              <option value="{{ sc_id }}" {% if sc_id in selected_home_showcases %}selected="selected"{% endif %}>
-                {{ sc.title }}
-              </option>
-            {% endfor %}
-          </select>
+          {{ form.textarea(
+            'ckanext.data_gov_gr.home.featured_dataset_views.ids',
+            id='field-ckanext.data_gov_gr.home.featured_dataset_views.ids',
+            label=_('Resource view IDs για την αρχική (ένα ανά γραμμή, έως 6)'),
+            value=raw_featured_dataset_views,
+            error=errors['ckanext.data_gov_gr.home.featured_dataset_views.ids'],
+            placeholder='a1b2c3d4-....\ne5f6g7h8-....\n...'
+          ) }}
           <p class="help-block">
-            {{ _('Επιλέξτε έως 3 εφαρμογές για την αρχική σελίδα. Η επιλογή ενημερώνει αυτόματα τα IDs παρακάτω.') }}
+            {{ _('Εισάγετε τα IDs των προβολών (views) από datasets που θέλετε να εμφανίζονται στην αρχική. ') }}
+            {{ _('Θα βρείτε το view ID στο URL της προβολής (…/resource/<RESOURCE_ID>?view_id=<VIEW_ID> ή …/resource/<RESOURCE_ID>/view/<VIEW_ID>).') }}
           </p>
+        {% endif %}
+
+        {% if show_home_showcases_section %}
+          <h4>{{ _('Εφαρμογές στην αρχική σελίδα (Showcases)') }}</h4>
+
+          {# Δυναμική λίστα διαθέσιμων showcases για εύκολη επιλογή #}
+          {# Χρησιμοποιούμε απευθείας το config για να εμφανίζεται πάντα η αποθηκευμένη τιμή #}
+          {% set raw_home_showcases = h.get_config_value('ckanext.data_gov_gr.home.showcases.ids', '') %}
+          {% if raw_home_showcases is not string and raw_home_showcases %}
+            {% set raw_home_showcases = raw_home_showcases[-1] %}
+          {% endif %}
+          {% set selected_home_showcases = [] %}
+          {% if raw_home_showcases %}
+            {% set selected_home_showcases = raw_home_showcases.splitlines() %}
+          {% endif %}
+
+          {% set available_showcases = h.get_available_showcases() %}
+          {% if available_showcases %}
+            <div class="control-group">
+              <label class="control-label" for="home-showcases-select">
+                {{ _('Διαθέσιμα showcases') }}
+              </label>
+              <div class="controls">
+                <select id="home-showcases-select" multiple="multiple" size="8" class="control-medium">
+                  {% for sc in available_showcases %}
+                    {% set sc_id = sc.name %}
+                    <option value="{{ sc_id }}" {% if sc_id in selected_home_showcases %}selected="selected"{% endif %}>
+                      {{ sc.title }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <p class="help-block">
+                  {{ _('Επιλέξτε έως 3 εφαρμογές για την αρχική σελίδα. Η επιλογή ενημερώνει αυτόματα τα IDs παρακάτω.') }}
+                </p>
+              </div>
+            </div>
+          {% endif %}
+
+          {{ form.textarea(
+            'ckanext.data_gov_gr.home.showcases.ids',
+            id='field-ckanext.data_gov_gr.home.showcases.ids',
+            label=_('Showcase IDs ή ονόματα για την αρχική (ένα ανά γραμμή, έως 3)'),
+            value=raw_home_showcases,
+            error=errors['ckanext.data_gov_gr.home.showcases.ids'],
+            placeholder='showcase-1\nshowcase-2\nshowcase-3'
+          ) }}
+
+          <script>
+            document.addEventListener('DOMContentLoaded', function () {
+              var select = document.getElementById('home-showcases-select');
+              var textarea = document.getElementById('field-ckanext.data_gov_gr.home.showcases.ids');
+              if (!select || !textarea) {
+                return;
+              }
+
+              function readTextareaIds() {
+                var raw = (textarea.value || '').replace(/\\n/g, '\n');
+                return raw
+                  .split(/\\r?\\n/)
+                  .map(function (v) { return (v || '').trim(); })
+                  .filter(Boolean);
+              }
+
+              function applySelectionFromTextarea() {
+                var ids = readTextareaIds();
+                if (!ids.length) {
+                  return;
+                }
+                Array.prototype.forEach.call(select.options, function (opt) {
+                  opt.selected = ids.indexOf(opt.value) !== -1;
+                });
+                // Enforce max 3 when restoring.
+                var selected = Array.prototype.slice.call(select.selectedOptions || []);
+                if (selected.length > 3) {
+                  selected.slice(3).forEach(function (opt) { opt.selected = false; });
+                }
+              }
+
+              function syncToTextarea() {
+                var selected = Array.prototype.slice.call(select.selectedOptions || []);
+                var values = selected.map(function (opt) { return opt.value; }).slice(0, 3);
+                textarea.value = values.join('\\n');
+              }
+
+              select.addEventListener('change', function () {
+                // Enforce max 3 selections visually.
+                var selected = Array.prototype.slice.call(select.selectedOptions || []);
+                if (selected.length > 3) {
+                  selected.slice(3).forEach(function (opt) { opt.selected = false; });
+                }
+                syncToTextarea();
+              });
+
+              // Restore selection from saved textarea value (if any) and sync.
+              applySelectionFromTextarea();
+              if ((select.selectedOptions || []).length) {
+                syncToTextarea();
+              }
+            });
+          </script>
+        {% endif %}
+
+	        {% if not show_home_stats_section and not show_home_featured_datasets_section and not show_home_showcases_section %}
+	          <p class="help-block">{{ _('Δεν υπάρχουν ενεργές ρυθμίσεις για την αρχική σελίδα σε αυτό το περιβάλλον.') }}</p>
+	        {% endif %}
+      </section>
+
+      <section id="dg-config-metadata-defaults" class="dg-config-section" data-dg-section="dg-config-metadata-defaults">
+        <h3>{{ _('Προεπιλογές πεδίων μεταδεδομένων') }}</h3>
+        <h4>{{ _('Προεπιλεγμένη Εφαρμοστέα Νομοθεσία') }}</h4>
+
+        {{ form.input(
+          'ckanext.data_gov_gr.dataset.legislation.open',
+          id='field-ckanext.data_gov_gr.dataset.legislation.open',
+          label=_('Για Ανοικτά Δεδομένα (access_rights_type=open)'),
+          value=data['ckanext.data_gov_gr.dataset.legislation.open'],
+          error=errors['ckanext.data_gov_gr.dataset.legislation.open'],
+          placeholder='https://... (π.χ. οδηγία 2019/1024)'
+        ) }}
+
+        {% if not h.should_disable_protected_data() %}
+          {{ form.input(
+            'ckanext.data_gov_gr.dataset.legislation.protected',
+            id='field-ckanext.data_gov_gr.dataset.legislation.protected',
+            label=_('Για Προστατευόμενα Δεδομένα (access_rights_type=protected)'),
+            value=data['ckanext.data_gov_gr.dataset.legislation.protected'],
+            error=errors['ckanext.data_gov_gr.dataset.legislation.protected'],
+            placeholder='https://... (π.χ. κανονισμός 2022/868)'
+          ) }}
+        {% endif %}
+      </section>
+
+      <section id="dg-config-menu" class="dg-config-section" data-dg-section="dg-config-menu">
+        <h3>{{ _('Μενού / Αναζήτηση') }}</h3>
+
+        {% if show_dataset_menu_section %}
+          <h4>{{ _('Μενού Συνόλων Δεδομένων (Dropdown)') }}</h4>
+
+          <p class="help-block">
+            {{ _('Ορίστε παραμετρικές επιλογές για το dropdown «Σύνολα δεδομένων» στην κεφαλίδα.') }}
+            {{ _('Κάθε γραμμή στον πίνακα αντιστοιχεί σε μία επιλογή (Ετικέτα + Query).') }}
+            {{ _('Χρησιμοποιήστε το κουμπί \"+\" για να προσθέσετε νέες επιλογές μία-μία και το \"−\" για να αφαιρέσετε κάποια. ') }}
+            {{ _('Στο πεδίο \"Query\" μπορείτε είτε να επικολλήσετε απευθείας το URL από τη σελίδα αναζήτησης (π.χ. /dataset/?is_hvd=Yes), είτε μόνο το query μέρος (π.χ. fq=is_hvd:true).') }}
+          </p>
+
+          {# Κρυφό textarea που αποθηκεύει τη JSON αναπαράσταση των επιλογών #}
+          <div style="display:none;">
+            {{ form.textarea(
+              'ckanext.data_gov_gr.menu.dataset.items',
+              id='field-ckanext.data_gov_gr.menu.dataset.items',
+              label=_('Επιλογές dropdown (JSON)'),
+              value=data['ckanext.data_gov_gr.menu.dataset.items'],
+              error=errors['ckanext.data_gov_gr.menu.dataset.items']
+            ) }}
+          </div>
+
+          <table class="table table-striped" id="dataset-menu-items-editor">
+            <thead>
+              <tr>
+                <th>{{ _('Ετικέτα') }}</th>
+                <th>{{ _('Query') }}</th>
+                <th style="width: 3rem; text-align: center;">{{ _('Ενέργειες') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {# Γεμίζει δυναμικά με JavaScript βάσει του JSON #}
+            </tbody>
+          </table>
+          <button type="button" class="btn btn-default" data-role="add-item">
+            +
+          </button>
+
+          <script type="text/javascript">
+            (function () {
+              function getTextarea() {
+                return document.getElementById('field-ckanext.data_gov_gr.menu.dataset.items');
+              }
+
+              function parseItems() {
+                var textarea = getTextarea();
+                if (!textarea) return [];
+                var raw = textarea.value || '';
+                if (!raw.trim()) return [];
+                try {
+                  var parsed = JSON.parse(raw);
+                  if (!Array.isArray(parsed)) return [];
+                  return parsed.filter(function (item) {
+                    return item && (item.label || item.query);
+                  });
+                } catch (e) {
+                  console && console.warn && console.warn('Invalid dataset menu JSON', e);
+                  return [];
+                }
+              }
+
+              function serializeItems(tbody) {
+                var rows = tbody.querySelectorAll('tr');
+                var items = [];
+                rows.forEach(function (row) {
+                  var labelInput = row.querySelector('input[data-field=\"label\"]');
+                  var queryInput = row.querySelector('input[data-field=\"query\"]');
+                  if (!labelInput || !queryInput) return;
+                  var label = labelInput.value.trim();
+                  var query = queryInput.value.trim();
+                  if (label || query) {
+                    items.push({label: label, query: query});
+                  }
+                });
+                var textarea = getTextarea();
+                if (textarea) {
+                  textarea.value = JSON.stringify(items);
+                }
+              }
+
+              function addRow(tbody, item) {
+                var tr = document.createElement('tr');
+
+                var tdLabel = document.createElement('td');
+                var inputLabel = document.createElement('input');
+                inputLabel.type = 'text';
+                inputLabel.className = 'form-control';
+                inputLabel.setAttribute('data-field', 'label');
+                inputLabel.value = item && item.label || '';
+                tdLabel.appendChild(inputLabel);
+
+                var tdQuery = document.createElement('td');
+                var inputQuery = document.createElement('input');
+                inputQuery.type = 'text';
+                inputQuery.className = 'form-control';
+                inputQuery.setAttribute('data-field', 'query');
+                inputQuery.placeholder = 'dataset/?is_hvd=Yes ή fq=is_hvd:true';
+                inputQuery.value = item && item.query || '';
+                tdQuery.appendChild(inputQuery);
+
+                var tdActions = document.createElement('td');
+                tdActions.style.textAlign = 'center';
+                var removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-default';
+                removeBtn.textContent = '−';
+                removeBtn.onclick = function () {
+                  tr.parentNode.removeChild(tr);
+                  serializeItems(tbody);
+                };
+                tdActions.appendChild(removeBtn);
+
+                tr.appendChild(tdLabel);
+                tr.appendChild(tdQuery);
+                tr.appendChild(tdActions);
+
+                [inputLabel, inputQuery].forEach(function (input) {
+                  input.addEventListener('input', function () {
+                    serializeItems(tbody);
+                  });
+                });
+
+                tbody.appendChild(tr);
+              }
+
+              function initEditor() {
+                var editor = document.getElementById('dataset-menu-items-editor');
+                if (!editor) return;
+                var tbody = editor.querySelector('tbody');
+                var addBtn = document.querySelector('#dataset-menu-items-editor + button[data-role=\"add-item\"]');
+                if (!tbody || !addBtn) return;
+
+                var items = parseItems();
+                if (items.length === 0) {
+                  // Ξεκινάμε με μια κενή γραμμή για ευκολία
+                  addRow(tbody, {label: '', query: ''});
+                } else {
+                  items.forEach(function (item) {
+                    addRow(tbody, item);
+                  });
+                }
+
+                addBtn.onclick = function (e) {
+                  e.preventDefault();
+                  addRow(tbody, {label: '', query: ''});
+                  serializeItems(tbody);
+                };
+              }
+
+              if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                initEditor();
+              } else {
+                document.addEventListener('DOMContentLoaded', initEditor);
+              }
+            })();
+          </script>
+        {% endif %}
+
+        {% if not show_dataset_menu_section %}
+          <p class="help-block">{{ _('Δεν υπάρχουν ενεργές ρυθμίσεις για Μενού / Αναζήτηση σε αυτό το περιβάλλον.') }}</p>
+        {% endif %}
+      </section>
+
+      {% if show_guides_section %}
+      <section id="dg-config-guides" class="dg-config-section" data-dg-section="dg-config-guides">
+        <h3>{{ _('Οδηγοί (GitBook)') }}</h3>
+
+        {{ form.input(
+          'guides_base_url',
+          id='field-guides_base_url',
+          label=_('Σύνδεσμος οδηγών (base URL)'),
+          value=data['guides_base_url'],
+          error=errors['guides_base_url'],
+          placeholder='https://data-gov-gr.gitbook.io/guides'
+        ) }}
+
+        <p class="help-block">
+          {{ _('Ορίστε λίστα επιλογών (dropdown) για το embedded περιεχόμενο στη σελίδα επικοινωνίας. ') }}
+          {{ _('Κάθε γραμμή αντιστοιχεί σε μία επιλογή (Τίτλος + URL).') }}
+        </p>
+
+        {# Κρυφό textarea που αποθηκεύει τη JSON αναπαράσταση των επιλογών #}
+        <div style="display:none;">
+          {{ form.textarea(
+            'ckanext.data_gov_gr.contact.gitbook_embed_items',
+            id='field-ckanext.data_gov_gr.contact.gitbook_embed_items',
+            label=_('Επιλογές GitBook (JSON)'),
+            value=data['ckanext.data_gov_gr.contact.gitbook_embed_items'],
+            error=errors['ckanext.data_gov_gr.contact.gitbook_embed_items']
+          ) }}
         </div>
-      </div>
-    {% endif %}
 
-    {{ form.textarea(
-      'ckanext.data_gov_gr.home.showcases.ids',
-      id='field-ckanext.data_gov_gr.home.showcases.ids',
-      label=_('Showcase IDs ή ονόματα για την αρχική (ένα ανά γραμμή, έως 3)'),
-      value=raw_home_showcases,
-      error=errors['ckanext.data_gov_gr.home.showcases.ids'],
-      placeholder='showcase-1\nshowcase-2\nshowcase-3'
-    ) }}
+        <table class="table table-striped" id="contact-gitbook-embed-items-editor"
+               data-has-config="{{ 'true' if contact_gitbook_embed_has_value else 'false' }}">
+          <thead>
+            <tr>
+              <th>{{ _('Τίτλος') }}</th>
+              <th>{{ _('URL') }}</th>
+              <th style="width: 3rem; text-align: center;">{{ _('Ενέργειες') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {# Γεμίζει δυναμικά με JavaScript βάσει του JSON #}
+          </tbody>
+        </table>
+        <button type="button" class="btn btn-default" data-role="add-contact-gitbook-item">
+          +
+        </button>
+        <button type="button" class="btn btn-default" data-role="reset-contact-gitbook-items">
+          {{ _('Επαναφορά προεπιλογών') }}
+        </button>
+        <p class="help-block" style="margin-top: 0.5rem;">
+          {{ _('Αν αφήσετε τη λίστα κενή και κάνετε αποθήκευση, δεν θα εμφανιστεί dropdown στη σελίδα επικοινωνίας.') }}
+        </p>
 
-		  <script>
-		    document.addEventListener('DOMContentLoaded', function () {
-		      var select = document.getElementById('home-showcases-select');
-		      var textarea = document.getElementById('field-ckanext.data_gov_gr.home.showcases.ids');
-		      if (!select || !textarea) {
-		        return;
-		      }
+        <script type="text/javascript">
+          (function () {
+            function getTextarea() {
+              return document.getElementById('field-ckanext.data_gov_gr.contact.gitbook_embed_items');
+            }
 
-		      function readTextareaIds() {
-		        var raw = (textarea.value || '').replace(/\\n/g, '\n');
-		        return raw
-		          .split(/\r?\n/)
-		          .map(function (v) { return (v || '').trim(); })
-		          .filter(Boolean);
-		      }
+            function hasConfigValue() {
+              var editor = document.getElementById('contact-gitbook-embed-items-editor');
+              if (!editor) return true;
+              return editor.getAttribute('data-has-config') === 'true';
+            }
 
-		      function applySelectionFromTextarea() {
-		        var ids = readTextareaIds();
-		        if (!ids.length) {
-		          return;
-		        }
-		        Array.prototype.forEach.call(select.options, function (opt) {
-		          opt.selected = ids.indexOf(opt.value) !== -1;
-		        });
-		        // Enforce max 3 when restoring.
-		        var selected = Array.prototype.slice.call(select.selectedOptions || []);
-		        if (selected.length > 3) {
-		          selected.slice(3).forEach(function (opt) { opt.selected = false; });
-		        }
-		      }
+            function normalizeBaseUrl(value) {
+              return (value || '').trim().replace(/\\/+$/, '');
+            }
 
-		      function syncToTextarea() {
-		        var selected = Array.prototype.slice.call(select.selectedOptions || []);
-		        var values = selected.map(function (opt) { return opt.value; }).slice(0, 3);
-		        textarea.value = values.join('\n');
-		      }
+            function getDefaultItems() {
+              var guidesBaseInput = document.getElementById('field-guides_base_url');
+              var guidesBaseUrl = normalizeBaseUrl(guidesBaseInput && guidesBaseInput.value);
+              if (!guidesBaseUrl) {
+                guidesBaseUrl = 'https://data-gov-gr.gitbook.io/guides';
+              }
+              var faqRoot = guidesBaseUrl + '/syxnes-erotiseis';
+              return [
+                {title: 'Συχνές ερωτήσεις (Όλες)', url: faqRoot},
+                {title: 'Γενικά', url: faqRoot + '/genika'},
+                {title: 'Φορείς Δημόσιου Τομέα', url: faqRoot + '/foreis-dimosioy-tomea'},
+                {title: 'Πολίτες & Επιχειρήσεις', url: faqRoot + '/polites-and-epixeiriseis'},
+                {title: 'Τεχνικά θέματα & API', url: faqRoot + '/texnika-themata-and-api'},
+                {title: 'Dataspace, αλτρουιστές και διαμεσολαβητές', url: faqRoot + '/dataspace-altroyistes-kai-diamesolavites'}
+              ];
+            }
 
-		      select.addEventListener('change', function () {
-		        // Enforce max 3 selections visually.
-		        var selected = Array.prototype.slice.call(select.selectedOptions || []);
-		        if (selected.length > 3) {
-		          selected.slice(3).forEach(function (opt) { opt.selected = false; });
-		        }
-		        syncToTextarea();
-		      });
+            function parseItems() {
+              var textarea = getTextarea();
+              if (!textarea) return [];
+              var raw = textarea.value || '';
+              var hasConfig = hasConfigValue();
+              if (!raw.trim()) return hasConfig ? [] : getDefaultItems();
+              try {
+                var parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed) || !parsed.length) return hasConfig ? [] : getDefaultItems();
+                var filtered = parsed.filter(function (item) {
+                  return item && (item.title || item.url || item.label);
+                });
+                if (!filtered.length) return hasConfig ? [] : getDefaultItems();
+                return filtered;
+              } catch (e) {
+                console && console.warn && console.warn('Invalid contact gitbook items JSON', e);
+                return hasConfig ? [] : getDefaultItems();
+              }
+            }
 
-		      // Restore selection from saved textarea value (if any) and sync.
-		      applySelectionFromTextarea();
-		      if ((select.selectedOptions || []).length) {
-		        syncToTextarea();
-		      }
-		    });
-		  </script>
-  {% endif %}
+            function serializeItems(tbody) {
+              var rows = tbody.querySelectorAll('tr');
+              var items = [];
+              rows.forEach(function (row) {
+                var titleInput = row.querySelector('input[data-field=\"title\"]');
+                var urlInput = row.querySelector('input[data-field=\"url\"]');
+                if (!titleInput || !urlInput) return;
+                var title = titleInput.value.trim();
+                var url = urlInput.value.trim();
+                if (title || url) {
+                  items.push({title: title, url: url});
+                }
+              });
+              var textarea = getTextarea();
+              if (textarea) {
+                textarea.value = JSON.stringify(items);
+              }
+            }
 
-  <h3>{{ _('Προεπιλεγμένη Εφαρμοστέα Νομοθεσία') }}</h3>
+            function addRow(tbody, item) {
+              var tr = document.createElement('tr');
 
-  {{ form.input(
-    'ckanext.data_gov_gr.dataset.legislation.open',
-    id='field-ckanext.data_gov_gr.dataset.legislation.open',
-    label=_('Για Ανοικτά Δεδομένα (access_rights_type=open)'),
-    value=data['ckanext.data_gov_gr.dataset.legislation.open'],
-    error=errors['ckanext.data_gov_gr.dataset.legislation.open'],
-    placeholder='https://... (π.χ. οδηγία 2019/1024)'
-  ) }}
+              var tdTitle = document.createElement('td');
+              var inputTitle = document.createElement('input');
+              inputTitle.type = 'text';
+              inputTitle.className = 'form-control';
+              inputTitle.setAttribute('data-field', 'title');
+              inputTitle.value = (item && (item.title || item.label)) || '';
+              tdTitle.appendChild(inputTitle);
 
-  {% if not h.should_disable_protected_data() %}
+              var tdUrl = document.createElement('td');
+              var inputUrl = document.createElement('input');
+              inputUrl.type = 'text';
+              inputUrl.className = 'form-control';
+              inputUrl.setAttribute('data-field', 'url');
+              inputUrl.placeholder = 'https://data-gov-gr.gitbook.io/guides/syxnes-erotiseis';
+              inputUrl.value = (item && item.url) || '';
+              tdUrl.appendChild(inputUrl);
 
-  {{ form.input(
-    'ckanext.data_gov_gr.dataset.legislation.protected',
-    id='field-ckanext.data_gov_gr.dataset.legislation.protected',
-    label=_('Για Προστατευόμενα Δεδομένα (access_rights_type=protected)'),
-    value=data['ckanext.data_gov_gr.dataset.legislation.protected'],
-    error=errors['ckanext.data_gov_gr.dataset.legislation.protected'],
-    placeholder='https://... (π.χ. κανονισμός 2022/868)'
-  ) }}
+              var tdActions = document.createElement('td');
+              tdActions.style.textAlign = 'center';
+              var removeBtn = document.createElement('button');
+              removeBtn.type = 'button';
+              removeBtn.className = 'btn btn-default';
+              removeBtn.textContent = '−';
+              removeBtn.onclick = function () {
+                tr.parentNode.removeChild(tr);
+                serializeItems(tbody);
+              };
+              tdActions.appendChild(removeBtn);
 
-  {% endif %}
+              tr.appendChild(tdTitle);
+              tr.appendChild(tdUrl);
+              tr.appendChild(tdActions);
 
-  {% if show_dataset_menu_section %}
-    <h3>{{ _('Μενού Συνόλων Δεδομένων (Dropdown)') }}</h3>
+              [inputTitle, inputUrl].forEach(function (input) {
+                input.addEventListener('input', function () {
+                  serializeItems(tbody);
+                });
+              });
 
-    <p class="help-block">
-      {{ _('Ορίστε παραμετρικές επιλογές για το dropdown «Σύνολα δεδομένων» στην κεφαλίδα.') }}
-      {{ _('Κάθε γραμμή στον πίνακα αντιστοιχεί σε μία επιλογή (Ετικέτα + Query).') }}
-      {{ _('Χρησιμοποιήστε το κουμπί \"+\" για να προσθέσετε νέες επιλογές μία-μία και το \"−\" για να αφαιρέσετε κάποια. ') }}
-      {{ _('Στο πεδίο \"Query\" μπορείτε είτε να επικολλήσετε απευθείας το URL από τη σελίδα αναζήτησης (π.χ. /dataset/?is_hvd=Yes), είτε μόνο το query μέρος (π.χ. fq=is_hvd:true).') }}
-    </p>
+              tbody.appendChild(tr);
+            }
 
-    {# Κρυφό textarea που αποθηκεύει τη JSON αναπαράσταση των επιλογών #}
-    <div style="display:none;">
-      {{ form.textarea(
-        'ckanext.data_gov_gr.menu.dataset.items',
-        id='field-ckanext.data_gov_gr.menu.dataset.items',
-        label=_('Επιλογές dropdown (JSON)'),
-        value=data['ckanext.data_gov_gr.menu.dataset.items'],
-        error=errors['ckanext.data_gov_gr.menu.dataset.items']
-      ) }}
-    </div>
+            function initEditor() {
+              var editor = document.getElementById('contact-gitbook-embed-items-editor');
+              if (!editor) return;
+              var tbody = editor.querySelector('tbody');
+              var addBtn = document.querySelector('button[data-role=\"add-contact-gitbook-item\"]');
+              var resetBtn = document.querySelector('button[data-role=\"reset-contact-gitbook-items\"]');
+              if (!tbody || !addBtn) return;
 
-    <table class="table table-striped" id="dataset-menu-items-editor">
-      <thead>
-        <tr>
-          <th>{{ _('Ετικέτα') }}</th>
-          <th>{{ _('Query') }}</th>
-          <th style="width: 3rem; text-align: center;">{{ _('Ενέργειες') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {# Γεμίζει δυναμικά με JavaScript βάσει του JSON #}
-      </tbody>
-    </table>
-    <button type="button" class="btn btn-default" data-role="add-item">
-      +
-    </button>
+              var items = parseItems();
+              if (items.length) {
+                items.forEach(function (item) {
+                  addRow(tbody, item);
+                });
+              } else {
+                addRow(tbody, {title: '', url: ''});
+              }
 
-		  <script type="text/javascript">
-		    (function () {
-	      function getTextarea() {
-	        return document.getElementById('field-ckanext.data_gov_gr.menu.dataset.items');
-      }
+              serializeItems(tbody);
 
-      function parseItems() {
-        var textarea = getTextarea();
-        if (!textarea) return [];
-        var raw = textarea.value || '';
-        if (!raw.trim()) return [];
-        try {
-          var parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return [];
-          return parsed.filter(function (item) {
-            return item && (item.label || item.query);
-          });
-        } catch (e) {
-          console && console.warn && console.warn('Invalid dataset menu JSON', e);
-          return [];
-        }
-      }
+              addBtn.addEventListener('click', function () {
+                addRow(tbody, {title: '', url: ''});
+                serializeItems(tbody);
+              });
 
-      function serializeItems(tbody) {
-        var rows = tbody.querySelectorAll('tr');
-        var items = [];
-        rows.forEach(function (row) {
-          var labelInput = row.querySelector('input[data-field=\"label\"]');
-          var queryInput = row.querySelector('input[data-field=\"query\"]');
-          if (!labelInput || !queryInput) return;
-          var label = labelInput.value.trim();
-          var query = queryInput.value.trim();
-          if (label || query) {
-            items.push({label: label, query: query});
+              if (resetBtn) {
+                resetBtn.addEventListener('click', function () {
+                  tbody.innerHTML = '';
+                  getDefaultItems().forEach(function (item) {
+                    addRow(tbody, item);
+                  });
+                  serializeItems(tbody);
+                });
+              }
+            }
+
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', initEditor);
+            } else {
+              initEditor();
+            }
+          })();
+        </script>
+      </section>
+      {% endif %}
+
+      {% if show_stats_powerbi_section %}
+      <section id="dg-config-powerbi" class="dg-config-section" data-dg-section="dg-config-powerbi">
+        <h3>{{ _('Power BI') }}</h3>
+
+        {{ form.input(
+          'ckanext.data_gov_gr.powerbi_embed_url',
+          id='field-ckanext.data_gov_gr.powerbi_embed_url',
+          label=_('Σύνδεσμος ενσωμάτωσης Power BI'),
+          value=data['ckanext.data_gov_gr.powerbi_embed_url'],
+          error=errors['ckanext.data_gov_gr.powerbi_embed_url'],
+          placeholder='https://app.powerbi.com/view?r=...'
+        ) }}
+      </section>
+      {% endif %}
+
+      <section id="dg-config-survey" class="dg-config-section" data-dg-section="dg-config-survey">
+        <h3>{{ _('Έρευνα') }}</h3>
+
+        {{ form.input(
+          'ckanext.data_gov_gr.user_survey.url',
+          id='field-ckanext.data_gov_gr.user_survey.url',
+          label=_('Σύνδεσμος ερωτηματολογίου χρήστη'),
+          value=data['ckanext.data_gov_gr.user_survey.url'],
+          error=errors['ckanext.data_gov_gr.user_survey.url'],
+          placeholder='https://example.com/your-survey?lang={locale}'
+        ) }}
+      </section>
+
+      <section id="dg-config-showcases" class="dg-config-section" data-dg-section="dg-config-showcases">
+        <h3>{{ _('Showcases') }}</h3>
+
+        {{ form.textarea(
+          'ckanext.data_gov_gr.showcase.disclaimer',
+          id='field-ckanext.data_gov_gr.showcase.disclaimer',
+          label=_('Κείμενο αποποίησης ευθύνης για τις εφαρμογές (HTML επιτρέπεται)'),
+          value=data['ckanext.data_gov_gr.showcase.disclaimer'],
+          error=errors['ckanext.data_gov_gr.showcase.disclaimer'],
+          placeholder=_('Εισάγετε εδώ το κείμενο αποποίησης ευθύνης για την σελίδα εφαρμογών / Showcases.')
+        ) }}
+      </section>
+
+	      <style>
+	        /* When showing all sections, keep spacing between them. */
+	        #dg-config-content:not(.dg-config-enhanced) .dg-config-section + .dg-config-section { margin-top: 2rem; }
+	        .dg-config-enhanced .dg-config-section { display: none; }
+	        .dg-config-enhanced .dg-config-section.is-active { display: block; }
+	        #dg-config-content .dg-config-section > h3 { margin-top: 0.5rem; margin-bottom: 0.75rem; }
+	        #dg-config-content .dg-config-section > h3 + h4 { margin-top: 0.5rem; }
+	      </style>
+
+      <script>
+	        (function () {
+	          var content = document.getElementById('dg-config-content');
+	          if (!content) return;
+	
+	          var sections = Array.prototype.slice.call(content.querySelectorAll('.dg-config-section[data-dg-section]'));
+	          if (!sections.length) return;
+	          var nav = null;
+	          var hasBoundNav = false;
+	
+	          function getNav() {
+	            if (nav) return nav;
+	            nav = document.querySelector('.dg-config-nav');
+	            return nav;
+	          }
+	
+	          function dispatchSectionEvent(id) {
+	            if (!window || !window.dispatchEvent) return;
+	            try {
+	              window.dispatchEvent(new CustomEvent('dg-config:section', {detail: {id: id}}));
+	            } catch (e) {
+	              // Ignore if CustomEvent is not supported.
+	            }
+	          }
+	
+	          function setActiveNav(targetId) {
+	            var navEl = getNav();
+	            if (!navEl) return;
+	            var items = Array.prototype.slice.call(navEl.querySelectorAll('li'));
+	            items.forEach(function (li) { li.classList.remove('is-active'); li.classList.remove('active'); });
+	            var link = navEl.querySelector('a[href=\"#' + targetId + '\"]');
+	            if (link && link.parentElement) {
+	              link.parentElement.classList.add('is-active');
+	              link.parentElement.classList.add('active');
+	            }
+	          }
+
+            // Avoid scrolling "down" when switching sections; only scroll up if the
+            // target section would end up above the desired offset.
+            function scrollUpIfNeeded(el) {
+              if (!el || !window || !window.scrollTo) return;
+              try {
+                var offset = 20;
+                var rect = el.getBoundingClientRect();
+                if (rect.top >= offset) {
+                  return;
+                }
+                var top = window.pageYOffset + rect.top - offset;
+                if (top < 0) top = 0;
+                window.scrollTo({top: top, behavior: 'smooth'});
+              } catch (e) {}
+            }
+
+	          function showAll() {
+	            content.classList.remove('dg-config-enhanced');
+	            sections.forEach(function (s) { s.classList.remove('is-active'); });
+	            setActiveNav('dg-config-all');
+	            dispatchSectionEvent('dg-config-all');
+              scrollUpIfNeeded(content);
           }
-        });
-        var textarea = getTextarea();
-        if (textarea) {
-          textarea.value = JSON.stringify(items);
-        }
-      }
 
-      function addRow(tbody, item) {
-        var tr = document.createElement('tr');
+          function showSection(sectionId) {
+            if (!sectionId || sectionId === 'dg-config-all') {
+              showAll();
+              return;
+            }
+            var section = content.querySelector('#' + sectionId);
+            if (!section) {
+              showAll();
+              return;
+            }
+            content.classList.add('dg-config-enhanced');
+	            sections.forEach(function (s) {
+	              s.classList.toggle('is-active', s.id === sectionId);
+	            });
+	            setActiveNav(sectionId);
+	            dispatchSectionEvent(sectionId);
+              scrollUpIfNeeded(section);
+	          }
 
-        var tdLabel = document.createElement('td');
-        var inputLabel = document.createElement('input');
-        inputLabel.type = 'text';
-        inputLabel.className = 'form-control';
-        inputLabel.setAttribute('data-field', 'label');
-        inputLabel.value = item && item.label || '';
-        tdLabel.appendChild(inputLabel);
-
-        var tdQuery = document.createElement('td');
-        var inputQuery = document.createElement('input');
-        inputQuery.type = 'text';
-        inputQuery.className = 'form-control';
-        inputQuery.setAttribute('data-field', 'query');
-        inputQuery.placeholder = 'dataset/?is_hvd=Yes ή fq=is_hvd:true';
-        inputQuery.value = item && item.query || '';
-        tdQuery.appendChild(inputQuery);
-
-        var tdActions = document.createElement('td');
-        tdActions.style.textAlign = 'center';
-        var removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'btn btn-default';
-        removeBtn.textContent = '−';
-        removeBtn.onclick = function () {
-          tr.parentNode.removeChild(tr);
-          serializeItems(tbody);
-        };
-        tdActions.appendChild(removeBtn);
-
-        tr.appendChild(tdLabel);
-        tr.appendChild(tdQuery);
-        tr.appendChild(tdActions);
-
-        [inputLabel, inputQuery].forEach(function (input) {
-          input.addEventListener('input', function () {
-            serializeItems(tbody);
-          });
-        });
-
-        tbody.appendChild(tr);
-      }
-
-      function initEditor() {
-        var editor = document.getElementById('dataset-menu-items-editor');
-        if (!editor) return;
-        var tbody = editor.querySelector('tbody');
-        var addBtn = document.querySelector('#dataset-menu-items-editor + button[data-role=\"add-item\"]');
-        if (!tbody || !addBtn) return;
-
-        var items = parseItems();
-        if (items.length === 0) {
-          // Ξεκινάμε με μια κενή γραμμή για ευκολία
-          addRow(tbody, {label: '', query: ''});
-        } else {
-          items.forEach(function (item) {
-            addRow(tbody, item);
-          });
-        }
-
-        addBtn.onclick = function (e) {
-          e.preventDefault();
-          addRow(tbody, {label: '', query: ''});
-          serializeItems(tbody);
-        };
-      }
-
-      if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        initEditor();
-      } else {
-        document.addEventListener('DOMContentLoaded', initEditor);
-      }
-    })();
-  </script>
-  {% endif %}
+          function handleHash() {
+            var hash = (window.location.hash || '').replace('#', '');
+            if (!hash) {
+              // Default: first real section.
+              showSection(sections[0].id);
+              return;
+            }
+	            showSection(hash);
+	          }
+	
+	          function bindNavOnce() {
+	            if (hasBoundNav) return;
+	            var navEl = getNav();
+	            if (!navEl) return;
+	            hasBoundNav = true;
+	            navEl.addEventListener('click', function (e) {
+	              var a = e.target && e.target.closest ? e.target.closest('a[href^=\"#dg-config-\"]') : null;
+	              if (!a) return;
+	              var targetId = (a.getAttribute('href') || '').replace('#', '');
+	              if (!targetId) return;
+	              e.preventDefault();
+	              if (window && window.history && window.history.pushState) {
+	                window.history.pushState(null, '', '#' + targetId);
+	              } else {
+	                window.location.hash = '#' + targetId;
+	              }
+	              showSection(targetId);
+	            });
+	          }
+	
+	          // Init based on hash.
+	          if (document.readyState === 'loading') {
+	            document.addEventListener('DOMContentLoaded', function () {
+	              bindNavOnce();
+	              handleHash();
+	            });
+	          } else {
+	            bindNavOnce();
+	            handleHash();
+	          }
+	
+	          if (window && window.addEventListener) {
+	            window.addEventListener('hashchange', handleHash);
+	            window.addEventListener('popstate', handleHash);
+	          }
+	        })();
+	      </script>
+  </div>
 
 {% endblock %}
 
 {% block admin_form_help %}
+  <div class="dg-config-nav" aria-label="{{ _('Ρυθμίσεις') }}">
+    <ul class="list-unstyled nav nav-simple dg-config-nav-list">
+      <li><a href="#dg-config-all">{{ _('Όλα') }}</a></li>
+      <li><a href="#dg-config-general">{{ _('Γενικά') }}</a></li>
+      <li><a href="#dg-config-home">{{ _('Αρχική') }}</a></li>
+      <li><a href="#dg-config-metadata-defaults">{{ _('Προεπιλογές πεδίων μεταδεδομένων') }}</a></li>
+      <li><a href="#dg-config-menu">{{ _('Μενού / Αναζήτηση') }}</a></li>
+      {% if show_guides_section %}<li><a href="#dg-config-guides">{{ _('Οδηγοί (GitBook)') }}</a></li>{% endif %}
+      {% if show_stats_powerbi_section %}<li><a href="#dg-config-powerbi">{{ _('Power BI') }}</a></li>{% endif %}
+      <li><a href="#dg-config-survey">{{ _('Έρευνα') }}</a></li>
+      <li><a href="#dg-config-showcases">{{ _('Showcases') }}</a></li>
+    </ul>
+  </div>
 
-  <p>
-    <strong>{{ _('Site Title') }}:</strong>
-    {{ _('Ο τίτλος της πύλης, όπως εμφανίζεται στην κεφαλίδα και σε διάφορα σημεία του CKAN.') }}
-  </p>
+  <hr/>
 
-  <p>
-    <strong>{{ _('Site logo') }}:</strong>
-    {{ _('Το λογότυπο που εμφανίζεται στην κεφαλίδα όλων των σελίδων της πύλης (μπορεί να δοθεί ως URL ή να ανέβει ως εικόνα).') }}
-  </p>
-
-  {% if show_stats_powerbi_section %}
-    <p>
-      <strong>{{ _('Σύνδεσμος ενσωμάτωσης Power BI') }}:</strong>
-      {{ _('Πλήρες iframe src URL από το Power BI (\"Publish to web\" ή \"Embed → Website or portal\"). Αν οριστεί εδώ, υπερισχύει της τιμής powerbi.embed_url στο configuration file.') }}
+  <div id="dg-config-help">
+    <p class="muted">
+      {{ _('Επιλέξτε κατηγορία από το αριστερό μενού για να δείτε μόνο τις σχετικές ρυθμίσεις και επεξηγήσεις.') }}
     </p>
-  {% endif %}
 
-  {% if show_home_stats_section %}
-    <p>
-      <strong>{{ _('Στατιστικά αρχικής σελίδας') }}:</strong>
-      {{ _('Επιλέξτε μέχρι τρεις από τις διαθέσιμες σελίδες στατιστικών (/stats) για να εμφανίζονται ως πλακίδια στην αρχική σελίδα, με τίτλο και σύνδεσμο προς την αντίστοιχη αναλυτική σελίδα στατιστικών.') }}
-    </p>
-  {% endif %}
+    <div class="dg-help-section" data-dg-help="dg-config-all">
+      <p class="help-block">
+        {{ _('Επιλέξτε μια κατηγορία για να δείτε μόνο τα αντίστοιχα πεδία.') }}
+      </p>
+    </div>
 
-  <p>
-    <strong>{{ _('Σύνδεσμος ερωτηματολογίου χρήστη') }}:</strong>
-    {{ _('Διεύθυνση (URL) του εξωτερικού ερωτηματολογίου, που χρησιμοποιείται τόσο στο link του footer όσο και στο αναδυόμενο παράθυρο αξιολόγησης.') }}
-    {{ _('Μπορείτε να χρησιμοποιήσετε παραμετρικό link εδώ (π.χ. με τη γλώσσα: ?lang=el).') }}
-  </p>
+    <div class="dg-help-section" data-dg-help="dg-config-general">
+      <h4>{{ _('Γενικά') }}</h4>
+      <ul>
+        <li><strong>{{ _('Site Title') }}:</strong> {{ _('Ο τίτλος της πύλης, όπως εμφανίζεται στην κεφαλίδα και σε διάφορα σημεία του CKAN.') }}</li>
+        <li><strong>{{ _('Site logo') }}:</strong> {{ _('Το λογότυπο που εμφανίζεται στην κεφαλίδα όλων των σελίδων της πύλης (μπορεί να δοθεί ως URL ή να ανέβει ως εικόνα).') }}</li>
+      </ul>
+    </div>
 
-  <p>
-    <strong>{{ _('Κείμενο αποποίησης ευθύνης για τις εφαρμογές') }}:</strong>
-    {{ _('Κείμενο αποποίησης ευθύνης (disclaimer) που εμφανίζεται στη σελίδα ευρετηρίου των εφαρμογών (showcases).') }}
-    {{ _('Υποστηρίζει απλό HTML για συνδέσμους ή μορφοποίηση.') }}
-  </p>
+    <div class="dg-help-section" data-dg-help="dg-config-home">
+      <h4>{{ _('Αρχική') }}</h4>
+      <ul>
+        {% if show_home_stats_section %}
+          <li><strong>{{ _('Στατιστικά αρχικής σελίδας') }}:</strong> {{ _('Επιλέξτε μέχρι τέσσερα πλακίδια στατιστικών για την αρχική σελίδα.') }}</li>
+          <li><strong>{{ _('Η πύλη σε αριθμούς') }}:</strong> {{ _('Ενεργοποιεί/απενεργοποιεί τους συνοπτικούς μετρητές στην αρχική.') }}</li>
+        {% endif %}
+        {% if show_home_featured_datasets_section %}
+          <li><strong>{{ _('Επιλεγμένα datasets') }}:</strong> {{ _('Δώστε μέχρι έξι resource view IDs (ένα ανά γραμμή) για να εμφανιστούν ως επιλεγμένες προβολές.') }}</li>
+        {% endif %}
+        {% if show_home_showcases_section %}
+          <li><strong>{{ _('Showcases στην αρχική') }}:</strong> {{ _('Δώστε μέχρι τρία IDs/ονόματα showcase (ένα ανά γραμμή) για να εμφανιστούν ως ενδεικτικές εφαρμογές.') }}</li>
+        {% endif %}
+      </ul>
+    </div>
 
-  {% if show_home_featured_datasets_section %}
-    <p>
-      <strong>{{ _('Επιλεγμένα datasets στην αρχική σελίδα') }}:</strong>
-      {{ _('Δώστε μέχρι έξι resource view IDs (ένα ανά γραμμή) για να εμφανιστούν ως επιλεγμένες προβολές στην αρχική σελίδα.') }}
-    </p>
-  {% endif %}
+    <div class="dg-help-section" data-dg-help="dg-config-metadata-defaults">
+      <h4>{{ _('Προεπιλογές πεδίων μεταδεδομένων') }}</h4>
+      <ul>
+        <li><strong>{{ _('Προεπιλεγμένη Εφαρμοστέα Νομοθεσία') }}:</strong> {{ _('Σύνδεσμοι νομοθεσίας που προ-συμπληρώνονται κατά τη δημιουργία dataset (open / protected).') }}</li>
+        <li>{{ _('Αν τα πεδία μείνουν κενά, δεν θα προ-συμπληρώνεται τιμή.') }}</li>
+      </ul>
+    </div>
 
-  {% if show_home_showcases_section %}
-    <p>
-      <strong>{{ _('Εφαρμογές στην αρχική σελίδα (Showcases)') }}:</strong>
-      {{ _('Δώστε μέχρι τρία IDs ή ονόματα showcase (ένα ανά γραμμή) για να εμφανιστούν στην αρχική σελίδα ως ενδεικτικές εφαρμογές. Αν το πεδίο μείνει κενό, εμφανίζεται μόνο ο σύνδεσμος προς τη σελίδα όλων των εφαρμογών.') }}
-    </p>
-  {% endif %}
+    <div class="dg-help-section" data-dg-help="dg-config-menu">
+      <h4>{{ _('Μενού / Αναζήτηση') }}</h4>
+      <ul>
+        {% if show_dataset_menu_section %}
+          <li><strong>{{ _('Μενού Συνόλων Δεδομένων (Dropdown)') }}:</strong> {{ _('Οι επιλογές που ορίζονται εδώ εμφανίζονται ως υπο-μενού κάτω από το «Σύνολα δεδομένων».') }}</li>
+        {% endif %}
+      </ul>
+    </div>
 
-  <p>
-    <strong>{{ _('Προεπιλεγμένη Εφαρμοστέα Νομοθεσία') }}:</strong>
-    {{ _('Συνδέσμοι νομοθεσίας που προ-συμπληρώνονται στο πεδίο «Εφαρμοστέα Νομοθεσία» κατά τη δημιουργία συνόλου δεδομένων, ανάλογα με τον τύπο πρόσβασης (open / protected).') }}
-    {{ _('Αν τα πεδία μείνουν κενά, δεν θα προ-συμπληρώνεται τιμή.') }}
-  </p>
+    {% if show_guides_section %}
+      <div class="dg-help-section" data-dg-help="dg-config-guides">
+        <h4>{{ _('Οδηγοί (GitBook)') }}</h4>
+        <ul>
+          <li><strong>{{ _('Σύνδεσμος οδηγών (base URL)') }}:</strong> {{ _('Ο βασικός σύνδεσμος προς τους οδηγούς (GitBook).') }}</li>
+          <li><strong>{{ _('Επιλογές embed στη σελίδα επικοινωνίας') }}:</strong> {{ _('Η λίστα καθορίζει τις κατηγορίες που εμφανίζονται στο dropdown. Αν μείνει κενή, δεν θα εμφανιστεί dropdown.') }}</li>
+        </ul>
+      </div>
+    {% endif %}
 
-  {% if show_dataset_menu_section %}
-    <p>
-      <strong>{{ _('Μενού Συνόλων Δεδομένων (Dropdown)') }}:</strong>
-      {{ _('Οι επιλογές που ορίζονται εδώ εμφανίζονται ως υπο-μενού κάτω από το «Σύνολα δεδομένων».') }}
-      {{ _('Κάθε σειρά του πίνακα είναι μία επιλογή του dropdown· αν κάποια σειρά μείνει κενή (χωρίς Ετικέτα και Query), δεν θα εμφανιστεί στο μενού.') }}
-      {{ _('Μπορείτε να προσθέτετε ή να αφαιρείτε επιλογές μία-μία, χωρίς σταθερό μέγιστο αριθμό.') }}
-    </p>
-  {% endif %}
+    {% if show_stats_powerbi_section %}
+      <div class="dg-help-section" data-dg-help="dg-config-powerbi">
+        <h4>{{ _('Power BI') }}</h4>
+        <ul>
+          <li><strong>{{ _('Σύνδεσμος ενσωμάτωσης Power BI') }}:</strong> {{ _('Πλήρες iframe src URL από το Power BI (Publish to web / Embed).') }}</li>
+        </ul>
+      </div>
+    {% endif %}
 
-	  <p>
-	    <strong>{{ _('Νέα / Ανακοινώσεις') }}:</strong>
-	    {{ _('Η ενότητα «Νέα & Ανακοινώσεις» στην αρχική σελίδα αντλεί αυτόματα τα τρία πιο πρόσφατα άρθρα από το /blog.') }}
-	  </p>
+    <div class="dg-help-section" data-dg-help="dg-config-survey">
+      <h4>{{ _('Έρευνα') }}</h4>
+      <ul>
+        <li><strong>{{ _('Σύνδεσμος ερωτηματολογίου χρήστη') }}:</strong> {{ _('URL του εξωτερικού ερωτηματολογίου (χρησιμοποιείται στο footer και/ή σε αναδυόμενο).') }}</li>
+      </ul>
+    </div>
+
+    <div class="dg-help-section" data-dg-help="dg-config-showcases">
+      <h4>{{ _('Showcases') }}</h4>
+      <ul>
+        <li><strong>{{ _('Κείμενο αποποίησης ευθύνης') }}:</strong> {{ _('Κείμενο που εμφανίζεται στη σελίδα εφαρμογών (showcases). Υποστηρίζει απλό HTML.') }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <style>
+    .dg-config-nav-list li.active > a { font-weight: 600; }
+    .dg-config-nav-list > li > a { font-size: 14px !important; line-height: 1.4; }
+    /* Help panel typography (match CKAN defaults) */
+    #dg-config-help { font-size: 14px !important; line-height: 1.55; }
+    #dg-config-help p,
+    #dg-config-help li { font-size: 14px !important; }
+    #dg-config-help h4 { font-size: 16px !important; margin-top: 0.75rem; }
+    #dg-config-help strong { font-weight: 700; }
+    #dg-config-help .dg-help-section { display: none; }
+    #dg-config-help.is-enhanced .dg-help-section.is-active { display: block; }
+    #dg-config-help.is-enhanced .dg-help-section { display: none; }
+  </style>
+
+  <script>
+    (function () {
+      var help = document.getElementById('dg-config-help');
+      if (!help || !window || !window.addEventListener) return;
+      var helpSections = Array.prototype.slice.call(help.querySelectorAll('.dg-help-section[data-dg-help]'));
+      if (!helpSections.length) return;
+      help.classList.add('is-enhanced');
+
+      function setHelpActive(id) {
+        var target = id || 'dg-config-all';
+        if (target !== 'dg-config-all' && !help.querySelector('[data-dg-help=\"' + target + '\"]')) {
+          target = 'dg-config-all';
+        }
+        helpSections.forEach(function (el) {
+          el.classList.toggle('is-active', el.getAttribute('data-dg-help') === target);
+        });
+      }
+
+      window.addEventListener('dg-config:section', function (e) {
+        var id = e && e.detail && e.detail.id;
+        setHelpActive(id);
+      });
+
+      // Initial state (match hash or default all)
+      var hash = (window.location.hash || '').replace('#', '') || 'dg-config-all';
+      setHelpActive(hash);
+    })();
+  </script>
 
 {% endblock %}

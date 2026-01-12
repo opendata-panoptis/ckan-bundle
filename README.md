@@ -1,5 +1,5 @@
 # Public Export Bundle (manual)
-- Tag: v20260105.122029
-- Built: 2026-01-05T12:20:29Z (UTC)
+- Tag: v20260112.095341
+- Built: 2026-01-12T09:53:41Z (UTC)
 Each subfolder corresponds to a source repository from https://github.com/opendata-panoptis .
 See MANIFEST.json for commit SHAs.

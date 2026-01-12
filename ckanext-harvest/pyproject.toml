@@ -45,6 +45,8 @@ custom_dcat_harvester = "ckanext.data_gov_gr.harvesters.custom_dcat_harvester:Cu
 ekan_dcat_harvester = "ckanext.data_gov_gr.harvesters.ekan_dcat_harvester:EkanDcatHarvester"
 dkan_ckan_harvester = "ckanext.data_gov_gr.harvesters.dkan_ckan_harvester:DkanCkanHarvester"
 attica_opendata_harvester = "ckanext.data_gov_gr.harvesters.attica_harvester:AtticaOpenDataHarvester"
+bank_of_greece_harvester = "ckanext.data_gov_gr.harvesters.bank_of_greece_harvester:BankOfGreeceHarvester"
+apd_kritis_harvester = "ckanext.data_gov_gr.harvesters.apd_kritis_harvester:ApdKritisHarvester"
 # Test plugins
 test_harvester = "ckanext.harvest.tests.test_queue:MockHarvester"
 test_harvester2 = "ckanext.harvest.tests.test_queue2:MockHarvester"

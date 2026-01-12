@@ -50,3 +50,24 @@ Example:
     {% endfor %}
   </ul>
 </nav>
+
+<script type="text/javascript">
+  // Όταν υπάρχει ενεργός κόμβος, άνοιξε όλους τους γονείς του (details) ώστε να φαίνεται άμεσα.
+  document.addEventListener('DOMContentLoaded', function () {
+    var activeItem = document.querySelector('.org-tree-wrap .org-tree-item.is-active');
+    if (!activeItem) return;
+
+    // Άνοιξε όλα τα ancestor <details>
+    var current = activeItem;
+    while (current) {
+      var details = current.closest && current.closest('details.org-tree-branch');
+      if (!details) break;
+      details.open = true;
+      current = details.parentElement; // πήγαινε προς τα πάνω στο DOM
+    }
+
+    if (activeItem.scrollIntoView) {
+      activeItem.scrollIntoView({ block: 'center', inline: 'nearest' });
+    }
+  });
+</script>
