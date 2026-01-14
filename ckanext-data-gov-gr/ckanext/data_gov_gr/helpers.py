@@ -1608,6 +1608,27 @@ def is_url_field(field_name, value):
 
 # ---------------------------------------------------------------------------------------
 
+def _parse_csv_config(value: str) -> set[str]:
+    if not value:
+        return set()
+    return {
+        part.strip().upper()
+        for part in str(value).split(",")
+        if part.strip()
+    }
+
+def harvest_frequencies():
+    from ckanext.harvest.model import UPDATE_FREQUENCIES
+
+    excluded = _parse_csv_config(
+        toolkit.config.get("ckanext.data_gov_gr.harvest.frequency_exclude", "")
+    )
+
+    freqs = [f for f in UPDATE_FREQUENCIES if f.upper() not in excluded]
+    return [{"text": toolkit._(f.title()), "value": f} for f in freqs]
+
+# ---------------------------------------------------------------------------------------
+
 def get_helpers():
     return {
         "is_url_field": is_url_field,
@@ -1646,5 +1667,6 @@ def get_helpers():
         'get_dataset_menu_items': get_dataset_menu_items,
         'extract_iframe_from_html': extract_iframe_from_html,
         'get_stat_data': get_stat_data,
+        "harvest_frequencies": harvest_frequencies,
         'dump_json': dump_json,
     }

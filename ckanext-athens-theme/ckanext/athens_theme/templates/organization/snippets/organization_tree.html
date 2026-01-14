@@ -66,7 +66,12 @@ Example:
       current = details.parentElement; // πήγαινε προς τα πάνω στο DOM
     }
 
-    if (activeItem.scrollIntoView) {
+    // Κάνε scroll ΜΟΝΟ στο ευρετήριο οργανισμών:
+    // /organization ή /el/organization ή /en/organization (και με trailing slash)
+    var path = (window.location && window.location.pathname) ? window.location.pathname : '';
+    var isOrganizationsIndex = /^\/([a-z]{2}\/)?organization\/?$/.test(path);
+
+    if (isOrganizationsIndex && activeItem.scrollIntoView) {
       activeItem.scrollIntoView({ block: 'center', inline: 'nearest' });
     }
   });

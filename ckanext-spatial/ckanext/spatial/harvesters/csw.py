@@ -202,6 +202,10 @@ class CSWHarvester(SpatialHarvester, SingletonPlugin):
                 # Contents come from csw_client already declared and encoded as utf-8
                 # Remove original XML declaration
                 content = re.sub('<\?xml(.*)\?>', '', record['xml'])
+
+                # NEW: heal common ISO19139 invalid patterns from upstream CSW
+                content = self._heal_iso19139_common_issues(content)
+
                 harvest_object.content = content.strip()
                 harvest_object.save()
             except Exception as e:
@@ -215,6 +219,177 @@ class CSWHarvester(SpatialHarvester, SingletonPlugin):
         except Exception as e:
             self._save_object_error('Error getting the CSW record with GUID %s' % identifier, harvest_object)
             return False
+
+    def _heal_iso19139_common_issues(self, xml_string: str) -> str:
+        """
+        Apply a set of small, targeted ISO19139 "healing" rules.
+        Each rule fixes a known upstream structural issue that breaks XSD validation.
+        """
+        try:
+            from lxml import etree
+
+            parser = etree.XMLParser(recover=True, remove_blank_text=False, resolve_entities=False)
+            root = etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+            removed_citation_name = self._heal_rule_remove_citation_name(root)
+            normalized_included = self._heal_rule_normalize_included_with_dataset(root)
+            normalized_temporal = self._heal_rule_normalize_temporal_extent_gml(root)
+            normalized_decimals = self._heal_rule_normalize_gco_decimals(root)
+
+            log = logging.getLogger(__name__ + ".CSW.fetch")
+            if removed_citation_name:
+                log.info("Healed ISO19139: removed %s invalid gmd:CI_Citation/gmd:name element(s)",
+                         removed_citation_name)
+            if normalized_included:
+                log.info("Healed ISO19139: normalized %s gmd:includedWithDataset placement(s)", normalized_included)
+            if normalized_temporal:
+                log.info("Healed ISO19139: normalized %s temporal extent element(s)", normalized_temporal)
+            if normalized_decimals:
+                log.info("Healed ISO19139: normalized %s gco:Decimal value(s) (comma -> dot)", normalized_decimals)
+
+            return etree.tostring(root, encoding="unicode")
+        except Exception:
+            logging.getLogger(__name__ + ".CSW.fetch").warning(
+                "ISO19139 healing failed; keeping original XML",
+                exc_info=True
+            )
+            return xml_string
+
+    def _heal_rule_normalize_gco_decimals(self, root) -> int:
+        """
+        Fix decimal values that use comma as decimal separator (e.g. '23,42'),
+        which are invalid for xs:decimal.
+
+        Only converts simple patterns like: -?digits, digits
+        (avoids touching cases that might use commas as thousands separators).
+        """
+        import re
+
+        NS_GCO = "http://www.isotc211.org/2005/gco"
+        decimal_re = re.compile(r"^\s*-?\d+,\d+\s*$")
+
+        changed = 0
+        for el in root.xpath(
+                "//*[namespace-uri()=$gco and local-name()='Decimal']",
+                gco=NS_GCO,
+        ):
+            if not el.text:
+                continue
+            if decimal_re.match(el.text):
+                el.text = el.text.strip().replace(",", ".", 1)
+                changed += 1
+
+        return changed
+
+    def _heal_rule_normalize_temporal_extent_gml(self, root) -> int:
+        """
+        Fix temporal extent issues:
+          - Convert gml (3.1.1) time primitives under EX_TemporalExtent to gml32 (3.2)
+          - Normalize begin/endPosition values like '... 00:00' -> '...+00:00'
+        """
+        from lxml import etree
+
+        NS_GMD = "http://www.isotc211.org/2005/gmd"
+        NS_GML_311 = "http://www.opengis.net/gml"
+        NS_GML_32 = "http://www.opengis.net/gml/3.2"
+
+        changed = 0
+
+        # Scope to EX_TemporalExtent only (avoid touching other gml geometry)
+        temporal_extents = root.xpath(
+            "//*[namespace-uri()=$gmd and local-name()='EX_TemporalExtent']",
+            gmd=NS_GMD,
+        )
+
+        def _fix_dt(text: str) -> str:
+            if not text:
+                return text
+            s = text.strip()
+            # Common broken pattern in your feed: 'YYYY-MM-DDTHH:MM:SS 00:00'
+            if s.endswith(" 00:00") and "T" in s:
+                return s[:-6] + "+00:00"
+            return s
+
+        for te in temporal_extents:
+            # Convert TimePeriod/TimeInstant + their position children *only inside* temporal extent
+            for el in te.xpath(
+                    ".//*[namespace-uri()=$ns and (local-name()='TimePeriod' or local-name()='TimeInstant')]",
+                    ns=NS_GML_311):
+                local = etree.QName(el).localname
+                el.tag = f"{{{NS_GML_32}}}{local}"
+                changed += 1
+
+                # Fix gml:id attribute namespace if present (gml:id -> gml32:id)
+                old_id = el.attrib.pop(f"{{{NS_GML_311}}}id", None)
+                if old_id is not None:
+                    el.attrib[f"{{{NS_GML_32}}}id"] = old_id
+                    changed += 1
+
+            for el in te.xpath(
+                    ".//*[namespace-uri()=$ns and (local-name()='beginPosition' or local-name()='endPosition' or local-name()='timePosition')]",
+                    ns=NS_GML_311):
+                local = etree.QName(el).localname
+                el.tag = f"{{{NS_GML_32}}}{local}"
+                if el.text:
+                    new_text = _fix_dt(el.text)
+                    if new_text != el.text:
+                        el.text = new_text
+                        changed += 1
+                changed += 1
+
+            # Also normalize dateTime strings even if elements are already gml32
+            for el in te.xpath(
+                    ".//*[namespace-uri()=$ns and (local-name()='beginPosition' or local-name()='endPosition' or local-name()='timePosition')]",
+                    ns=NS_GML_32):
+                if el.text:
+                    new_text = _fix_dt(el.text)
+                    if new_text != el.text:
+                        el.text = new_text
+                        changed += 1
+
+        return changed
+
+    def _heal_rule_remove_citation_name(self, root) -> int:
+        """Remove invalid gmd:name elements that are direct children of gmd:CI_Citation."""
+        NS = {"gmd": "http://www.isotc211.org/2005/gmd"}
+        removed = 0
+
+        for el in root.xpath("//gmd:CI_Citation/gmd:name", namespaces=NS):
+            parent = el.getparent()
+            if parent is not None:
+                parent.remove(el)
+                removed += 1
+
+        return removed
+
+    def _heal_rule_normalize_included_with_dataset(self, root) -> int:
+        """
+        Move invalid gmd:contentInfo/gmd:includedWithDataset under
+        gmd:contentInfo/gmd:MD_FeatureCatalogueDescription.
+        """
+        NS = {"gmd": "http://www.isotc211.org/2005/gmd"}
+        moved = 0
+
+        for content_info in root.xpath("//gmd:contentInfo", namespaces=NS):
+            bad = content_info.find("{http://www.isotc211.org/2005/gmd}includedWithDataset")
+            if bad is None:
+                continue
+
+            fcd = content_info.find("{http://www.isotc211.org/2005/gmd}MD_FeatureCatalogueDescription")
+            if fcd is None:
+                # no obvious target; safest is to remove the invalid element
+                content_info.remove(bad)
+                moved += 1
+                continue
+
+            existing = fcd.find("{http://www.isotc211.org/2005/gmd}includedWithDataset")
+            content_info.remove(bad)
+            if existing is None:
+                fcd.insert(0, bad)
+
+            moved += 1
+
+        return moved
 
     # ΠΡΟΣΘΗΚΗ: Νέα μέθοδος για GET-based getrecordbyid
     def _get_record_by_id_using_get(self, identifier, outputschema="gmd"):
