@@ -10,7 +10,8 @@ from .logic.harvest_mapping import (
     cleanup_package_tags,
     apply_cityofathens_publisher,
     apply_dcat_type_geospatial,
-    apply_download_url_for_direct_downloads
+    apply_download_url_for_direct_downloads,
+    apply_resource_format_from_iso19139
 )
 
 import logging
@@ -763,7 +764,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
                     package_dict['relationships_as_subject'] = relationships
 
             except Exception as e:
-                log.error("Error updating relationships in after_dataset_show: %s", str(e))
+                log.warning("Error updating relationships in after_dataset_show: %s", str(e))
 
         return package_dict
 
@@ -810,6 +811,7 @@ class DataGovGrSpatialHarvesterPlugin(plugins.SingletonPlugin):
             apply_resource_rights_and_license_from_iso19139(package_dict, xml_tree, overwrite=False)
 
             apply_download_url_for_direct_downloads(package_dict, xml_tree, overwrite=False)
+            apply_resource_format_from_iso19139(package_dict, xml_tree, overwrite=True)
 
             # Publisher rule(s)
             apply_cityofathens_publisher(package_dict, harvest_object)

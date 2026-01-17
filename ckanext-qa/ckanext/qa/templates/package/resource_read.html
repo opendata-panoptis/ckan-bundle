@@ -4,6 +4,8 @@
   {# Try and inherit from archiver's resource_read #}
   {{ super() }}
   <br>
-  {{ h.qa_openness_stars_resource_html(resource) }}
+  {% if h.qa_show_openness_stars() %}
+    {{ h.qa_openness_stars_resource_html(resource) }}
+  {% endif %}
 
 {% endblock %}

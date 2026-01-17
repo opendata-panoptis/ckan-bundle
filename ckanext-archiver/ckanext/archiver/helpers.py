@@ -1,3 +1,4 @@
+from ckan.common import config
 from ckan.plugins import toolkit as tk
 from ckan.common import _
 import re
@@ -6,6 +7,11 @@ import re
 def archiver_resource_show(resource_id):
     data_dict = {'id': resource_id}
     return tk.get_action('archiver_resource_show')(data_dict)
+
+
+def archiver_show_broken_status() -> bool:
+    # Default: False αν λείπει από το ini
+    return tk.asbool(config.get("ckanext.archiver.show_broken_status", False))
 
 
 def archiver_is_resource_broken_html(resource):
@@ -17,6 +23,11 @@ def archiver_is_resource_broken_html(resource):
     return tk.literal(
         tk.render('archiver/is_resource_broken.html',
                   extra_vars=extra_vars))
+
+
+def archiver_show_cached_url() -> bool:
+    # Default: False αν λείπει από το ini
+    return tk.asbool(config.get("ckanext.archiver.show_cached_url", False))
 
 
 def archiver_is_resource_cached_html(resource):

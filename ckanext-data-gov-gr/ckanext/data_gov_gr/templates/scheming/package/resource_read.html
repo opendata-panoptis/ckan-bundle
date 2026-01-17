@@ -11,7 +11,30 @@
 {% block resource_additional_information_inner %}
   {{ super() }}
 
-  {{ h.archiver_is_resource_broken_html(c.resource) }}<br>
-  {{ h.archiver_is_resource_cached_html(c.resource) }}<br>
-  {{ h.qa_openness_stars_resource_html(c.resource) }}
+  <div class="module-content">
+  {% if h.archiver_show_broken_status() %}
+    <details class="resource-debug module module-narrow">
+      <summary class="module-heading">Διαθεσιμότητα συνδέσμου στο κοινό</summary>
+      <div class="module-content">
+        {{ h.archiver_is_resource_broken_html(c.resource) }}
+      </div>
+    </details>
+  {% endif %}
+  {% if h.archiver_show_cached_url() %}
+    <details class="resource-debug module module-narrow">
+      <summary class="module-heading">Archiver: Cached URL</summary>
+      <div class="module-content">
+        {{ h.archiver_is_resource_cached_html(c.resource) }}
+      </div>
+    </details>
+  {% endif %}
+  {% if h.qa_show_openness_stars() %}
+    <details class="resource-debug module module-narrow">
+      <summary class="module-heading">Openness Stars</summary>
+      <div class="module-content">
+        {{ h.qa_openness_stars_resource_html(c.resource) }}
+      </div>
+    </details>
+  {% endif %}
+  </div>
 {% endblock %}

@@ -36,7 +36,11 @@
           </table>
         </div>
 
-  {{ h.archiver_is_resource_broken_html(c.resource) }}<br>
-  {{ h.archiver_is_resource_cached_html(c.resource) }}
+  {% if h.archiver_show_broken_status() %}
+    {{ h.archiver_is_resource_broken_html(c.resource) }}<br>
+  {% endif %}
+  {% if h.archiver_show_cached_url() %}
+    {{ h.archiver_is_resource_cached_html(c.resource) }}
+  {% endif %}
 
 {% endblock %}

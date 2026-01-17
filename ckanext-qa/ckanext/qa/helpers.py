@@ -1,4 +1,5 @@
 import copy
+from ckan.common import config
 from ckan.plugins import toolkit as tk
 
 
@@ -38,6 +39,10 @@ def qa_openness_stars_resource_html(resource):
     return tk.literal(
         tk.render('qa/openness_stars.html',
                   extra_vars=extra_vars))
+
+
+def qa_show_openness_stars() -> bool:
+    return tk.asbool(config.get("ckanext.qa.show_openness_stars", False))
 
 
 def qa_openness_stars_dataset_html(dataset):

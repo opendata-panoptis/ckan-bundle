@@ -1,6 +1,9 @@
 # ckanext/data_gov_gr/logic/harvest_mapping.py
 from __future__ import annotations
 
+from urllib.parse import urlparse, parse_qs
+import os
+
 from typing import Any, Iterable
 
 import ckanext.data_gov_gr.helpers as helpers
@@ -819,3 +822,186 @@ def apply_download_url_for_direct_downloads(
         protocol = o.get("protocol") or ""
         if _is_immediately_downloadable(protocol):
             res["download_url"] = res_url
+
+# -----------------------------------------------------------------------------
+# Format
+# -----------------------------------------------------------------------------
+
+def _format_from_extension(name: str = "", url: str = "") -> str:
+    """
+    Try to infer a human-friendly resource format from filename extension.
+    Returns '' if cannot infer.
+    """
+    candidate = (name or "").strip()
+    if not candidate:
+        try:
+            candidate = urlparse(url or "").path
+        except Exception:
+            candidate = ""
+
+    ext = os.path.splitext(candidate)[1].lower().lstrip(".")
+    if not ext:
+        return ""
+
+    if ext in ("json", "geojson"):
+        return "GeoJSON"
+    # if ext == "zip":
+    #     return "ZIP"
+    if ext == "gml":
+        return "GML"
+    if ext == "csv":
+        return "CSV"
+    if ext in ("jpg", "jpeg"):
+        return "JPEG"
+    if ext == "png":
+        return "PNG"
+    if ext == "pdf":
+        return "PDF"
+
+    return ext.upper()
+
+
+def _format_from_url_query(url: str = "") -> str:
+    """
+    Infer format from common OGC params:
+      - service=WMS + format=image/png
+      - service=WFS + outputFormat=json, SHAPE-ZIP, gml2, etc
+      - request=GetLegendGraphic, GetMap etc (still relies on format=)
+    Returns '' if cannot infer.
+    """
+    if not url:
+        return ""
+
+    try:
+        parsed = urlparse(url)
+        qs = parse_qs(parsed.query)
+    except Exception:
+        return ""
+
+    def q1(key: str) -> str:
+        v = qs.get(key, [])
+        return (v[0] or "").strip() if v else ""
+
+    service = q1("service").upper()
+    fmt = q1("format")
+    out_fmt = q1("outputFormat")
+
+    if service == "WMS" and fmt:
+        f = fmt.lower()
+        if "image/png" in f:
+            return "PNG"
+        if "image/jpeg" in f or "image/jpg" in f:
+            return "JPEG"
+        if "application/pdf" in f:
+            return "PDF"
+        return fmt.upper()
+
+    if service == "WFS" and out_fmt:
+        f = out_fmt.lower()
+
+        if "shape-zip" in f:
+            return "SHP"
+
+        if f == "json" or "json" in f:
+            return "GeoJSON"
+
+        if "csv" in f:
+            return "CSV"
+        if "excel" in f or "xls" in f:
+            return "XLSX"
+        if "gml" in f:
+            return "GML"
+
+        return out_fmt.upper()
+
+    return ""
+
+
+def _format_from_protocol(protocol: str = "") -> str:
+    p = (protocol or "").strip().upper()
+    if p == "OGC:WMS":
+        return "WMS"
+    if p == "OGC:WFS":
+        return "WFS"
+    return ""
+
+
+def _infer_resource_format_from_iso_online_resource(online: dict[str, str]) -> str:
+    """
+    online: dict with keys name, url, protocol, description
+    Returns a best-effort format string.
+    """
+    name = online.get("name") or ""
+    url = online.get("url") or ""
+    protocol = online.get("protocol") or ""
+
+    # 1) strongest: file extension in name/url path
+    f = _format_from_extension(name=name, url=url)
+    if f:
+        return f
+
+    # 2) OGC query params
+    f = _format_from_url_query(url=url)
+    if f:
+        return f
+
+    # 3) protocol (service type)
+    f = _format_from_protocol(protocol=protocol)
+    if f:
+        return f
+
+    return ""
+
+
+def apply_resource_format_from_iso19139(
+    package_dict: dict,
+    xml_tree,
+    *,
+    overwrite: bool = False,
+) -> None:
+    """
+    For each resource in package_dict["resources"], match corresponding ISO onlineResource
+    by (name + url) and set resource["format"] accordingly.
+    """
+    if not isinstance(package_dict, dict):
+        return
+
+    resources = package_dict.get("resources")
+    if not isinstance(resources, list) or not resources:
+        return
+
+    online = _extract_online_resources(xml_tree)
+    if not online:
+        return
+
+    # Index by (name_lower, url_norm) -> online dict
+    index: dict[tuple[str, str], dict[str, str]] = {}
+    for o in online:
+        n = (o.get("name") or "").strip()
+        u = _normalize_url(o.get("url") or "")
+        if not n or not u:
+            continue
+        index[(n.lower(), u)] = o
+
+    for res in resources:
+        if not isinstance(res, dict):
+            continue
+
+        if not overwrite and res.get("format"):
+            continue
+
+        res_name = _normalize_resource_name(res.get("name") or "")
+        res_url = _normalize_url(res.get("url") or "")
+        if not res_name or not res_url:
+            continue
+
+        o = index.get((res_name.lower(), res_url))
+        if not o:
+            continue
+
+        inferred = _infer_resource_format_from_iso_online_resource(o)
+        if not inferred:
+            continue
+
+        if inferred:
+            res["format"] = inferred

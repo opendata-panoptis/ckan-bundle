@@ -3,6 +3,8 @@ import logging
 import re
 from html import unescape
 
+from typing import Any
+
 import ckan.logic as logic
 import requests
 from ckan.plugins import toolkit
@@ -83,6 +85,45 @@ GEONODE_LICENCE_TO_EU_URI = {
 # =============================================================================
 # Pure helpers (string/html/tags/ids)
 # =============================================================================
+
+def _get_default_tags_from_config(cfg: dict[str, Any]) -> list[str]:
+    """
+    Supports ONLY:
+      "default_tags": ["geo", "Ανοιχτά Δεδομένα"]
+    """
+    raw = cfg.get("default_tags", [])
+    if not isinstance(raw, list):
+        return []
+
+    out: list[str] = []
+    for x in raw:
+        if not isinstance(x, str):
+            continue
+        t = _clean_tag_string_value(x)
+        if t:
+            out.append(t)
+    return out
+
+
+def _merge_tags_defaults_first(defaults: list[str], existing: list[str]) -> list[str]:
+    """
+    Defaults go first, then existing. Dedup is case-insensitive (keeps first occurrence).
+    """
+    result: list[str] = []
+    seen: set[str] = set()
+
+    for t in defaults + existing:
+        tt = (t or "").strip()
+        if not tt:
+            continue
+        key = tt.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(tt)
+
+    return result
+
 
 def _clean_tag_string_value(s):
     if not s:
@@ -357,12 +398,25 @@ class GeonodeMapsHarvester(HarvesterBase):
                 continue
 
             guid = m.get("uuid") or f"pk:{m.get('pk')}"
+
+            log.info(
+                "Got identifier %s from GeoNode maps (job_id=%s, source_id=%s)",
+                guid,
+                getattr(harvest_job, "id", None),
+                getattr(source, "id", None),
+            )
+
             ho = HarvestObject(guid=guid, job=harvest_job)
             ho.content = json.dumps(m)  # list-item (για pk)
             ho.save()
             object_ids.append(ho.id)
 
-        log.info("GeonodeMapsHarvester gathered %s objects", len(object_ids))
+        log.info(
+            "GeonodeMapsHarvester gathered %s objects (job_id=%s, source_id=%s)",
+            len(object_ids),
+            getattr(harvest_job, "id", None),
+            getattr(source, "id", None),
+        )
         return object_ids
 
     def fetch_stage(self, harvest_object):
@@ -406,13 +460,13 @@ class GeonodeMapsHarvester(HarvesterBase):
 
         return uuid, pk, name, title_translated, notes_translated
 
-    def _build_tags(self, m):
-        kw_names = []
+    def _build_tags(self, m) -> list[str]:
+        kw_names: list[str] = []
         for kw in (m.get("keywords") or []):
-            nm = _clean_tag_string_value(kw.get("name") or "")
+            nm = _clean_tag_string_value((kw or {}).get("name") or "")
             if nm:
                 kw_names.append(nm)
-        return ", ".join(kw_names)
+        return kw_names
 
     def _build_agents(self, m, *, is_cityofathens_source: bool = False):
         poc = m.get("poc") or {}
@@ -636,7 +690,13 @@ class GeonodeMapsHarvester(HarvesterBase):
         owner_org = self._get_source_owner_org(harvest_object.source.id)
 
         uuid, pk, name, title_translated, notes_translated = self._build_identity(m)
-        tag_string = self._build_tags(m)
+
+        cfg = self._get_source_config(harvest_object.source)
+        default_tags = _get_default_tags_from_config(cfg)
+
+        keyword_tags = self._build_tags(m)
+        all_tags = _merge_tags_defaults_first(default_tags, keyword_tags)
+        tag_string = ", ".join(all_tags)
 
         landing = (m.get("detail_url") or "").strip() or None
         embed_url = (m.get("embed_url") or "").strip() or None

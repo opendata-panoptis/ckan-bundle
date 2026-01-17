@@ -1,0 +1,51 @@
+[project]
+name = "ckanext-logs"
+version = "1.0.1"
+description = "Log file viewer"
+readme = "README.md"
+authors = [
+    {name = "Oleksandr Cherniavskiy", email = "mutantsan@gmail.com"}
+]
+license = {text = "AGPL"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+keywords = [ "CKAN", ]
+dependencies = [
+    "ckanext-tables>=1.5.1,<2.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/DataShades/ckanext-logs"
+
+[project.entry-points."ckan.plugins"]
+logs = "ckanext.logs.plugin:LogsPlugin"
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+        "ignore::sqlalchemy.exc.SADeprecationWarning",
+        "ignore::sqlalchemy.exc.SAWarning",
+        "ignore::DeprecationWarning",
+]
+addopts = "--ckan-ini test.ini"
+
+[tool.ruff]
+line-length = 127
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+
+[tool.ruff.lint.isort.sections]
+ckan = ["ckan"]
+ckanext = ["ckanext"]
+self = ["ckanext.logs"]

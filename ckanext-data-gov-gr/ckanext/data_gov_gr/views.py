@@ -15,6 +15,8 @@ from ckanext.data_gov_gr.logic.mqa_calculator import MQACalculator
 from ckanext.data_gov_gr.stats import DataGovStats
 import requests
 
+from ckanext.data_gov_gr.admin_views import admin_blueprint
+
 log = logging.getLogger(__name__)
 
 blueprint = Blueprint('dataset_type', __name__)
@@ -466,4 +468,4 @@ def more_page():
 blueprint.add_url_rule("/more", view_func=more_page, endpoint='more_page')
 
 def get_blueprint():
-    return blueprint
+    return [blueprint, admin_blueprint]

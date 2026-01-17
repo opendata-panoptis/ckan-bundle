@@ -592,6 +592,7 @@ resource_fields:
 
     - field_name: uri
       label: URI
+      display_snippet: link.html
       help_text:
         el: Το μοναδικό URI της περιγραφής της υπηρεσίας δεδομένων στο σύστημα
         en: The unique URI of the dataservice description in the system

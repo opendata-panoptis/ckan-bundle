@@ -1,0 +1,7 @@
+version: 1
+groups:
+  - annotation: ckanext-logs
+    options:
+      - key: ckanext.logs.logs_path
+        description: Specify the path to the logs folder
+        default: /var/log/ckan

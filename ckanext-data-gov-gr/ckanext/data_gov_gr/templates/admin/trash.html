@@ -1,0 +1,22 @@
+{% ckan_extends %}
+
+{% block primary_content_inner %}
+<form method="POST" action="{{ h.url_for('data_gov_gr_admin.trash_purge_all_async') }}" id="form-purge-all">
+  {{ h.csrf_input() }}
+  <div class="form-actions">
+    <input type="hidden" name="action" value="all">
+    <a class="btn btn-danger purge-all"
+       type="submit"
+       href="{{ h.url_for('data_gov_gr_admin.trash_purge_all_async', name='all') }}"
+       data-module="confirm-action"
+       data-module-with-data=true
+       data-module-content="{{ _('Are you sure you want to purge everything?') }}">
+      {{ _('Purge all') }}
+    </a>
+  </div>
+</form>
+
+{% for ent_type, entities in data.items() %}
+  {% snippet "admin/snippets/data_type.html", ent_type=ent_type, entities=entities, messages=messages %}
+{% endfor %}
+{% endblock %}

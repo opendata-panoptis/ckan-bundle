@@ -251,6 +251,25 @@ class ArchiverPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
 
     def cached_resource_redirect(self, id, resource_id, filename=None):
         # Generate the same blob path you used in archive_resource
+
+        context = {
+            "model": model,
+            "session": model.Session,
+            "user": p.toolkit.c.user,
+        }
+
+        try:
+            res_dict = p.toolkit.get_action("resource_show")(
+                context,
+                {"id": resource_id},
+            )
+        except p.toolkit.NotAuthorized:
+            p.toolkit.abort(403, p.toolkit._("Not authorized to access this resource"))
+        except p.toolkit.ObjectNotFound:
+            p.toolkit.abort(404, p.toolkit._("Resource not found"))
+        except Exception as e:
+            p.toolkit.abort(500, p.toolkit._("Problem accessing resource: %s") % e)
+
         blob_path = os.path.join("cached", resource_id[:2], resource_id, filename)
 
         uploader = BaseAzureUploader()

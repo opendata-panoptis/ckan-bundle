@@ -8,7 +8,7 @@ from ckan.plugins import toolkit
 from ckanext.archiver.interfaces import IPipe
 from ckanext.qa.logic import action, auth
 from ckanext.qa.model import QA, aggregate_qa_for_a_dataset
-from ckanext.qa.helpers import qa_openness_stars_resource_html, qa_openness_stars_dataset_html, qa_mqa_rating_label
+from ckanext.qa.helpers import qa_show_openness_stars, qa_openness_stars_resource_html, qa_openness_stars_dataset_html, qa_mqa_rating_label
 from ckanext.qa.lib import create_qa_update_package_task
 from ckanext.report.interfaces import IReport
 import ckanext.data_gov_gr.helpers as data_gov_gr_helpers
@@ -100,6 +100,7 @@ class QAPlugin(MixinPlugin, p.SingletonPlugin, toolkit.DefaultDatasetForm):
 
     def get_helpers(self):
         return {
+            'qa_show_openness_stars': qa_show_openness_stars,
             'qa_openness_stars_resource_html':
             qa_openness_stars_resource_html,
             'qa_openness_stars_dataset_html':
