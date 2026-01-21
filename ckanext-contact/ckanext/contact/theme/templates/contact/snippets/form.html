@@ -19,6 +19,35 @@
                 </legend>
             {% endblock %}
             {% block contact_form_fields %}
+                {% set extended_fields = show_extended_contact_fields|default(false) %}
+
+                <input type="hidden"
+                       name="contact_context"
+                       id="field-contact-context"
+                       value="{{ contact_context|default('page')|e }}">
+
+                <input type="hidden" name="support_question_scope"
+                       id="field-support-question-scope"
+                       value="{{ (data.support_question_scope if data.support_question_scope not in [none] else '')|e }}">
+
+                {% if extended_fields and h.contact_organization_field_enabled() %}
+                <div class="form-group control-medium">
+                    <label for="field-organization">Φορέας / Οργανισμός (σε περίπτωση που ανήκετε σε κάποιον από τους ενταγμένους φορείς στο σύστημα)</label>
+                    <select id="field-organization" name="organization" class="form-control">
+                        <option value="">{{ _('Select...') }}</option>
+                        {% for org in h.data_gov_gr_get_organizations() %}
+                          <option value="{{ org.id }}"
+                                  {% if data.organization == org.id %}selected="selected"{% endif %}>
+                            {{ org.title or org.name }}
+                          </option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.organization %}
+                        <div class="error-block">{{ errors.organization }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 <div class="form-group control-medium">
                     <span class="text-danger">*</span>
                     <label for="field-name">{{ _('Contact Name') }}</label>
@@ -41,6 +70,43 @@
                     {% endif %}
                 </div>
 
+                {% if extended_fields and h.contact_support_tree_enabled() %}
+                <div class="form-group control-medium">
+                    <label for="field-subject-type">Θέμα επικοινωνίας</label>
+                    <select id="field-subject-type" name="subject_type" class="form-control">
+                        <option value="">{{ _('Select...') }}</option>
+                        <option value="general_question"
+                                {% if data.subject_type == 'general_question' %}selected="selected"{% endif %}>
+                            Γενική ερώτηση
+                        </option>
+                        <option value="account"
+                                {% if data.subject_type == 'account' %}selected="selected"{% endif %}>
+                            Πρόβλημα με λογαριασμό / σύνδεση
+                        </option>
+                        <option value="dataset_publication"
+                                {% if data.subject_type == 'dataset_publication' %}selected="selected"{% endif %}>
+                            Δημοσίευση / ενημέρωση συνόλου δεδομένων
+                        </option>
+                        <option value="api_or_technical"
+                                {% if data.subject_type == 'api_or_technical' %}selected="selected"{% endif %}>
+                            Αναφορά σφάλματος
+                        </option>
+                        <option value="open_new_data"
+                                {% if data.subject_type == 'open_new_data' %}selected="selected"{% endif %}>
+                            Αίτημα για δεδομένα
+                        </option>
+                        <option value="general_feedback"
+                                {% if data.subject_type == 'general_feedback' %}selected="selected"{% endif %}>
+                            Γενικό σχόλιο / βελτίωση πύλης
+                        </option>
+                        <option value="other"
+                                {% if data.subject_type == 'other' %}selected="selected"{% endif %}>
+                            Άλλο
+                        </option>
+                    </select>
+                </div>
+                {% endif %}
+
                 {{ form.input('subject', label=_('Subject'), id='field-subject',
                               value=data.subject, error=errors.subject, classes=['control-medium'],
                               is_required=false, placeholder=_('Optional subject')) }}
@@ -48,6 +114,43 @@
                 {{ form.textarea('content', label=_('Your Request'), id='field-content',
                                  value=data.content, error=errors.content,
                                  placeholder=_('What do you have to tell us?'), is_required=true) }}
+
+              {% if extended_fields and h.contact_accept_terms_enabled() %}
+                <div class="form-group control-medium">
+                    <span class="text-danger">*</span>
+                    <div class="checkbox">
+                        <label for="field-accept-terms">
+                            <input id="field-accept-terms"
+                                   type="checkbox"
+                                   name="accept_terms"
+                                   value="on"
+                                   {% if data.accept_terms %}checked="checked"{% endif %}>
+                            Δηλώνω ότι έχω διαβάσει και αποδέχομαι τους Όρους Χρήσης
+                            και την Πολιτική Προστασίας Δεδομένων του data.gov.gr.
+                        </label>
+                    </div>
+                    {% if errors.accept_terms %}
+                        <div class="error-block">{{ errors.accept_terms }}</div>
+                    {% endif %}
+                    <p class="help-block">
+                        {% set terms_url = config.get('ckanext.contact.terms_url') %}
+                        {% set privacy_url = config.get('ckanext.contact.privacy_url') %}
+                        {% if terms_url or privacy_url %}
+                            {% if terms_url %}
+                                <a href="{{ terms_url }}" target="_blank" rel="noopener">Όροι Χρήσης</a>
+                            {% else %}
+                                Όροι Χρήσης
+                            {% endif %}
+                            |
+                            {% if privacy_url %}
+                                <a href="{{ privacy_url }}" target="_blank" rel="noopener">Πολιτική Προστασίας Δεδομένων</a>
+                            {% else %}
+                                Πολιτική Προστασίας Δεδομένων
+                            {% endif %}
+                        {% endif %}
+                    </p>
+                </div>
+              {% endif %}
             {% endblock %}
         </fieldset>
 

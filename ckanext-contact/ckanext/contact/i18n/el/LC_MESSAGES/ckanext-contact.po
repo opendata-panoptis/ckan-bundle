@@ -31,6 +31,10 @@ msgstr "Επικοινωνήστε μαζί μας"
 msgid "Questions? Comments? We are always glad to hear from you!"
 msgstr "Ερωτήσεις; Σχόλια; Είμαστε πάντα χαρούμενοι να ακούσουμε από εσάς!"
 
+# Generic select placeholder used in dropdowns
+msgid "Select..."
+msgstr "Επιλέξτε..."
+
 msgid "Contact Name"
 msgstr "Ονοματεπώνυμο"
 
@@ -46,6 +50,10 @@ msgstr "Το αίτημά σας"
 
 msgid "What do you have to tell us?"
 msgstr "Τι θέλετε να μας πείτε;"
+
+# Placeholder used in some forms
+msgid "Describe briefly your request (what, who, when)."
+msgstr "Περιγράψτε συνοπτικά το αίτημά σας (τι, ποιος, πότε)."
 
 
 msgid "Contact form"
@@ -65,6 +73,13 @@ msgstr "Γεια σας, ήθελα να ρωτήσω για..."
 
 msgid "None"
 msgstr "Κανένα"
+
+# Validation messages for contact form
+msgid "You must accept the terms of use to continue."
+msgstr "Πρέπει να αποδεχθείτε τους Όρους Χρήσης για να συνεχίσετε."
+
+msgid "You must accept the terms of use."
+msgstr "Πρέπει να αποδεχθείτε τους Όρους Χρήσης."
 
 msgid "Email"
 msgstr "Email"

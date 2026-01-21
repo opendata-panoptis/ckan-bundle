@@ -127,6 +127,7 @@ class CoreCkanHarvester(DataGovGrHarvester, CKANHarvester):
             self._set_default_access_rights_public(package_dict)
             # Ensure applicable_legislation is set for PUBLIC datasets
             self._ensure_applicable_legislation(package_dict)
+            self._set_landing_page_from_remote_id_config(package_dict, remote_package_dict, harvest_object)
             
             # Remove original description when we have translated version
             if 'notes_translated-el' in package_dict:
@@ -305,6 +306,141 @@ class CoreCkanHarvester(DataGovGrHarvester, CKANHarvester):
         except Exception as e:
             log.error(f"❌ Error in license processing: {e}", exc_info=True)
         return package_dict
+
+    def _get_harvest_source_config(self, harvest_object):
+        """
+        Return harvest source config as dict, parsed from harvest_object.source.config.
+        """
+        try:
+            source = getattr(harvest_object, "source", None)
+            raw = getattr(source, "config", None)
+            if not isinstance(raw, str) or not raw.strip():
+                return {}
+            return json.loads(raw)
+        except Exception:
+            return {}
+
+    def _set_landing_page_from_remote_id_config(self, package_dict, remote_package_dict, harvest_object):
+        """
+        Set package['landing_page'] using:
+        - remote_package_dict['id']
+        - harvest source config: landing_page_base_url (+ optional landing_page_path_template)
+
+        Example:
+          base_url = "http://smartcity.heraklion.gr/opendata"
+          template = "/dataset/{id}"
+          remote_id = "1bf496d3-..."
+          => landing_page = "http://smartcity.heraklion.gr/opendata/dataset/1bf496d3-..."
+        """
+        try:
+            if not isinstance(package_dict, dict) or not isinstance(remote_package_dict, dict):
+                return
+
+            remote_id = remote_package_dict.get("id")
+            if not isinstance(remote_id, str) or not remote_id.strip():
+                return
+            remote_id = remote_id.strip()
+
+            cfg = self._get_harvest_source_config(harvest_object)
+
+            base_url = cfg.get("landing_page_base_url")
+            if not isinstance(base_url, str) or not base_url.strip():
+                # If config not provided, do nothing (explicit requirement)
+                return
+            base_url = base_url.strip().rstrip("/")
+
+            path_template = cfg.get("landing_page_path_template", "/dataset/{id}")
+            if not isinstance(path_template, str) or not path_template.strip():
+                path_template = "/dataset/{id}"
+            path_template = path_template.strip()
+
+            # Ensure template path starts with /
+            if not path_template.startswith("/"):
+                path_template = "/" + path_template
+
+            landing_path = path_template.format(id=remote_id)
+            landing_page = f"{base_url}{landing_path}"
+
+            package_dict["landing_page"] = landing_page
+
+            # Avoid conflicts if landing_page also exists in extras
+            extras = package_dict.get("extras")
+            if isinstance(extras, list):
+                package_dict["extras"] = [
+                    e for e in extras
+                    if not (isinstance(e, dict) and (e.get("key") or "").strip().lower() == "landing_page")
+                ]
+
+            log.debug("Set landing_page from remote id + config: %s", landing_page)
+
+        except Exception as e:
+            log.error("Error setting landing_page from remote id + config: %s", e, exc_info=True)
+
+    def _set_landing_page_from_resources(self, package_dict, remote_package_dict):
+        """
+        Populate package['landing_page'] by scanning ALL remote resources and picking
+        the first resource URL that contains '/dataset/<id-or-name>'.
+        """
+        try:
+            resources = remote_package_dict.get('resources')
+            if not isinstance(resources, list) or not resources:
+                return
+
+            marker = '/dataset/'
+
+            landing_page = None
+            used_resource_url = None
+
+            for res in resources:
+                if not isinstance(res, dict):
+                    continue
+
+                res_url = res.get('url')
+                if not isinstance(res_url, str) or not res_url.strip():
+                    continue
+
+                parsed = urlparse(res_url.strip())
+                if not parsed.scheme or not parsed.netloc:
+                    continue
+
+                path = parsed.path or ''
+                lower_path = path.lower()
+
+                if marker not in lower_path:
+                    continue
+
+                start = lower_path.index(marker)
+                after = path[start + len(marker):]
+                dataset_part = after.split('/', 1)[0].strip()
+                if not dataset_part:
+                    continue
+
+                landing_path = path[:start] + '/dataset/' + dataset_part
+                landing_page = f"{parsed.scheme}://{parsed.netloc}{landing_path}"
+                used_resource_url = res_url
+                break
+
+            if not landing_page:
+                log.debug(
+                    "Could not derive landing_page from any resource url (no '%s' marker found).",
+                    marker
+                )
+                return
+
+            package_dict['landing_page'] = landing_page
+
+            # Remove potential duplicates in extras (avoid schema conflicts)
+            extras = package_dict.get('extras')
+            if isinstance(extras, list):
+                package_dict['extras'] = [
+                    e for e in extras
+                    if not (isinstance(e, dict) and (e.get('key') or '').strip().lower() == 'landing_page')
+                ]
+
+            log.debug("Set landing_page: %s (derived from resource: %s)", landing_page, used_resource_url)
+
+        except Exception as e:
+            log.error("Error setting landing_page from resources: %s", e, exc_info=True)
 
     def _fix_organization_mapping(self, package_dict, remote_package_dict):
         '''Maps the organization from the remote package to the publisher field'''

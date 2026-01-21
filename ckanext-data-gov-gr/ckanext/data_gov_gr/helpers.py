@@ -670,6 +670,78 @@ def get_dataset_menu_items():
     return []
 
 
+def _get_default_contact_gitbook_embed_items():
+    guides_root = toolkit.config.get('guides_base_url') or 'https://data-gov-gr.gitbook.io/guides'
+    guides_root = str(guides_root).rstrip('/')
+    faq_root = f'{guides_root}/syxnes-erotiseis'
+
+    return [
+        {'title': 'Συχνές ερωτήσεις (Όλες)', 'url': faq_root},
+        {'title': 'Γενικά', 'url': f'{faq_root}/genika'},
+        {'title': 'Φορείς Δημόσιου Τομέα', 'url': f'{faq_root}/foreis-dimosioy-tomea'},
+        {'title': 'Πολίτες & Επιχειρήσεις', 'url': f'{faq_root}/polites-and-epixeiriseis'},
+        {'title': 'Τεχνικά θέματα & API', 'url': f'{faq_root}/texnika-themata-and-api'},
+        {'title': 'Dataspace, αλτρουιστές και διαμεσολαβητές', 'url': f'{faq_root}/dataspace-altroyistes-kai-diamesolavites'},
+    ]
+
+
+def get_contact_gitbook_embed_items():
+    """
+    Επιστρέφει τη λίστα επιλογών (τίτλος + URL) για το dropdown του
+    embedded GitBook περιεχομένου στη σελίδα /contact.
+
+    Πηγή: ``ckanext.data_gov_gr.contact.gitbook_embed_items`` από /ckan-admin/config,
+    ως JSON λίστα από αντικείμενα, π.χ. ::
+
+      [
+        {"title": "Γενικά", "url": "https://.../syxnes-erotiseis/genika"},
+        {"title": "Φορείς Δημόσιου Τομέα", "url": "https://.../syxnes-erotiseis/foreis-dimosioy-tomea"}
+      ]
+
+    Υποστηρίζει και το κλειδί ``label`` αντί για ``title`` για συμβατότητα.
+
+    Επιστρέφει:
+      - default λίστα αν το key δεν έχει οριστεί καθόλου
+      - κενή λίστα αν έχει οριστεί αλλά είναι κενό/[]
+      - λίστα αν έχει οριστεί με έγκυρα items
+    """
+    raw = toolkit.config.get('ckanext.data_gov_gr.contact.gitbook_embed_items')
+    if raw is None:
+        return _get_default_contact_gitbook_embed_items()
+
+    if isinstance(raw, list):
+        if not raw:
+            return []
+        raw = raw[-1]
+
+    raw_str = str(raw).strip()
+    if not raw_str:
+        return []
+
+    try:
+        parsed = json.loads(raw_str)
+        if not isinstance(parsed, list) or not parsed:
+            return []
+
+        items = []
+        for entry in parsed:
+            if not isinstance(entry, dict):
+                continue
+
+            title = (entry.get('title') or entry.get('label') or '').strip()
+            url = (entry.get('url') or '').strip()
+
+            if not title or not url:
+                continue
+
+            items.append({'title': title, 'url': url})
+
+        return items
+    except Exception as e:
+        log.exception('Error parsing ckanext.data_gov_gr.contact.gitbook_embed_items JSON: %s', e)
+        return []
+
+
 def has_gitbook_pdf_export():
     """
     Check whether the GitBook PDF export configuration is complete.
@@ -1665,6 +1737,7 @@ def get_helpers():
         'allow_org_admins_public_decisions': allow_org_admins_public_decisions,
         'should_show_update_button_in_user_profile': should_show_update_button_in_user_profile,
         'get_dataset_menu_items': get_dataset_menu_items,
+        'get_contact_gitbook_embed_items': get_contact_gitbook_embed_items,
         'extract_iframe_from_html': extract_iframe_from_html,
         'get_stat_data': get_stat_data,
         "harvest_frequencies": harvest_frequencies,

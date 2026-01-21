@@ -91,6 +91,8 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         - ``ckanext.data_gov_gr.showcase.disclaimer`` (apps/showcases disclaimer)
         - ``ckanext.data_gov_gr.dataset.legislation.open`` (default applicable legislation for open datasets)
         - ``ckanext.data_gov_gr.dataset.legislation.protected`` (default applicable legislation for protected datasets)
+        - ``guides_base_url`` (external guides base URL)
+        - ``ckanext.data_gov_gr.contact.gitbook_embed_items`` (contact page GitBook dropdown items as JSON)
         which are independent from their fallback values in the ini file.
 
         Επιπλέον, ορίζει παραμετρικές επιλογές μενού για τα σύνολα δεδομένων:
@@ -107,6 +109,8 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
             'ckanext.data_gov_gr.showcase.disclaimer': [ignore_missing, unicode_safe],
             'ckanext.data_gov_gr.dataset.legislation.open': [ignore_missing, unicode_safe],
             'ckanext.data_gov_gr.dataset.legislation.protected': [ignore_missing, unicode_safe],
+            'guides_base_url': [ignore_missing, unicode_safe],
+            'ckanext.data_gov_gr.contact.gitbook_embed_items': [ignore_missing, unicode_safe],
             # Νέα, JSON παραμετρικές επιλογές για dropdown συνόλων δεδομένων
             'ckanext.data_gov_gr.menu.dataset.items': [ignore_missing, unicode_safe],
             # Ρυθμίσεις αρχικής σελίδας (στατιστικά, showcases)
@@ -135,6 +139,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         root = key.ckanext.data_gov_gr
         home = root.home
         config_ui = root.config_ui
+        contact = root.contact
 
         declaration.declare(root.powerbi_embed_url, "").set_description(
             "Power BI embed URL (used on /stats/powerbi and home previews)."
@@ -153,6 +158,37 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         )
         declaration.declare(root.menu.dataset.items, "").set_description(
             "JSON list for the dataset dropdown menu items."
+        )
+        declaration.declare(key.guides_base_url, "").set_description(
+            "External guides base URL (e.g. GitBook /guides)."
+        )
+        declaration.declare(contact.gitbook_embed_items, json.dumps([
+            {
+                "title": "Συχνές ερωτήσεις (Όλες)",
+                "url": "https://data-gov-gr.gitbook.io/guides/syxnes-erotiseis",
+            },
+            {
+                "title": "Γενικά",
+                "url": "https://data-gov-gr.gitbook.io/guides/syxnes-erotiseis/genika",
+            },
+            {
+                "title": "Φορείς Δημόσιου Τομέα",
+                "url": "https://data-gov-gr.gitbook.io/guides/syxnes-erotiseis/foreis-dimosioy-tomea",
+            },
+            {
+                "title": "Πολίτες & Επιχειρήσεις",
+                "url": "https://data-gov-gr.gitbook.io/guides/syxnes-erotiseis/polites-and-epixeiriseis",
+            },
+            {
+                "title": "Τεχνικά θέματα & API",
+                "url": "https://data-gov-gr.gitbook.io/guides/syxnes-erotiseis/texnika-themata-and-api",
+            },
+            {
+                "title": "Dataspace, αλτρουιστές και διαμεσολαβητές",
+                "url": "https://data-gov-gr.gitbook.io/guides/syxnes-erotiseis/dataspace-altroyistes-kai-diamesolavites",
+            },
+        ], ensure_ascii=False)).set_description(
+            "Contact page GitBook dropdown items as JSON list."
         )
 
         declaration.annotate("Home page configuration")
@@ -193,6 +229,9 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         )
         declaration.declare(config_ui.dataset_menu.enabled, "no").set_description(
             "Show 'Μενού Συνόλων Δεδομένων (Dropdown)' section in /ckan-admin/config."
+        )
+        declaration.declare(config_ui.guides.enabled, "no").set_description(
+            "Show 'Οδηγοί (GitBook)' section in /ckan-admin/config."
         )
 
     # IBlueprint

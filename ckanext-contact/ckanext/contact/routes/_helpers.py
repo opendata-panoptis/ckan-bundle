@@ -8,7 +8,7 @@ import socket
 from datetime import datetime, timezone
 
 from ckan import logic
-from ckan.common import asbool
+from ckan.common import asbool, config
 from ckan.lib import mailer
 from ckan.lib.navl.dictization_functions import unflatten
 from ckan.plugins import PluginImplementations, toolkit
@@ -16,6 +16,7 @@ from pyisemail import is_email
 
 from ckanext.contact import recaptcha
 from ckanext.contact.interfaces import IContact
+from ckanext.contact.helpers import contact_accept_terms_enabled
 
 log = logging.getLogger(__name__)
 
@@ -30,8 +31,33 @@ def validate(data_dict):
     """
     errors = {}
     error_summary = {}
-    optional_fields = {'subject'}
+    # subject και τα επιπλέον περιγραφικά πεδία είναι προαιρετικά
+    optional_fields = {
+        'subject',
+        'actor_type',
+        'organization',
+        'role',
+        'subject_type',
+        'related_reference',
+        # fields used in the support tree (helper selections)
+        'support_request_type',
+        'support_question_scope',
+        'support_data_topic',
+        'support_subject_choice',
+        # context flag (page/modal)
+        'contact_context',
+    }
     recaptcha_error = None
+
+    accept_terms_enabled = contact_accept_terms_enabled()
+
+    # Αν το submit προέρχεται από modal, δεν απαιτούμε accept_terms (ακόμα κι αν είναι enabled)
+    contact_context = (data_dict.get('contact_context') or '').strip().lower()
+    accept_terms_required = accept_terms_enabled and contact_context != 'modal'
+
+    if not accept_terms_required:
+        # If terms are not required in this context, do not require the field at all.
+        optional_fields.add('accept_terms')
 
     # check each field to see if it has a value and if not, show and error
     for field, value in data_dict.items():
@@ -44,6 +70,15 @@ def validate(data_dict):
         if value is None or value == '':
             errors[field] = ['Missing Value']
             error_summary[field] = 'Missing value'
+
+    # ensure ότι έχουν αποδεχθεί τους όρους χρήσης (μόνο όταν είναι required)
+    if accept_terms_required and not data_dict.get('accept_terms'):
+        errors['accept_terms'] = [
+            toolkit._('You must accept the terms of use to continue.')
+        ]
+        error_summary['accept_terms'] = toolkit._(
+            'You must accept the terms of use.'
+        )
 
     # check the email address, if there is one and the config option isn't off
     if (
@@ -129,10 +164,83 @@ def submit():
     if len(errors) == 0 and recaptcha_error is None:
         body_parts = [
             f'{data_dict["content"]}\n',
-            'Sent by:',
-            f'  Name: {data_dict["name"]}',
+            'Στοιχεία αποστολέα:',
+            f'  Όνομα: {data_dict["name"]}',
             f'  Email: {data_dict["email"]}',
         ]
+
+        # Προσθήκη επιπλέον δομημένων πεδίων για καλύτερο πλαίσιο
+        actor_type = data_dict.get('actor_type')
+        if actor_type:
+            body_parts.append(f'  Τύπος αποστολέα: {actor_type}')
+
+        organization = data_dict.get('organization')
+        if organization:
+            org_label = organization
+            org_url = None
+            try:
+                org_dict = toolkit.get_action('organization_show')(context, {'id': organization})
+                org_name = org_dict.get('title') or org_dict.get('name') or organization
+                org_label = org_name
+                # Προσθήκη συνδέσμου προς τη σελίδα του οργανισμού, αν είναι εφικτό
+                try:
+                    site_url = config.get('ckan.site_url', '').rstrip('/')
+                    org_name_for_url = org_dict.get('name')
+                    if site_url and org_name_for_url:
+                        org_url = f'{site_url}/organization/{org_name_for_url}'
+                except Exception:
+                    org_url = None
+            except Exception as e:
+                log.error(f'Error resolving organization {organization} in contact email: {e}')
+
+            if org_url:
+                body_parts.append(f'  Οργανισμός: {org_label} ({org_url})')
+            else:
+                body_parts.append(f'  Οργανισμός: {org_label}')
+
+        role = data_dict.get('role')
+        if role:
+            body_parts.append(f'  Ρόλος: {role}')
+
+        # Ανθρώπινα labels για τις βασικές κατηγορίες θέματος
+        subject_type_labels = {
+            'general_question': 'Γενική ερώτηση',
+            'open_new_data': 'Αίτημα για δεδομένα',
+            'api_or_technical': 'Αναφορά σφάλματος',
+            'general_feedback': 'Γενικό σχόλιο / βελτίωση',
+            'account': 'Πρόβλημα με λογαριασμό / σύνδεση',
+            'dataset_publication': 'Δημοσίευση / ενημέρωση συνόλου δεδομένων',
+            'other': 'Άλλο',
+        }
+
+        support_choice_labels = {
+            'specific_data': 'Συγκεκριμένα δεδομένα ή σύνολο δεδομένων',
+            'procedure': 'Μια διοικητική διαδικασία',
+            'portal_usage': 'Τη χρήση του data.gov.gr',
+            'new_datasets': 'Νέα σύνολα δεδομένων που δεν βρίσκετε',
+            'update_existing': 'Ενημέρωση ή διόρθωση υπαρχόντων δεδομένων',
+            'licensing': 'Διευκρινίσεις για άδειες και όρους χρήσης',
+            'page_error': 'Σελίδα που εμφανίζει σφάλμα',
+            'api_issue': 'API που δεν ανταποκρίνεται όπως αναμένεται',
+            'data_inconsistency': 'Λανθασμένα ή ασυνεπή δεδομένα',
+            'feedback_usability': 'Εμπειρία χρήσης / ευχρηστία της πύλης',
+            'feedback_features': 'Προτάσεις για νέες λειτουργίες',
+            'feedback_content': 'Σχόλιο ή παρατήρηση για το περιεχόμενο',
+        }
+
+        subject_type = data_dict.get('subject_type')
+        if subject_type:
+            label = subject_type_labels.get(subject_type, subject_type)
+            body_parts.append(f'  Κατηγορία θέματος: {label}')
+
+        related_reference = data_dict.get('related_reference')
+        if related_reference:
+            body_parts.append(f'  Related dataset/service: {related_reference}')
+
+        support_scope = data_dict.get('support_question_scope')
+        if support_scope:
+            scope_label = support_choice_labels.get(support_scope, support_scope)
+            body_parts.append(f'  Υποκατηγορία αιτήματος: {scope_label}')
 
 
         # -------------- Ανάκτηση στοιχείων Υπεύθυνου Επικοινωνίας από ini------
@@ -152,7 +260,6 @@ def submit():
             # Ανάκτηση συνόλου δεδομένων
             pkg_dict = toolkit.get_action('package_show')(context, {'id': data_dict["package_id"]})
 
-            from ckan.common import config
             site_url = config.get('ckan.site_url')
             dataset_url = f'{site_url}/dataset/{pkg_dict["name"]}'
 
@@ -189,6 +296,8 @@ def submit():
         mail_dict = {
             'recipient_email': recipients,
             'recipient_name': recipient_name,
+            # κρατάμε τη συμπεριφορά του extension: είτε το subject που πληκτρολόγησε
+            # ο χρήστης, είτε το default από build_subject
             'subject': build_subject(subject=data_dict.get('subject')),
             'body': '\n'.join(body_parts),
             'headers': {'reply-to': email},

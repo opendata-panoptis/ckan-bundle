@@ -17,11 +17,9 @@ def load_config(config_path=None):
         config_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..', 'ckan.ini')
 
     # Load the config
-    from ckan.config.environment import load_environment
-    from ckan.config.middleware import make_app
+    from ckan.cli import load_config
 
-    conf = make_app(config_path)
-    load_environment(conf)
+    conf = load_config(config_path)
     return conf
 
 # Define our own click_config_option
@@ -43,7 +41,7 @@ class CkanCommand(object):
 
     def __init__(self, conf=None):
         self.config = load_config(conf)
-        self.app = make_app(self.config.global_conf, **self.config.local_conf)
+        self.app = make_app(self.config)
 
 
 @click.group()

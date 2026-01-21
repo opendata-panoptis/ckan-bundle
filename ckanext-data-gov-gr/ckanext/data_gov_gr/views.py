@@ -29,6 +29,9 @@ GITBOOK_PDF_TIMEOUT = 60
 def download_guides_pdf():
     space_id = config.get('ckanext.data_gov_gr.gitbook.space_id')
     token = config.get('ckanext.data_gov_gr.gitbook.api_token')
+    inline_requested = (request.args.get('inline') or '').strip().lower() in {
+        '1', 'true', 'yes', 'on'
+    }
 
     if not space_id or not token:
         log.warning('GitBook PDF download requested without configured credentials')
@@ -59,13 +62,57 @@ def download_guides_pdf():
         try:
             payload = response.json()
         except ValueError:
+            response.close()
             log.error('GitBook PDF JSON response could not be decoded')
             abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
 
         download_url = payload.get('url')
         if download_url:
-            return redirect(download_url)
+            # Για εμφάνιση σε iframe θέλουμε inline PDF από το δικό μας origin.
+            if not inline_requested:
+                response.close()
+                return redirect(download_url)
 
+            response.close()
+            try:
+                pdf_response = requests.get(
+                    download_url,
+                    stream=True,
+                    timeout=GITBOOK_PDF_TIMEOUT
+                )
+            except requests.RequestException as exc:
+                log.error('GitBook PDF download URL request failed: %s', exc)
+                abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
+
+            if pdf_response.status_code >= 400:
+                try:
+                    error_preview = pdf_response.text[:500]
+                except Exception:
+                    error_preview = '<binary>'
+                log.error(
+                    'GitBook PDF download URL request failed (%s): %s',
+                    pdf_response.status_code,
+                    error_preview
+                )
+                abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
+
+            def generate_pdf():
+                try:
+                    for chunk in pdf_response.iter_content(chunk_size=8192):
+                        if chunk:
+                            yield chunk
+                finally:
+                    pdf_response.close()
+
+            filename = f'guides-{space_id.strip()}.pdf'
+            response_headers = {
+                'Content-Type': pdf_response.headers.get('Content-Type', 'application/pdf') or 'application/pdf',
+                'Content-Disposition': f'inline; filename="{filename}"',
+            }
+
+            return Response(stream_with_context(generate_pdf()), headers=response_headers)
+
+        response.close()
         log.error('GitBook PDF JSON response did not include a download URL: %s', payload)
         abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
 
@@ -77,12 +124,11 @@ def download_guides_pdf():
         finally:
             response.close()
 
+    filename = f'guides-{space_id.strip()}.pdf'
+    disposition = 'inline' if inline_requested else 'attachment'
     response_headers = {
         'Content-Type': content_type or 'application/pdf',
-        'Content-Disposition': response.headers.get(
-            'Content-Disposition',
-            f'attachment; filename="guides-{space_id.strip()}.pdf"'
-        )
+        'Content-Disposition': f'{disposition}; filename="{filename}"',
     }
 
     return Response(stream_with_context(generate()), headers=response_headers)
@@ -421,7 +467,7 @@ def more_page():
             {
                 'title': 'Οδηγοί',
                 'description': 'Τεκμηρίωση και οδηγοί χρήσης.',
-                'url': config.get('guides_base_url', '/pages'),
+                'url': config.get('guides_base_url') or '/pages',
                 'icon': 'fa-book',
                 'color': 'success'
             },

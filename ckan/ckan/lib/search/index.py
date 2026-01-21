@@ -199,6 +199,9 @@ class PackageSearchIndex(SearchIndex):
                 pkg_dict[nkey] = pkg_dict.get(nkey, []) + [resource.get(okey, u'')]
         pkg_dict.pop('resources', None)
 
+        # Αγνοούμε πλήρως τα relationships στο search index
+        pkg_dict.pop("relationships_as_subject", None)
+        pkg_dict.pop("relationships_as_object", None)
         rel_dict: dict[str, list[Any]] = collections.defaultdict(list)
         subjects = pkg_dict.pop("relationships_as_subject", [])
         objects = pkg_dict.pop("relationships_as_object", [])

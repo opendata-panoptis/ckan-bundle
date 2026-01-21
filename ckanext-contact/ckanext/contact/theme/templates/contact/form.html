@@ -11,14 +11,530 @@
 {% endblock %}
 
 {% block primary %}
-    <article class="module">
-        <div class="module-content">
-            <h1 class="page-heading">{{ _('Contact us') }}</h1>
+		    <article class="module support-page">
+	        <div class="module-content">
+	            {% set site_title = (config.get('ckan.site_title') or '').strip() %}
+	            {% set guides_root = (config.get('guides_base_url') or 'https://data-gov-gr.gitbook.io/guides').rstrip('/') %}
+	            {% set faq_root = guides_root ~ '/syxnes-erotiseis' %}
+	            {% set guides_embed_url = guides_root %}
+	            {% set contact_gitbook_embed_items = h.get_contact_gitbook_embed_items() or [] %}
+	            {% set contact_gitbook_embed_url = faq_root.rstrip('/') %}
+	            {% set contact_gitbook_embed_item_title = 'Συχνές ερωτήσεις' %}
+	            {% if contact_gitbook_embed_items %}
+	              {% set contact_gitbook_embed_url = contact_gitbook_embed_items[0].url.rstrip('/') %}
+	              {% set contact_gitbook_embed_item_title = contact_gitbook_embed_items[0].title %}
+	            {% endif %}
+            <header class="support-header">
+              <h1 class="page-heading">
+                Καλώς ήρθατε στο Κέντρο Υποστήριξης{% if site_title %} του {{ site_title }}{% endif %}
+              </h1>
+              <p class="lead">
+                Πριν επικοινωνήσετε μαζί μας, δείτε τους οδηγούς και τις συχνές ερωτήσεις –
+                ίσως να υπάρχει ήδη η απάντηση που χρειάζεστε.
+              </p>
+            </header>
 
-            {% block contact_form_content %}
-                {% include "contact/snippets/form.html" %}
-            {% endblock %}
+            {% if guides_embed_url %}
+            <section class="support-guides-embed" aria-label="{% if site_title %}Οδηγοί {{ site_title }}{% else %}Οδηγοί{% endif %}">
+              <h2>{% if site_title %}Οδηγοί {{ site_title }}{% else %}Οδηγοί{% endif %}</h2>
+              <div class="support-guides-embed-frame">
+                <iframe
+                  src="{{ guides_embed_url }}"
+                  title="{% if site_title %}Οδηγοί {{ site_title }}{% else %}Οδηγοί{% endif %}"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                  allowfullscreen>
+                </iframe>
+              </div>
+              <p class="support-guides-embed-fallback">
+                Αν δεν εμφανίζεται ο οδηγός, ανοίξτε τον σε νέα καρτέλα:
+                <a href="{{ guides_root }}" target="_blank" rel="noopener">{{ guides_root }}</a>
+              </p>
+            </section>
+            {% endif %}
+
+            <section class="support-shortcuts row">
+              <div class="col-md-6 col-sm-12">
+                <div class="module module-narrow module-shallow">
+                  <h2 class="module-heading">
+                    <i class="fa fa-book"></i> Οδηγοί &amp; τεκμηρίωση
+                  </h2>
+                  <div class="module-content">
+                    <p>
+                      Βήμα‑βήμα οδηγίες για τη δημοσίευση, αναζήτηση και χρήση των δεδομένων
+                      {% if site_title %}στην πύλη {{ site_title }}.{% else %}στην πύλη.{% endif %}
+                    </p>
+                    <p>
+                      <a href="{{ guides_root }}"
+                         class="btn btn-primary btn-sm"
+                         target="_blank" rel="noopener">
+                        {% if site_title %}Όλοι οι οδηγοί {{ site_title }}{% else %}Όλοι οι οδηγοί{% endif %} <i class="fa fa-arrow-right"></i>
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <div class="module module-narrow module-shallow">
+                  <h2 class="module-heading">
+                    <i class="fa fa-question-circle"></i> Βοήθεια &amp; περισσότερες πληροφορίες
+                  </h2>
+                  <div class="module-content">
+                    <p>
+                      {% if h.should_disable_protected_data() %}
+                        Εξερευνήστε πρόσθετες πληροφορίες για τα ανοικτά δεδομένα,
+                        τις δυνατότητες της πύλης και τις σχετικές υπηρεσίες.
+                      {% else %}
+                        Εξερευνήστε πρόσθετες πληροφορίες για τα ανοικτά και προστατευόμενα δεδομένα,
+                        τις δυνατότητες της πύλης και τις σχετικές υπηρεσίες.
+                      {% endif %}
+                    </p>
+                    <p>
+                      <a href="{{ h.url_for('dataset_type.more_page') }}"
+                         class="btn btn-primary btn-sm">
+                        Μετάβαση στη σελίδα «Περισσότερα» <i class="fa fa-arrow-right"></i>
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+              {% if h.contact_support_faq_enabled() %}
+			            <section class="support-faq" id="support-faq">
+			              <h2 id="support-gitbook-title">Συχνές ερωτήσεις</h2>
+			              {% if contact_gitbook_embed_items %}
+			              <div class="support-gitbook-selector">
+			                <label for="support-gitbook-select" class="control-label">Κατηγορία</label>
+			                <select id="support-gitbook-select" class="form-control">
+			                  {% for item in contact_gitbook_embed_items %}
+			                  <option value="{{ item.url.rstrip('/') }}"
+			                          data-title="{{ item.title }}"
+			                          {% if item.url.rstrip('/') == contact_gitbook_embed_url %}selected{% endif %}>
+			                    {{ item.title }}
+			                  </option>
+			                  {% endfor %}
+			                </select>
+			              </div>
+			              {% endif %}
+		              <div class="support-faq-embed-frame">
+		                <iframe
+		                  id="support-gitbook-iframe"
+		                  src="{{ contact_gitbook_embed_url }}"
+		                  title="{{ contact_gitbook_embed_item_title }}"
+		                  loading="lazy"
+		                  referrerpolicy="no-referrer"
+	                  allowfullscreen>
+	                </iframe>
+		              </div>
+		              <p class="support-faq-embed-fallback">
+		                Αν δεν εμφανίζεται το περιεχόμενο, ανοίξτε το σε νέα καρτέλα:
+		                <a id="support-gitbook-open-link" href="{{ contact_gitbook_embed_url }}" target="_blank" rel="noopener">{{ contact_gitbook_embed_url }}</a>
+		              </p>
+		            </section>
+              {% endif %}
+
+            {% if h.contact_support_tree_enabled() %}
+            <section class="support-tree" id="support-tree">
+              <h2>Δεν βρήκατε αυτό που ψάχνετε; Πώς μπορούμε να σας βοηθήσουμε;</h2>
+
+              <div class="row">
+                <div class="col-md-3 col-sm-6">
+                  <div class="module module-narrow module-shallow support-card"
+                       data-subject-type="general_question">
+                    <h3 class="module-heading">💁‍♀️ Γενική ερώτηση</h3>
+                    <div class="module-content">
+                      <p>Γενικές ερωτήσεις για τα δεδομένα ή την πύλη.</p>
+                      <p class="mb-0">Η ερώτησή σας αφορά;</p>
+                      <ul class="support-scope-list">
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="specific_data"
+                                   data-subject-type="general_question">
+                            <span>Συγκεκριμένα δεδομένα ή σύνολο δεδομένων</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="procedure"
+                                   data-subject-type="general_question">
+                            <span>Μια διοικητική διαδικασία</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="portal_usage"
+                                   data-subject-type="general_question">
+                            <span>Τη χρήση του data.gov.gr</span>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                  <div class="module module-narrow module-shallow support-card"
+                       data-subject-type="open_new_data">
+                    <h3 class="module-heading">💡 Αίτημα για δεδομένα</h3>
+                    <div class="module-content">
+                      <p>Θέλετε να ανοίξουν ή να ενημερωθούν δεδομένα;</p>
+                      <p class="mb-0">Συνηθισμένες περιπτώσεις</p>
+                      <ul class="support-scope-list">
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="new_datasets"
+                                   data-subject-type="open_new_data">
+                            <span>Νέα σύνολα δεδομένων που δεν βρίσκετε</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="update_existing"
+                                   data-subject-type="open_new_data">
+                            <span>Ενημέρωση ή διόρθωση υπαρχόντων δεδομένων</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="licensing"
+                                   data-subject-type="open_new_data">
+                            <span>Διευκρινίσεις για άδειες και όρους χρήσης</span>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                  <div class="module module-narrow module-shallow support-card"
+                       data-subject-type="api_or_technical">
+                    <h3 class="module-heading">🐛 Αναφορά σφάλματος</h3>
+                    <div class="module-content">
+                      <p>Κάτι δεν λειτουργεί όπως θα έπρεπε στην πύλη ή στα δεδομένα;</p>
+                      <p class="mb-0">Παραδείγματα</p>
+                      <ul class="support-scope-list">
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="page_error"
+                                   data-subject-type="api_or_technical">
+                            <span>Σελίδα που εμφανίζει σφάλμα</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="api_issue"
+                                   data-subject-type="api_or_technical">
+                            <span>API που δεν ανταποκρίνεται όπως αναμένεται</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="data_inconsistency"
+                                   data-subject-type="api_or_technical">
+                            <span>Λανθασμένα ή ασυνεπή δεδομένα</span>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                  <div class="module module-narrow module-shallow support-card"
+                       data-subject-type="general_feedback">
+                    <h3 class="module-heading">💬 Γενικό σχόλιο / βελτίωση</h3>
+                    <div class="module-content">
+                      <p>Σχόλια και προτάσεις για την πύλη data.gov.gr.</p>
+                      <ul class="support-scope-list">
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="feedback_usability"
+                                   data-subject-type="general_feedback">
+                            <span>Εμπειρία χρήσης / ευχρηστία της πύλης</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="feedback_features"
+                                   data-subject-type="general_feedback">
+                            <span>Προτάσεις για νέες λειτουργίες</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="feedback_content"
+                                   data-subject-type="general_feedback">
+                            <span>Σχόλιο ή παρατήρηση για το περιεχόμενο</span>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </section>
+            {% endif %}
+
+            <section class="support-form" id="support-contact-form">
+              <h2>Επικοινωνήστε μαζί μας</h2>
+              {% block contact_form_content %}
+                  {% set show_extended_contact_fields = true %}
+                  {% set contact_context = 'page' %}
+                  {% include "contact/snippets/form.html" %}
+              {% endblock %}
+            </section>
 
         </div>
     </article>
+    <style>
+      .support-faq .accordion {
+        margin-left: 1.5rem;
+      }
+
+      .support-guides-embed {
+        margin-top: 1.25rem;
+        margin-bottom: 2rem;
+      }
+
+      .support-guides-embed h2 {
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+      }
+
+      .support-guides-embed-frame iframe {
+        width: 100%;
+        height: min(70vh, 720px);
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        background: #fff;
+      }
+
+      .support-guides-embed-fallback {
+        margin-top: 0.75rem;
+        margin-bottom: 0;
+        color: #6c757d;
+      }
+
+      .support-faq-embed-frame iframe {
+        width: 100%;
+        height: min(70vh, 720px);
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        background: #fff;
+      }
+
+      .support-gitbook-selector {
+        max-width: 520px;
+        margin-bottom: 0.75rem;
+      }
+
+      .support-faq-embed-fallback {
+        margin-top: 0.75rem;
+        margin-bottom: 0;
+        color: #6c757d;
+      }
+
+      .support-card {
+        cursor: pointer;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease,
+                    background-color 0.15s ease;
+        margin-bottom: 1.5rem;
+      }
+
+      .support-card .radio input[type="radio"] {
+        margin-right: 0.35rem;
+        transform: scale(1.1);
+      }
+
+      .support-card.is-selected {
+        border-color: var(--color-primary, #003476);
+        box-shadow: 0 0 0 2px rgba(0, 52, 118, 0.15);
+        background-color: #f5f8ff;
+      }
+
+      .support-card.is-selected .module-heading {
+        color: var(--color-primary, #003476);
+      }
+
+      .support-scope-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+      }
+
+      .support-scope-list li {
+        margin-top: 0.25rem;
+      }
+
+      .support-scope-option {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        cursor: pointer;
+      }
+
+      .support-scope-option input[type="radio"] {
+        margin: 0;
+      }
+
+      .support-tree {
+        margin-top: 2rem;
+      }
+
+      /* Αφαίρεση τυχόν global label::after (:) μόνο για τις υποκατηγορίες στο δέντρο υποστήριξης */
+      .support-tree .support-scope-option::after {
+        content: '' !important;
+      }
+
+      .support-faq h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+    </style>
+	    <script>
+	      (function () {
+	        var cards = document.querySelectorAll('.support-card[data-subject-type]');
+	        var subjectSelect = document.getElementById('field-subject-type');
+		        var subjectInput = document.getElementById('field-subject');
+		        var radios = document.querySelectorAll('input[name=\"support_subject_choice\"]');
+			        var scopeField = document.getElementById('field-support-question-scope');
+			        var gitbookSelect = document.getElementById('support-gitbook-select');
+			        var gitbookIframe = document.getElementById('support-gitbook-iframe');
+			        var gitbookOpenLink = document.getElementById('support-gitbook-open-link');
+			        function updateGitBookEmbedFromSelect() {
+			          if (!gitbookSelect) return;
+			          var selectedOption = gitbookSelect.options[gitbookSelect.selectedIndex];
+			          var url = gitbookSelect.value || '';
+		          var title = (selectedOption && selectedOption.getAttribute('data-title')) || '';
+
+			          if (gitbookIframe && url) {
+			            gitbookIframe.src = url;
+			            if (title) {
+			              gitbookIframe.title = title;
+			            }
+			          }
+			          if (gitbookOpenLink && url) {
+			            gitbookOpenLink.href = url;
+			            gitbookOpenLink.textContent = url;
+			          }
+			        }
+
+		        if (gitbookSelect) {
+		          gitbookSelect.addEventListener('change', updateGitBookEmbedFromSelect);
+		          // Ensure we are in sync on first paint (and after any browser auto-fill).
+		          updateGitBookEmbedFromSelect();
+		        }
+
+		        if (!cards.length || !subjectSelect) {
+		          return;
+		        }
+
+		        function clearSelection() {
+		          cards.forEach(function (card) {
+		            card.classList.remove('is-selected');
+		          });
+		        }
+
+        cards.forEach(function (card) {
+          card.addEventListener('click', function () {
+            // Αν ο χρήστης κλικάρει απευθείας σε radio, αφήνουμε τον handler του radio να τρέξει
+            if (card.contains(document.activeElement) &&
+                document.activeElement.type === 'radio') {
+              return;
+            }
+            var firstRadio = card.querySelector('input[name=\"support_subject_choice\"]');
+            if (!firstRadio) return;
+            firstRadio.checked = true;
+            try {
+              var changeEvent = new Event('change', {bubbles: true});
+              firstRadio.dispatchEvent(changeEvent);
+            } catch (e) {
+              var evt = document.createEvent('Event');
+              evt.initEvent('change', true, true);
+              firstRadio.dispatchEvent(evt);
+            }
+          });
+        });
+
+        // Όταν αλλάζει επιλογή από τα radio, ενημερώνουμε το dropdown
+        if (radios.length) {
+          radios.forEach(function (radio) {
+            radio.addEventListener('change', function () {
+              if (!radio.checked) return;
+              var scope = radio.value;
+              if (scopeField) {
+                scopeField.value = scope;
+              }
+
+              var subjectType = radio.getAttribute('data-subject-type') || 'general_feedback';
+              subjectSelect.value = subjectType;
+              try {
+                var event = new Event('change', {bubbles: true});
+                subjectSelect.dispatchEvent(event);
+              } catch (e) {
+                var evt = document.createEvent('Event');
+                evt.initEvent('change', true, true);
+                subjectSelect.dispatchEvent(evt);
+              }
+
+              // Προσυμπλήρωση του πεδίου \"Θέμα\" με την υποκατηγορία,
+              // αν είναι κενό ή αν είχε ήδη συμπληρωθεί αυτόματα.
+              if (subjectInput) {
+                var labelEl = radio.closest('.support-scope-option');
+                var labelText = '';
+                if (labelEl) {
+                  var span = labelEl.querySelector('span');
+                  if (span && span.textContent) {
+                    labelText = span.textContent.trim();
+                  }
+                }
+                if (labelText && (!subjectInput.value || subjectInput.dataset.autofilled === 'true')) {
+                  subjectInput.value = labelText;
+                  subjectInput.dataset.autofilled = 'true';
+                }
+              }
+
+              clearSelection();
+              var card = radio.closest('.support-card');
+              if (card) {
+                card.classList.add('is-selected');
+              }
+
+              var formSection = document.getElementById('support-contact-form');
+              if (formSection && formSection.scrollIntoView) {
+                formSection.scrollIntoView({behavior: 'smooth', block: 'start'});
+              }
+            });
+          });
+        }
+
+      })();
+    </script>
 {% endblock %}

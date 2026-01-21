@@ -61,7 +61,7 @@
               <p>Χρειάζεστε βοήθεια με κάποια από τις ενότητες;</p>
               <ul class="list-unstyled">
                 <li><a href="{{ h.url_for('pages.show', page='about-portal', locale=h.lang()) }}"><i class="fa fa-info"></i> Σχετικά με την Πύλη</a></li>
-                <li><a href="{{ config.get('guides_base_url', '/pages') }}" target="_blank" rel="noopener"><i class="fa fa-book"></i> Οδηγοί Χρήσης</a></li>
+                <li><a href="{{ config.get('guides_base_url') or '/pages' }}" target="_blank" rel="noopener"><i class="fa fa-book"></i> Οδηγοί Χρήσης</a></li>
                 <li><a href="{{ h.url_for('/contact') }}"><i class="fa fa-envelope"></i> Επικοινωνία</a></li>
               </ul>
             </div>

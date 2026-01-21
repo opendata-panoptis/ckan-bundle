@@ -12,6 +12,7 @@ from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
 
 from ckanext.contact import routes
 from ckanext.contact.auth import send_contact
+from ckanext.contact import helpers as contact_helpers
 
 plugin_dir = os.path.dirname(__file__)
 
@@ -61,4 +62,5 @@ class ContactPlugin(SingletonPlugin):
             'get_recaptcha_v3_key': functools.partial(
                 toolkit.config.get, 'ckanext.contact.recaptcha_v3_key', None
             ),
+            **contact_helpers.get_helpers(),
         }
