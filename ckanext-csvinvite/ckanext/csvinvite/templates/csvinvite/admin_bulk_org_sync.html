@@ -1,5 +1,15 @@
 {% extends "admin/base.html" %}
 
+{% macro state_badge(state) %}
+  {% if state == 'active' %}
+    <span class="label label-success">{{ state }}</span>
+  {% elif state == 'pending' %}
+    <span class="label label-warning">{{ state }}</span>
+  {% else %}
+    <span class="label label-default">{{ state or '—' }}</span>
+  {% endif %}
+{% endmacro %}
+
 {% block primary_content_inner %}
   <h1 class="page-heading">{{ _('Bulk sync organization members') }}</h1>
 
@@ -129,7 +139,7 @@
                 <li>{{ _('Role updates:') }} {{ plan.role_updates|length }}</li>
                 <li>{{ _('Unchanged:') }} {{ plan.unchanged|length }}</li>
                 <li>{{ _('Protected skips:') }} {{ plan.protected_skips|length }}</li>
-                <li>{{ _('Removals:') }} {{ plan.removals|length }}</li>
+                <li>{{ _('Removals:') }} {{ plan.removals|length }}{% if not report.remove_missing %} <em>(δεν θα αφαιρεθούν — το «Αφαίρεση μελών που δεν υπάρχουν στο αρχείο» δεν είναι ενεργοποιημένο)</em>{% endif %}</li>
                 <li>{{ _('Pending invites:') }} {{ plan.pending_invites|length }}</li>
               </ul>
             </div>
@@ -141,11 +151,17 @@
               {% if plan.creations and plan.creations|length %}
                 <table class="table table-bordered table-striped">
                   <thead>
-                    <tr><th>Line</th><th>Username</th><th>Email</th><th>Role</th></tr>
+                    <tr><th>Line</th><th>Username</th><th>Email</th><th>Role</th><th>State</th></tr>
                   </thead>
                   <tbody>
                     {% for r in plan.creations %}
-                      <tr><td>{{ r.line }}</td><td>{{ r.username }}</td><td>{{ r.email }}</td><td>{{ r.role }}</td></tr>
+                      <tr>
+                        <td>{{ r.line }}</td>
+                        <td>{{ r.username }}</td>
+                        <td>{{ r.email }}</td>
+                        <td>{{ r.role }}</td>
+                        <td>{{ state_badge(r.state) }}</td>
+                      </tr>
                     {% endfor %}
                   </tbody>
                 </table>
@@ -157,7 +173,7 @@
               {% if plan.role_updates and plan.role_updates|length %}
                 <table class="table table-bordered table-striped">
                   <thead>
-                    <tr><th>Username</th><th>Email</th><th>Old</th><th>New</th></tr>
+                    <tr><th>Username</th><th>Email</th><th>Old</th><th>New</th><th>State</th></tr>
                   </thead>
                   <tbody>
                     {% for r in plan.role_updates %}
@@ -166,6 +182,7 @@
                         <td>{{ r.member.email }}</td>
                         <td>{{ r.member.role }}</td>
                         <td>{{ r.new_role }}</td>
+                        <td>{{ state_badge(r.member.state) }}</td>
                       </tr>
                     {% endfor %}
                   </tbody>
@@ -178,11 +195,16 @@
               {% if plan.unchanged and plan.unchanged|length %}
                 <table class="table table-bordered table-striped">
                   <thead>
-                    <tr><th>Username</th><th>Email</th><th>Role</th></tr>
+                    <tr><th>Username</th><th>Email</th><th>Role</th><th>State</th></tr>
                   </thead>
                   <tbody>
                     {% for r in plan.unchanged %}
-                      <tr><td>{{ r.username }}</td><td>{{ r.email }}</td><td>{{ r.role }}</td></tr>
+                      <tr>
+                        <td>{{ r.username }}</td>
+                        <td>{{ r.email }}</td>
+                        <td>{{ r.role }}</td>
+                        <td>{{ state_badge(r.state) }}</td>
+                      </tr>
                     {% endfor %}
                   </tbody>
                 </table>
@@ -194,7 +216,7 @@
               {% if plan.protected_skips and plan.protected_skips|length %}
                 <table class="table table-bordered table-striped">
                   <thead>
-                    <tr><th>Username</th><th>Email</th><th>Role</th><th>Reason</th></tr>
+                    <tr><th>Username</th><th>Email</th><th>Role</th><th>State</th><th>Reason</th></tr>
                   </thead>
                   <tbody>
                     {% for r in plan.protected_skips %}
@@ -202,6 +224,7 @@
                         <td>{{ r.member.username }}</td>
                         <td>{{ r.member.email }}</td>
                         <td>{{ r.member.role }}</td>
+                        <td>{{ state_badge(r.member.state) }}</td>
                         <td>{{ REASON_GR.get(r.reason, r.reason) }}</td>
                       </tr>
                     {% endfor %}
@@ -211,15 +234,20 @@
                 <p>{{ _('None.') }}</p>
               {% endif %}
 
-              <h3>{{ _('Removals') }}</h3>
+              <h3>{{ _('Removals') }}{% if not report.remove_missing %} <small><em>(δεν θα αφαιρεθούν — το «Αφαίρεση μελών που δεν υπάρχουν στο αρχείο» δεν είναι ενεργοποιημένο)</em></small>{% endif %}</h3>
               {% if plan.removals and plan.removals|length %}
                 <table class="table table-bordered table-striped">
                   <thead>
-                    <tr><th>Username</th><th>Email</th><th>Role</th></tr>
+                    <tr><th>Username</th><th>Email</th><th>Role</th><th>State</th></tr>
                   </thead>
                   <tbody>
                     {% for r in plan.removals %}
-                      <tr><td>{{ r.username }}</td><td>{{ r.email }}</td><td>{{ r.role }}</td></tr>
+                      <tr>
+                        <td>{{ r.username }}</td>
+                        <td>{{ r.email }}</td>
+                        <td>{{ r.role }}</td>
+                        <td>{{ state_badge(r.state) }}</td>
+                      </tr>
                     {% endfor %}
                   </tbody>
                 </table>

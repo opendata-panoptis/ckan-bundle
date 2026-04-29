@@ -18,12 +18,23 @@
               {{ h.scheming_language_text(subfield.label) }}
             </dt>
             <dd>
-            {%- snippet 'scheming/snippets/display_field.html',
-              field=subfield,
-              data=field_data,
-              entity_type=entity_type,
-              object_type=object_type
-            -%}
+            {% set raw_value = field_data.get(subfield.field_name, '') %}
+            {% set max_len = 700 %}
+            {% if subfield.field_name in ('bbox', 'geom', 'centroid') and raw_value and raw_value|string|length > max_len %}
+              <div class="subfield-truncated-wrapper">
+                <span class="subfield-truncated-text">
+                  {{ raw_value|string|truncate(max_len, True, '…') }}
+                </span>
+                <span class="subfield-tooltip-text">{{ raw_value }}</span>
+              </div>
+            {% else %}
+              {%- snippet 'scheming/snippets/display_field.html',
+                field=subfield,
+                data=field_data,
+                entity_type=entity_type,
+                object_type=object_type
+              -%}
+            {% endif %}
             </dd>
           {% endfor %}
         </dl>

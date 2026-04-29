@@ -45,10 +45,79 @@
           field_upload='logo_upload',
           field_clear='clear_logo_upload'
         ) }}
+
+        {# Preset logo — χρησιμοποιείται μόνο όταν το ckan.site_logo είναι άδειο #}
+        {% set logo_preset_options = [
+          {'value': 'logo_0.png',  'text': 'logo_0 (PNG)'},
+          {'value': 'logo_1.svg',  'text': 'logo_1 (SVG)'}
+        ] %}
+        {% set logo_preset_selected = data.get('ckanext.data_gov_gr.header.logo_preset', 'logo_0.png') %}
+        {{ form.select(
+          'ckanext.data_gov_gr.header.logo_preset',
+          id='field-ckanext.data_gov_gr.header.logo_preset',
+          label=_('Preset λογότυπο header'),
+          options=logo_preset_options,
+          selected=logo_preset_selected,
+          error=errors.get('ckanext.data_gov_gr.header.logo_preset'),
+          classes=['control-medium']
+        ) }}
+        <p class="help-block" style="margin-top: -10px; margin-bottom: 4px;">
+          {{ _('Χρησιμοποιείται μόνο αν το «Site logo» παραπάνω είναι άδειο.') }}
+        </p>
+        <div id="dg-logo-preset-preview" style="margin-bottom: 16px; background: #f0f0f0; display: inline-block; padding: 8px 16px; border-radius: 4px; border: 1px solid #ddd;">
+          <img id="dg-logo-preset-img" src="" alt="preview" style="height: 50px; display: block;" />
+        </div>
+        <script>
+          (function () {
+            var BASE = '{{ h.url_for_static("/images/logo/") }}';
+            var select = document.getElementById('field-ckanext.data_gov_gr.header.logo_preset');
+            var img = document.getElementById('dg-logo-preset-img');
+            if (!select || !img) return;
+            function update() {
+              img.src = BASE + select.value;
+            }
+            select.addEventListener('change', update);
+            update();
+          })();
+        </script>
+
       </section>
 
       <section id="dg-config-home" class="dg-config-section" data-dg-section="dg-config-home">
         <h3>{{ _('Αρχική') }}</h3>
+
+        {% set athens_hero_image_options = [
+          {'value': '/images/hero/hero_0.jpg', 'text': _('Hero 0')},
+          {'value': '/images/hero/hero_1.jpg', 'text': _('Hero 1')},
+          {'value': '/images/hero/hero_2.jpg', 'text': _('Hero 2')}
+        ] %}
+        {{ form.select(
+          'ckanext.athens_theme.hero.image_url',
+          id='field-ckanext.athens_theme.hero.image_url',
+          label=_('Hero image αρχικής σελίδας'),
+          options=athens_hero_image_options,
+          selected=data.get('ckanext.athens_theme.hero.image_url', '/images/hero/hero_0.jpg'),
+          error=errors.get('ckanext.athens_theme.hero.image_url'),
+          classes=['control-medium']
+        ) }}
+        <p class="help-block">
+          {{ _('Οι εικόνες σερβίρονται από τον public φάκελο images/hero του Athens theme.') }}
+        </p>
+        <div id="dg-hero-image-preview" style="margin-bottom: 16px; background: #f0f0f0; display: inline-block; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+          <img id="dg-hero-image-img" src="" alt="preview" style="width: 280px; height: 105px; object-fit: cover; display: block;" />
+        </div>
+        <script>
+          (function () {
+            var select = document.getElementById('field-ckanext.athens_theme.hero.image_url');
+            var img = document.getElementById('dg-hero-image-img');
+            if (!select || !img) return;
+            function update() {
+              img.src = select.value;
+            }
+            select.addEventListener('change', update);
+            update();
+          })();
+        </script>
 
         {% if show_home_stats_section %}
           <h4>{{ _('Στατιστικά αρχικής σελίδας') }}</h4>
@@ -249,9 +318,6 @@
           </script>
         {% endif %}
 
-	        {% if not show_home_stats_section and not show_home_featured_datasets_section and not show_home_showcases_section %}
-	          <p class="help-block">{{ _('Δεν υπάρχουν ενεργές ρυθμίσεις για την αρχική σελίδα σε αυτό το περιβάλλον.') }}</p>
-	        {% endif %}
       </section>
 
       <section id="dg-config-metadata-defaults" class="dg-config-section" data-dg-section="dg-config-metadata-defaults">
@@ -673,6 +739,22 @@
       </section>
       {% endif %}
 
+      <section id="dg-config-footer" class="dg-config-section" data-dg-section="dg-config-footer">
+        <h3>{{ _('Footer') }}</h3>
+
+        {{ form.input(
+          'ckanext.athens_theme.footer.chatbot_url',
+          id='field-ckanext.athens_theme.footer.chatbot_url',
+          label=_('Σύνδεσμος Ψηφιακού Βοηθού Athens Gov'),
+          value=data['ckanext.athens_theme.footer.chatbot_url'],
+          error=errors['ckanext.athens_theme.footer.chatbot_url'],
+          placeholder='https://...'
+        ) }}
+        <p class="help-block">
+          {{ _('Αν συμπληρωθεί, εμφανίζεται στη στήλη «Σχετικά» του footer ως σύνδεσμος που ανοίγει σε νέα καρτέλα. Αφήστε κενό για απόκρυψη.') }}
+        </p>
+      </section>
+
       <section id="dg-config-survey" class="dg-config-section" data-dg-section="dg-config-survey">
         <h3>{{ _('Έρευνα') }}</h3>
 
@@ -849,6 +931,7 @@
       <li><a href="#dg-config-menu">{{ _('Μενού / Αναζήτηση') }}</a></li>
       {% if show_guides_section %}<li><a href="#dg-config-guides">{{ _('Οδηγοί (GitBook)') }}</a></li>{% endif %}
       {% if show_stats_powerbi_section %}<li><a href="#dg-config-powerbi">{{ _('Power BI') }}</a></li>{% endif %}
+      <li><a href="#dg-config-footer">{{ _('Footer') }}</a></li>
       <li><a href="#dg-config-survey">{{ _('Έρευνα') }}</a></li>
       <li><a href="#dg-config-showcases">{{ _('Showcases') }}</a></li>
     </ul>
@@ -926,6 +1009,13 @@
         </ul>
       </div>
     {% endif %}
+
+    <div class="dg-help-section" data-dg-help="dg-config-footer">
+      <h4>{{ _('Footer') }}</h4>
+      <ul>
+        <li><strong>{{ _('Σύνδεσμος Ψηφιακού Βοηθού Athens Gov') }}:</strong> {{ _('Εμφανίζεται στη στήλη «Σχετικά» του footer και ανοίγει σε νέα καρτέλα. Αφήστε κενό για απόκρυψη.') }}</li>
+      </ul>
+    </div>
 
     <div class="dg-help-section" data-dg-help="dg-config-survey">
       <h4>{{ _('Έρευνα') }}</h4>

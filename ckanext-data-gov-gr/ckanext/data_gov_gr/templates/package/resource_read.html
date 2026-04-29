@@ -93,11 +93,24 @@
               {% if resource_views %}
                   {% for resource_view in resource_views %}
                     {% if resource_view == current_resource_view %}
-                      {% snippet 'package/snippets/resource_view.html',
-                         resource_view=resource_view,
-                         resource=resource,
-                         package=package
-                       %}
+                      {% if h.should_skip_tables_view_render(resource, resource_view) %}
+                        <div class="data-viewer-info">
+                          <p>{{ _("This resource view is not available for this resource.") }}</p>
+                          {% if h.check_access('resource_view_delete', {'id': resource_view.id}) %}
+                            <p>
+                              <a class="btn btn-default" href="{{ h.url_for(package.type ~ '_resource.edit_view', id=package.name, resource_id=resource.id, view_id=resource_view.id) }}">
+                                <i class="fa fa-pencil"></i> {{ _('Edit view') }}
+                              </a>
+                            </p>
+                          {% endif %}
+                        </div>
+                      {% else %}
+                        {% snippet 'package/snippets/resource_view.html',
+                           resource_view=resource_view,
+                           resource=resource,
+                           package=package
+                         %}
+                      {% endif %}
                     {% endif %}
                   {% endfor %}
               {% else %}

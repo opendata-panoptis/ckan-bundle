@@ -28,8 +28,10 @@ fields:
     en: Description
     el: Περιγραφή οργανισμού
   form_snippet: markdown.html
-  form_placeholder: A little information about this organization.
-  
+  form_placeholder:
+    el: Λίγες πληροφορίες για αυτόν τον οργανισμό
+    en: A little information about this organization
+
 - field_name: email
   label:
     en: Contact email
@@ -66,7 +68,9 @@ fields:
   form_choices_helper_kwargs:
     vocabulary_id_or_name: "Publisher type"
   required: false
-  help_text: Select the Publisher type  for this resource from the controlled list.
+  help_text:
+    en: Select the Publisher type for this resource from the controlled list.
+    el: Επιλέξτε τον τύπο εκδότη για αυτόν τον πόρο από την ελεγχόμενη λίστα.
 
 - field_name: image
   label: Image URL

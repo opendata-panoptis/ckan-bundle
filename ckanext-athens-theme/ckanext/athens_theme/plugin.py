@@ -25,8 +25,6 @@ class AthensThemePlugin(plugins.SingletonPlugin):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
 
-        # Set up default logo
-        config_["ckan.site_logo"] = "/images/logo.png"
         log.info(f"Loading static files from {os.path.join(plugin_dir, 'public')}")
 
     # ITemplateHelpers

@@ -59,7 +59,11 @@ To install ckanext-data-gov-gr:
 
 ## Config settings
 
-None at present
+Optional settings:
+
+    # Hide the "Data and Resources" section on data-service ("API") dataset pages.
+    # (optional, default: yes)
+    ckanext.data_gov_gr.data_service.hide_resources_section = yes
 
 **TODO:** Document any optional config settings here. For example:
 

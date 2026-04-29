@@ -1701,9 +1701,59 @@ def harvest_frequencies():
 
 # ---------------------------------------------------------------------------------------
 
+def get_allowed_view_types(resource, package):
+    allowed_view_types = core_helpers.get_allowed_view_types(resource, package)
+
+    if resource.get("url_type") == "tabledesigner":
+        return [
+            option
+            for option in allowed_view_types
+            if option[0] != "tables_view"
+        ]
+
+    return allowed_view_types
+
+# ---------------------------------------------------------------------------------------
+
+def should_skip_tables_view_render(resource, resource_view):
+    """Return true for tables_view previews that are known to break rendering."""
+    if not resource_view or resource_view.get("view_type") != "tables_view":
+        return False
+
+    return resource.get("url_type") == "tabledesigner"
+
+# ---------------------------------------------------------------------------------------
+
+def rendered_resource_view(resource_view, resource, package, *args, **kwargs):
+    if should_skip_tables_view_render(resource, resource_view):
+        return toolkit.literal(
+            '<div class="data-viewer-info">'
+            f'<p>{toolkit._("This resource view is not available for this resource.")}</p>'
+            '</div>'
+        )
+
+    try:
+        return core_helpers.rendered_resource_view(
+            resource_view, resource, package, *args, **kwargs
+        )
+    except Exception:
+        if resource_view and resource_view.get("view_type") == "tables_view":
+            log.exception("Unable to render tables_view %s", resource_view.get("id"))
+            return toolkit.literal(
+                '<div class="data-viewer-info">'
+                f'<p>{toolkit._("This resource view is not available for this resource.")}</p>'
+                '</div>'
+            )
+        raise
+
+# ---------------------------------------------------------------------------------------
+
 def get_helpers():
     return {
         "is_url_field": is_url_field,
+        "get_allowed_view_types": get_allowed_view_types,
+        "should_skip_tables_view_render": should_skip_tables_view_render,
+        "rendered_resource_view": rendered_resource_view,
         "vocabulary_facet_item_label": vocabulary_facet_item_label,
         "vocabulary_facet_title": vocabulary_facet_title,
         "get_vocabulary_id_for_field": get_vocabulary_id_for_field,

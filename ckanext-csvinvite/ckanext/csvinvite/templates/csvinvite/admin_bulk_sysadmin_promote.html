@@ -1,0 +1,356 @@
+{% extends "admin/base.html" %}
+
+{% block primary_content_inner %}
+  <h1 class="page-heading">{{ _('Bulk sysadmin promotion') }}</h1>
+
+  <form method="post" enctype="multipart/form-data">
+    {{ h.csrf_input() }}
+    <div class="form-group">
+      <label>{{ _('CSV file') }}</label>
+      <input type="file" name="file" class="form-control" accept=".csv" required>
+      <p class="help-block">{{ _('Columns:') }} <code>username</code> {{ _('and/or') }} <code>email</code></p>
+    </div>
+
+    <div class="form-group">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" name="remove_missing" value="1"
+                 {% if plan and plan.remove_missing %}checked{% endif %}>
+          {{ _('Remove sysadmin from users not in CSV') }}
+        </label>
+        <p class="help-block">
+          {{ _('If enabled, existing sysadmins that are NOT listed in the CSV will be demoted (sysadmin=false). Protected users (configured in ckan.ini) and the current user are never demoted.') }}
+        </p>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-default" href="{% url_for 'csvinvite.admin_user_management_get' %}">{{ _('Back') }}</a>
+      <button class="btn btn-primary" type="submit">{{ _('Preview') }}</button>
+
+      {% if plan and (
+            (plan.to_promote and plan.to_promote|length)
+            or (plan.to_create and plan.to_create|length)
+            or (plan.to_demote and plan.to_demote|length)
+         ) %}
+        <button class="btn btn-danger" name="apply" value="1"
+                onclick="return confirm('{{ _('Are you sure you want to apply these sysadmin changes?') }}');">
+          {{ _('Apply changes') }}
+        </button>
+      {% endif %}
+    </div>
+  </form>
+
+  <form method="post" action="{% url_for 'csvinvite.admin_bulk_sysadmin_promote_reset' %}" style="display:inline;">
+    {{ h.csrf_input() }}
+    <button class="btn btn-warning" type="submit">{{ _('Reset results') }}</button>
+  </form>
+
+  {% if plan %}
+    <hr>
+
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <strong>{{ _('Summary') }}</strong>
+      </div>
+      <div class="panel-body">
+        <ul class="list-unstyled">
+          <li><strong>{{ _('Total CSV rows:') }}</strong> {{ plan.csv_count }}</li>
+          <li><strong>{{ _('Would promote:') }}</strong> {{ plan.to_promote | length }}</li>
+          <li><strong>{{ _('Already sysadmin:') }}</strong> {{ plan.already_sysadmin | length }}</li>
+          <li><strong>{{ _('Would create (pending):') }}</strong> {{ plan.to_create | length }}</li>
+          <li><strong>{{ _('Not found:') }}</strong> {{ plan.not_found | length }}</li>
+          {% if plan.remove_missing %}
+            <li><strong>{{ _('Would demote:') }}</strong> {{ plan.to_demote | length }}</li>
+            <li><strong>{{ _('Protected (skipped):') }}</strong> {{ plan.protected_skips | length }}</li>
+          {% endif %}
+          {% if plan.errors %}
+            <li><strong>{{ _('Errors:') }}</strong> {{ plan.errors | length }}</li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <hr>
+
+    {% if plan.applied %}
+      <div class="alert alert-info">
+        {{ _('Applied:') }}
+        {{ _('promoted') }}={{ plan.applied.promoted }},
+        {{ _('created') }}={{ plan.applied.created }},
+        {{ _('demoted') }}={{ plan.applied.demoted }},
+        {{ _('errors') }}={{ plan.applied.errors }}
+      </div>
+    {% endif %}
+
+    {% if plan.errors and plan.errors|length %}
+      <div class="alert alert-danger">
+        <ul>
+          {% for e in plan.errors %}
+            <li>{{ e.error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <h3>{{ _('Would be promoted') }}</h3>
+    {% if plan.to_promote and plan.to_promote|length %}
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>{{ _('Username') }}</th><th>{{ _('Email') }}</th><th>{{ _('State') }}</th><th>{{ _('Line') }}</th></tr></thead>
+        <tbody>
+          {% for u in plan.to_promote %}
+            <tr>
+              <td>{{ u.username }}</td>
+              <td>{{ u.email }}</td>
+              <td>
+                {% if u.state == 'active' %}
+                  <span class="label label-success">{{ u.state }}</span>
+                {% elif u.state == 'pending' %}
+                  <span class="label label-warning">{{ u.state }}</span>
+                {% else %}
+                  <span class="label label-default">{{ u.state }}</span>
+                {% endif %}
+              </td>
+              <td>{{ u.line }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>{{ _('None.') }}</p>
+    {% endif %}
+
+    <h3>{{ _('Already sysadmin') }}</h3>
+    {% if plan.already_sysadmin and plan.already_sysadmin|length %}
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>{{ _('Username') }}</th><th>{{ _('Email') }}</th><th>{{ _('State') }}</th><th>{{ _('Line') }}</th></tr></thead>
+        <tbody>
+          {% for u in plan.already_sysadmin %}
+            <tr>
+              <td>{{ u.username }}</td>
+              <td>{{ u.email }}</td>
+              <td>
+                {% if u.state == 'active' %}
+                  <span class="label label-success">{{ u.state }}</span>
+                {% elif u.state == 'pending' %}
+                  <span class="label label-warning">{{ u.state }}</span>
+                {% else %}
+                  <span class="label label-default">{{ u.state }}</span>
+                {% endif %}
+              </td>
+              <td>{{ u.line }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>{{ _('None.') }}</p>
+    {% endif %}
+
+    <h3>
+      {{ _('Would create (new pending users)') }}
+      <small class="text-muted">
+        {{ _('These users were not found in the system. Since their email was provided, they will be created as new pending sysadmin users.') }}
+      </small>
+    </h3>
+    {% if plan.to_create and plan.to_create|length %}
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>{{ _('Username (input)') }}</th><th>{{ _('Email') }}</th><th>{{ _('Line') }}</th></tr></thead>
+        <tbody>
+          {% for u in plan.to_create %}
+            <tr><td>{{ u.username }}</td><td>{{ u.email }}</td><td>{{ u.line }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>{{ _('None.') }}</p>
+    {% endif %}
+
+    <h3>
+      {{ _('Not found') }}
+      <small class="text-muted">
+        {{ _('These rows had only a username (no email) and no match was found, or the matched user is deleted. Without an active/pending user or an email, no action can be taken.') }}
+      </small>
+    </h3>
+    {% if plan.not_found and plan.not_found|length %}
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>{{ _('Username') }}</th><th>{{ _('Email') }}</th><th>{{ _('State') }}</th><th>{{ _('Line') }}</th></tr></thead>
+        <tbody>
+          {% for x in plan.not_found %}
+            <tr>
+              <td>{{ x.username }}</td>
+              <td>{{ x.email }}</td>
+              <td>
+                {% if x.state %}
+                  <span class="label label-default">{{ x.state }}</span>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td>{{ x.line }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>{{ _('None.') }}</p>
+    {% endif %}
+
+    {% if plan.remove_missing %}
+      <h3>{{ _('Would be demoted') }}</h3>
+      {% if plan.to_demote and plan.to_demote|length %}
+        <table class="table table-bordered table-striped">
+          <thead><tr><th>{{ _('Username') }}</th><th>{{ _('Email') }}</th><th>{{ _('State') }}</th></tr></thead>
+          <tbody>
+            {% for u in plan.to_demote %}
+              <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td>
+                  {% if u.state == 'active' %}
+                    <span class="label label-success">{{ u.state }}</span>
+                  {% elif u.state == 'pending' %}
+                    <span class="label label-warning">{{ u.state }}</span>
+                  {% else %}
+                    <span class="label label-default">{{ u.state }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>{{ _('None.') }}</p>
+      {% endif %}
+
+      <h3>{{ _('Protected (skipped)') }}</h3>
+      {% if plan.protected_skips and plan.protected_skips|length %}
+        <table class="table table-bordered table-striped">
+          <thead><tr><th>{{ _('Username') }}</th><th>{{ _('Email') }}</th><th>{{ _('Reason') }}</th></tr></thead>
+          <tbody>
+            {% for x in plan.protected_skips %}
+              <tr><td>{{ x.username }}</td><td>{{ x.email }}</td><td>{{ x.reason }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>{{ _('None.') }}</p>
+      {% endif %}
+    {% endif %}
+
+    <p>
+      <a class="btn btn-default" href="{{ h.url_for('csvinvite.admin_bulk_sysadmin_promote_export') }}">
+        {{ _('Download results CSV') }}
+      </a>
+    </p>
+  {% endif %}
+{% endblock %}
+
+{% block secondary_content %}
+  {{ super() }}
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-download"></i>
+      {{ _('CSV template') }}
+    </h2>
+    <div class="module-content">
+      <p class="muted">
+        {{ _('Download a ready-to-use CSV template (headers + one example row).') }}
+      </p>
+      <p style="margin: 10px 0 0 0;">
+        <a class="btn btn-default btn-sm"
+           href="{{ h.url_for('csvinvite.admin_bulk_sysadmin_promote_template_csv') }}">
+          {{ _('Download CSV template') }}
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-info-circle"></i>
+      {{ _('Quick guide') }}
+    </h2>
+    <div class="module-content">
+      <ol class="list-unstyled" style="margin-bottom: 0;">
+        <li><strong>1.</strong> {{ _('Prepare a CSV with username and/or email.') }}</li>
+        <li><strong>2.</strong> {{ _('Upload and click "Preview" to see the dry-run plan.') }}</li>
+        <li><strong>3.</strong> {{ _('Review the tables carefully.') }}</li>
+        <li><strong>4.</strong> {{ _('Only then click "Apply changes".') }}</li>
+      </ol>
+      <p class="muted" style="margin-top: 10px;">
+        {{ _('Tip: start with 1-2 rows to confirm the matching logic.') }}
+      </p>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-table"></i>
+      {{ _('CSV format') }}
+    </h2>
+    <div class="module-content">
+      <p class="muted">
+        {{ _('Accepted columns:') }} <code>username</code> {{ _('and/or') }} <code>email</code>.
+        {{ _('You may provide either one or both per row.') }}
+      </p>
+
+      <p><strong>{{ _('Example') }}</strong></p>
+      <pre style="white-space: pre; overflow: auto;"><code>username,email
+user_a,person@example.org
+,newadmin@example.org</code></pre>
+
+      <ul class="muted" style="margin-bottom: 0;">
+        <li>{{ _('Leave empty values blank (do not write "null").') }}</li>
+        <li>{{ _('Avoid duplicate rows; keep one user per line.') }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-exclamation-triangle"></i>
+      {{ _('How matching works') }}
+    </h2>
+    <div class="module-content">
+      <ul style="margin-bottom: 0;">
+        <li>
+          <strong>{{ _('Found (active):') }}</strong>
+          {{ _('If a user is found by username or email and is active, they will be promoted to sysadmin.') }}
+        </li>
+        <li>
+          <strong>{{ _('Already sysadmin:') }}</strong>
+          {{ _('Users already marked as sysadmin are reported but skipped.') }}
+        </li>
+        <li>
+          <strong>{{ _('Not found (with email):') }}</strong>
+          {{ _('If no user is found but the CSV row has an email, a new pending user will be created with sysadmin=true.') }}
+        </li>
+        <li>
+          <strong>{{ _('Not found (no email):') }}</strong>
+          {{ _('If no user is found and the row only has a username (no email), it is reported as "Not found". A new user cannot be created without an email.') }}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+      <i class="fa fa-shield"></i>
+      {{ _('Remove missing & protection') }}
+    </h2>
+    <div class="module-content">
+      <ul style="margin-bottom: 0;">
+        <li>
+          <strong>{{ _('Remove missing:') }}</strong>
+          {{ _('When enabled, existing sysadmins NOT in the CSV will be demoted (sysadmin=false).') }}
+        </li>
+        <li>
+          <strong>{{ _('Protected users:') }}</strong>
+          {{ _('Users listed in ckanext.csvinvite.protected_sysadmin_emails and the current user are NEVER demoted, even if "remove missing" is enabled.') }}
+        </li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}

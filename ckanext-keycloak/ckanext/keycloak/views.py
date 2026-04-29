@@ -4,7 +4,7 @@ from ckan.plugins import toolkit as tk
 import ckan.lib.helpers as h
 import ckan.model as model
 from ckan.common import g
-from ckan.views.user import set_repoze_user, RequestResetView, login as original_login
+from ckan.views.user import set_repoze_user, RequestResetView, login as original_login, logout as original_logout
 from ckanext.keycloak.keycloak import KeycloakClient
 import ckanext.keycloak.helpers as helpers
 from os import environ
@@ -93,6 +93,7 @@ def sso_login():
 
     data = tk.request.args
     token = client.get_token(data['code'], redirect_uri)
+    session['keycloak_id_token'] = token.get('id_token')
     userinfo = client.get_user_info(token)
     log.info("SSO Login: {}".format(userinfo))
     if userinfo:
@@ -185,9 +186,35 @@ def force_sso_login():
 
     return original_login()
 
+def sso_logout():
+    """Logout από CKAN + Keycloak (+ cascade στη ΓΓΠΣ μέσω Keycloak)"""
+    id_token = session.pop('keycloak_id_token', None)
+    log.info(f"SSO Logout - id_token present: {id_token is not None}")
+
+    # Κάνουμε πρώτα το CKAN logout
+    original_logout()
+
+    # Αν έχουμε id_token, redirect στο Keycloak end_session_endpoint
+    if id_token:
+        post_logout_uri = tk.config.get('ckanext.keycloak.post_logout_redirect_uri',
+                                        environ.get('CKANEXT__KEYCLOAK__POST_LOGOUT_REDIRECT_URI',
+                                                     redirect_uri))
+        base_url = server_url.rstrip('/')
+        logout_url = (
+            f"{base_url}/realms/{realm_name}/protocol/openid-connect/logout"
+            f"?id_token_hint={id_token}"
+            f"&post_logout_redirect_uri={post_logout_uri}"
+        )
+        log.info(f"SSO Logout - redirect to: {logout_url}")
+        return tk.redirect_to(logout_url)
+
+    return tk.redirect_to('/')
+
+
 keycloak.add_url_rule('/sso', view_func=sso)
 keycloak.add_url_rule('/sso_login', view_func=sso_login)
 keycloak.add_url_rule('/login', view_func=force_sso_login, methods=['GET','POST'])
+keycloak.add_url_rule('/_logout', view_func=sso_logout, methods=['GET', 'POST'])
 # keycloak.add_url_rule('/reset_password', view_func=reset_password, methods=['POST'])
 
 def get_blueprint():

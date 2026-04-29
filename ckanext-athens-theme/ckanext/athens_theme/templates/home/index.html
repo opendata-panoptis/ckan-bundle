@@ -1,17 +1,20 @@
 {% ckan_extends %}
 
-{% block subtitle %}{{ _("Welcome") }}{% endblock %}
+{% set subtitle_text = config.get('ckanext.athens_theme.home.subtitle') %}
+{% set hero_image_url = config.get('ckanext.athens_theme.hero.image_url') or '/images/hero/hero_0.jpg' %}
+{% set hero_overlay_opacity = '0.7' if hero_image_url.endswith('/hero_0.jpg') else '0.1' %}
+{% block subtitle %}{% if subtitle_text %}{{ _(subtitle_text) }}{% endif %}{% endblock %}
 
 {% block maintag %}{% endblock %}
 {% block toolbar %}{% endblock %}
 
 {% block header %}
-  {% include "header_index.html" %}
+  {% include "header.html" %}
 {% endblock %}
 
 {% block content %}
   <div class="homepage">
-    <section class="hero-section">
+    <section class="hero-section" style="--hero-image-url: url('{{ hero_image_url }}'); --hero-overlay-opacity: {{ hero_overlay_opacity }};">
       <div class="pulse-overlay"></div>
       <div class="hero-content">
         <div class="container">

@@ -32,6 +32,13 @@ user2@example.gr,editor</pre>
     <input id="file" name="file" type="file" accept=".csv,text/csv" class="form-control"/>
   </div>
 
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="dry_run" value="on" checked>
+      Dry run (προεπισκόπηση μόνο)
+    </label>
+  </div>
+
   <button class="btn btn-primary" type="submit">Εισαγωγή</button>
   <a class="btn btn-default" href="{{ h.url_for('organization.manage_members', id=org.name) }}">Άκυρο</a>
 </form>

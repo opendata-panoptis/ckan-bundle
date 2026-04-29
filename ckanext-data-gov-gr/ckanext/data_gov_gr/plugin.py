@@ -121,6 +121,9 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
             'ckanext.data_gov_gr.home.featured_dataset_views.ids': [ignore_missing, unicode_safe],
             'ckanext.data_gov_gr.home.portal_numbers.enabled': [ignore_missing, boolean_validator],
             'ckanext.data_gov_gr.home.showcases.ids': [ignore_missing, unicode_safe],
+            'ckanext.data_gov_gr.header.logo_preset': [ignore_missing, unicode_safe],
+            'ckanext.athens_theme.hero.image_url': [ignore_missing, unicode_safe],
+            'ckanext.athens_theme.footer.chatbot_url': [ignore_missing, unicode_safe],
         })
 
         return schema
@@ -140,6 +143,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         home = root.home
         config_ui = root.config_ui
         contact = root.contact
+        data_service = root.data_service
 
         declaration.declare(root.powerbi_embed_url, "").set_description(
             "Power BI embed URL (used on /stats/powerbi and home previews)."
@@ -212,6 +216,24 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         )
         declaration.declare(home.showcases.ids, "").set_description(
             "Selected showcases IDs (one per line, up to 3) for the home page."
+        )
+        declaration.declare(key.ckanext.athens_theme.hero.image_url, "/images/hero/hero_0.jpg").set_description(
+            "Athens theme home hero image URL selected from the bundled hero images."
+        )
+
+        declaration.annotate("Footer")
+        declaration.declare(key.ckanext.athens_theme.footer.chatbot_url, "").set_description(
+            "URL for the 'Ψηφιακός Βοηθός Athens Gov' link in the footer About column. Opens in new tab. Leave empty to hide."
+        )
+
+        declaration.annotate("Header")
+        declaration.declare(root.header.logo_preset, "logo_1.svg").set_description(
+            "Preset logo filename from /images/logo/ shown in the header when ckan.site_logo is not set."
+        )
+
+        declaration.annotate("Dataset / data-service view")
+        declaration.declare(data_service.hide_resources_section, "yes").set_description(
+            "Hide 'Data and Resources' section on data-service (API) pages."
         )
 
         declaration.annotate("Config UI visibility (ini-only feature flags)")
@@ -595,6 +617,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
             'check_user_org_permission': actions.check_user_org_permission,
             'organization_list_with_user_extras': actions.organization_list_with_user_extras,
             'user_organization_capacity': actions.user_organization_capacity,
+            'user_delete': actions.user_delete,
             'geonames_search': self.geonames_search_action # Κλήση για ανάκτηση αποτελεσμάτων σε geoname
         }
 

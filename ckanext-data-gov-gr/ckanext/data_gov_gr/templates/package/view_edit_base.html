@@ -1,0 +1,28 @@
+{% ckan_extends %}
+
+{% block main_content %}
+  {% set hide_tables_preview = h.should_skip_tables_view_render(resource, resource_view) %}
+
+  {% if h.resource_view_full_page(resource_view) %}
+    {{ self.flash() }}
+    {{ self.toolbar() }}
+    <div class="wrapper no-nav">
+      {{ self.primary_content() }}
+    </div>
+  {% else %}
+    {{ super.super() }}
+  {% endif %}
+
+  {% if to_preview and h.resource_view_display_preview(resource_view) and not hide_tables_preview %}
+    <div class="row wrapper no-nav view-preview-container">
+      <section class="module module-narrow module-shallow">
+        <h2 class="module-heading">
+          <i class="fa fa-image"></i> {{ _('View preview') }}
+        </h2>
+        <div class="module-content">
+          {% snippet 'package/snippets/resource_view.html', resource_view=resource_view, resource=resource, package=package, to_preview=True %}
+        </div>
+      </section>
+    </div>
+  {% endif %}
+{% endblock %}

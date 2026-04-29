@@ -47,10 +47,10 @@
       {% else %}
       <nav class="account not-authed" aria-label="{{ _('Account') }}">
         <ul class="list-unstyled">
-          <li>{% link_for _('Log in'), named_route='user.login' %}</li>
-          {% if h.check_access('user_create') %}
-          <li>{% link_for _('Register'), named_route='user.register', class_='sub' %}</li>
-          {% endif %}
+          <li class="account-login-register">
+            {% set login_label = _('Log in / Register') %}
+            {% link_for login_label, named_route='user.login' %}
+          </li>
         </ul>
       </nav>
       {% endif %}
@@ -58,7 +58,7 @@
   </div>
   {% endblock %}
   
-  <header class="masthead">
+  <header class="masthead athens-home-masthead">
     <div class="container">
       {% block header_debug %} {% if g.debug and not g.debug_supress_header %}
       <div class="debug">Blueprint : {{ g.blueprint }}<br />View : {{ g.view }}</div>
@@ -67,11 +67,22 @@
         <hgroup class="{{ g.header_class }} navbar-left">
 
         {% block header_logo %}
+        {% if g.site_logo %}
         <a class="logo" href="{{ h.url_for('home.index') }}">
-          <img src="{{ h.url_for_static('images/athens-logo.png') }}" alt="Δήμος Αθηναίων"
-            title="Δήμος Αθηναίων" style="height: 70px; width: auto; margin-left: 24px;" />
+          <img src="{{ h.url_for_static_or_external(g.site_logo) }}" alt="{{ g.site_title }}"
+            title="{{ g.site_title }}" style="max-height: 50px; width: auto; margin-left: 24px;" />
         </a>
-        <a class="service-name" href="{{ h.url_for('home.index') }}"></a>
+        {% else %}
+          {% set _logo_preset = config.get('ckanext.data_gov_gr.header.logo_preset', 'logo_1.svg') %}
+          {% if _logo_preset %}
+          <a class="logo" href="{{ h.url_for('home.index') }}">
+            <img src="{{ h.url_for_static('/images/logo/' ~ _logo_preset) }}" alt="{{ g.site_title }}"
+              title="{{ g.site_title }}" style="max-height: 50px; width: auto; margin-left: 24px;" />
+          </a>
+          {% else %}
+          <a class="logo" href="{{ h.url_for('home.index') }}">{{ g.site_title }}</a>
+          {% endif %}
+        {% endif %}
         {% endblock %}
 
          </hgroup>

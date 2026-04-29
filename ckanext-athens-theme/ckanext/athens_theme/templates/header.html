@@ -1,20 +1,27 @@
 {% ckan_extends %}
 
 {% block header_site_search %}
-    <form class="d-flex site-search ms-auto" action="{% url_for dataset_type ~ '.search' %}" method="get">
-        <label class="d-none" for="field-sitewide-search">{% block header_site_search_label %}{{ h.humanize_entity_type('package', dataset_type, 'search_placeholder') or _('Search Datasets...') }}{% endblock %}</label>
-        <div class="search-input-group">
-            <input id="field-sitewide-search" class="form-control" type="text" name="q" placeholder="{{ _('Search') }}" aria-label="{{ h.humanize_entity_type('package', dataset_type, 'search_placeholder') or _('Search datasets...') }}"/>
-        </div>
-    </form>
 {% endblock %}
 
 {% block header_logo %}
-<a class="navbar-brand" href="{{ h.url_for_static('/') }}">
-<img src="{{ h.url_for_static('images/athens-logo.png') }}"
-     alt="Δήμος Αθηναίων"
-     style="height:70px;">
+{% if g.site_logo %}
+<a class="navbar-brand" href="{{ h.url_for('home.index') }}">
+  <img src="{{ h.url_for_static_or_external(g.site_logo) }}"
+       alt="{{ g.site_title }}" title="{{ g.site_title }}"
+       style="max-height:50px; width:auto;">
 </a>
+{% else %}
+  {% set _logo_preset = config.get('ckanext.data_gov_gr.header.logo_preset', 'logo_1.svg') %}
+  {% if _logo_preset %}
+  <a class="navbar-brand" href="{{ h.url_for('home.index') }}">
+    <img src="{{ h.url_for_static('/images/logo/' ~ _logo_preset) }}"
+         alt="{{ g.site_title }}" title="{{ g.site_title }}"
+         style="max-height:50px; width:auto;">
+  </a>
+  {% else %}
+  <a class="navbar-brand" href="{{ h.url_for('home.index') }}">{{ g.site_title }}</a>
+  {% endif %}
+{% endif %}
 {% endblock %}
 
 {% block header_site_navigation_tabs %}

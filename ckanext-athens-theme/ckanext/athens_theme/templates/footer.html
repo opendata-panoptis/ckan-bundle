@@ -1,5 +1,7 @@
 {% ckan_extends %}
 
+{% set footer_chatbot_url = config.get('ckanext.athens_theme.footer.chatbot_url') %}
+
 {% block footer_content %}
 {% set footer_source_code_url = config.get('ckanext.data_gov_gr.footer.source_code_url') %}
 <footer class="site-footer" role="contentinfo">
@@ -15,6 +17,9 @@
             <li><a href="https://www.data.gov.gr">{{ _('Data.gov.gr') }}</a></li>
             {% if footer_source_code_url %}
               <li><a href="{{ footer_source_code_url }}">{{ _('Source Code') }}</a></li>
+            {% endif %}
+            {% if footer_chatbot_url %}
+              <li><a href="{{ footer_chatbot_url }}" target="_blank" rel="noopener">{{ _('Ψηφιακός Βοηθός Athens Gov') }}</a></li>
             {% endif %}
 
           {% endblock %}

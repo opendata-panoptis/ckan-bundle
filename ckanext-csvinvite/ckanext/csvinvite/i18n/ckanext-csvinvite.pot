@@ -584,6 +584,10 @@ msgid "Delete/disable the user in Keycloak first."
 msgstr ""
 
 #: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:159
+msgid "Delete/disable the user in Keycloak/Active Directory first."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:159
 msgid "Upload your CSV and click “Preview”."
 msgstr ""
 
@@ -682,6 +686,10 @@ msgstr ""
 msgid "Note: First delete the user from Keycloak."
 msgstr ""
 
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:72
+msgid "Note: First delete the user from Keycloak/Active Directory."
+msgstr ""
+
 #: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:86
 msgid "Members"
 msgstr ""
@@ -722,6 +730,10 @@ msgstr ""
 
 #: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:187
 msgid "Delete the user in Keycloak first, then proceed here."
+msgstr ""
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:189
+msgid "Delete the user in Keycloak/Active Directory first, then proceed here."
 msgstr ""
 
 #: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:193

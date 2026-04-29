@@ -2273,3 +2273,81 @@ table.harvest-error-list tr td div.error {
 
 /* ---------------------------------------------------------------------------- */
 
+
+/* Truncated subfield values (bbox, geom, centroid) */
+.subfield-truncated-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  cursor: help;
+}
+
+.subfield-truncated-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Custom CSS-only tooltip — no character limit, lives OUTSIDE the overflow:hidden element */
+.subfield-truncated-wrapper .subfield-tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 1000;
+  min-width: 250px;
+  max-width: 500px;
+  padding: 10px 14px;
+  background-color: #333;
+  color: #fff;
+  font-size: 0.85em;
+  line-height: 1.4;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  user-select: text;
+  cursor: text;
+}
+
+/* Arrow */
+.subfield-truncated-wrapper .subfield-tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 20px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+/* Show on hover — hover on the WRAPPER, not the overflow:hidden child */
+.subfield-truncated-wrapper:hover .subfield-tooltip-text,
+.subfield-truncated-wrapper .subfield-tooltip-text:hover {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ============================================================ */
+
+.resource-view img[src*="navigateToGraph"] {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (min-width: 992px) {
+  .resource-view img[src*="navigateToGraph"] {
+    width: 40%;
+    transition: width 0.25s ease;
+  }
+
+  .resource-view img[src*="navigateToGraph"]:hover {
+    width: 65%;
+  }
+}
+
+/* ============================================================ */

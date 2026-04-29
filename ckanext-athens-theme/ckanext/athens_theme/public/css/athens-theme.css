@@ -3,6 +3,7 @@
 /* Brand Colors based on cityofathens.gr */
 :root {
   --primary-blue: #1877B8;        /* Primary blue from Athens Geoportal */
+  --header-blue: #4a7ba7;         /* Flat top-bar blue */
   --light-bg: #F6F9FC;            /* Light background */
   --dark-gray: #24292F;           /* Dark gray for text */
   --light-gray: #EDEFF1;          /* Light gray for borders */
@@ -57,36 +58,145 @@ body {
 
 
 .navbar-left .logo img {
-  height: 70px;
+  max-height: 50px;
+  height: auto;
   width: auto;
   margin-left: 24px;
 }
 
-.account-masthead {
-  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%);
-  color: white;
-  padding: 0.5rem 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+@media (min-width: 992px) {
+  .athens-home-masthead .navbar-left .logo img {
+    transform: none;
+  }
 }
 
-.account-masthead .list-unstyled {
+.athens-home-masthead {
+  padding: 6px 0 2px !important;
+  border-bottom: 0;
+}
+
+/* Account masthead (shared across home and inner pages) */
+.account-masthead {
+  padding: 0;
+  background: var(--header-blue);
+  background-image: none;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(30, 87, 153, 0.25);
+  position: relative;
+}
+
+.account-masthead .account ul.list-unstyled,
+.account-masthead .account.not-authed ul.list-unstyled,
+.account-masthead nav.account ul.list-unstyled {
   margin: 0;
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
-.account-masthead .list-unstyled li {
-  display: inline-block;
-  margin-right: 1rem;
+.account-masthead .account ul.list-unstyled li,
+.account-masthead .account.not-authed ul.list-unstyled li,
+.account-masthead nav.account ul.list-unstyled li {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
 }
 
-.account-masthead a {
-  color: #a6cbef;
+.account-masthead .account ul.list-unstyled li::before,
+.account-masthead .account ul.list-unstyled li::after,
+.account-masthead .account.not-authed ul.list-unstyled li::before,
+.account-masthead .account.not-authed ul.list-unstyled li::after,
+.account-masthead nav.account ul.list-unstyled li::before,
+.account-masthead nav.account ul.list-unstyled li::after {
+  content: none;
+}
+
+.account-masthead .account ul.list-unstyled a,
+.account-masthead .account.not-authed ul.list-unstyled a,
+.account-masthead nav.account ul.list-unstyled a,
+.account-masthead .account ul.list-unstyled .btn-link,
+.account-masthead .account.not-authed ul.list-unstyled .btn-link,
+.account-masthead nav.account ul.list-unstyled .btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0 10px;
+  height: 31px;
+  line-height: 31px;
+  border-radius: 4px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.account-masthead .account ul.list-unstyled a:hover,
+.account-masthead .account.not-authed ul.list-unstyled a:hover,
+.account-masthead nav.account ul.list-unstyled a:hover,
+.account-masthead .account ul.list-unstyled .btn-link:hover,
+.account-masthead .account.not-authed ul.list-unstyled .btn-link:hover,
+.account-masthead nav.account ul.list-unstyled .btn-link:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
   text-decoration: none;
 }
 
-.account-masthead a:hover {
+.account-masthead .account ul li > a:focus-visible,
+.account-masthead .account ul li > .btn-link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 1px;
+}
+
+.account-masthead .account.authed ul.list-unstyled li > form {
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.account-masthead .account.authed .image img {
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+  transition: border-color 0.2s ease;
+}
+
+.account-masthead .account.authed .image img:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.account-masthead .account.authed .username {
+  font-weight: 700;
   color: #fff;
-  text-decoration: underline;
+  text-shadow: none;
+}
+
+.account-masthead .fa {
+  line-height: 1;
+  font-size: 0.95em;
+  opacity: 0.9;
+}
+
+.account-masthead .fa-gavel {
+  color: #fff;
+  opacity: 1;
+  font-size: 1.05em;
+}
+
+.account-masthead .fa-gavel + .text {
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.account-masthead .account.authed ul.list-unstyled li > form > .btn-link > .fa {
+  transform: translateY(1px);
 }
 
 /* Service name */
@@ -108,6 +218,48 @@ body {
   z-index: 1000;
 }
 
+.main-navbar .navbar-toggler,
+.masthead .navbar .navbar-toggler {
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+}
+
+.main-navbar .navbar-toggler:hover,
+.main-navbar .navbar-toggler:focus,
+.masthead .navbar .navbar-toggler:hover,
+.masthead .navbar .navbar-toggler:focus {
+  background-color: rgba(24, 119, 184, 0.08);
+}
+
+.main-navbar .navbar-toggler:focus,
+.masthead .navbar .navbar-toggler:focus {
+  box-shadow: 0 0 0 0.2rem rgba(24, 119, 184, 0.25);
+}
+
+.main-navbar .navbar-toggler-icon,
+.masthead .navbar .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%231877B8' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.main-navbar .navbar-toggler .fa-bars,
+.masthead .navbar .navbar-toggler .fa-bars {
+  display: inline-block;
+  width: 1.5em;
+  height: 1.5em;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%231877B8' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  font-size: 1em;
+  line-height: 1;
+  color: transparent !important;
+}
+
+.main-navbar .navbar-toggler .fa-bars::before,
+.masthead .navbar .navbar-toggler .fa-bars::before {
+  content: "";
+}
+
 
 /* Βασικό στυλ - μόνο μπλε κείμενο */
 .main-navbar .nav > li > a {
@@ -116,36 +268,33 @@ body {
   margin: 0 4px;
   font-weight: 500;
   text-decoration: none;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   border-radius: 4px;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-
-/* Καθαρό hover effect για navigation */
-.main-navbar .nav > li > a:hover,
-.navbar-nav > li > a:hover {
-  color: white !important;
-  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%) !important;
-  border: 2px solid #4a7ba7 !important;
-  text-decoration: none !important;
-  transition: all 0.2s ease !important;
-}
-
 
 /* Ενεργό menu item */
 .main-navbar .nav > li.active > a,
 .navbar-nav > li.active > a {
-  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%) !important;
+  background: #14659b !important;
   color: #fff !important;   /* <-- λευκά γράμματα */
-  border: 2px solid #4a7ba7 !important;
+  border: 1px solid #14659b !important;
   font-weight: 600;
 }
 
 .navbar-nav > li > a:hover,
+.main-navbar .nav > li > a:hover,
 .navbar-right > li > a:hover {
   color: white !important;
-  background: linear-gradient(to right, #4a7ba7 0%, #5a8db8 100%) !important;
-  border: 2px solid #4a7ba7 !important;
+  background: var(--header-blue) !important;
+  border: 1px solid var(--header-blue) !important;
   text-decoration: none !important;
+}
+
+.main-navbar .nav > li > a:focus-visible,
+.navbar-nav > li > a:focus-visible {
+  outline: 2px solid rgba(24, 119, 184, 0.35);
+  outline-offset: 1px;
 }
 
 .main-navbar *::after,
@@ -200,10 +349,6 @@ body {
 }
 
 /* Footer tweaks for light background */
-.site-footer {
-  background-color: #ffffff;
-}
-
 .site-footer .attribution,
 .site-footer .attribution p,
 .site-footer .attribution span {
@@ -292,12 +437,16 @@ a:hover {
 
 
 .hero-section {
-  background: linear-gradient(to bottom, rgba(0, 35, 70, 0.7) 0%, rgba(255, 255, 255, 0) 100%), url('../images/general-search.jpg') center/cover;
+  background: linear-gradient(to bottom, rgba(0, 35, 70, var(--hero-overlay-opacity, 0.7)) 0%, rgba(255, 255, 255, 0) 100%), var(--hero-image-url, url('../images/hero/hero_0.jpg')) center/cover;
   color: white;
   padding: 4rem 0 12rem 0;
   margin-top: -12px;
   margin-bottom: 2rem;
   position: relative;
+}
+
+.homepage .hero-section {
+  margin-top: 0;
 }
 
 .hero-search {
@@ -306,7 +455,37 @@ a:hover {
 }
 
 .hero-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
   margin-top: 1rem;
+}
+
+.hero-feature {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.hero-feature .feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  min-width: 1.25rem;
+  text-align: center;
 }
 
 .hero-badge {
@@ -653,33 +832,6 @@ li#simple-tab.active a, li#advanced-tab.active a {
   }
 }
 
-/* Ensure homepage header buttons match other pages */
-.homepage .main-navbar .nav > li > a,
-.homepage .main-navbar .navbar-nav > li > a,
-.homepage header .navbar-nav > li > a,
-.homepage .navbar-collapse .navbar-nav > li > a {
-  padding: 12px 16px !important;
-  margin: 0 4px !important;
-  font-weight: 500 !important;
-  font-size: 14px !important;
-  min-height: 44px !important;
-  display: flex !important;
-  align-items: center !important;
-  border: 2px solid transparent !important;
-  border-radius: 4px !important;
-  text-decoration: none !important;
-}
-
-/* More specific selectors for homepage navigation */
-.homepage header.masthead .main-navbar .navbar-nav > li > a {
-  padding: 12px 16px !important;
-  margin: 0 4px !important;
-  font-weight: 500 !important;
-  font-size: 14px !important;
-  min-height: 44px !important;
-  line-height: 1.2 !important;
-}
-
 /* -------------------------------------------------------------------- */
 /* guides section landing page */
 
@@ -688,7 +840,7 @@ li#simple-tab.active a, li#advanced-tab.active a {
   background-color: #f8f9fa;
 }
 
-.section-title {
+.guides-section .section-title {
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 0.5rem;

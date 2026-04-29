@@ -3,7 +3,9 @@
 {% block subtitle %}Αποτελέσματα εισαγωγής - {{ org.title }}{% endblock %}
 
 {% block primary_content %}
-<h1 class="page-heading">Αποτελέσματα εισαγωγής</h1>
+<h1 class="page-heading">
+  {% if results.dry_run %}Προεπισκόπηση εισαγωγής (Dry Run){% else %}Αποτελέσματα εισαγωγής{% endif %}
+</h1>
 
 <p>
   Οργάνωση: <strong>{{ org.title }}</strong>
@@ -12,7 +14,11 @@
 <div class="well">
   <ul>
     <li>Σύνολο γραμμών: <strong>{{ results.total }}</strong></li>
+    {% if results.dry_run %}
+    <li>Θα προσκαλούνταν (dry-run): <strong>{{ results.would_invite }}</strong></li>
+    {% else %}
     <li>Προσκλήσεις / pending: <strong>{{ results.invited }}</strong></li>
+    {% endif %}
     <li>Παραλείφθηκαν (invalid): <strong>{{ results.skipped_invalid }}</strong></li>
     <li>Errors: <strong>{{ results.errors }}</strong></li>
   </ul>
@@ -30,7 +36,7 @@
   </thead>
   <tbody>
   {% for r in results.rows %}
-    <tr class="{% if r.status=='ok' %}success{% elif r.status=='skip' %}warning{% else %}danger{% endif %}">
+    <tr class="{% if r.status=='ok' %}success{% elif r.status=='dry_run' %}info{% elif r.status=='skip' %}warning{% else %}danger{% endif %}">
       <td>{{ r.line }}</td>
       <td>{{ r.email }}</td>
       <td>{{ r.role }}</td>

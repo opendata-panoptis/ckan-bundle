@@ -611,6 +611,10 @@ msgid "Delete/disable the user in Keycloak first."
 msgstr "Πρώτα διαγράψτε/απενεργοποιήστε τον χρήστη στο Keycloak."
 
 #: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:159
+msgid "Delete/disable the user in Keycloak/Active Directory first."
+msgstr "Πρώτα διαγράψτε/απενεργοποιήστε τον χρήστη στο Keycloak/Active Directory."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_user_delete.html:160
 msgid "Upload your CSV and click “Preview”."
 msgstr "Ανεβάστε το CSV και πατήστε «Προεπισκόπηση»."
 
@@ -719,6 +723,10 @@ msgstr "Διαγράψτε πολλούς χρήστες χρησιμοποιώ�
 msgid "Note: First delete the user from Keycloak."
 msgstr "Σημείωση: Πρώτα διαγράψτε τον χρήστη από το Keycloak."
 
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:72
+msgid "Note: First delete the user from Keycloak/Active Directory."
+msgstr "Σημείωση: Πρώτα διαγράψτε τον χρήστη από το Keycloak/Active Directory."
+
 #: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:86
 msgid "Members"
 msgstr "Μέλη"
@@ -767,6 +775,10 @@ msgstr "Διαγραφές:"
 #: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:187
 msgid "Delete the user in Keycloak first, then proceed here."
 msgstr "Πρώτα διαγράψτε τον χρήστη από το Keycloak και έπειτα συνεχίστε εδώ."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:189
+msgid "Delete the user in Keycloak/Active Directory first, then proceed here."
+msgstr "Πρώτα διαγράψτε τον χρήστη από το Keycloak/Active Directory και έπειτα συνεχίστε εδώ."
 
 #: ckanext/csvinvite/templates/csvinvite/admin_user_management.html:193
 msgid "Sync:"
@@ -844,4 +856,161 @@ msgstr "Εισαγωγή από CSV"
 #: ckanext/csvinvite/templates/organization/manage_members.html:15
 msgid "Sync from CSV"
 msgstr "Συγχρονισμός από CSV"
+
+# ---------------------------------------------------------------------------
+# Bulk sysadmin promotion
+# ---------------------------------------------------------------------------
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Bulk sysadmin promotion"
+msgstr "Μαζική προαγωγή σε διαχειριστές συστήματος"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_user_management.html
+msgid "Promote users to sysadmin using a CSV file. Optionally demote users not in CSV."
+msgstr "Προαγωγή χρηστών σε διαχειριστές συστήματος μέσω CSV. Προαιρετικά υποβιβασμός όσων δεν περιλαμβάνονται στο CSV."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Remove sysadmin from users not in CSV"
+msgstr "Αφαίρεση δικαιωμάτων διαχειριστή από χρήστες που δεν περιλαμβάνονται στο CSV"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "If enabled, existing sysadmins that are NOT listed in the CSV will be demoted (sysadmin=false). Protected users (configured in ckan.ini) and the current user are never demoted."
+msgstr "Αν ενεργοποιηθεί, οι υπάρχοντες διαχειριστές συστήματος που ΔΕΝ περιλαμβάνονται στο CSV θα υποβιβαστούν (sysadmin=false). Προστατευόμενοι χρήστες (ρυθμισμένοι στο ckan.ini) και ο τρέχων χρήστης δεν υποβιβάζονται ποτέ."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Are you sure you want to apply these sysadmin changes?"
+msgstr "Είστε σίγουροι ότι θέλετε να εφαρμόσετε αυτές τις αλλαγές διαχειριστή συστήματος;"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Apply changes"
+msgstr "Εφαρμογή αλλαγών"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Would promote:"
+msgstr "Θα προαχθούν:"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Already sysadmin:"
+msgstr "Ήδη διαχειριστές συστήματος:"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Would create (pending):"
+msgstr "Θα δημιουργηθούν (εκκρεμείς):"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Would demote:"
+msgstr "Θα υποβιβαστούν:"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "promoted"
+msgstr "προήχθησαν"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "demoted"
+msgstr "υποβιβάστηκαν"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Would be promoted"
+msgstr "Θα προαχθούν σε διαχειριστές συστήματος"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Already sysadmin"
+msgstr "Ήδη διαχειριστές συστήματος"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Would create (new pending users)"
+msgstr "Θα δημιουργηθούν (νέοι εκκρεμείς χρήστες)"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "These users were not found in the system. Since their email was provided, they will be created as new pending sysadmin users."
+msgstr "Αυτοί οι χρήστες δεν βρέθηκαν στο σύστημα. Εφόσον παρέχεται email, θα δημιουργηθούν ως νέοι εκκρεμείς διαχειριστές συστήματος."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Username (input)"
+msgstr "Όνομα χρήστη (εισαγωγή)"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "These rows had only a username (no email) and no match was found, or the matched user is deleted. Without an active/pending user or an email, no action can be taken."
+msgstr "Αυτές οι γραμμές είχαν μόνο όνομα χρήστη (χωρίς email) και δεν βρέθηκε αντιστοιχία, ή ο χρήστης που βρέθηκε έχει διαγραφεί. Χωρίς ενεργό/εκκρεμή χρήστη ή email, δεν είναι δυνατή καμία ενέργεια."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Would be demoted"
+msgstr "Θα υποβιβαστούν"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "State"
+msgstr "Κατάσταση"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Prepare a CSV with username and/or email."
+msgstr "Ετοιμάστε ένα CSV με όνομα χρήστη ή/και email."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Upload and click \"Preview\" to see the dry-run plan."
+msgstr "Ανεβάστε και πατήστε \"Προεπισκόπηση\" για να δείτε το πλάνο."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Review the tables carefully."
+msgstr "Ελέγξτε προσεκτικά τους πίνακες."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Only then click \"Apply changes\"."
+msgstr "Μόνο τότε πατήστε \"Εφαρμογή αλλαγών\"."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Tip: start with 1-2 rows to confirm the matching logic."
+msgstr "Συμβουλή: ξεκινήστε με 1-2 γραμμές για να επαληθεύσετε τη λογική αντιστοίχισης."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "You may provide either one or both per row."
+msgstr "Μπορείτε να δώσετε ένα ή και τα δύο ανά γραμμή."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "How matching works"
+msgstr "Πώς λειτουργεί η αντιστοίχιση"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Found (active):"
+msgstr "Βρέθηκε (ενεργός):"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "If a user is found by username or email and is active, they will be promoted to sysadmin."
+msgstr "Αν βρεθεί χρήστης με όνομα ή email και είναι ενεργός, θα προαχθεί σε διαχειριστή συστήματος."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Users already marked as sysadmin are reported but skipped."
+msgstr "Χρήστες που είναι ήδη διαχειριστές συστήματος καταγράφονται αλλά αγνοούνται."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Not found (with email):"
+msgstr "Δεν βρέθηκε (με email):"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "If no user is found but the CSV row has an email, a new pending user will be created with sysadmin=true."
+msgstr "Αν δεν βρεθεί χρήστης αλλά η γραμμή CSV έχει email, θα δημιουργηθεί νέος εκκρεμής χρήστης με sysadmin=true."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Not found (no email):"
+msgstr "Δεν βρέθηκε (χωρίς email):"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "If no user is found and the row only has a username (no email), it is reported as \"Not found\". A new user cannot be created without an email."
+msgstr "Αν δεν βρεθεί χρήστης και η γραμμή έχει μόνο όνομα χρήστη (χωρίς email), καταγράφεται ως \"Δεν βρέθηκε\". Δεν είναι δυνατή η δημιουργία νέου χρήστη χωρίς email."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Remove missing & protection"
+msgstr "Αφαίρεση απόντων & προστασία"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "When enabled, existing sysadmins NOT in the CSV will be demoted (sysadmin=false)."
+msgstr "Όταν ενεργοποιηθεί, οι υπάρχοντες διαχειριστές συστήματος που ΔΕΝ περιλαμβάνονται στο CSV θα υποβιβαστούν (sysadmin=false)."
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Protected users:"
+msgstr "Προστατευόμενοι χρήστες:"
+
+#: ckanext/csvinvite/templates/csvinvite/admin_bulk_sysadmin_promote.html
+msgid "Users listed in ckanext.csvinvite.protected_sysadmin_emails and the current user are NEVER demoted, even if \"remove missing\" is enabled."
+msgstr "Χρήστες που αναφέρονται στο ckanext.csvinvite.protected_sysadmin_emails και ο τρέχων χρήστης ΔΕΝ υποβιβάζονται ΠΟΤΕ, ακόμα κι αν είναι ενεργοποιημένη η \"αφαίρεση απόντων\"."
 

@@ -8,6 +8,8 @@ import ckan.lib.mailer as mailer
 import ckan.lib.dictization.model_dictize as model_dictize
 from socket import error as socket_error
 
+import uuid
+from ckan import model
 from ckan import authz
 from ckan.lib.api_token import get_user_from_token
 from ckan.lib.mailer import mail_recipient
@@ -17,6 +19,36 @@ from ckan.logic import _validate
 import ckan.lib.helpers as h
 
 log = logging.getLogger(__name__)
+
+@toolkit.chained_action
+def user_delete(original_action, context, data_dict):
+    """Αν ο χρήστης είναι pending, μετονομάζει το name σε
+    <name>_deleted_<uuid> πριν τη διαγραφή, ώστε να ελευθερωθεί
+    το αρχικό username."""
+
+    try:
+        user_id = data_dict.get("id")
+        user_obj = model.User.get(user_id) if user_id else None
+
+        if user_obj and user_obj.is_pending():
+            old_name = user_obj.name or "user"
+            suffix = f"_deleted_{uuid.uuid4()}"
+            max_len = 255
+            base = old_name
+            if len(base) + len(suffix) > max_len:
+                base = base[: max_len - len(suffix)]
+
+            user_obj.name = f"{base}{suffix}"
+            log.info(
+                "Renamed pending user %s -> %s before delete",
+                old_name, user_obj.name,
+            )
+    except Exception as e:
+        log.warning("Could not rename pending user before delete: %r", e)
+
+    return original_action(context, data_dict)
+
+# ----------------------------------------------------------------------------------------------
 
 # Define some shortcuts
 _get_action = logic.get_action

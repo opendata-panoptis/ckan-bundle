@@ -10,6 +10,11 @@ from ckanext.csvinvite.logic.bulk_delete import (
     apply_bulk_user_delete,
     results_to_csv,
 )
+from ckanext.csvinvite.logic.bulk_sysadmin import (
+    plan_bulk_sysadmin_promote,
+    apply_bulk_sysadmin_promote,
+    results_to_csv as sysadmin_results_to_csv,
+)
 
 from ckan.lib.redis import connect_to_redis, is_redis_available
 import ckan.plugins.toolkit as toolkit
@@ -24,6 +29,7 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 CSVINVITE_BULK_ORG_SYNC_CACHE_PREFIX = "csvinvite:bulk_org_sync:"
 CSVINVITE_BULK_ORG_INVITE_CACHE_PREFIX = "csvinvite:bulk_org_invite:"
 CSVINVITE_BULK_USER_DELETE_CACHE_PREFIX = "csvinvite:bulk_user_delete:"
+CSVINVITE_BULK_SYSADMIN_CACHE_PREFIX = "csvinvite:bulk_sysadmin:"
 CSVINVITE_SYNC_MEMBERS_CACHE_PREFIX = "csvinvite:sync_members:"
 CSVINVITE_IMPORT_MEMBERS_CACHE_PREFIX = "csvinvite:import_members:"
 CSVINVITE_BULK_ORG_SYNC_TTL_SECONDS = 1800  # 30 minutes
@@ -98,6 +104,11 @@ def _require_sync_process_enabled():
 
 def _require_bulk_user_delete_enabled():
     if not _feature_enabled("csvinvite_enable_bulk_user_delete"):
+        return toolkit.abort(404)
+
+
+def _require_bulk_sysadmin_promote_enabled():
+    if not _feature_enabled("csvinvite_enable_bulk_sysadmin_promote"):
         return toolkit.abort(404)
 
 
@@ -332,38 +343,41 @@ def _capacity_from_member_list_item(item):
 
 def _build_org_member_index(context, org_id):
     """
-    Build existing-members index using the same approach as member_dump:
-    - member_list in CSV mode to get (uid, type, role_label)
-    - model.User.get(uid) to fetch email/fullname/sysadmin server-side
+    Build existing-members index querying model.Member directly so that
+    both active AND pending memberships are included (the standard
+    member_list action only returns state='active').
     """
-    members = toolkit.get_action("member_list")(context, {
-        "id": org_id,
-        "object_type": "user",
-        "records_format": "csv",
-        "include_total": False,
-    })
+    # Resolve org_id (may be slug/name) to the actual UUID.
+    group = model.Group.get(org_id)
+    if not group:
+        return [], {}, {}
+    resolved_org_id = group.id
+
+    member_rows = (
+        model.Session.query(model.Member)
+        .filter(model.Member.group_id == resolved_org_id)
+        .filter(model.Member.table_name == "user")
+        .filter(model.Member.state.in_(("active", "pending")))
+        .all()
+    )
 
     existing = []
     by_username = {}
     by_email = {}
 
-    for item in members or []:
-        # expected csv tuple: (user_id, 'user', role_label)
-        if not isinstance(item, (list, tuple)) or len(item) < 3:
-            continue
-
-        uid = item[0]
-        capacity = _capacity_from_member_list_item(item)  # maps Greek labels -> admin/editor/member
-
-        user_obj = model.User.get(uid)
+    for mrow in member_rows:
+        user_obj = model.User.get(mrow.table_id)
         if not user_obj:
             continue
+
+        capacity = (mrow.capacity or "member").lower()
 
         md = {
             "username": user_obj.name,
             "email": _norm_email(getattr(user_obj, "email", "") or ""),
-            "role": (capacity or "member").lower(),
+            "role": capacity,
             "sysadmin": bool(getattr(user_obj, "sysadmin", False)),
+            "state": getattr(user_obj, "state", "") or "active",
         }
 
         existing.append(md)
@@ -515,6 +529,7 @@ def _plan_full_sync(context, org_id, existing, by_username, by_email, csv_rows):
             "username": u.name,
             "email": _norm_email(getattr(u, "email", "") or ""),
             "role": r["role"],
+            "state": getattr(u, "state", "") or "active",
         })
 
     warnings = []
@@ -540,11 +555,25 @@ def _apply_full_sync(context, org_id, plan, remove_missing=True):
 
     if remove_missing:
         for m in plan["removals"]:
-            toolkit.get_action("organization_member_delete")(
-                _fresh_action_context(context),
-                {"id": org_id, "username": m["username"]}
-            )
-            removed += 1
+            if m.get("state") == "pending":
+                # organization_member_delete only works on active members;
+                # pending memberships must be removed via direct DB query.
+                u = model.User.get(m["username"])
+                if u:
+                    model.Session.query(model.Member).filter(
+                        model.Member.group_id == org_id,
+                        model.Member.table_name == "user",
+                        model.Member.table_id == u.id,
+                        model.Member.state == "pending",
+                    ).delete()
+                    model.Session.commit()
+                    removed += 1
+            else:
+                toolkit.get_action("organization_member_delete")(
+                    _fresh_action_context(context),
+                    {"id": org_id, "username": m["username"]}
+                )
+                removed += 1
 
     for u in plan["role_updates"]:
         toolkit.get_action("organization_member_create")(_fresh_action_context(context), {
@@ -718,12 +747,16 @@ def import_members_post(org_id):
 
     header_map = {h: h.strip().lower() for h in reader.fieldnames}
 
+    dry_run = _is_truthy(request.form.get("dry_run"))
+
     results = {
         "total": 0,
         "invited": 0,
+        "would_invite": 0,
         "skipped_invalid": 0,
         "errors": 0,
         "rows": [],
+        "dry_run": dry_run,
     }
 
     for line_no, row in enumerate(reader, start=2):
@@ -737,6 +770,14 @@ def import_members_post(org_id):
             results["skipped_invalid"] += 1
             results["rows"].append(
                 {"line": line_no, "email": email, "role": role, "status": "skip", "message": "Invalid email"}
+            )
+            continue
+
+        if dry_run:
+            results["would_invite"] += 1
+            results["rows"].append(
+                {"line": line_no, "email": email, "role": role, "status": "dry_run",
+                 "message": "Would be invited (dry-run)"}
             )
             continue
 
@@ -900,8 +941,8 @@ def sync_members_post(org_id):
     if parse_errors:
         return render_template("csvinvite/sync_members.html", org=org, error="; ".join(parse_errors))
 
-    dry_run = _is_truthy(request.form.get("dry_run", "on"))
-    remove_missing = _is_truthy(request.form.get("remove_missing", "on"))
+    dry_run = _is_truthy(request.form.get("dry_run", ""))
+    remove_missing = _is_truthy(request.form.get("remove_missing", ""))
 
     existing, by_username, by_email = _build_org_member_index(context, org_id)
     plan = _plan_full_sync(context, org_id, existing, by_username, by_email, csv_rows)
@@ -1004,6 +1045,7 @@ def export_sync_plan_csv(org_id):
             "email": m.get("email", ""),
             "current_role": m.get("role", ""),
             "new_role": "",
+            "state": m.get("state", ""),
             "reason": "",
         })
 
@@ -1017,6 +1059,7 @@ def export_sync_plan_csv(org_id):
             "email": member.get("email", ""),
             "current_role": member.get("role", ""),
             "new_role": u.get("new_role", ""),
+            "state": member.get("state", ""),
             "reason": "",
         })
 
@@ -1029,6 +1072,7 @@ def export_sync_plan_csv(org_id):
             "email": m.get("email", "") or "",
             "current_role": m.get("role", "") or "",
             "new_role": "",
+            "state": m.get("state", ""),
             "reason": "",
         })
 
@@ -1041,6 +1085,7 @@ def export_sync_plan_csv(org_id):
             "email": c.get("email", ""),
             "current_role": "",
             "new_role": c.get("role", ""),
+            "state": c.get("state", ""),
             "reason": "",
         })
 
@@ -1053,6 +1098,7 @@ def export_sync_plan_csv(org_id):
             "email": p.get("email", "") or "",
             "current_role": "",
             "new_role": p.get("role", ""),
+            "state": "",
             "reason": p.get("reason", "") or "",
         })
 
@@ -1066,6 +1112,7 @@ def export_sync_plan_csv(org_id):
             "email": member.get("email", "") or "",
             "current_role": member.get("role", "") or "",
             "new_role": "",
+            "state": member.get("state", ""),
             "reason": ps.get("reason", "") or "",
         })
 
@@ -1079,6 +1126,7 @@ def export_sync_plan_csv(org_id):
         "email",
         "current_role",
         "new_role",
+        "state",
         "reason",
     ]
 
@@ -1185,6 +1233,7 @@ def _bulk_org_sync_plan_to_export_rows(report: dict) -> list[dict]:
                 "email": m.get("email", ""),
                 "current_role": m.get("role", ""),
                 "new_role": "",
+                "state": m.get("state", ""),
                 "reason": "",
             })
 
@@ -1201,6 +1250,7 @@ def _bulk_org_sync_plan_to_export_rows(report: dict) -> list[dict]:
                 "email": member.get("email", ""),
                 "current_role": member.get("role", ""),
                 "new_role": u.get("new_role", ""),
+                "state": member.get("state", ""),
                 "reason": "",
             })
 
@@ -1216,6 +1266,7 @@ def _bulk_org_sync_plan_to_export_rows(report: dict) -> list[dict]:
                 "email": m.get("email", "") or "",
                 "current_role": m.get("role", "") or "",
                 "new_role": "",
+                "state": m.get("state", ""),
                 "reason": "",
             })
 
@@ -1231,6 +1282,7 @@ def _bulk_org_sync_plan_to_export_rows(report: dict) -> list[dict]:
                 "email": c.get("email", ""),
                 "current_role": "",
                 "new_role": c.get("role", ""),
+                "state": c.get("state", ""),
                 "reason": "",
             })
 
@@ -1246,6 +1298,7 @@ def _bulk_org_sync_plan_to_export_rows(report: dict) -> list[dict]:
                 "email": p.get("email", "") or "",
                 "current_role": "",
                 "new_role": p.get("role", ""),
+                "state": "",
                 "reason": p.get("reason", "") or "",
             })
 
@@ -1262,6 +1315,7 @@ def _bulk_org_sync_plan_to_export_rows(report: dict) -> list[dict]:
                 "email": member.get("email", "") or "",
                 "current_role": member.get("role", "") or "",
                 "new_role": "",
+                "state": member.get("state", ""),
                 "reason": ps.get("reason", "") or "",
             })
 
@@ -1382,6 +1436,135 @@ def admin_bulk_user_delete_export():
     response = Response(csv_text, mimetype="text/csv")
     response.headers["Content-Disposition"] = 'attachment; filename="bulk_user_delete_results.csv"'
     return response
+
+# ----------------------------------------------------------------------------------------------------------------------------------
+# Bulk sysadmin promote
+# ----------------------------------------------------------------------------------------------------------------------------------
+
+
+def admin_bulk_sysadmin_promote_template_csv():
+    _require_bulk_sysadmin_promote_enabled()
+
+    context = {"user": toolkit.c.user, "auth_user_obj": toolkit.c.userobj, "model": model}
+    _require_sysadmin(context)
+
+    headers = ["username", "email"]
+    sample = {"username": "someuser", "email": "user@example.org"}
+    return _csv_template_response("bulk_sysadmin_promote_template.csv", headers, sample)
+
+
+def admin_bulk_sysadmin_promote_reset():
+    _require_bulk_sysadmin_promote_enabled()
+
+    context = {"user": toolkit.c.user, "auth_user_obj": toolkit.c.userobj, "model": model}
+    _require_sysadmin(context)
+
+    token = session.pop("csvinvite_bulk_sysadmin_token", None)
+    if token:
+        _csvinvite_cache_delete(f"{CSVINVITE_BULK_SYSADMIN_CACHE_PREFIX}{token}")
+
+    return toolkit.redirect_to("csvinvite.admin_bulk_sysadmin_promote_get")
+
+
+def admin_bulk_sysadmin_promote_get():
+    _require_bulk_sysadmin_promote_enabled()
+
+    context = {"user": toolkit.c.user, "auth_user_obj": toolkit.c.userobj, "model": model}
+    _require_sysadmin(context)
+
+    token = session.get("csvinvite_bulk_sysadmin_token")
+    payload = _csvinvite_cache_get(f"{CSVINVITE_BULK_SYSADMIN_CACHE_PREFIX}{token}") if token else None
+
+    return render_template(
+        "csvinvite/admin_bulk_sysadmin_promote.html",
+        plan=(payload or {}).get("plan"),
+    )
+
+
+def admin_bulk_sysadmin_promote_post():
+    _require_bulk_sysadmin_promote_enabled()
+
+    context = {"user": toolkit.c.user, "auth_user_obj": toolkit.c.userobj, "model": model}
+    _require_sysadmin(context)
+
+    if not is_redis_available():
+        return render_template(
+            "csvinvite/admin_bulk_sysadmin_promote.html",
+            plan={"errors": [{"error": "Redis is not available; cannot store results safely."}]},
+        )
+
+    f = request.files.get("file")
+
+    if not f or not getattr(f, "filename", ""):
+        token = _csvinvite_new_token()
+        session["csvinvite_bulk_sysadmin_token"] = token
+        _csvinvite_cache_set(
+            f"{CSVINVITE_BULK_SYSADMIN_CACHE_PREFIX}{token}",
+            {"plan": {"errors": [{"error": "Please choose a CSV file."}]}, "results_rows": []},
+        )
+        return toolkit.redirect_to("csvinvite.admin_bulk_sysadmin_promote_get")
+
+    if not f.filename.lower().endswith(".csv"):
+        token = _csvinvite_new_token()
+        session["csvinvite_bulk_sysadmin_token"] = token
+        _csvinvite_cache_set(
+            f"{CSVINVITE_BULK_SYSADMIN_CACHE_PREFIX}{token}",
+            {"plan": {"errors": [{"error": "Only CSV files are allowed."}]}, "results_rows": []},
+        )
+        return toolkit.redirect_to("csvinvite.admin_bulk_sysadmin_promote_get")
+
+    header_bytes = f.read(2048)
+    f.seek(0)
+    mime = magic.from_buffer(header_bytes, mime=True)
+    if not mime.startswith("text/"):
+        token = _csvinvite_new_token()
+        session["csvinvite_bulk_sysadmin_token"] = token
+        _csvinvite_cache_set(
+            f"{CSVINVITE_BULK_SYSADMIN_CACHE_PREFIX}{token}",
+            {"plan": {"errors": [{"error": "Invalid file content. Please upload a valid CSV text file."}]}, "results_rows": []},
+        )
+        return toolkit.redirect_to("csvinvite.admin_bulk_sysadmin_promote_get")
+
+    raw = f.read()
+    try:
+        text = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        text = raw.decode("cp1253", errors="replace")
+
+    remove_missing = _is_truthy(request.form.get("remove_missing"))
+
+    plan, results_rows = plan_bulk_sysadmin_promote(context, text, remove_missing=remove_missing)
+
+    if _is_truthy(request.form.get("apply")):
+        plan, results_rows = apply_bulk_sysadmin_promote(context, plan, results_rows)
+
+    token = _csvinvite_new_token()
+    session["csvinvite_bulk_sysadmin_token"] = token
+    _csvinvite_cache_set(
+        f"{CSVINVITE_BULK_SYSADMIN_CACHE_PREFIX}{token}",
+        {"plan": plan, "results_rows": results_rows},
+        ttl_seconds=CSVINVITE_BULK_ORG_SYNC_TTL_SECONDS,
+    )
+
+    return toolkit.redirect_to("csvinvite.admin_bulk_sysadmin_promote_get")
+
+
+def admin_bulk_sysadmin_promote_export():
+    _require_bulk_sysadmin_promote_enabled()
+
+    context = {"user": toolkit.c.user, "auth_user_obj": toolkit.c.userobj, "model": model}
+    _require_sysadmin(context)
+
+    token = session.get("csvinvite_bulk_sysadmin_token")
+    payload = _csvinvite_cache_get(f"{CSVINVITE_BULK_SYSADMIN_CACHE_PREFIX}{token}") if token else None
+    rows = (payload or {}).get("results_rows") or []
+
+    csv_text = sysadmin_results_to_csv(rows)
+
+    response = Response(csv_text, mimetype="text/csv")
+    response.headers["Content-Disposition"] = 'attachment; filename="bulk_sysadmin_promote_results.csv"'
+    return response
+
 
 # ----------------------------------------------------------------------------------------------------------------------------------
 
@@ -1793,6 +1976,7 @@ def admin_bulk_org_sync_export():
         "email",
         "current_role",
         "new_role",
+        "state",
         "reason",
     ]
 
@@ -1959,6 +2143,37 @@ def get_blueprints():
         "/ckan-admin/users/bulk-sync/template",
         "admin_bulk_org_sync_template_csv",
         admin_bulk_org_sync_template_csv,
+        methods=["GET"],
+    )
+
+    bp.add_url_rule(
+        "/ckan-admin/users/sysadmin-promote",
+        "admin_bulk_sysadmin_promote_get",
+        admin_bulk_sysadmin_promote_get,
+        methods=["GET"],
+    )
+    bp.add_url_rule(
+        "/ckan-admin/users/sysadmin-promote",
+        "admin_bulk_sysadmin_promote_post",
+        admin_bulk_sysadmin_promote_post,
+        methods=["POST"],
+    )
+    bp.add_url_rule(
+        "/ckan-admin/users/sysadmin-promote/reset",
+        "admin_bulk_sysadmin_promote_reset",
+        admin_bulk_sysadmin_promote_reset,
+        methods=["POST"],
+    )
+    bp.add_url_rule(
+        "/ckan-admin/users/sysadmin-promote/export",
+        "admin_bulk_sysadmin_promote_export",
+        admin_bulk_sysadmin_promote_export,
+        methods=["GET"],
+    )
+    bp.add_url_rule(
+        "/ckan-admin/users/sysadmin-promote/template",
+        "admin_bulk_sysadmin_promote_template_csv",
+        admin_bulk_sysadmin_promote_template_csv,
         methods=["GET"],
     )
 

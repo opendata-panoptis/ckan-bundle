@@ -1,0 +1,13 @@
+{% ckan_extends %}
+
+{# Optional: hide the "Data and Resources" section on data-service ("API") pages #}
+{% block package_resources %}
+  {% set current_type = dataset_type or (pkg.type if pkg else 'dataset') %}
+  {% set hide_resources_section = h.get_config_as_bool('ckanext.data_gov_gr.data_service.hide_resources_section', True) %}
+
+  {% if current_type == 'data-service' and hide_resources_section %}
+    {# intentionally hidden #}
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
