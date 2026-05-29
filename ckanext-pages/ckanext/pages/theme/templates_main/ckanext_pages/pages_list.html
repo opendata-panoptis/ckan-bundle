@@ -17,6 +17,8 @@
 
 {% block main_content %}
    <div class="wrapper no-nav">
-     {{ self.primary_content() }}
+     <main class="primary" role="main">
+       {{ self.primary_content() }}
+     </main>
    </div>
 {% endblock %}

@@ -138,10 +138,14 @@ class ShowcasePlugin(plugins.SingletonPlugin, lib_plugins.DefaultDatasetForm):
                                          pkg_dict.get('image_url')),
                                  qualified=True)
 
-        # Add dataset count
         pkg_dict['num_datasets'] = len(
             tk.get_action('ckanext_showcase_package_list')(
-                context, {'showcase_id': pkg_dict['id']}))
+                context,
+                {'showcase_id': pkg_dict['id'], 'package_type': 'dataset'}))
+        pkg_dict['num_apis'] = len(
+            tk.get_action('ckanext_showcase_package_list')(
+                context,
+                {'showcase_id': pkg_dict['id'], 'package_type': 'data-service'}))
 
         # Rendered notes
         if showcase_helpers.showcase_get_wysiwyg_editor() == 'ckeditor':

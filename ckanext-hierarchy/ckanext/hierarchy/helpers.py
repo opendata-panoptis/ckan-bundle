@@ -1,6 +1,7 @@
 import ckan.plugins as p
 import ckan.model as model
-from ckan.common import request
+from ckan.common import request, _
+from markupsafe import Markup, escape
 
 
 def group_tree(organizations=[], type_='organization'):
@@ -126,3 +127,107 @@ def is_include_children_selected():
         if request.args.get('include_children'):
             include_children_selected = True
     return include_children_selected
+
+
+def _collect_node_ids(nodes):
+    ids = []
+    for node in nodes:
+        ids.append(node['id'])
+        if node.get('children'):
+            ids.extend(_collect_node_ids(node['children']))
+    return ids
+
+
+def _bulk_get_longnames(group_ids):
+    if not group_ids:
+        return {}
+    from ckan.model.group_extra import group_extra_table
+    from sqlalchemy import select as sa_select
+    result = model.Session.execute(
+        sa_select(
+            group_extra_table.c.group_id,
+            group_extra_table.c.value
+        ).where(
+            group_extra_table.c.group_id.in_(group_ids),
+        ).where(
+            group_extra_table.c.key == 'longname',
+        ).where(
+            group_extra_table.c.state == 'active',
+        )
+    )
+    return {row.group_id: row.value for row in result if row.value}
+
+
+def _render_nodes(parts, nodes, longnames, base_url, type_,
+                  use_longnames, associated_ids, is_top=False):
+    css_class = 'hierarchy-tree-top' if is_top else 'hierarchy-tree'
+    parts.append(u'<ul class="{}">'.format(css_class))
+
+    for node in nodes:
+        name = node['name']
+        title = node['title']
+        node_id = node['id']
+        highlighted = node.get('highlighted', False)
+
+        if use_longnames:
+            longname = longnames.get(node_id, '')
+            if longname:
+                display_text = u'{} ({})'.format(longname, title)
+            else:
+                display_text = title
+        else:
+            display_text = title
+
+        li_class = u' class="highlighted"' if highlighted else u''
+        parts.append(u'<li{} id="node_{}">'.format(li_class, escape(name)))
+
+        url = base_url.replace('__placeholder__', name)
+
+        if type_ == 'group':
+            parts.append(u'<div class="node-item">')
+            parts.append(u'<a href="{}">{}</a>'.format(
+                escape(url), escape(display_text)))
+            if node_id in associated_ids:
+                parts.append(u' {}'.format(escape(_('(associated)'))))
+                parts.append(
+                    u'<input name="group_remove.{}" value="{}" '
+                    u'type="submit" class="btn btn-danger btn-sm media-edit" '
+                    u'title="{}"/>'.format(
+                        escape(name),
+                        escape(_('Remove')),
+                        escape(_('Remove dataset from this group'))))
+            parts.append(u'</div>')
+        else:
+            parts.append(u'<a href="{}">{}</a>'.format(
+                escape(url), escape(display_text)))
+
+        if node.get('children'):
+            _render_nodes(parts, node['children'], longnames, base_url,
+                          type_, use_longnames, associated_ids)
+
+        parts.append(u'</li>')
+
+    parts.append(u'</ul>')
+
+
+def render_tree_html(top_nodes, type_='organization', use_longnames=False,
+                     use_shortnames=False, pkg_dict=None):
+    longnames = {}
+    if use_longnames:
+        all_ids = _collect_node_ids(top_nodes)
+        longnames = _bulk_get_longnames(all_ids)
+
+    base_url = p.toolkit.url_for(
+        '{}.read'.format(type_), id='__placeholder__')
+
+    associated_ids = set()
+    if pkg_dict and pkg_dict.get('groups'):
+        for g in pkg_dict['groups']:
+            if g.get('user_member'):
+                associated_ids.add(g['id'])
+
+    parts = []
+    _render_nodes(parts, top_nodes, longnames, base_url, type_,
+                  use_longnames, associated_ids, is_top=True)
+
+    return Markup(u''.join(parts))

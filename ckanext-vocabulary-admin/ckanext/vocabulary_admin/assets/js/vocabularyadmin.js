@@ -104,6 +104,47 @@ function vocabularyadminInitTagDragAndDrop($container) {
   vocabularyadminUpdateTagOrderInput($container);
 }
 
+function vocabularyadminNormalizeBool(value) {
+  if (value === true || value === false) {
+    return value;
+  }
+
+  const normalized = String(value || '').toLowerCase();
+  return normalized === 'true' || normalized === '1' || normalized === 'yes';
+}
+
+function vocabularyadminSyncTagIsActiveControl() {
+  const $checkbox = $('#is_active');
+  const $hidden = $('#is_active_hidden');
+  const $vocabularySelect = $('#vocabulary_id');
+
+  if (!$checkbox.length || !$hidden.length || !$vocabularySelect.length) {
+    return;
+  }
+
+  const $selectedOption = $vocabularySelect.find('option:selected');
+  const isProtectedVocabulary = vocabularyadminNormalizeBool($selectedOption.data('protected'));
+  const protectedCurrentValue = vocabularyadminNormalizeBool($checkbox.data('protected-current'));
+  const $controls = $checkbox.closest('.controls');
+  const protectedMessage = $controls.data('protected-message') || '';
+  const $info = $('#is_active_info');
+
+  if (isProtectedVocabulary) {
+    $checkbox.prop('checked', protectedCurrentValue);
+    $checkbox.prop('disabled', true);
+    $hidden.val(protectedCurrentValue ? 'true' : 'false');
+    if ($info.length) {
+      $info.text(protectedMessage);
+    }
+  } else {
+    $checkbox.prop('disabled', false);
+    $hidden.val('false');
+    if ($info.length) {
+      $info.text('');
+    }
+  }
+}
+
 // Wait for the DOM to be ready
 $(document).ready(function() {
   // Toggle hidden tags when clicking on the "more tags" message
@@ -196,6 +237,11 @@ $(document).ready(function() {
   var $tagsContainer = $('.vocabulary-tags-section .vocabulary-tags');
   if ($tagsContainer.length && $('#tag_order').length) {
     vocabularyadminInitTagDragAndDrop($tagsContainer);
+  }
+
+  if ($('#vocabulary_id').length && $('#is_active').length) {
+    vocabularyadminSyncTagIsActiveControl();
+    $('#vocabulary_id').on('change', vocabularyadminSyncTagIsActiveControl);
   }
 
 });

@@ -3,7 +3,9 @@
 {% block subtitle %}{{ c.page.title }}{% endblock %}
 
 {% block primary %}
-  <section class="module-content">
+  <main class="primary" role="main">
+  <section class="module">
+    <div class="module-content">
 
     {% block ckanext_pages_actions %}
       {% if h.check_access('ckanext_pages_update') %}
@@ -31,7 +33,9 @@
         {% endif %}
 
       {% endblock %}
+    </div>
   </section>
+  </main>
 {% endblock %}
 
 {% block secondary %}{% endblock %}

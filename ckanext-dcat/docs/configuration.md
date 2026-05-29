@@ -40,6 +40,14 @@ Default value: `False`
 If there is no license defined for a resource / distribution, inherit it from
 the dataset.
 
+#### ckanext.dcat.include_downloadall_resource
+
+Default value: `False`
+
+If set to `False`, resources created by ckanext-downloadall (identified by the
+`downloadall_metadata_modified` field) will be excluded from RDF distributions.
+Set to `True` to include them.
+
 
 #### ckanext.dcat.normalize_ckan_format
 
@@ -173,6 +181,5 @@ ckanext.dcat.croissant.profiles = my_custom_croissant_profile
 Default value: `croissant`
 
 Profiles to use when creating the [Croissant](croissant.md) serializations
-
 
 

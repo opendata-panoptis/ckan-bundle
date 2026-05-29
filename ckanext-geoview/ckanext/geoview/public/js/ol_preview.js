@@ -28,6 +28,97 @@
       return out;
     }
 
+    function asBool(v) {
+        if (typeof v === 'boolean') return v;
+        if (typeof v === 'string') return /^(true|1|yes|on)$/i.test(v);
+        return !!v;
+    }
+
+    function asList(v) {
+        if (!v) return [];
+        if (Array.isArray(v)) return v;
+        if (typeof v === 'string') return v.replace(/,/g, ' ').split(/\s+/).filter(Boolean);
+        return [];
+    }
+
+    function hostMatches(url, hosts) {
+        hosts = asList(hosts).map(function(host) {
+            return host.toLowerCase();
+        });
+        if (!hosts.length) return false;
+
+        try {
+            var parsed = new URL(url, window.location.href);
+            return hosts.indexOf(parsed.hostname.toLowerCase()) >= 0;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function asHostMap(v) {
+        var out = {};
+        if (!v) return out;
+        if (typeof v === 'object' && !Array.isArray(v)) return v;
+        if (typeof v !== 'string') return out;
+
+        try {
+            var parsed = JSON.parse(v);
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+        } catch (e) {
+            // Fall back to the compact host=value syntax.
+        }
+
+        v.replace(/,/g, ' ').split(/\s+/).filter(Boolean).forEach(function(item) {
+            var parts = item.split(/[=:]/);
+            if (parts.length >= 2 && parts[0]) {
+                out[parts[0]] = parts.slice(1).join(':');
+            }
+        });
+        return out;
+    }
+
+    function normalizeWMSExceptions(value) {
+        if (!value) return undefined;
+        value = String(value);
+        if (/^blank$/i.test(value)) return 'application/vnd.ogc.se_blank';
+        if (/^inimage$/i.test(value)) return 'INIMAGE';
+        if (/^xml$/i.test(value)) return 'XML';
+        return value;
+    }
+
+    function wmsExceptionsForUrl(url, olConfig) {
+        var exceptions = olConfig && normalizeWMSExceptions(olConfig.wms_exceptions);
+        var byHost = asHostMap(olConfig && olConfig.wms_exceptions_by_host);
+
+        try {
+            var parsed = new URL(url, window.location.href);
+            var hostname = parsed.hostname.toLowerCase();
+            Object.keys(byHost).some(function(host) {
+                if (host.toLowerCase() === hostname) {
+                    exceptions = normalizeWMSExceptions(byHost[host]);
+                    return true;
+                }
+                return false;
+            });
+        } catch (e) {
+            // Leave the default value untouched if URL parsing fails.
+        }
+
+        return exceptions || 'INIMAGE';
+    }
+
+    function shouldLogWMSTileErrors(url, olConfig) {
+        if (!olConfig) return false;
+        if (asBool(olConfig.log_wms_tile_errors)) return true;
+        return hostMatches(url, olConfig.log_wms_tile_errors_hosts);
+    }
+
+    function shouldProxyWMSGetMap(url, olConfig) {
+        if (!olConfig) return false;
+        if (asBool(olConfig.proxy_wms_getmap)) return true;
+        return hostMatches(url, olConfig.proxy_wms_getmap_hosts);
+    }
+
     // Determine if a URL is same-origin with the current page
     function isSameOrigin(url) {
       try {
@@ -75,15 +166,20 @@
                 var ftName = parsedUrl.length > 1 && parsedUrl[1];
                 OL_HELPERS.withFeatureTypesLayers(url, layerProcessor, ftName, map, true /* useGET */);
             },
-            'wms' : function(resource, proxyUrl, proxyServiceUrl, layerProcessor, map) {
+            'wms' : function(resource, proxyUrl, proxyServiceUrl, layerProcessor, map, olConfig) {
                 var parsedUrl = resource.url.split('#');
-                // use the original URL for the getMap, as there's no need for a proxy for image requests
-                var getMapUrl = parsedUrl[0];
+                var rawGetMapUrl = parsedUrl[0];
+                var proxyGetMap = shouldProxyWMSGetMap(rawGetMapUrl, olConfig);
+                var getMapUrl = proxyGetMap && proxyServiceUrl ? proxyServiceUrl : rawGetMapUrl;
+                var wmsOptions = {
+                    exceptions: wmsExceptionsForUrl(rawGetMapUrl, olConfig),
+                    logTileErrors: shouldLogWMSTileErrors(rawGetMapUrl, olConfig)
+                };
 
-                var url = proxyServiceUrl || getMapUrl;
+                var url = proxyServiceUrl || rawGetMapUrl;
 
                 var layerName = parsedUrl.length > 1 && parsedUrl[1];
-                OL_HELPERS.withWMSLayers(url, getMapUrl, layerProcessor, layerName, true /* useTiling*/, map );
+                OL_HELPERS.withWMSLayers(url, getMapUrl, layerProcessor, layerName, true /* useTiling*/, map, wmsOptions );
             },
             'wmts' : function(resource, proxyUrl, proxyServiceUrl, layerProcessor, map) {
                 var parsedUrl = resource.url.split('#');
@@ -105,10 +201,10 @@
             }
         }
 
-        var withLayers = function (resource, proxyUrl, proxyServiceUrl, layerProcessor, map) {
+        var withLayers = function (resource, proxyUrl, proxyServiceUrl, layerProcessor, map, olConfig) {
 
             var withLayers = ckan.geoview.layerExtractors[resource.format && resource.format.toLocaleLowerCase()];
-            withLayers && withLayers(resource, proxyUrl, proxyServiceUrl, layerProcessor, map);
+            withLayers && withLayers(resource, proxyUrl, proxyServiceUrl, layerProcessor, map, olConfig);
         }
 
         return {
@@ -152,6 +248,11 @@
                     mapConfig.attribution = '<a href="https://www.mapbox.com/about/maps/" target="_blank">&copy; Mapbox &copy; OpenStreetMap </a> <a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a>';
 
                 } else if (mapConfig.type == 'custom') {
+                    // Convert Leaflet-style URL placeholders that OL's XYZ source does not support:
+                    //   {s} -> {a-d} (subdomains), {r} -> '' (retina tag)
+                    if (mapConfig.url) {
+                        mapConfig.url = mapConfig.url.replace(/\{s\}/g, '{a-d}').replace(/\{r\}/g, '');
+                    }
                     mapConfig.type = 'XYZ'
                 } else if (!mapConfig.type || mapConfig.type.toLowerCase() == 'osm') {
 
@@ -283,7 +384,7 @@
                 ckan.geoview.googleApiKey = this.options.gapi_key;
 
 
-                withLayers(preload_resource, proxyUrl, proxyServiceUrl, $_.bind(this.addLayer, this), this.map);
+                withLayers(preload_resource, proxyUrl, proxyServiceUrl, $_.bind(this.addLayer, this), this.map, this.options.ol_config);
             },
 
             _onReady: function () {
@@ -396,13 +497,25 @@
 
                 if (!baseMapsConfig) {
                     // deprecated - for backward comp, parse old config format into json config
+                    var mc = this.options.map_config || {};
                     var config = {
-                        type: this.options.map_config['type']
+                        type: mc['type']
                     }
-                    var prefix = config.type+'.'
-                    for (var fieldName in this.options.map_config) {
-                        if (fieldName.startsWith(prefix)) config[fieldName.substring(prefix.length)] = this.options.map_config[fieldName]
+                    // accept both dot- (type.field) and underscore-prefixed (type_field)
+                    // config keys to match the Leaflet common_map.js convention
+                    var dotPrefix = (config.type || '') + '.';
+                    var underPrefix = (config.type || '') + '_';
+                    for (var fieldName in mc) {
+                        if (fieldName.startsWith(dotPrefix)) {
+                            config[fieldName.substring(dotPrefix.length)] = mc[fieldName];
+                        } else if (fieldName.startsWith(underPrefix)) {
+                            config[fieldName.substring(underPrefix.length)] = mc[fieldName];
+                        }
                     }
+                    // pass-through shared fields (no type prefix)
+                    ['attribution', 'subdomains', 'tms'].forEach(function(k) {
+                        if (mc[k] != null) config[k] = mc[k];
+                    });
                     baseMapsConfig = [config]
                 }
 

@@ -1,4 +1,5 @@
-import logging
+import datetime
+import hashlib
 
 import ckan.lib.uploader as uploader
 import ckan.lib.helpers as h
@@ -8,18 +9,14 @@ from ckan.lib.navl.dictization_functions import validate
 
 import ckanext.showcase.logic.converters as showcase_converters
 import ckanext.showcase.logic.schema as showcase_schema
+from ckanext.showcase.logic.notifications import send_showcase_created_notifications
 from ckanext.showcase.model import ShowcasePackageAssociation, ShowcaseAdmin
-import datetime
-import hashlib
-from ckan.lib.mailer import mail_recipient
 
 convert_package_name_or_id_to_title_or_name = \
     showcase_converters.convert_package_name_or_id_to_title_or_name
 showcase_package_association_create_schema = \
     showcase_schema.showcase_package_association_create_schema
 showcase_admin_add_schema = showcase_schema.showcase_admin_add_schema
-
-log = logging.getLogger(__name__)
 
 
 def showcase_create(context, data_dict):
@@ -46,31 +43,27 @@ def showcase_create(context, data_dict):
     from ckanext.showcase.logic.auth import _is_showcase_admin
     if not _is_showcase_admin(context):
         data_dict['approval_status'] = 'pending'
+    effective_approval_status = data_dict.get('approval_status')
 
     # Στην αποθήκευση του showcase επιτρέπουμε σε όλους τους συνδεδεμένους χρήστες να κάνουν προσθήκη εφαρμογής
     context['ignore_auth'] = True
     pkg = toolkit.get_action('package_create')(context, data_dict)
+    showcase_id = pkg.get('id') if isinstance(pkg, dict) else pkg
 
     try:
+        notification_showcase = toolkit.get_action('ckanext_showcase_show')(
+            context,
+            {'id': showcase_id},
+        )
+    except Exception:
+        notification_showcase = pkg if isinstance(pkg, dict) else dict(data_dict, id=showcase_id)
 
-        # Ανάκτηση ονόματος του δημιουργού του showcase
-        creator_email = get_email_from_id(context, pkg['creator_user_id'])
-
-        # Ανάκτηση των emails των διαχειριστών
-        admins_emails = get_showcase_admin_emails(context)
-
-        # Δημιουργία του URL του showcase
-        from ckan.common import config
-        site_url = config.get('ckan.site_url', 'http://localhost:5000')
-        showcase_url = f"{site_url}/showcase/{pkg['name']}"
-
-        # Αποστολή email σε όλους τους διαχειριστές
-        for admin_email in admins_emails:
-            send_email(context, admin_email, data_dict, showcase_url)
-
-        # Αποστολή email στον δημιουργό
-        send_email(context, creator_email, data_dict, showcase_url)
-
+    try:
+        send_showcase_created_notifications(
+            context,
+            notification_showcase,
+            requested_status=effective_approval_status,
+        )
     except Exception as e:
         toolkit.error_shout(f"Email sending failed: {e}")
 
@@ -92,7 +85,9 @@ def showcase_package_association_create(context, data_dict):
         toolkit.check_access('ckanext_showcase_package_association_create',
                            context, data_dict)
     except toolkit.NotAuthorized:
-        return toolkit.abort(403, toolkit._('Not authorized to add dataset to showcase'))
+        return toolkit.abort(
+            403, toolkit._('Not authorized to add package to showcase')
+        )
 
     # validate the incoming data_dict
     validated_data_dict, errors = validate(
@@ -107,8 +102,14 @@ def showcase_package_association_create(context, data_dict):
 
     if ShowcasePackageAssociation.exists(package_id=package_id,
                                          showcase_id=showcase_id):
-        raise toolkit.ValidationError("ShowcasePackageAssociation with package_id '{0}' and showcase_id '{1}' already exists.".format(package_id, showcase_id),
-                                      error_summary=u"The dataset, {0}, is already in the showcase".format(convert_package_name_or_id_to_title_or_name(package_id, context)))
+        raise toolkit.ValidationError(
+            "ShowcasePackageAssociation with package_id '{0}' and showcase_id '{1}' already exists.".format(
+                package_id, showcase_id
+            ),
+            error_summary=u"The package, {0}, is already in the showcase".format(
+                convert_package_name_or_id_to_title_or_name(package_id, context)
+            ),
+        )
 
     # create the association
     return ShowcasePackageAssociation.create(package_id=package_id,
@@ -163,49 +164,3 @@ def showcase_upload(context, data_dict):
             qualified=True
         )
     return {'url': image_url}
-
-# Μέθοδος που ανακτά το username του χρήστη με βάση το id
-def get_username_from_id(context, user_id):
-    try:
-        user = toolkit.get_action('user_show')(context, {'id': user_id})
-        return user.get('name')  # or 'fullname' if you want full name
-    except toolkit.ObjectNotFound:
-        return None
-
-# Μέθοδος που ανακτά το email του χρήστη με βάση το id
-def get_email_from_id(context, user_id):
-    try:
-        user = toolkit.get_action('user_show')(context, {'id': user_id})
-        return user.get('email')  # or 'fullname' if you want full name
-    except toolkit.ObjectNotFound:
-        return None
-from ckan import model
-# Ανάκτηση των sysadmins και showcase admins
-def get_showcase_admin_emails(context):
-    admin_emails = set()
-
-    all_users = toolkit.get_action('user_list')(context, {'all_fields': True})
-
-    for user in all_users:
-        is_sysadmin = user.get('sysadmin', False)
-
-        # check if user is showcase admin by looking up in showcase_admin table
-        is_showcase_admin = model.Session.execute(
-            "SELECT 1 FROM showcase_admin WHERE user_id = :uid",
-            {"uid": user["id"]}
-        ).fetchone() is not None
-
-        if is_sysadmin or is_showcase_admin:
-            if user.get('email'):
-                admin_emails.add(user['email'])
-
-    return list(admin_emails)
-
-# Μέθοδος αποστολής email
-def send_email(context, recipient, data_dict, showcase_url):
-    mail_recipient(
-        recipient_name="",
-        recipient_email=recipient,
-        subject=f"DATA GOV GR: Δημιουργήθηκε Showcase: '{data_dict['name']}'",
-        body=f"Μια νέα εφαρμογή με όνομα '{data_dict['title']}' δημιουργήθηκε με επιτυχία. Μπορείτε να επισκεφθείτε την εφαρμογή σας εδώ για να ελέγξετε την κατάστασή της. URL: '{showcase_url}'"
-    )

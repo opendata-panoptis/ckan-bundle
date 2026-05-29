@@ -1,0 +1,18 @@
+{% extends "user/dashboard.html" %}
+
+{% block page_primary_action %}
+  {% if h.check_access('ckanext_showcase_create') %}
+    {% link_for _('Add Showcase'), named_route='showcase_blueprint.new', class_='btn btn-primary', icon='plus-square' %}
+  {% endif %}
+{% endblock %}
+
+{% block primary_content_inner %}
+  <h2 class="hide-heading">{{ _('My Showcases') }}</h2>
+
+  {% if page.items %}
+    {% snippet 'data_gov_gr/showcase/snippets/showcase_list.html', packages=page.items %}
+    {{ page.pager() }}
+  {% else %}
+    <p class="empty">{{ _('You have not created any showcases yet.') }}</p>
+  {% endif %}
+{% endblock %}

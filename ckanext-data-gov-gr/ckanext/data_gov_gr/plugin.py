@@ -7,11 +7,26 @@ from .logic.harvest_mapping import (
     ensure_applicable_legislation,
     apply_temporal_coverage_from_iso19139,
     apply_resource_rights_and_license_from_iso19139,
+    apply_resource_rights_from_iso_use_constraints,
     cleanup_package_tags,
-    apply_cityofathens_publisher,
     apply_dcat_type_geospatial,
+    apply_dataset_name_from_file_identifier,
+    apply_default_dataset_fields_from_config,
+    apply_default_resource_fields_from_config,
+    apply_landing_page_from_file_identifier,
     apply_download_url_for_direct_downloads,
-    apply_resource_format_from_iso19139
+    insert_configured_wms_wfs_capabilities_resources,
+    apply_resource_access_url_from_url,
+    apply_resource_description_from_name,
+    apply_resource_mimetype_from_distribution_format,
+    apply_resource_format_from_iso19139,
+    preserve_resource_ids_by_url,
+    prepend_configured_wms_layer_resource,
+    prepend_wms_preview_resource_from_online_resource,
+    prepend_wms_preview_resources_from_wms_online_resources,
+    should_skip_data_service_package,
+    should_skip_dataset_when_title_matches_layer_name,
+    should_skip_dataset_with_uuid_like_layer_identifier,
 )
 
 import logging
@@ -91,6 +106,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         - ``ckanext.data_gov_gr.showcase.disclaimer`` (apps/showcases disclaimer)
         - ``ckanext.data_gov_gr.dataset.legislation.open`` (default applicable legislation for open datasets)
         - ``ckanext.data_gov_gr.dataset.legislation.protected`` (default applicable legislation for protected datasets)
+        - ``ckanext.data_gov_gr.dataset.show_metadata_license_disclaimer`` (show/hide metadata license disclaimer in dataset form)
         - ``guides_base_url`` (external guides base URL)
         - ``ckanext.data_gov_gr.contact.gitbook_embed_items`` (contact page GitBook dropdown items as JSON)
         which are independent from their fallback values in the ini file.
@@ -110,6 +126,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
             'ckanext.data_gov_gr.dataset.legislation.open': [ignore_missing, unicode_safe],
             'ckanext.data_gov_gr.dataset.legislation.protected': [ignore_missing, unicode_safe],
             'guides_base_url': [ignore_missing, unicode_safe],
+            'ckanext.data_gov_gr.dataset.show_metadata_license_disclaimer': [ignore_missing, boolean_validator],
             'ckanext.data_gov_gr.contact.gitbook_embed_items': [ignore_missing, unicode_safe],
             # Νέα, JSON παραμετρικές επιλογές για dropdown συνόλων δεδομένων
             'ckanext.data_gov_gr.menu.dataset.items': [ignore_missing, unicode_safe],
@@ -120,10 +137,13 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
             'ckanext.data_gov_gr.home.stats.item4': [ignore_missing, unicode_safe],
             'ckanext.data_gov_gr.home.featured_dataset_views.ids': [ignore_missing, unicode_safe],
             'ckanext.data_gov_gr.home.portal_numbers.enabled': [ignore_missing, boolean_validator],
+            'ckanext.data_gov_gr.header.dashboard_activity_count.enabled': [ignore_missing, boolean_validator],
+            'ckanext.data_gov_gr.home.reuse_stats.enabled': [ignore_missing, boolean_validator],
             'ckanext.data_gov_gr.home.showcases.ids': [ignore_missing, unicode_safe],
             'ckanext.data_gov_gr.header.logo_preset': [ignore_missing, unicode_safe],
             'ckanext.athens_theme.hero.image_url': [ignore_missing, unicode_safe],
             'ckanext.athens_theme.footer.chatbot_url': [ignore_missing, unicode_safe],
+            'ckanext.contact.external_contact_url': [ignore_missing, unicode_safe],
         })
 
         return schema
@@ -144,6 +164,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         config_ui = root.config_ui
         contact = root.contact
         data_service = root.data_service
+        user = root.user
 
         declaration.declare(root.powerbi_embed_url, "").set_description(
             "Power BI embed URL (used on /stats/powerbi and home previews)."
@@ -159,6 +180,9 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         )
         declaration.declare(root.dataset.legislation.protected, "").set_description(
             "Default applicable legislation URL for protected datasets."
+        )
+        declaration.declare(root.dataset.show_metadata_license_disclaimer, "no").set_description(
+            "Show/hide the metadata license disclaimer text in dataset create/edit forms."
         )
         declaration.declare(root.menu.dataset.items, "").set_description(
             "JSON list for the dataset dropdown menu items."
@@ -199,6 +223,9 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         declaration.declare(home.portal_numbers.enabled, "no").set_description(
             "Show the 'Portal in numbers' counters on the home page."
         )
+        declaration.declare(home.reuse_stats.enabled, "yes").set_description(
+            "Show the 'Reuse statistics' section (Matomo visitors/downloads + apps count) on the home page."
+        )
         declaration.declare(home.stats.item1, "").set_description(
             "Home stats tile 1 (stats id)."
         )
@@ -226,6 +253,15 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
             "URL for the 'Ψηφιακός Βοηθός Athens Gov' link in the footer About column. Opens in new tab. Leave empty to hide."
         )
 
+        declaration.annotate("Επικοινωνία")
+        declaration.declare(key.ckanext.contact.external_contact_url, "").set_description(
+            "URL εξωτερικής σελίδας επικοινωνίας. Αν συμπληρωθεί, η φόρμα επικοινωνίας αντικαθίσταται από σύνδεσμο προς αυτό το URL. Αφήστε κενό για εμφάνιση κανονικής φόρμας."
+        )
+
+        declaration.declare(root.header.dashboard_activity_count.enabled, "no").set_description(
+            "Calculate the dashboard activity notification count in the header. Disabled by default to avoid per-page activity queries for logged-in users."
+        )
+
         declaration.annotate("Header")
         declaration.declare(root.header.logo_preset, "logo_1.svg").set_description(
             "Preset logo filename from /images/logo/ shown in the header when ckan.site_logo is not set."
@@ -234,6 +270,9 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         declaration.annotate("Dataset / data-service view")
         declaration.declare(data_service.hide_resources_section, "yes").set_description(
             "Hide 'Data and Resources' section on data-service (API) pages."
+        )
+        declaration.declare(user.hide_showcase_tab, "no").set_description(
+            "Hide the 'Showcases' tab from the user dashboard."
         )
 
         declaration.annotate("Config UI visibility (ini-only feature flags)")
@@ -854,6 +893,23 @@ class DataGovGrSpatialHarvesterPlugin(plugins.SingletonPlugin):
         harvest_object = data_dict.get("harvest_object")
 
         if isinstance(package_dict, dict):
+            if should_skip_data_service_package(package_dict, harvest_object):
+                return None
+            if should_skip_dataset_with_uuid_like_layer_identifier(
+                xml_tree,
+                harvest_object,
+            ):
+                return None
+            if should_skip_dataset_when_title_matches_layer_name(
+                package_dict,
+                xml_tree,
+                harvest_object,
+            ):
+                return None
+
+            apply_dataset_name_from_file_identifier(package_dict, xml_tree, harvest_object)
+            apply_landing_page_from_file_identifier(package_dict, xml_tree, harvest_object)
+
             # Cleanup tags: remove "__", "--", etc (junk tags)
             cleanup_package_tags(package_dict)
 
@@ -861,6 +917,7 @@ class DataGovGrSpatialHarvesterPlugin(plugins.SingletonPlugin):
             apply_dcat_type_geospatial(package_dict, overwrite=False)
 
             apply_theme_from_topiccategory(package_dict, iso_values, xml_tree)
+            apply_default_dataset_fields_from_config(package_dict, harvest_object)
 
             apply_temporal_coverage_from_iso19139(package_dict, xml_tree)
 
@@ -870,13 +927,49 @@ class DataGovGrSpatialHarvesterPlugin(plugins.SingletonPlugin):
             # Default applicable legislation (only if missing)
             ensure_applicable_legislation(package_dict, protected=False)
 
+            prepend_configured_wms_layer_resource(package_dict, xml_tree, harvest_object)
+            prepend_wms_preview_resource_from_online_resource(
+                package_dict,
+                xml_tree,
+                harvest_object,
+            )
+            prepend_wms_preview_resources_from_wms_online_resources(
+                package_dict,
+                xml_tree,
+                harvest_object,
+            )
+            insert_configured_wms_wfs_capabilities_resources(
+                package_dict,
+                xml_tree,
+                harvest_object,
+            )
+
             apply_resource_rights_and_license_from_iso19139(package_dict, xml_tree, overwrite=False)
+            apply_resource_rights_from_iso_use_constraints(
+                package_dict,
+                xml_tree,
+                harvest_object,
+                overwrite=False,
+            )
+            apply_default_resource_fields_from_config(package_dict, harvest_object)
+
+            apply_resource_access_url_from_url(package_dict, harvest_object)
+            apply_resource_description_from_name(package_dict, harvest_object)
+            apply_resource_mimetype_from_distribution_format(
+                package_dict,
+                xml_tree,
+                harvest_object,
+            )
 
             apply_download_url_for_direct_downloads(package_dict, xml_tree, overwrite=False)
-            apply_resource_format_from_iso19139(package_dict, xml_tree, overwrite=True)
+            apply_resource_format_from_iso19139(
+                package_dict,
+                xml_tree,
+                overwrite=True,
+                harvest_object=harvest_object,
+            )
 
-            # Publisher rule(s)
-            apply_cityofathens_publisher(package_dict, harvest_object)
+            preserve_resource_ids_by_url(package_dict, harvest_object)
 
         return package_dict
 

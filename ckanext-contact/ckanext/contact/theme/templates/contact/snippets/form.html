@@ -30,24 +30,6 @@
                        id="field-support-question-scope"
                        value="{{ (data.support_question_scope if data.support_question_scope not in [none] else '')|e }}">
 
-                {% if extended_fields and h.contact_organization_field_enabled() %}
-                <div class="form-group control-medium">
-                    <label for="field-organization">Φορέας / Οργανισμός (σε περίπτωση που ανήκετε σε κάποιον από τους ενταγμένους φορείς στο σύστημα)</label>
-                    <select id="field-organization" name="organization" class="form-control">
-                        <option value="">{{ _('Select...') }}</option>
-                        {% for org in h.data_gov_gr_get_organizations() %}
-                          <option value="{{ org.id }}"
-                                  {% if data.organization == org.id %}selected="selected"{% endif %}>
-                            {{ org.title or org.name }}
-                          </option>
-                        {% endfor %}
-                    </select>
-                    {% if errors.organization %}
-                        <div class="error-block">{{ errors.organization }}</div>
-                    {% endif %}
-                </div>
-                {% endif %}
-
                 <div class="form-group control-medium">
                     <span class="text-danger">*</span>
                     <label for="field-name">{{ _('Contact Name') }}</label>
@@ -75,33 +57,17 @@
                     <label for="field-subject-type">Θέμα επικοινωνίας</label>
                     <select id="field-subject-type" name="subject_type" class="form-control">
                         <option value="">{{ _('Select...') }}</option>
-                        <option value="general_question"
-                                {% if data.subject_type == 'general_question' %}selected="selected"{% endif %}>
-                            Γενική ερώτηση
-                        </option>
-                        <option value="account"
-                                {% if data.subject_type == 'account' %}selected="selected"{% endif %}>
-                            Πρόβλημα με λογαριασμό / σύνδεση
-                        </option>
-                        <option value="dataset_publication"
-                                {% if data.subject_type == 'dataset_publication' %}selected="selected"{% endif %}>
-                            Δημοσίευση / ενημέρωση συνόλου δεδομένων
-                        </option>
                         <option value="api_or_technical"
                                 {% if data.subject_type == 'api_or_technical' %}selected="selected"{% endif %}>
-                            Αναφορά σφάλματος
+                            Τεχνικό πρόβλημα-σφάλμα με λογαριασμό/Εθνική Πύλη
                         </option>
                         <option value="open_new_data"
                                 {% if data.subject_type == 'open_new_data' %}selected="selected"{% endif %}>
-                            Αίτημα για δεδομένα
+                            Αίτημα διάθεσης νέου ανοικτού συνόλου δεδομένων
                         </option>
                         <option value="general_feedback"
                                 {% if data.subject_type == 'general_feedback' %}selected="selected"{% endif %}>
-                            Γενικό σχόλιο / βελτίωση πύλης
-                        </option>
-                        <option value="other"
-                                {% if data.subject_type == 'other' %}selected="selected"{% endif %}>
-                            Άλλο
+                            Πρόταση βελτίωσης της Εθνικής Πύλης
                         </option>
                     </select>
                 </div>
@@ -111,9 +77,13 @@
                               value=data.subject, error=errors.subject, classes=['control-medium'],
                               is_required=false, placeholder=_('Optional subject')) }}
 
-                {{ form.textarea('content', label=_('Your Request'), id='field-content',
-                                 value=data.content, error=errors.content,
-                                 placeholder=_('What do you have to tell us?'), is_required=true) }}
+                {% call form.textarea('content', label=_('Your Request'), id='field-content',
+                                      value=data.content, error=errors.content,
+                                      placeholder=_('What do you have to tell us?'),
+                                      attrs={'class': 'form-control', 'minlength': '20', 'maxlength': '1000'},
+                                      is_required=true) %}
+                    <p class="help-block">Το μήνυμα πρέπει να έχει από 20 έως 1000 χαρακτήρες.</p>
+                {% endcall %}
 
               {% if extended_fields and h.contact_accept_terms_enabled() %}
                 <div class="form-group control-medium">

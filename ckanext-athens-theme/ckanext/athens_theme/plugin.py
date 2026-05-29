@@ -33,7 +33,8 @@ class AthensThemePlugin(plugins.SingletonPlugin):
             'athens_theme_get_municipality_name': helpers.get_municipality_name,
             'get_featured_categories': helpers.get_featured_categories,
             'get_recent_datasets': helpers.get_recent_datasets,
-            'get_site_statistics': helpers.get_site_statistics
+            'get_site_statistics': helpers.get_site_statistics,
+            'render_athens_tree_html': helpers.render_athens_tree_html,
         }
 
     # ITranslation

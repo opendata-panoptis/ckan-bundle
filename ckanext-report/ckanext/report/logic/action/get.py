@@ -1,6 +1,7 @@
 from ckanext.report.report_registry import ReportRegistry
 import ckan.plugins as p
 import ckan.logic as logic
+from ckanext.report import lib as report_lib
 
 
 @logic.side_effect_free
@@ -73,6 +74,8 @@ def report_data_get(context=None, data_dict=None):
     report = ReportRegistry.instance().get_report(id)
 
     data, date = report.get_fresh_report(**options)
+
+    data = report_lib.filter_report_data_by_package_show_access(data, context, report=report)
 
     return data, date.isoformat()
 

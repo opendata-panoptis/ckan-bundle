@@ -1,0 +1,9 @@
+{% block showcase_index_list %}
+<div class="organizations-index showcases-index">
+  <ul class="organizations-index-grid">
+    {% for package in packages %}
+      {% snippet "data_gov_gr/showcase/snippets/showcase_item.html", package=package %}
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

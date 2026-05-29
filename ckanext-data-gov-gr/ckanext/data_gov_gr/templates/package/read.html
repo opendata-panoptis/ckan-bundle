@@ -11,3 +11,21 @@
     {{ super() }}
   {% endif %}
 {% endblock %}
+
+{% block package_tags %}
+  {% set current_type = dataset_type or (pkg.type if pkg else 'dataset') %}
+
+  {% if current_type in ['data-service', 'decision'] and pkg.tags %}
+    <section class="tags">
+      <ul class="tag-list">
+        {% for tag in pkg.tags %}
+          <li>
+            <a class="tag" href="{{ h.url_for(current_type ~ '.search', tags=tag.name) }}" title="{{ tag.display_name }}">{{ tag.display_name|truncate(22) }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}

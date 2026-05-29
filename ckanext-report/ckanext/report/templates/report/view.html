@@ -68,6 +68,8 @@
           {{ gettext('Dataset resource URLs that are found to result in errors when resolved.', domain='ckanext-archiver') }}
         {% elif 'tagless' in report_name %}
           {{ gettext('Datasets which have no tags.', domain='ckanext-report') }}
+        {% elif 'stale-datasets' in report_name %}
+          {{ gettext('Datasets that have not been updated according to their frequency schedule', domain='ckanext-report') }}
         {% else %}
           {{ report.description }}
         {% endif %}
@@ -111,7 +113,29 @@
       {% endif %}
       <h3>{{ _('Results') }}</h3>
       {% if not are_some_results %}
-        <p>{{ _('No results found.') }}</p>
+        {% if 'metadata' in report_name and organization %}
+          <p>{{ gettext('No metadata quality results were found for this organization.', domain='ckanext-qa') }}</p>
+        {% elif 'metadata' in report_name %}
+          <p>{{ gettext('No metadata quality results were found.', domain='ckanext-qa') }}</p>
+        {% elif 'openness' in report_name and organization %}
+          <p>{{ gettext('No openness score results were found for this organization.', domain='ckanext-qa') }}</p>
+        {% elif 'openness' in report_name %}
+          <p>{{ gettext('No openness score results were found.', domain='ckanext-qa') }}</p>
+        {% elif 'broken' in report_name and organization %}
+          <p>{{ gettext('No broken links were found for this organization.', domain='ckanext-archiver') }}</p>
+        {% elif 'broken' in report_name %}
+          <p>{{ gettext('No broken links were found.', domain='ckanext-archiver') }}</p>
+        {% elif 'tagless' in report_name and organization %}
+          <p>{{ gettext('No datasets without tags were found for this organization.', domain='ckanext-report') }}</p>
+        {% elif 'tagless' in report_name %}
+          <p>{{ gettext('No datasets without tags were found.', domain='ckanext-report') }}</p>
+        {% elif 'stale-datasets' in report_name and organization %}
+          <p>{{ gettext('No stale datasets were found for this organization.', domain='ckanext-report') }}</p>
+        {% elif 'stale-datasets' in report_name %}
+          <p>{{ gettext('No stale datasets were found.', domain='ckanext-report') }}</p>
+        {% else %}
+          <p>{{ _('No results found.') }}</p>
+        {% endif %}
       {% else %}
         <div class="pull-left">
           {% snippet report_template, table=data['table'], data=data, report_name=report_name, options=options, lib=lib %}

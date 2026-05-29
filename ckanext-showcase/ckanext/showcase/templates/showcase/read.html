@@ -46,15 +46,16 @@
 {% block page_header %}
 {% endblock %}
 
+{% block page_primary_action %}
+    {% if h.check_access('ckanext_showcase_update', {'id':pkg.id }) %}
+        {% link_for _('Manage'), named_route=showcase_edit_route, id=pkg.name, class_='btn btn-default', icon='wrench' %}
+    {% endif %}
+{% endblock %}
+
 {% block pre_primary %}
 {% endblock %}
 
 {% block primary_content_inner %}
-    {% if h.check_access('ckanext_showcase_update', {'id':pkg.id }) %}
-        <div class="actions">
-            {% link_for _('Manage'), named_route=showcase_edit_route, id=pkg.name, class_='btn btn-default', icon='wrench' %}
-        </div>
-    {% endif %}
     {% block package_description %}
         {% if pkg.private %}
             <span class="dataset-private label label-inverse pull-right">
@@ -120,7 +121,7 @@
     {% block secondary_help_content %}{% endblock %}
 
     {% block package_info %}
-        {% snippet 'showcase/snippets/showcase_info.html', pkg=pkg, showcase_pkgs=showcase_pkgs %}
+        {% snippet 'showcase/snippets/showcase_info.html', pkg=pkg, showcase_datasets=showcase_datasets, showcase_apis=showcase_apis %}
     {% endblock %}
 
     {% block package_social %}

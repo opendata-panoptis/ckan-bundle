@@ -1,28 +1,216 @@
+{#
+  Αναφορά μη λειτουργικών συνδέσμων του ckanext-archiver
+  Σελιδοποίηση + ταξινόμηση στηλών (στο pattern του ckanext-report)
+#}
+
+{# --- Στυλ --- #}
+<style>
+  .pagination > li > a,
+  .pagination > li > span {
+    margin: 0 3px;
+    padding: 6px 12px;
+    border-radius: 4px !important;
+  }
+  .pagination > li:first-child > a,
+  .pagination > li:last-child > a {
+    border-radius: 4px !important;
+  }
+  /* Επικεφαλίδες με ταξινόμηση */
+  th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 20px !important;
+  }
+  th.sortable:hover {
+    background-color: #eaeaea;
+  }
+  th.sortable .sort-icon {
+    margin-left: 5px;
+    color: #999;
+    font-size: 12px;
+  }
+  th.sortable.sort-asc .sort-icon,
+  th.sortable.sort-desc .sort-icon {
+    color: #333;
+  }
+  /* Κενό πάνω από CSV/JSON κουμπιά */
+  div.pull-right {
+    margin-top: 15px !important;
+  }
+  /* Αιτία στήλη - αρκετός χώρος */
+  .reason-cell {
+    min-width: 520px;
+  }
+  .url-cell {
+    min-width: 250px;
+  }
+  /* Κενό πάνω από pagination */
+  #pagination-nav {
+    margin-top: 25px;
+  }
+  /* Active σελίδα στο pagination */
+  .pagination > li.active > a,
+  .pagination > li.active > a:hover,
+  .pagination > li.active > a:focus {
+    background-color: #337ab7;
+    border-color: #337ab7;
+    color: #fff;
+    font-weight: bold;
+  }
+  .broken-links-toolbar {
+    margin-bottom: 15px;
+  }
+  .broken-links-toolbar .btn-group {
+    margin-bottom: 10px;
+  }
+  .status-summary {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .status-summary > [class*="col-"] {
+    display: flex;
+    margin-bottom: 15px;
+  }
+  .status-summary .well {
+    width: 100%;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 132px;
+  }
+  .status-summary .well p {
+    margin-bottom: 0;
+  }
+  .broken-links-meta {
+    margin: -2px 0 18px;
+    color: #6f7f8f;
+  }
+</style>
+
 {% if c.options['organization'] == None %}
-  <div class="summary-list">
-      <ul>
-          <li>{% trans %}Broken datasets{% endtrans %}: {{ c.data['num_broken_packages'] }} / {{ c.data['num_packages'] }} ({{ c.data.get('broken_package_percent') }}%)</li>
-          <li>{% trans %}Broken links{% endtrans %}: {{ c.data['num_broken_resources'] }} / {{ c.data['num_resources'] }} ({{ c.data.get('broken_resource_percent') }}%)</li>
-      </ul>
+
+  {# ==================== Συνοπτική προβολή (όλοι οι οργανισμοί) ==================== #}
+  {% set status_counts = namespace(with_broken=0, without_broken=0) %}
+  {% for row in c.data['table'] %}
+    {% if row['broken_resource_count'] > 0 %}
+      {% set status_counts.with_broken = status_counts.with_broken + 1 %}
+    {% else %}
+      {% set status_counts.without_broken = status_counts.without_broken + 1 %}
+    {% endif %}
+  {% endfor %}
+
+  <div class="row status-summary">
+    <div class="col-md-4">
+      <div class="well text-center">
+        <h2>{{ c.data['table']|length }}</h2>
+        <p>Οργανισμοί</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="well text-center" style="border-left: 4px solid #5cb85c;">
+        <h2 style="color: #5cb85c;">{{ status_counts.without_broken }}</h2>
+        <p>Χωρίς μη λειτουργικούς συνδέσμους</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="well text-center" style="border-left: 4px solid #d9534f;">
+        <h2 style="color: #d9534f;">{{ status_counts.with_broken }}</h2>
+        <p>Με μη λειτουργικούς συνδέσμους</p>
+      </div>
+    </div>
   </div>
+  <p class="broken-links-meta">
+    {% trans %}Broken datasets{% endtrans %}: {{ c.data['num_broken_packages'] }}
+    {% if c.data['num_packages'] is not none %}
+      / {{ c.data['num_packages'] }}
+    {% endif %}
+    {% if c.data.get('broken_package_percent') is not none %}
+      ({{ c.data.get('broken_package_percent') }}%)
+    {% endif %}
+    |
+    {% trans %}Broken links{% endtrans %}: {{ c.data['num_broken_resources'] }}
+    {% if c.data['num_resources'] is not none %}
+      / {{ c.data['num_resources'] }}
+    {% endif %}
+    {% if c.data.get('broken_resource_percent') is not none %}
+      ({{ c.data.get('broken_resource_percent') }}%)
+    {% endif %}
+    |
+    Μη αξιολογήσιμοι πόροι: {{ c.data.get('num_non_evaluable_resources', 0) }}
+  </p>
+
+  {# --- Φίλτρα + επιλογέας αποτελεσμάτων ανά σελίδα --- #}
+  <div class="row broken-links-toolbar">
+    <div class="col-md-8">
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-default active" data-filter="all">
+          Όλοι ({{ c.data['table']|length }})
+        </button>
+        <button type="button" class="btn btn-default" data-filter="ok">
+          <i class="fa fa-check text-success"></i>
+          Χωρίς μη λειτουργικούς συνδέσμους ({{ status_counts.without_broken }})
+        </button>
+        <button type="button" class="btn btn-default" data-filter="broken">
+          <i class="fa fa-exclamation-triangle text-danger"></i>
+          Με μη λειτουργικούς συνδέσμους ({{ status_counts.with_broken }})
+        </button>
+      </div>
+    </div>
+    <div class="col-md-4 text-right">
+      <label style="font-weight: normal; margin-right: 5px;">{% trans %}Per page{% endtrans %}</label>
+      <select id="per-page-select" class="form-control" style="width: auto; display: inline-block;">
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="all">{% trans %}All{% endtrans %}</option>
+      </select>
+    </div>
+  </div>
+
   <div class="report-table-wrapper">
-    <table class="table table-striped table-bordered table-condensed" id="report-table">
-      <col style="width: 60%" />
+    <table class="table table-striped table-bordered table-condensed table-hover" id="report-table">
+      <col style="width: 45%" />
+      <col style="width: 15%" />
       <col style="width: 10%" />
       <col style="width: 10%" />
       <col style="width: 10%" />
       <thead>
       <tr>
-        <th class="header">{% trans %}Organization{% endtrans %}</th>
-        <th class="header">{% trans %}Broken datasets{% endtrans %}</th>
-        <th class="header">{% trans %}Broken links{% endtrans %}</th>
-        <th class="header">% {% trans %}Broken links{% endtrans %}</th>
+        <th class="header sortable" data-sort="org_title">
+          {% trans %}Organization{% endtrans %}
+          <i class="fa fa-sort sort-icon"></i>
+        </th>
+        <th class="header sortable" data-sort="has_broken">
+          Έχει μη λειτουργικούς συνδέσμους;
+          <i class="fa fa-sort sort-icon"></i>
+        </th>
+        <th class="header sortable" data-sort="broken_packages">
+          {% trans %}Broken datasets{% endtrans %}
+          <i class="fa fa-sort sort-icon"></i>
+        </th>
+        <th class="header sortable" data-sort="broken_resources">
+          {% trans %}Broken links{% endtrans %}
+          <i class="fa fa-sort sort-icon"></i>
+        </th>
+        <th class="header sortable" data-sort="broken_percent">
+          % {% trans %}Broken links{% endtrans %}
+          <i class="fa fa-sort sort-icon"></i>
+        </th>
       </tr>
      </thead>
-     <tbody>
+      <tbody>
       {% for row in c.data['table'] %}
-        <tr>
+        <tr class="report-row {% if row['broken_resource_count'] > 0 %}filter-broken{% else %}filter-ok{% endif %}"
+            data-sort-org_title="{{ row['organization_title']|lower }}"
+            data-sort-has_broken="{{ 1 if row['broken_resource_count'] > 0 else 0 }}"
+            data-sort-broken_packages="{{ row['broken_package_count'] }}"
+            data-sort-broken_resources="{{ row['broken_resource_count'] }}"
+            data-sort-broken_percent="{{ row.get('broken_resource_percent', 0) }}">
           <td>{{ h.link_to(row['organization_title'], h.report__relative_url_for(organization=row['organization_name'])) }}</td>
+          <td>{% if row['broken_resource_count'] > 0 %}Ναι{% else %}Όχι{% endif %}</td>
           <td>{{ row['broken_package_count'] }}</td>
           <td>{{ row['broken_resource_count'] }}</td>
           <td>{{ row.get('broken_resource_percent') }}%</td>
@@ -32,38 +220,163 @@
     </table>
   </div>
 
+  {# --- Στοιχεία σελιδοποίησης --- #}
+  <nav class="text-center" id="pagination-nav">
+    <ul class="pagination" id="pagination-controls"></ul>
+    <p class="text-muted" id="pagination-info" style="margin-top: 5px;"></p>
+  </nav>
+
 {% else %}
 
-  <div class="summary-list">
-    <ul>
-      <li>{% trans %}Broken datasets{% endtrans %}: {{ c.data['num_broken_packages'] }} / {{ c.data['num_packages'] }} ({{ c.data.get('broken_package_percent') }}%)</li>
-      <li>{% trans %}Broken links{% endtrans %}: {{ c.data['num_broken_resources'] }} / {{ c.data['num_resources'] }} ({{ c.data.get('broken_resource_percent') }}%)</li>
-    </ul>
+  {# ==================== Αναλυτική προβολή (ένας οργανισμός) ==================== #}
+  {% set total_packages = c.data['num_packages'] if c.data['num_packages'] is not none else 0 %}
+  {% set total_resources = c.data['num_resources'] %}
+  {% set non_evaluable_resources = c.data.get('num_non_evaluable_resources', 0) %}
+  {% set healthy_resources = (total_resources - c.data['num_broken_resources'] - non_evaluable_resources) if total_resources is not none else none %}
+
+  <div class="row status-summary">
+    <div class="col-md-4">
+      <div class="well text-center">
+        <h2>{{ total_resources if total_resources is not none else '(κενό)' }}</h2>
+        <p>Πόροι</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="well text-center" style="border-left: 4px solid #5cb85c;">
+        <h2 style="color: #5cb85c;">{{ healthy_resources if healthy_resources is not none else '(κενό)' }}</h2>
+        <p>Λειτουργικοί πόροι</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="well text-center" style="border-left: 4px solid #d9534f;">
+        <h2 style="color: #d9534f;">{{ c.data['num_broken_resources'] }}</h2>
+        <p>Μη λειτουργικοί πόροι</p>
+      </div>
+    </div>
   </div>
+  <p class="broken-links-meta">
+    {% trans %}Broken datasets{% endtrans %}: {{ c.data['num_broken_packages'] }}
+    {% if c.data['num_packages'] is not none %}
+      / {{ c.data['num_packages'] }}
+    {% endif %}
+    {% if c.data.get('broken_package_percent') is not none %}
+      ({{ c.data.get('broken_package_percent') }}%)
+    {% endif %}
+    |
+    {% trans %}Broken links{% endtrans %}: {{ c.data['num_broken_resources'] }}
+    {% if c.data['num_resources'] is not none %}
+      / {{ c.data['num_resources'] }}
+    {% endif %}
+    {% if c.data.get('broken_resource_percent') is not none %}
+      ({{ c.data.get('broken_resource_percent') }}%)
+    {% endif %}
+    |
+    Μη αξιολογήσιμοι πόροι: {{ non_evaluable_resources }}
+  </p>
+
+  {# --- Φίλτρα + επιλογέας αποτελεσμάτων ανά σελίδα --- #}
+  <div class="row broken-links-toolbar">
+    <div class="col-md-8">
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-default active" data-filter="all">
+          {% trans %}All{% endtrans %} ({{ c.data['table']|length }})
+        </button>
+        <button type="button" class="btn btn-default" data-filter="broken">
+          <i class="fa fa-exclamation-triangle text-danger"></i>
+          {% trans %}Broken links{% endtrans %} ({{ c.data['num_broken_resources'] }})
+        </button>
+        <button type="button" class="btn btn-default" data-filter="non_evaluable">
+          <i class="fa fa-minus text-muted"></i>
+          Μη αξιολογήσιμοι πόροι ({{ non_evaluable_resources }})
+        </button>
+      </div>
+    </div>
+    <div class="col-md-4 text-right">
+      <label style="font-weight: normal; margin-right: 5px;">{% trans %}Per page{% endtrans %}</label>
+      <select id="per-page-select" class="form-control" style="width: auto; display: inline-block;">
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="all">{% trans %}All{% endtrans %}</option>
+      </select>
+    </div>
+  </div>
+
+  <h3 style="margin: 0 0 18px;">Προβληματικοί και μη αξιολογήσιμοι πόροι</h3>
+
   <div class="report-table-wrapper">
-    <table class="table table-striped table-bordered table-condensed" id="report-table">
+    <table class="table table-striped table-bordered table-condensed table-hover" id="report-table">
      <thead>
         <tr class="js-tooltip">
-          <th>{% trans %}Dataset{% endtrans %}</th>
-          <th>{% trans %}Organization{% endtrans %}</th>
-          <th title="{% trans %}Index/position of the resource in the dataset{% endtrans %}">{% trans %}Res{% endtrans %}</th>
-          <th>{% trans %}URL{% endtrans %}</th>
-          <th>{% trans %}Status{% endtrans %}</th>
-          <th>{% trans %}Reason{% endtrans %}</th>
-          <th title="{% trans %}Failed download attempts{% endtrans %}">{% trans %}No. of fails{% endtrans %}</th>
-          <th title="{% trans %}First failed attempt{% endtrans %}">{% trans %}First fail{% endtrans %}</th>
-          <th title="{% trans %}Most recent failed attempt{% endtrans %}">{% trans %}Latest fail{% endtrans %}</th>
-          <th title="{% trans %}The last time it was successfully obtained{% endtrans %}">{% trans %}Last success{% endtrans %}</th>
+          <th class="sortable" data-sort="dataset" data-sort-type="string">
+            {% trans %}Dataset{% endtrans %}
+            <i class="fa fa-sort sort-icon"></i>
+          </th>
+          <th class="sortable" data-sort="organization" data-sort-type="string">
+            {% trans %}Organization{% endtrans %}
+            <i class="fa fa-sort sort-icon"></i>
+          </th>
+          <th class="sortable" data-sort="position" data-sort-type="number"
+              title="{% trans %}Index/position of the resource in the dataset{% endtrans %}">
+            {% trans %}Res{% endtrans %}
+            <i class="fa fa-sort sort-icon"></i>
+          </th>
+          <th class="url-cell">{% trans %}URL{% endtrans %}</th>
+          <th class="sortable" data-sort="status" data-sort-type="string">
+            {% trans %}Status{% endtrans %}
+            <i class="fa fa-sort sort-icon"></i>
+          </th>
+          <th class="reason-cell">{% trans %}Reason{% endtrans %}</th>
+          <th class="sortable" data-sort="failures" data-sort-type="number"
+              title="{% trans %}Failed download attempts{% endtrans %}">
+            {% trans %}No. of fails{% endtrans %}
+            <i class="fa fa-sort sort-icon"></i>
+          </th>
+          <th class="sortable" data-sort="first_failure" data-sort-type="string"
+              title="{% trans %}First failed attempt{% endtrans %}">
+            {% trans %}First fail{% endtrans %}
+            <i class="fa fa-sort sort-icon"></i>
+          </th>
+          <th class="sortable" data-sort="last_updated" data-sort-type="string"
+              title="{% trans %}Most recent failed attempt{% endtrans %}">
+            {% trans %}Latest fail{% endtrans %}
+            <i class="fa fa-sort sort-icon"></i>
+          </th>
+          <th class="sortable" data-sort="last_success" data-sort-type="string"
+              title="{% trans %}The last time it was successfully obtained{% endtrans %}">
+            {% trans %}Last success{% endtrans %}
+            <i class="fa fa-sort sort-icon"></i>
+          </th>
         </tr>
      </thead>
      <tbody>
         {% for row_dict in c.data['table'] %}
-          <tr>
+          <tr class="report-row filter-{{ row_dict.get('evaluation_state', 'broken') }}"
+              data-sort-dataset="{{ row_dict['dataset_title']|lower }}"
+              data-sort-organization="{{ row_dict['organization_title']|lower }}"
+              data-sort-position="{{ row_dict['resource_position'] }}"
+              data-sort-status="{{ row_dict.get('evaluation_state', row_dict.get('status', 'not recorded'))|lower }}"
+              data-sort-failures="{{ row_dict.get('failure_count', 0) }}"
+              data-sort-first_failure="{{ row_dict.get('first_failure', '') }}"
+              data-sort-last_updated="{{ row_dict.get('last_updated', '') }}"
+              data-sort-last_success="{{ row_dict.get('last_success', '') }}">
             <td><a href="{{ h.url_for('dataset.read', id=row_dict['dataset_name']) }}">{{ row_dict['dataset_title'] }}</a></td>
-            <td><a href="/publisher/{{ row_dict['organization_name'] }}">{{ row_dict['organization_title'] }}</a></td>
+            <td><a href="/organization/{{ row_dict['organization_name'] }}">{{ row_dict['organization_title'] }}</a></td>
             <td class="resource-position"><a href="/dataset/{{ row_dict['dataset_name'] }}/resource/{{ row_dict['resource_id'] }}">{{ row_dict['resource_position'] }}</a></td>
-            <td class="url-cell"><a href="{{ row_dict['resource_url'] }}" target="_blank">{{ row_dict['resource_url'] }}</a></td>
-            <td class="{{ 'status-error' if row_dict.get('status', 'not recorded') != 'not recorded' else '' }}">{{ h.archiver_status_label(row_dict.get('status', 'not recorded')) }}</td>
+            <td class="url-cell">
+              {% if row_dict.get('resource_url') %}
+                <a href="{{ row_dict['resource_url'] }}" target="_blank">{{ row_dict['resource_url'] }}</a>
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td class="{{ 'status-error' if row_dict.get('evaluation_state') == 'broken' else '' }}">
+              {% if row_dict.get('evaluation_state') == 'non_evaluable' %}
+                {{ h.archiver_status_label('Non-evaluable') }}
+              {% else %}
+                {{ h.archiver_status_label(row_dict.get('status', 'not recorded')) }}
+              {% endif %}
+            </td>
             <td class="reason-cell">{{ h.archiver_reason_label(row_dict.get('reason', 'not recorded')) }}</td>
             <td class="failure-count">{{ row_dict.get('failure_count', _('not recorded')) }}</td>
             <td class="date-cell">{{ h.render_datetime(row_dict.get('first_failure')) if row_dict.get('first_failure') else _('not recorded') }}</td>
@@ -74,4 +387,227 @@
       </tbody>
     </table>
   </div>
+
+  {# --- Στοιχεία σελιδοποίησης --- #}
+  <nav class="text-center" id="pagination-nav">
+    <ul class="pagination" id="pagination-controls"></ul>
+    <p class="text-muted" id="pagination-info" style="margin-top: 5px;"></p>
+  </nav>
+
 {% endif %}
+
+{# --- JavaScript: ταξινόμηση + σελιδοποίηση --- #}
+<script>
+(function() {
+  'use strict';
+
+  var ROWS_SELECTOR = '#report-table tbody .report-row';
+  var perPage = 20;
+  var currentPage = 1;
+  var currentSort = { column: null, direction: 'asc' };
+  var currentFilter = 'all';
+
+  // ===================== ΤΑΞΙΝΟΜΗΣΗ =====================
+
+  function sortRows(column) {
+    if (currentSort.column === column) {
+      currentSort.direction = (currentSort.direction === 'asc') ? 'desc' : 'asc';
+    } else {
+      currentSort.column = column;
+      currentSort.direction = 'asc';
+    }
+
+    var tbody = document.querySelector('#report-table tbody');
+    var rows = Array.prototype.slice.call(tbody.querySelectorAll('.report-row'));
+
+    // Εντοπισμός τύπου ταξινόμησης από το header
+    var th = document.querySelector('th[data-sort="' + column + '"]');
+    var sortType = (th && th.getAttribute('data-sort-type')) || 'string';
+
+    rows.sort(function(a, b) {
+      var valA = a.getAttribute('data-sort-' + column) || '';
+      var valB = b.getAttribute('data-sort-' + column) || '';
+
+      var result;
+      if (sortType === 'number') {
+        result = (parseFloat(valA) || 0) - (parseFloat(valB) || 0);
+      } else {
+        result = valA.localeCompare(valB, 'el');
+      }
+
+      return (currentSort.direction === 'desc') ? -result : result;
+    });
+
+    rows.forEach(function(row) {
+      tbody.appendChild(row);
+    });
+
+    updateSortHeaders();
+    currentPage = 1;
+    render();
+  }
+
+  function updateSortHeaders() {
+    var headers = document.querySelectorAll('th.sortable');
+    headers.forEach(function(th) {
+      var col = th.getAttribute('data-sort');
+      var icon = th.querySelector('.sort-icon');
+
+      th.classList.remove('sort-asc', 'sort-desc');
+      icon.className = 'fa sort-icon';
+
+      if (col === currentSort.column) {
+        if (currentSort.direction === 'asc') {
+          th.classList.add('sort-asc');
+          icon.classList.add('fa-sort-up');
+        } else {
+          th.classList.add('sort-desc');
+          icon.classList.add('fa-sort-down');
+        }
+      } else {
+        icon.classList.add('fa-sort');
+      }
+    });
+  }
+
+  function getFilteredRows() {
+    var rows = Array.prototype.slice.call(
+      document.querySelectorAll(ROWS_SELECTOR)
+    );
+    if (currentFilter === 'all') {
+      return rows;
+    }
+    var cls = 'filter-' + currentFilter;
+    return rows.filter(function(row) { return row.classList.contains(cls); });
+  }
+
+  // ===================== RENDER =====================
+
+  function render() {
+    var allRows = Array.prototype.slice.call(
+      document.querySelectorAll(ROWS_SELECTOR)
+    );
+    var visibleRowsSource = getFilteredRows();
+    var totalRows = visibleRowsSource.length;
+
+    var totalPages = (perPage === 'all')
+      ? 1
+      : Math.ceil(totalRows / perPage) || 1;
+
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    var startIdx = (perPage === 'all') ? 0 : (currentPage - 1) * perPage;
+    var endIdx = (perPage === 'all') ? totalRows : startIdx + perPage;
+    var visibleSet = new Set(visibleRowsSource.slice(startIdx, endIdx));
+
+    allRows.forEach(function(row) {
+      if (visibleSet.has(row)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    var info = document.getElementById('pagination-info');
+    if (perPage === 'all') {
+      info.textContent = totalRows + ' {% trans %}records{% endtrans %}';
+    } else {
+      var showStart = totalRows > 0 ? startIdx + 1 : 0;
+      var showEnd = Math.min(endIdx, totalRows);
+      info.textContent = showStart + '-' + showEnd +
+                         ' {% trans %}of{% endtrans %} ' + totalRows;
+    }
+
+    renderPaginationButtons(totalPages);
+  }
+
+  // ===================== PAGINATION =====================
+
+  function renderPaginationButtons(totalPages) {
+    var nav = document.getElementById('pagination-controls');
+    nav.innerHTML = '';
+
+    if (totalPages <= 1 || perPage === 'all') {
+      document.getElementById('pagination-nav').style.display = 'none';
+      return;
+    }
+    document.getElementById('pagination-nav').style.display = '';
+
+    // Previous button
+    var prevLi = document.createElement('li');
+    if (currentPage <= 1) prevLi.className = 'disabled';
+    prevLi.innerHTML = '<a href="#">&laquo;</a>';
+    prevLi.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (currentPage > 1) { currentPage--; render(); }
+    });
+    nav.appendChild(prevLi);
+
+    // Page numbers (window of 7)
+    var startPage = Math.max(1, currentPage - 3);
+    var endPage = Math.min(totalPages, startPage + 6);
+    if (endPage - startPage < 6) startPage = Math.max(1, endPage - 6);
+
+    for (var p = startPage; p <= endPage; p++) {
+      var li = document.createElement('li');
+      if (p === currentPage) li.className = 'active';
+      li.innerHTML = '<a href="#">' + p + '</a>';
+      (function(page) {
+        li.addEventListener('click', function(e) {
+          e.preventDefault();
+          currentPage = page;
+          render();
+        });
+      })(p);
+      nav.appendChild(li);
+    }
+
+    // Next button
+    var nextLi = document.createElement('li');
+    if (currentPage >= totalPages) nextLi.className = 'disabled';
+    nextLi.innerHTML = '<a href="#">&raquo;</a>';
+    nextLi.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (currentPage < totalPages) { currentPage++; render(); }
+    });
+    nav.appendChild(nextLi);
+  }
+
+  // ===================== EVENT LISTENERS =====================
+
+  // Sorting
+  var sortHeaders = document.querySelectorAll('th.sortable');
+  sortHeaders.forEach(function(th) {
+    th.addEventListener('click', function() {
+      sortRows(this.getAttribute('data-sort'));
+    });
+  });
+
+  // Per page
+  var perPageSelect = document.getElementById('per-page-select');
+  if (perPageSelect) {
+    perPageSelect.addEventListener('change', function() {
+      var val = this.value;
+      perPage = (val === 'all') ? 'all' : parseInt(val, 10);
+      currentPage = 1;
+      render();
+    });
+  }
+
+  // Filter buttons
+  var filterButtons = document.querySelectorAll('[data-filter]');
+  filterButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      filterButtons.forEach(function(other) { other.classList.remove('active'); });
+      this.classList.add('active');
+      currentFilter = this.getAttribute('data-filter');
+      currentPage = 1;
+      render();
+    });
+  });
+
+  // Initial render
+  render();
+
+})();
+</script>

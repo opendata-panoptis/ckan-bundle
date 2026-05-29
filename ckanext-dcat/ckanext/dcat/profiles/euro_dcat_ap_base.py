@@ -35,6 +35,12 @@ from .base import (
 config = toolkit.config
 
 DISTRIBUTION_LICENSE_FALLBACK_CONFIG = "ckanext.dcat.resource.inherit.license"
+INCLUDE_DOWNLOADALL_RESOURCE_CONFIG = "ckanext.dcat.include_downloadall_resource"
+OUTPUT_RESOURCE_FORMAT_AS_FILE_TYPE_URI_CONFIG = (
+    "ckanext.dcat.output_resource_format_as_file_type_uri"
+)
+FILE_TYPE_VOCABULARY_NAME = "File Type"
+FILE_TYPE_URI_BY_CODE_GRAPH_CACHE = "_dcat_file_type_uri_by_code_cache"
 
 
 class BaseEuropeanDCATAPProfile(RDFProfile):
@@ -42,6 +48,55 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
     A base profile with common RDF properties across the different DCAT-AP versions
 
     """
+
+    def _file_type_uri_by_code(self):
+        if hasattr(self.g, FILE_TYPE_URI_BY_CODE_GRAPH_CACHE):
+            return getattr(self.g, FILE_TYPE_URI_BY_CODE_GRAPH_CACHE)
+
+        mapping = {}
+        try:
+            vocabulary_show = toolkit.get_action("vocabularyadmin_vocabulary_show")
+            vocabulary = vocabulary_show(
+                {"ignore_auth": True},
+                {"id": FILE_TYPE_VOCABULARY_NAME},
+            )
+        except Exception:
+            setattr(self.g, FILE_TYPE_URI_BY_CODE_GRAPH_CACHE, mapping)
+            return mapping
+
+        tags = vocabulary.get("tags", []) if isinstance(vocabulary, dict) else []
+        for tag in tags:
+            if not isinstance(tag, dict):
+                continue
+
+            value_uri = tag.get("value_uri")
+            name = tag.get("name")
+            code = None
+            if isinstance(value_uri, str) and value_uri.strip():
+                code = value_uri.rstrip("/").split("/")[-1]
+            elif isinstance(name, str) and name.strip():
+                code = name
+
+            if code and value_uri:
+                mapping[code.strip().upper()] = value_uri.strip()
+
+        setattr(self.g, FILE_TYPE_URI_BY_CODE_GRAPH_CACHE, mapping)
+        return mapping
+
+    def _file_type_uri_for_format(self, fmt):
+        if not fmt or not isinstance(fmt, str):
+            return None
+
+        if not toolkit.asbool(
+            config.get(OUTPUT_RESOURCE_FORMAT_AS_FILE_TYPE_URI_CONFIG) or False
+        ):
+            return None
+
+        stripped = fmt.strip()
+        if not stripped or stripped.startswith(("http://", "https://")):
+            return None
+
+        return self._file_type_uri_by_code().get(stripped.upper())
 
     def _parse_dataset_base(self, dataset_dict, dataset_ref):
 
@@ -109,9 +164,20 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         ):
 
             multilingual = key in multilingual_fields
-            value = self._object_value(
-                dataset_ref, predicate, multilingual=multilingual
-            )
+            if key == "frequency":
+                # Προτιμάμε το URI (rdf:about) όταν υπάρχει. Αν το Frequency έχει
+                # rdfs:label, το _object_value() θα γυρίσει το label αντί για το URI.
+                freq_obj = self._object(dataset_ref, predicate)
+                if freq_obj and isinstance(freq_obj, URIRef):
+                    value = str(freq_obj)
+                else:
+                    value = self._object_value(
+                        dataset_ref, predicate, multilingual=multilingual
+                    )
+            else:
+                value = self._object_value(
+                    dataset_ref, predicate, multilingual=multilingual
+                )
             if value:
                 dataset_dict["extras"].append({"key": key, "value": value})
 
@@ -224,7 +290,6 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 ("issued", DCT.issued),
                 ("modified", DCT.modified),
                 ("status", ADMS.status),
-                ("license", DCT.license),
                 ("rights", DCT.rights),
             ):
                 multilingual = key in multilingual_fields
@@ -233,6 +298,20 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 )
                 if value:
                     resource_dict[key] = value
+
+            # License
+            #
+            # Προτιμάμε το URI (rdf:about) όταν υπάρχει. Σε αρκετές πηγές το
+            # LicenseDocument έχει rdfs:label, και το _object_value() θα
+            # επιστρέψει το label αντί για το URI.
+            license_obj = self._object(distribution, DCT.license)
+            if license_obj:
+                if isinstance(license_obj, URIRef):
+                    resource_dict["license"] = str(license_obj)
+                else:
+                    value = self._object_value(distribution, DCT.license)
+                    if value:
+                        resource_dict["license"] = value
 
             # Multilingual core fields
             for key, predicate in (
@@ -597,7 +676,15 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         )
 
         # Resources
+        include_downloadall_resource = toolkit.asbool(
+            config.get(INCLUDE_DOWNLOADALL_RESOURCE_CONFIG, False)
+        )
         for resource_dict in dataset_dict.get("resources", []):
+            if (
+                not include_downloadall_resource
+                and "downloadall_metadata_modified" in resource_dict
+            ):
+                continue
 
             distribution = CleanedURIRef(resource_uri(resource_dict))
 
@@ -690,7 +777,8 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                     g.add((mimetype, RDF.type, DCT.MediaType))
 
             if fmt:
-                fmt = URIRefOrLiteral(fmt)
+                file_type_uri = self._file_type_uri_for_format(fmt)
+                fmt = URIRef(file_type_uri) if file_type_uri else URIRefOrLiteral(fmt)
                 g.add((distribution, DCT["format"], fmt))
                 if isinstance(fmt, URIRef):
                     g.add((fmt, RDF.type, DCT.MediaTypeOrExtent))

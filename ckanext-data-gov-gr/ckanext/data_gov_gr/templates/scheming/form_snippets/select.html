@@ -48,7 +48,7 @@
 
 {%- set show_only_selected = False -%}
 
-{%- if data.get('type', 'dataset') == 'dataset' -%}
+{%- if data.get('type', 'dataset') == 'dataset' and field.field_name == 'access_rights' -%}
   {%- set option_selected = '' -%}
 
   {%- if access_rights_type == 'open' and not data.get(field.field_name) -%}

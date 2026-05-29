@@ -42,9 +42,11 @@
         <a class="list-group-item list-group-item-action" href="{{ h.url_for('dataset_type.stats_top_tags') }}">
           <i class="fa fa-tags"></i> {{ _('Top Tags') }}
         </a>
-        <a class="list-group-item list-group-item-action" href="{{ h.url_for('dataset_type.stats_top_creators') }}">
-          <i class="fa fa-user"></i> {{ _('Users Creating Most Datasets') }}
-        </a>
+        {% if h.check_access('sysadmin') %}
+          <a class="list-group-item list-group-item-action" href="{{ h.url_for('dataset_type.stats_top_creators') }}">
+            <i class="fa fa-user"></i> {{ _('Users Creating Most Datasets') }}
+          </a>
+        {% endif %}
         {% set powerbi_url = h.get_powerbi_embed_url() %}
         {% if powerbi_url %}
           <a class="list-group-item list-group-item-action" href="{{ h.url_for('dataset_type.stats_powerbi') }}">

@@ -10,6 +10,8 @@
          data-module-site_url="{{ h.dump_json(h.url_for('/', locale='default', qualified=true)) }}"
          data-module-map_config="{{ h.dump_json(map_config) }}"
          data-module-max_file_size="{{ h.geojson_get_max_file_size() }}"
+         data-module-max_features="{{ h.geojson_get_max_features() }}"
+         data-module-max_coordinates="{{ h.geojson_get_max_coordinates() }}"
          >
         <h4 class="loading-dialog">
           <div class="loading-spinner"></div>

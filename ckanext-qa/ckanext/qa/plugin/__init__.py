@@ -23,6 +23,56 @@ else:
     from ckanext.qa.plugin.pylons_plugin import MixinPlugin
 
 
+def _mqa_rating_from_score(mqa_score):
+    if mqa_score is None:
+        return None
+    if 86.4 <= mqa_score <= 100:
+        return 'excellent'
+    if 54.3 <= mqa_score < 86.4:
+        return 'good'
+    if 29.6 <= mqa_score < 54.3:
+        return 'sufficient'
+    if 0 <= mqa_score < 29.6:
+        return 'bad'
+    return None
+
+
+def _build_mqa_for_dataset_without_resources(pkg_dict):
+    resources = pkg_dict.get('resources') or []
+    if resources:
+        return None
+
+    try:
+        from ckanext.data_gov_gr.logic.mqa_calculator import MQACalculator
+    except ImportError:
+        return None
+
+    try:
+        check_urls = toolkit.asbool(
+            toolkit.config.get('ckanext.data_gov_gr.mqa.check_urls', True)
+        )
+        mqa_scores = MQACalculator(check_urls=check_urls).calculate_all_scores(pkg_dict)
+    except Exception as e:
+        log.warning(
+            'Error calculating fallback MQA scores for dataset %s: %s',
+            pkg_dict.get('id'),
+            str(e)
+        )
+        return None
+
+    return {
+        'openness_score': None,
+        'openness_score_reason': None,
+        'mqa_score': round(mqa_scores.get('percentage', 0), 1),
+        'mqa_findability_score': round(mqa_scores.get('findability', 0), 1),
+        'mqa_accessibility_score': round(mqa_scores.get('accessibility', 0), 1),
+        'mqa_interoperability_score': round(mqa_scores.get('interoperability', 0), 1),
+        'mqa_reusability_score': round(mqa_scores.get('reusability', 0), 1),
+        'mqa_contextuality_score': round(mqa_scores.get('contextuality', 0), 1),
+        'updated': None
+    }
+
+
 class QAPlugin(MixinPlugin, p.SingletonPlugin, toolkit.DefaultDatasetForm):
     p.implements(p.IConfigurer, inherit=True)
     p.implements(IPipe, inherit=True)
@@ -151,6 +201,9 @@ class QAPlugin(MixinPlugin, p.SingletonPlugin, toolkit.DefaultDatasetForm):
 
         qa_objs = QA.get_for_package(pkg_dict['id'])
         if not qa_objs:
+            fallback_qa = _build_mqa_for_dataset_without_resources(pkg_dict)
+            if fallback_qa:
+                pkg_dict['qa'] = fallback_qa
             return
         # dataset
         dataset_qa = aggregate_qa_for_a_dataset(qa_objs)
@@ -180,25 +233,22 @@ class QAPlugin(MixinPlugin, p.SingletonPlugin, toolkit.DefaultDatasetForm):
             return pkg_dict
 
         qa = pkg_dict.get('qa')
-        if qa != None:
+        if qa is None:
+            qa = _build_mqa_for_dataset_without_resources(pkg_dict)
+        if qa is not None:
             # Add openness score
-            openness_score = qa['openness_score']
-            pkg_dict['qa_openness_score'] = openness_score
+            openness_score = qa.get('openness_score')
+            if openness_score is not None:
+                pkg_dict['qa_openness_score'] = openness_score
 
             # Add MQA score and categorize it
             mqa_score = qa.get('mqa_score')
             if mqa_score is not None:
                 pkg_dict['qa_mqa_score'] = mqa_score
 
-                # Categorize MQA score according to specified ranges
-                if mqa_score >= 86.4 and mqa_score <= 100:
-                    pkg_dict['qa_mqa_rating'] = 'excellent'
-                elif mqa_score >= 54.3 and mqa_score < 86.4:
-                    pkg_dict['qa_mqa_rating'] = 'good'
-                elif mqa_score >= 29.6 and mqa_score < 54.3:
-                    pkg_dict['qa_mqa_rating'] = 'sufficient'
-                elif mqa_score >= 0 and mqa_score < 29.6:
-                    pkg_dict['qa_mqa_rating'] = 'bad'
+                mqa_rating = _mqa_rating_from_score(mqa_score)
+                if mqa_rating is not None:
+                    pkg_dict['qa_mqa_rating'] = mqa_rating
 
         pkg_dict.pop('qa', None)
         return pkg_dict

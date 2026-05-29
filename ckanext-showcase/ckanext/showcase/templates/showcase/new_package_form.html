@@ -87,6 +87,8 @@
     {% endblock %}
 
     {% block package_metadata_author %}
+      <!-- Οργανισμός -->
+      {{ form.input('submitter_organization', label=_('Organization'), id='field-submitter-organization', placeholder=_('eg. OTS'), value=data.submitter_organization, error=errors.submitter_organization, classes=['control-medium']) }}
       <!-- Συγγραφέας -->
       {{ form.input('author', label=_('Submitted By'), id='field-author', placeholder=_('Joe Bloggs'), value=data.author, error=errors.author, classes=['control-medium']) }}
       <!-- Email Συγγραφέα -->

@@ -20,6 +20,15 @@ html, body {
   overflow: auto;
 }
 
+.geojson-preview-warning {
+  position: absolute;
+  top: 10px;
+  left: 50px;
+  right: 10px;
+  z-index: 1100;
+  margin: 0;
+}
+
 .leaflet-control-no-provider {
   background-color: white;
   margin-right: 10px;

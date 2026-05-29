@@ -367,3 +367,20 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Inline error panel for is_active validation failures in tag forms */
+.vocabularyadmin-error-box {
+  margin-top: var(--spacing-sm);
+  padding: 10px 12px;
+  border: 1px solid var(--danger-border);
+  border-left: 4px solid var(--danger-color);
+  background-color: #fcf2f2;
+  color: var(--danger-color);
+  border-radius: var(--border-radius);
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+.vocabularyadmin-error-box i {
+  margin-right: 6px;
+}

@@ -49,3 +49,6 @@ profiles_settings.xml
 *.iml
 modules.xml
 profiles_settings.xml
+
+.temporary
+docs/

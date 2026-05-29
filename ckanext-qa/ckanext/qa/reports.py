@@ -15,6 +15,217 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
+EXCLUDED_PACKAGE_TYPES = frozenset(['showcase', 'data-service', 'decision', 'harvest'])
+
+
+def _filter_report_packages(packages):
+    return [
+        pkg for pkg in packages
+        if not (hasattr(pkg, 'type') and pkg.type in EXCLUDED_PACKAGE_TYPES)
+    ]
+
+
+def _get_active_report_packages_for_org(org_id):
+    # NB org.packages() misses out many - see:
+    # http://redmine.dguteam.org.uk/issues/1844
+    pkgs = model.Session.query(model.Package) \
+        .filter_by(owner_org=org_id) \
+        .filter_by(state='active') \
+        .all()
+    return _filter_report_packages(pkgs)
+
+
+def _get_active_qa_for_packages(package_ids):
+    from ckanext.qa.model import QA
+
+    if not package_ids:
+        return {}
+
+    qa_rows = model.Session.query(QA) \
+        .join(model.Resource, QA.resource_id == model.Resource.id) \
+        .filter(QA.package_id.in_(package_ids)) \
+        .filter(model.Resource.state == 'active') \
+        .all()
+
+    qa_by_package = {}
+    for qa_row in qa_rows:
+        qa_by_package.setdefault(qa_row.package_id, []).append(qa_row)
+    return qa_by_package
+
+
+def _iter_qa_rows(qa_by_package):
+    for package_qa_rows in qa_by_package.values():
+        for qa_row in package_qa_rows:
+            yield qa_row
+
+
+def _calculate_mqa_dimension_totals(qa_rows):
+    totals = {
+        'total_findability': 0,
+        'total_accessibility': 0,
+        'total_interoperability': 0,
+        'total_reusability': 0,
+        'total_contextuality': 0,
+        'findability_values_count': 0,
+        'accessibility_values_count': 0,
+        'interoperability_values_count': 0,
+        'reusability_values_count': 0,
+        'contextuality_values_count': 0,
+        'resources_with_mqa': 0,
+    }
+
+    for qa_row in qa_rows:
+        if qa_row.mqa_score is None:
+            continue
+
+        totals['resources_with_mqa'] += 1
+        if qa_row.mqa_findability_score is not None:
+            totals['total_findability'] += qa_row.mqa_findability_score
+            totals['findability_values_count'] += 1
+        if qa_row.mqa_accessibility_score is not None:
+            totals['total_accessibility'] += qa_row.mqa_accessibility_score
+            totals['accessibility_values_count'] += 1
+        if qa_row.mqa_interoperability_score is not None:
+            totals['total_interoperability'] += qa_row.mqa_interoperability_score
+            totals['interoperability_values_count'] += 1
+        if qa_row.mqa_reusability_score is not None:
+            totals['total_reusability'] += qa_row.mqa_reusability_score
+            totals['reusability_values_count'] += 1
+        if qa_row.mqa_contextuality_score is not None:
+            totals['total_contextuality'] += qa_row.mqa_contextuality_score
+            totals['contextuality_values_count'] += 1
+
+    return totals
+
+
+def _calculate_mqa_dimension_scores(dimension_totals):
+    scores = {
+        'mqa_findability_score': None,
+        'mqa_accessibility_score': None,
+        'mqa_interoperability_score': None,
+        'mqa_reusability_score': None,
+        'mqa_contextuality_score': None,
+    }
+    resources_with_mqa = dimension_totals.get('resources_with_mqa', 0)
+
+    if resources_with_mqa > 0:
+        if dimension_totals.get('findability_values_count', 0) > 0:
+            scores['mqa_findability_score'] = round(dimension_totals['total_findability'] / resources_with_mqa, 1)
+        if dimension_totals.get('accessibility_values_count', 0) > 0:
+            scores['mqa_accessibility_score'] = round(dimension_totals['total_accessibility'] / resources_with_mqa, 1)
+        if dimension_totals.get('interoperability_values_count', 0) > 0:
+            scores['mqa_interoperability_score'] = round(dimension_totals['total_interoperability'] / resources_with_mqa, 1)
+        if dimension_totals.get('reusability_values_count', 0) > 0:
+            scores['mqa_reusability_score'] = round(dimension_totals['total_reusability'] / resources_with_mqa, 1)
+        if dimension_totals.get('contextuality_values_count', 0) > 0:
+            scores['mqa_contextuality_score'] = round(dimension_totals['total_contextuality'] / resources_with_mqa, 1)
+
+    return scores
+
+
+def _accumulate_mqa_dimension_totals_from_scores(dimension_totals, mqa_scores):
+    if not mqa_scores:
+        return
+
+    dimension_totals['resources_with_mqa'] += 1
+
+    score_mapping = (
+        ('mqa_findability_score', 'total_findability', 'findability_values_count'),
+        ('mqa_accessibility_score', 'total_accessibility', 'accessibility_values_count'),
+        ('mqa_interoperability_score', 'total_interoperability', 'interoperability_values_count'),
+        ('mqa_reusability_score', 'total_reusability', 'reusability_values_count'),
+        ('mqa_contextuality_score', 'total_contextuality', 'contextuality_values_count'),
+    )
+
+    for score_key, total_key, count_key in score_mapping:
+        score = mqa_scores.get(score_key)
+        if score is not None:
+            dimension_totals[total_key] += score
+            dimension_totals[count_key] += 1
+
+
+def _normalize_mqa_score(value):
+    if value is None:
+        return None
+    try:
+        return round(float(value), 1)
+    except (TypeError, ValueError):
+        return None
+
+
+def _extract_mqa_scores_from_pkg_dict(pkg_dict):
+    qa_dict = pkg_dict.get('qa')
+    if not isinstance(qa_dict, dict):
+        return None
+
+    mqa_score = _normalize_mqa_score(qa_dict.get('mqa_score'))
+    if mqa_score is None:
+        return None
+
+    return {
+        'mqa_score': mqa_score,
+        'mqa_findability_score': _normalize_mqa_score(qa_dict.get('mqa_findability_score')),
+        'mqa_accessibility_score': _normalize_mqa_score(qa_dict.get('mqa_accessibility_score')),
+        'mqa_interoperability_score': _normalize_mqa_score(qa_dict.get('mqa_interoperability_score')),
+        'mqa_reusability_score': _normalize_mqa_score(qa_dict.get('mqa_reusability_score')),
+        'mqa_contextuality_score': _normalize_mqa_score(qa_dict.get('mqa_contextuality_score')),
+    }
+
+
+def _build_mqa_fallback_for_dataset_without_resources(pkg):
+    active_resources = [
+        resource for resource in getattr(pkg, 'resources', [])
+        if getattr(resource, 'state', None) == 'active'
+    ]
+    if active_resources:
+        return None
+
+    try:
+        from ckanext.data_gov_gr.logic.mqa_calculator import MQACalculator
+    except ImportError:
+        return None
+
+    context = {'model': model, 'session': model.Session, 'ignore_auth': True}
+
+    try:
+        pkg_dict = p.toolkit.get_action('package_show')(context, {'id': pkg.id})
+    except Exception as e:
+        log.warning(
+            'Error loading dataset %s for fallback MQA score calculation: %s',
+            pkg.id,
+            str(e)
+        )
+        return None
+
+    if pkg_dict.get('resources'):
+        return None
+
+    existing_mqa_scores = _extract_mqa_scores_from_pkg_dict(pkg_dict)
+    if existing_mqa_scores is not None:
+        return existing_mqa_scores
+
+    try:
+        check_urls = p.toolkit.asbool(
+            p.toolkit.config.get('ckanext.data_gov_gr.mqa.check_urls', True)
+        )
+        mqa_scores = MQACalculator(check_urls=check_urls).calculate_all_scores(pkg_dict)
+    except Exception as e:
+        log.warning(
+            'Error calculating fallback MQA score for dataset %s: %s',
+            pkg.id,
+            str(e)
+        )
+        return None
+
+    return {
+        'mqa_score': round(mqa_scores.get('percentage', 0), 1),
+        'mqa_findability_score': round(mqa_scores.get('findability', 0), 1),
+        'mqa_accessibility_score': round(mqa_scores.get('accessibility', 0), 1),
+        'mqa_interoperability_score': round(mqa_scores.get('interoperability', 0), 1),
+        'mqa_reusability_score': round(mqa_scores.get('reusability', 0), 1),
+        'mqa_contextuality_score': round(mqa_scores.get('contextuality', 0), 1),
+    }
+
 
 def openness_report(organization):
     if organization is None:
@@ -29,22 +240,16 @@ def openness_index():
     context = {'model': model, 'session': model.Session, 'ignore_auth': True}
     total_score_counts = Counter()
     counts = {}
+    total_packages = 0
     # Get all the scores and build up the results by org
     orgs = add_progress_bar(model.Session.query(model.Group)
                             .filter(model.Group.type == 'organization')
                             .filter(model.Group.state == 'active').all())
     for org in orgs:
         scores = []
-        # NB org.packages() misses out many - see:
-        # http://redmine.dguteam.org.uk/issues/1844
-        pkgs = model.Session.query(model.Package) \
-                    .filter_by(owner_org=org.id) \
-                    .filter_by(state='active') \
-                    .all()
-        
-        # Filter to exclude only the types that can interfere with reports
-        pkgs = [pkg for pkg in pkgs if not (hasattr(pkg, 'type') and pkg.type in ['showcase', 'data-service', 'decision', 'harvest'])]
-        
+        pkgs = _get_active_report_packages_for_org(org.id)
+        total_packages += len(pkgs)
+
         for pkg in pkgs:
             try:
                 qa = p.toolkit.get_action('qa_package_openness_show')(context, {'id': pkg.id})
@@ -82,14 +287,10 @@ def openness_index():
     table.sort(key=lambda x: (-x['total_stars'],
                               -x['average_stars']))
 
-    # Get total number of packages & resources
-    num_packages = model.Session.query(model.Package)\
-                        .filter_by(state='active')\
-                        .count()
     return {'table': table,
             'total_score_counts': jsonify_counter(total_score_counts),
             'num_packages_scored': sum(total_score_counts.values()),
-            'num_packages': num_packages,
+            'num_packages': total_packages,
             }
 
 
@@ -105,16 +306,8 @@ def openness_for_organization(organization=None):
     rows = []
     num_packages = 0
     for org in orgs:
-        # NB org.packages() misses out many - see:
-        # http://redmine.dguteam.org.uk/issues/1844
-        pkgs = model.Session.query(model.Package) \
-                    .filter_by(owner_org=org.id) \
-                    .filter_by(state='active') \
-                    .all()
-        
-        # Filter to exclude only the types that can interfere with reports
-        pkgs = [pkg for pkg in pkgs if not (hasattr(pkg, 'type') and pkg.type in ['showcase', 'data-service', 'decision', 'harvest'])]
-        
+        pkgs = _get_active_report_packages_for_org(org.id)
+
         num_packages += len(pkgs)
         for pkg in pkgs:
             try:
@@ -153,6 +346,48 @@ def openness_report_combinations():
         yield {'organization': organization}
 
 
+def openness_post_access_filter(data, context):
+    table = data.get('table', [])
+    if not table:
+        data['score_counts'] = {}
+        data['num_packages_scored'] = 0
+        data['num_packages'] = 0
+        data['average_stars'] = 0.0
+        return data
+
+    # Index view rows are organization aggregates and do not reference
+    # individual datasets, so they cannot be safely recomputed here.
+    if 'dataset_name' not in table[0]:
+        return data
+
+    score_counts = {}
+    total_stars = 0.0
+    num_packages_scored = 0
+
+    for row in table:
+        score = row.get('openness_score')
+        try:
+            score = float(score) if score is not None else None
+        except (TypeError, ValueError):
+            score = None
+
+        if score is None:
+            key = 'null'
+        else:
+            key = str(int(score))
+            total_stars += score
+            num_packages_scored += 1
+
+        score_counts[key] = score_counts.get(key, 0) + 1
+
+    data['score_counts'] = score_counts
+    data['num_packages_scored'] = num_packages_scored
+    data['num_packages'] = len(table)
+    data['average_stars'] = round(float(total_stars) / num_packages_scored, 1) \
+        if num_packages_scored else 0.0
+    return data
+
+
 openness_report_info = {
     'name': 'openness',
     'title': p.toolkit._('Openness (Five Stars)'),
@@ -162,6 +397,7 @@ openness_report_info = {
                                     )),
     'option_combinations': openness_report_combinations,
     'generate': openness_report,
+    'post_access_filter': openness_post_access_filter,
     'template': 'report/openness.html',
     }
 
@@ -199,8 +435,10 @@ def metadata_quality_report(organization):
 def metadata_quality_index():
     '''Returns the metadata quality metrics for all organizations.'''
 
-    context = {'model': model, 'session': model.Session, 'ignore_auth': True}
+    from ckanext.qa.model import aggregate_qa_for_a_dataset
+
     counts = {}
+    total_packages_count = 0
 
 
     # Get all organizations
@@ -209,14 +447,10 @@ def metadata_quality_index():
                           .filter(model.Group.state == 'active').all())
 
     for org in orgs:
-        # Get all active packages for this organization
-        pkgs = model.Session.query(model.Package) \
-                  .filter_by(owner_org=org.id) \
-                  .filter_by(state='active') \
-                  .all()
-        
-        # Filter to exclude only the types that can interfere with reports
-        pkgs = [pkg for pkg in pkgs if not (hasattr(pkg, 'type') and pkg.type in ['showcase', 'data-service', 'decision', 'harvest'])]
+        pkgs = _get_active_report_packages_for_org(org.id)
+        pkg_ids = [pkg.id for pkg in pkgs]
+        qa_by_package = _get_active_qa_for_packages(pkg_ids)
+        total_packages_count += len(pkgs)
 
         # Initialize counters for this organization
         org_counts = {
@@ -230,46 +464,33 @@ def metadata_quality_index():
             'total_contextuality': 0,
             'resources_with_mqa': 0
         }
+        org_counts.update(
+            _calculate_mqa_dimension_totals(_iter_qa_rows(qa_by_package))
+        )
 
         # Count metadata quality metrics for each package
         for pkg in pkgs:
-            # Try to get MQA score from QA table
-            from ckanext.qa.model import QA, aggregate_qa_for_a_dataset
-            qa_objs = QA.get_for_package(pkg.id)
+            qa_objs = qa_by_package.get(pkg.id, [])
+            mqa_score = None
 
             # If we have QA objects with MQA scores, use them
             if qa_objs:
                 qa_dict = aggregate_qa_for_a_dataset(qa_objs)
                 mqa_score = qa_dict.get('mqa_score')
-
                 if mqa_score is not None:
-                    # Use the stored MQA score
-                    org_counts['total_mqa_score'] += mqa_score
-                    org_counts['packages_with_mqa_score'] += 1
                     log.info(f"Using stored MQA score for package {pkg.name}: {mqa_score}")
 
-        # Get all resources for this organization and calculate dimension scores
-        resources = model.Session.query(model.Resource)\
-            .join(model.Package, model.Resource.package_id == model.Package.id)\
-            .filter(model.Package.owner_org == org.id)\
-            .filter(model.Package.state == 'active')\
-            .all()
+            if mqa_score is None:
+                fallback_mqa_scores = _build_mqa_fallback_for_dataset_without_resources(pkg)
+                if fallback_mqa_scores:
+                    mqa_score = fallback_mqa_scores.get('mqa_score')
+                    if mqa_score is not None:
+                        _accumulate_mqa_dimension_totals_from_scores(org_counts, fallback_mqa_scores)
+                        log.info(f"Using fallback MQA score for dataset without resources {pkg.name}: {mqa_score}")
 
-        # Calculate MQA dimension scores for this organization
-        for resource in resources:
-            qa = QA.get_for_resource(resource.id)
-            if qa and qa.mqa_score is not None:
-                org_counts['resources_with_mqa'] += 1
-                if qa.mqa_findability_score is not None:
-                    org_counts['total_findability'] += qa.mqa_findability_score
-                if qa.mqa_accessibility_score is not None:
-                    org_counts['total_accessibility'] += qa.mqa_accessibility_score
-                if qa.mqa_interoperability_score is not None:
-                    org_counts['total_interoperability'] += qa.mqa_interoperability_score
-                if qa.mqa_reusability_score is not None:
-                    org_counts['total_reusability'] += qa.mqa_reusability_score
-                if qa.mqa_contextuality_score is not None:
-                    org_counts['total_contextuality'] += qa.mqa_contextuality_score
+            if mqa_score is not None:
+                org_counts['total_mqa_score'] += mqa_score
+                org_counts['packages_with_mqa_score'] += 1
 
         # Store organization counts
         counts[org.name] = {
@@ -283,9 +504,9 @@ def metadata_quality_index():
     table = []
     for org_name, org_data in results.items():
         quality_counts = org_data['quality_counts']
-        total_packages = quality_counts['total_packages']
+        org_total_packages = quality_counts['total_packages']
 
-        if total_packages == 0:
+        if org_total_packages == 0:
             continue
 
         # Calculate overall quality score - only use MQA scores
@@ -300,17 +521,12 @@ def metadata_quality_index():
             mqa_reusability_score = None
             mqa_contextuality_score = None
 
-            if quality_counts.get('resources_with_mqa', 0) > 0:
-                if quality_counts.get('total_findability', 0) > 0:
-                    mqa_findability_score = round(quality_counts['total_findability'] / quality_counts['resources_with_mqa'], 1)
-                if quality_counts.get('total_accessibility', 0) > 0:
-                    mqa_accessibility_score = round(quality_counts['total_accessibility'] / quality_counts['resources_with_mqa'], 1)
-                if quality_counts.get('total_interoperability', 0) > 0:
-                    mqa_interoperability_score = round(quality_counts['total_interoperability'] / quality_counts['resources_with_mqa'], 1)
-                if quality_counts.get('total_reusability', 0) > 0:
-                    mqa_reusability_score = round(quality_counts['total_reusability'] / quality_counts['resources_with_mqa'], 1)
-                if quality_counts.get('total_contextuality', 0) > 0:
-                    mqa_contextuality_score = round(quality_counts['total_contextuality'] / quality_counts['resources_with_mqa'], 1)
+            dimension_scores = _calculate_mqa_dimension_scores(quality_counts)
+            mqa_findability_score = dimension_scores['mqa_findability_score']
+            mqa_accessibility_score = dimension_scores['mqa_accessibility_score']
+            mqa_interoperability_score = dimension_scores['mqa_interoperability_score']
+            mqa_reusability_score = dimension_scores['mqa_reusability_score']
+            mqa_contextuality_score = dimension_scores['mqa_contextuality_score']
         else:
             # If no MQA scores are available, set overall score to None
             overall_score = None
@@ -325,7 +541,7 @@ def metadata_quality_index():
         row = OrderedDict((
             ('organization_title', org_data['organization_title']),
             ('organization_name', org_name),
-            ('total_packages', total_packages),
+            ('total_packages', org_total_packages),
             ('overall_score', overall_score),
             ('mqa_findability_score', mqa_findability_score),
             ('mqa_accessibility_score', mqa_accessibility_score),
@@ -340,19 +556,16 @@ def metadata_quality_index():
     # Handle None values by placing them at the end
     table.sort(key=lambda x: float('-inf') if x['overall_score'] is None else -x['overall_score'])
 
-    # Get total number of packages
-    num_packages = model.Session.query(model.Package)\
-                      .filter_by(state='active')\
-                      .count()
-
     return {
         'table': table,
-        'total_packages': num_packages,
+        'total_packages': total_packages_count,
 
     }
 
 def metadata_quality_for_organization(organization=None):
     '''Returns the metadata quality metrics for a specific organization.'''
+
+    from ckanext.qa.model import aggregate_qa_for_a_dataset
 
     org = model.Group.get(organization)
     if not org:
@@ -360,36 +573,31 @@ def metadata_quality_for_organization(organization=None):
 
     orgs = [org]
 
-    context = {'model': model, 'session': model.Session, 'ignore_auth': True}
     rows = []
     num_packages = 0
     total_mqa_score = 0
     packages_with_mqa_score = 0
 
     for org in orgs:
-        # Get all active packages for this organization
-        pkgs = model.Session.query(model.Package) \
-                  .filter_by(owner_org=org.id) \
-                  .filter_by(state='active') \
-                  .all()
-        
-        # Filter to exclude only the types that can interfere with reports
-        pkgs = [pkg for pkg in pkgs if not (hasattr(pkg, 'type') and pkg.type in ['showcase', 'data-service', 'decision', 'harvest'])]
+        pkgs = _get_active_report_packages_for_org(org.id)
+        pkg_ids = [pkg.id for pkg in pkgs]
+        qa_by_package = _get_active_qa_for_packages(pkg_ids)
 
         num_packages += len(pkgs)
 
         for pkg in pkgs:
             # Try to get MQA score from QA table
-            from ckanext.qa.model import QA, aggregate_qa_for_a_dataset
-            qa_objs = QA.get_for_package(pkg.id)
+            qa_objs = qa_by_package.get(pkg.id, [])
+            dimension_totals = _calculate_mqa_dimension_totals(qa_objs)
+            dimension_scores = _calculate_mqa_dimension_scores(dimension_totals)
 
             # Default MQA scores to None
             mqa_quality_score = None
-            mqa_findability_score = None
-            mqa_accessibility_score = None
-            mqa_interoperability_score = None
-            mqa_reusability_score = None
-            mqa_contextuality_score = None
+            mqa_findability_score = dimension_scores['mqa_findability_score']
+            mqa_accessibility_score = dimension_scores['mqa_accessibility_score']
+            mqa_interoperability_score = dimension_scores['mqa_interoperability_score']
+            mqa_reusability_score = dimension_scores['mqa_reusability_score']
+            mqa_contextuality_score = dimension_scores['mqa_contextuality_score']
 
             # If we have QA objects with MQA scores, use them
             if qa_objs:
@@ -398,17 +606,24 @@ def metadata_quality_for_organization(organization=None):
 
                 if mqa_score is not None:
                     # Use the stored MQA score (rounded to 1 decimal place)
-                    mqa_quality_score = round(mqa_score, 1) if mqa_score is not None else None
+                    mqa_quality_score = round(mqa_score, 1)
                     packages_with_mqa_score += 1
                     total_mqa_score += mqa_score
                     log.info(f"Using stored MQA score for package {pkg.name}: {mqa_score}")
 
-                    # Get individual MQA dimension scores and round to 1 decimal place
-                    mqa_findability_score = round(qa_dict.get('mqa_findability_score', 0), 1) if qa_dict.get('mqa_findability_score') is not None else None
-                    mqa_accessibility_score = round(qa_dict.get('mqa_accessibility_score', 0), 1) if qa_dict.get('mqa_accessibility_score') is not None else None
-                    mqa_interoperability_score = round(qa_dict.get('mqa_interoperability_score', 0), 1) if qa_dict.get('mqa_interoperability_score') is not None else None
-                    mqa_reusability_score = round(qa_dict.get('mqa_reusability_score', 0), 1) if qa_dict.get('mqa_reusability_score') is not None else None
-                    mqa_contextuality_score = round(qa_dict.get('mqa_contextuality_score', 0), 1) if qa_dict.get('mqa_contextuality_score') is not None else None
+            if mqa_quality_score is None:
+                fallback_mqa_scores = _build_mqa_fallback_for_dataset_without_resources(pkg)
+                if fallback_mqa_scores:
+                    mqa_quality_score = fallback_mqa_scores.get('mqa_score')
+                    if mqa_quality_score is not None:
+                        mqa_findability_score = fallback_mqa_scores.get('mqa_findability_score')
+                        mqa_accessibility_score = fallback_mqa_scores.get('mqa_accessibility_score')
+                        mqa_interoperability_score = fallback_mqa_scores.get('mqa_interoperability_score')
+                        mqa_reusability_score = fallback_mqa_scores.get('mqa_reusability_score')
+                        mqa_contextuality_score = fallback_mqa_scores.get('mqa_contextuality_score')
+                        packages_with_mqa_score += 1
+                        total_mqa_score += mqa_quality_score
+                        log.info(f"Using fallback MQA score for dataset without resources {pkg.name}: {mqa_quality_score}")
 
 
             # Add row for this package
@@ -448,6 +663,33 @@ def metadata_quality_report_combinations():
         yield {'organization': organization}
 
 
+def metadata_quality_post_access_filter(data, context):
+    table = data.get('table', [])
+    if not table:
+        data['num_packages'] = 0
+        data['overall_score'] = None
+        return data
+
+    # Index view rows are organization aggregates and do not reference
+    # individual datasets, so they cannot be safely recomputed here.
+    if 'dataset_name' not in table[0]:
+        return data
+
+    scores = []
+    for row in table:
+        score = row.get('mqa_quality_score')
+        try:
+            score = float(score) if score is not None else None
+        except (TypeError, ValueError):
+            score = None
+        if score is not None:
+            scores.append(score)
+
+    data['num_packages'] = len(table)
+    data['overall_score'] = round(sum(scores) / len(scores), 1) if scores else None
+    return data
+
+
 metadata_quality_report_info = {
     'name': 'metadata-quality',
     'title': p.toolkit._('Metadata Quality'),
@@ -456,5 +698,6 @@ metadata_quality_report_info = {
                                   )),
     'option_combinations': metadata_quality_report_combinations,
     'generate': metadata_quality_report,
+    'post_access_filter': metadata_quality_post_access_filter,
     'template': 'report/metadata_quality.html',
 }

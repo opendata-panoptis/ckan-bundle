@@ -82,6 +82,7 @@ def showcase_package_list(context, data_dict):
     # get a list of package ids associated with showcase id
     pkg_id_list = ShowcasePackageAssociation.get_package_ids_for_showcase(
         validated_data_dict['showcase_id'])
+    package_type = validated_data_dict.get('package_type')
 
     pkg_list = []
     if pkg_id_list:
@@ -91,9 +92,12 @@ def showcase_package_list(context, data_dict):
         for pkg_id in pkg_id_list:
             id_list.append(pkg_id[0])
         q = 'id:(' + ' OR '.join(['{0}'.format(x) for x in id_list]) + ')'
+        fq = ''
+        if package_type:
+            fq = 'dataset_type:{0}'.format(package_type)
         _pkg_list = toolkit.get_action('package_search')(
             context,
-            {'q': q, 'rows': 100})
+            {'q': q, 'fq': fq, 'rows': 100})
         pkg_list = _pkg_list['results']
     return pkg_list
 

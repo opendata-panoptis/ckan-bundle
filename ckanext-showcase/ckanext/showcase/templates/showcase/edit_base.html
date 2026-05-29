@@ -7,6 +7,7 @@
 {% set showcase_read_route = 'showcase_blueprint.read' %}
 {% set showcase_edit_route = 'showcase_blueprint.edit' %}
 {% set showcase_manage_route = 'showcase_blueprint.manage_datasets' %}
+{% set showcase_manage_api_route = 'showcase_blueprint.manage_apis' %}
 
 
 
@@ -48,6 +49,7 @@
               {% block content_primary_nav %}
                 {{ h.build_nav_icon(showcase_edit_route, _('Edit showcase'), id=pkg.name) }}
                 {{ h.build_nav_icon(showcase_manage_route, _('Manage datasets'), id=pkg.name) }}
+                {{ h.build_nav_icon(showcase_manage_api_route, _('Διαχείριση APIs'), id=pkg.name) }}
               {% endblock %}
             </ul>
           </header>

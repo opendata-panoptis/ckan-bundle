@@ -18,7 +18,7 @@ class IContact(interfaces.Interface):
         dependent on form values.
 
         :param data_dict: form values
-        :param mail_dict: dictionary of mail values, used in mailer.mail_recipient
+        :param mail_dict: dictionary of mail values used in the extension mail flow
         :returns: altered mail_dict
         """
         return mail_dict

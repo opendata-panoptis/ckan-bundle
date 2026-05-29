@@ -24,12 +24,27 @@ boolean_validator = toolkit.get_validator("boolean_validator")
 log = logging.getLogger(__name__)
 
 
+def _build_proxy_error_response(message, status=500):
+    from flask import Response
+
+    response = Response(message, status=status, mimetype='text/plain')
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Max-Age': '86400'
+    })
+    return response
+
+
 class GeoViewBase(p.SingletonPlugin):
     """This base class is for view extensions. """
 
     p.implements(p.IResourceView, inherit=True)
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.IConfigurable, inherit=True)
+    if hasattr(p, "IConfigDeclaration"):
+        p.implements(p.IConfigDeclaration, inherit=True)
 
     proxy_enabled = False
     same_domain = False
@@ -49,6 +64,60 @@ class GeoViewBase(p.SingletonPlugin):
 
         self.proxy_enabled = "resource_proxy" in toolkit.config.get(
             "ckan.plugins", ""
+        )
+
+    def declare_config_options(self, declaration, key):
+        declaration.annotate("ckanext-geoview")
+
+        geoview = key.ckanext.geoview
+        ol_viewer = geoview.ol_viewer
+
+        def declare_once(config_key, default, description):
+            if config_key not in declaration:
+                declaration.declare(config_key, default).set_description(description)
+
+        declare_once(
+            geoview.force_http_hosts,
+            "",
+            "Space- or comma-separated host allowlist. HTTPS URLs for these "
+            "hosts are rewritten to HTTP when fetched by the geoview service "
+            "proxy."
+        )
+        declare_once(
+            ol_viewer.proxy_wms_getmap,
+            "False",
+            "If true, WMS GetMap tile requests are sent through the CKAN "
+            "service proxy."
+        )
+        declare_once(
+            ol_viewer.proxy_wms_getmap_hosts,
+            "",
+            "Space- or comma-separated host allowlist for WMS GetMap requests "
+            "that should be sent through the CKAN service proxy."
+        )
+        declare_once(
+            ol_viewer.wms_exceptions,
+            "INIMAGE",
+            "Default WMS GetMap exception format. Use 'blank' to request "
+            "blank exception images instead of rendering error text in tiles."
+        )
+        declare_once(
+            ol_viewer.wms_exceptions_by_host,
+            "",
+            "Space- or comma-separated host-to-exception mapping for WMS "
+            "GetMap requests, eg 'geoportal.ypen.gr=blank'."
+        )
+        declare_once(
+            ol_viewer.log_wms_tile_errors,
+            "False",
+            "If true, failed WMS tile/image loads are logged to the browser "
+            "console."
+        )
+        declare_once(
+            ol_viewer.log_wms_tile_errors_hosts,
+            "",
+            "Space- or comma-separated host allowlist for browser console "
+            "logging of failed WMS tile/image loads."
         )
 
 
@@ -108,8 +177,8 @@ class OLGeoView(GeoViewMixin, GeoViewBase):
             context = {'user': toolkit.c.user}
             resource = toolkit.get_action('resource_show')(context, {'id': resource_id})
 
-            if not resource.get('url_type') == 'upload':
-                return toolkit.abort(404, 'Resource not an upload')
+            if resource.get('url_type') != 'upload':
+                return _build_proxy_error_response('Resource not an upload', status=404)
 
             # Get the uploader for this resource
             resource_uploader = uploader.get_resource_uploader(resource)
@@ -164,19 +233,10 @@ class OLGeoView(GeoViewMixin, GeoViewBase):
 
         except Exception as e:
             log.error("Error in kml_proxy: %s", str(e))
-            response = Response(
+            return _build_proxy_error_response(
                 f"Error fetching KML data: {str(e)}",
-                status=500,
-                mimetype='text/plain'
+                status=500
             )
-            # Add CORS headers even to error responses
-            response.headers.update({
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-                'Access-Control-Max-Age': '86400'  # 24 hours
-            })
-            return response
 
     GEOVIEW_FORMATS = [
         "kml",
@@ -400,8 +460,8 @@ class GeoJSONView(GeoViewBase):
             resource = toolkit.get_action('resource_show')(context, {'id': resource_id})
             
             # Check if the resource is an upload
-            if not resource.get('url_type') == 'upload':
-                return toolkit.abort(404, 'Resource not an upload')
+            if resource.get('url_type') != 'upload':
+                return _build_proxy_error_response('Resource not an upload', status=404)
             
             # Get the uploader for this resource
             resource_uploader = uploader.get_resource_uploader(resource)
@@ -468,34 +528,16 @@ class GeoJSONView(GeoViewBase):
                 return response
             except json.JSONDecodeError as json_err:
                 log.error("Error parsing GeoJSON data: %s", str(json_err))
-                response = Response(
-                    f"Error parsing GeoJSON data: The file is not valid JSON. Please check the file format.",
-                    status=400,
-                    mimetype='text/plain'
+                return _build_proxy_error_response(
+                    'Error parsing GeoJSON data: The file is not valid JSON. Please check the file format.',
+                    status=400
                 )
-                # Add CORS headers even to error responses
-                response.headers.update({
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-                    'Access-Control-Max-Age': '86400'  # 24 hours
-                })
-                return response
         except Exception as e:
             log.error("Error in geoview_proxy: %s", str(e))
-            response = Response(
+            return _build_proxy_error_response(
                 f"Error fetching GeoJSON data: {str(e)}",
-                status=500,
-                mimetype='text/plain'
+                status=500
             )
-            # Add CORS headers even to general error responses
-            response.headers.update({
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-                'Access-Control-Max-Age': '86400'  # 24 hours
-            })
-            return response
 
     def geoview_file_proxy(self, resource_id, filename):
         """
@@ -513,8 +555,8 @@ class GeoJSONView(GeoViewBase):
             resource = toolkit.get_action('resource_show')(context, {'id': resource_id})
 
             # Ensure it's an uploaded resource stored in Azure
-            if not resource.get('url_type') == 'upload':
-                return toolkit.abort(404, 'Resource not an upload')
+            if resource.get('url_type') != 'upload':
+                return _build_proxy_error_response('Resource not an upload', status=404)
 
             # Resolve blob path via the resource-specific uploader
             resource_uploader = uploader.get_resource_uploader(resource)
@@ -568,18 +610,10 @@ class GeoJSONView(GeoViewBase):
             return response
         except Exception as e:
             log.error("Error in geoview_file_proxy: %s", str(e))
-            response = Response(
+            return _build_proxy_error_response(
                 f"Error fetching file data: {str(e)}",
-                status=500,
-                mimetype='text/plain'
+                status=500
             )
-            response.headers.update({
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-                'Access-Control-Max-Age': '86400'
-            })
-            return response
 
     def update_config(self, config):
 
@@ -736,6 +770,8 @@ class GeoJSONView(GeoViewBase):
         return {
             "get_common_map_config_geojson": utils.get_common_map_config,
             "geojson_get_max_file_size": utils.get_max_file_size,
+            "geojson_get_max_features": utils.get_max_features,
+            "geojson_get_max_coordinates": utils.get_max_coordinates,
             "get_geoview_sas_url": self.get_geoview_sas_url,
         }
         

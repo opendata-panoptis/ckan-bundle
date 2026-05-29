@@ -3,11 +3,13 @@ import ckan.lib.helpers as h
 import ckan.logic as logic
 import ckan.model as model
 import ckan.plugins.toolkit as toolkit
+import json
 import logging
 
 from ckan.common import _, c, g
 from ckan.model.package_relationship import PackageRelationship
 from pprint import pprint
+from sqlalchemy import and_
 
 abort = base.abort
 get_action = logic.get_action
@@ -52,6 +54,63 @@ def get_relationships(id, context=None):
         return []
 
 
+def get_relatable_datasets_from_db(source_package, same_org_only):
+    owner_org = source_package.get('owner_org')
+
+    query = model.Session.query(
+        model.Package.name,
+        model.Package.title,
+        model.PackageExtra.value
+    ).outerjoin(
+        model.PackageExtra,
+        and_(
+            model.PackageExtra.package_id == model.Package.id,
+            model.PackageExtra.key == 'title_translated',
+            model.PackageExtra.state == 'active'
+        )
+    ).filter(
+        model.Package.type == 'dataset',
+        model.Package.state == 'active',
+        model.Package.private == False
+    )
+
+    if same_org_only and owner_org:
+        query = query.filter(model.Package.owner_org == owner_org)
+
+    current_lang = h.lang()
+    base_lang = current_lang.split('_')[0]
+    pkg_list = []
+
+    for package_name, title, title_translated_value in query:
+        package_title = package_name
+        title_translated = None
+
+        if title_translated_value:
+            try:
+                title_translated = json.loads(title_translated_value)
+            except ValueError:
+                pass
+
+        if isinstance(title_translated, dict):
+            if title_translated.get(current_lang):
+                package_title = title_translated[current_lang]
+            elif title_translated.get(base_lang):
+                package_title = title_translated[base_lang]
+            elif title_translated.get('el'):
+                package_title = title_translated['el']
+            elif title:
+                package_title = title
+        elif title:
+            package_title = title
+
+        pkg_list.append({
+            'name': package_name,
+            'title': f"{package_title} ({package_name})"
+        })
+
+    return pkg_list
+
+
 def get_relatable_datasets(id):
 
     relatable_datasets = []
@@ -63,53 +122,69 @@ def get_relatable_datasets(id):
 
     try:
         source_package = get_action('package_show')(context, {'id': id})
+        same_org_only = toolkit.asbool(toolkit.config.get(
+            'ckanext.relationships.relatable_datasets_same_org_only',
+            True
+        ))
+        use_db_query = toolkit.asbool(toolkit.config.get(
+            'ckanext.relationships.relatable_datasets_use_db_query',
+            True
+        ))
+        owner_org = source_package.get('owner_org')
+        fq = 'type:dataset'
 
-        # Παίρνουμε μόνο τον αριθμό των datasets
-        count_params = {
-            'q': '*:*',
-            'fq': 'type:dataset',
-            'rows': 0  # Δεν θέλουμε αποτελέσματα, μόνο το count
-        }
+        if same_org_only and owner_org:
+            fq += ' owner_org:"{}"'.format(owner_org)
 
-        count_result = get_action('package_search')(context, count_params)
-        total_datasets = count_result['count']
-
-        # Χρησιμοποιούμε package_search για να πάρουμε όλα τα datasets
-        search_params = {
-            'q': '*:*',  # Όλα τα datasets
-            'fq': 'type:dataset',
-            'rows': total_datasets
-        }
-
-        search_results = get_action('package_search')(context, search_params)
-        packages = search_results['results']
-
-        pkg_list = []
-
-        for package in packages:
-            package_title = package.get('name', 'Untitled')
-
-            if 'title_translated' in package and isinstance(package['title_translated'], dict):
-                # Παίρνουμε την τρέχουσα γλώσσα
-                current_lang = h.lang()
-
-                # Προτιμάμε την τρέχουσα γλώσσα
-                if current_lang in package['title_translated'] and package['title_translated'][current_lang]:
-                    package_title = package['title_translated'][current_lang]
-                # Αν δεν υπάρχει η τρέχουσα γλώσσα, επιστρέφουμε στα ελληνικά (default)
-                else:
-                    package_title = package['title_translated']['el']
-
-            # Προσθέτουμε το (name) στον τίτλο για καλύτερη αναγνώριση
-            display_title = f"{package_title} ({package['name']})"
-
-            result_dict = {
-                'name': package['name'],
-                'title': display_title,
-                'match_field': 'title',
-                'match_displayed': package_title
+        if use_db_query:
+            pkg_list = get_relatable_datasets_from_db(source_package, same_org_only)
+        else:
+            # Παίρνουμε μόνο τον αριθμό των datasets
+            count_params = {
+                'q': '*:*',
+                'fq': fq,
+                'rows': 0  # Δεν θέλουμε αποτελέσματα, μόνο το count
             }
-            pkg_list.append(result_dict)
+
+            count_result = get_action('package_search')(context, count_params)
+            total_datasets = count_result['count']
+
+            # Χρησιμοποιούμε package_search για να πάρουμε όλα τα datasets
+            search_params = {
+                'q': '*:*',  # Όλα τα datasets
+                'fq': fq,
+                'rows': total_datasets
+            }
+
+            search_results = get_action('package_search')(context, search_params)
+            packages = search_results['results']
+
+            pkg_list = []
+
+            for package in packages:
+                package_title = package.get('name', 'Untitled')
+
+                if 'title_translated' in package and isinstance(package['title_translated'], dict):
+                    # Παίρνουμε την τρέχουσα γλώσσα
+                    current_lang = h.lang()
+
+                    # Προτιμάμε την τρέχουσα γλώσσα
+                    if current_lang in package['title_translated'] and package['title_translated'][current_lang]:
+                        package_title = package['title_translated'][current_lang]
+                    # Αν δεν υπάρχει η τρέχουσα γλώσσα, επιστρέφουμε στα ελληνικά (default)
+                    else:
+                        package_title = package['title_translated']['el']
+
+                # Προσθέτουμε το (name) στον τίτλο για καλύτερη αναγνώριση
+                display_title = f"{package_title} ({package['name']})"
+
+                result_dict = {
+                    'name': package['name'],
+                    'title': display_title,
+                    'match_field': 'title',
+                    'match_displayed': package_title
+                }
+                pkg_list.append(result_dict)
 
     except Exception:
         traceback.print_exc()  # This prints the full traceback to the console

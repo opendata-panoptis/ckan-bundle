@@ -222,3 +222,125 @@ def filter_datasets_only(query):
 
     return query
 
+
+def _looks_like_dataset_row(row):
+    # some reports store the dataset identifier under `name`, which
+    # may clash with other report tables (eg organization summaries).
+    return any(
+        key in row
+        for key in (
+            'title',
+            'dataset_title',
+            'package_title',
+            'notes',
+            'dataset_notes',
+            'frequency',
+            'status',
+            'resource_id',
+            'resource_url',
+            'created',
+        )
+    )
+
+
+def _extract_package_id_from_report_row(row):
+    if not isinstance(row, dict):
+        return None
+
+    # Prefer explicit dataset/package identifiers. Avoid generic `id` because
+    # many report tables contain non-dataset IDs and we'd risk filtering out
+    # unrelated rows.
+    for key in ('dataset_name', 'package_name', 'package_id'):
+        value = row.get(key)
+        if isinstance(value, six.string_types) and value:
+            return value
+
+    for key in ('package', 'dataset'):
+        value = row.get(key)
+        if isinstance(value, dict):
+            for subkey in ('id', 'name'):
+                subval = value.get(subkey)
+                if isinstance(subval, six.string_types) and subval:
+                    return subval
+        elif isinstance(value, six.string_types) and value:
+            return value
+
+    value = row.get('name')
+    if isinstance(value, six.string_types) and value and _looks_like_dataset_row(row):
+        return value
+
+    return None
+
+
+def _apply_post_access_filter(report, data, context):
+    if not report:
+        return data
+    post_access_filter = getattr(report, 'post_access_filter', None)
+    if not callable(post_access_filter):
+        return data
+    try:
+        maybe_data = post_access_filter(data, context)
+    except Exception:
+        return data
+    return maybe_data if maybe_data is not None else data
+
+
+def filter_report_data_by_package_show_access(data, context, report=None):
+    '''
+    Filters report rows that reference datasets, keeping only rows
+    for datasets the current user is allowed to `package_show`.
+
+    This is applied at request-time (after pulling cached report data) so that
+    private dataset details do not leak to unauthorized users via reports.
+    '''
+    if not isinstance(data, dict) or 'table' not in data:
+        return data
+
+    if context is None:
+        context = {}
+
+    # Some reports store tuples + `columns`. Normalize first.
+    ensure_data_is_dicts(data)
+
+    table = data.get('table')
+    if not isinstance(table, list) or not table:
+        return data
+
+    try:
+        import ckan.logic as logic
+        from ckan.plugins import toolkit
+    except Exception:
+        # If CKAN isn't fully available (eg during imports), avoid breaking.
+        return data
+
+    filtered = []
+    package_access_cache = {}
+    for row in table:
+        package_id = _extract_package_id_from_report_row(row)
+        if not package_id:
+            filtered.append(row)
+            continue
+        cached_access = package_access_cache.get(package_id)
+        if cached_access is True:
+            filtered.append(row)
+            continue
+        if cached_access is False:
+            continue
+        try:
+            logic.check_access('package_show', context, {'id': package_id})
+        except toolkit.NotAuthorized:
+            package_access_cache[package_id] = False
+            continue
+        except Exception:
+            # Treat unexpected failures (eg deleted datasets) as not visible.
+            package_access_cache[package_id] = False
+            continue
+        package_access_cache[package_id] = True
+        filtered.append(row)
+
+    was_filtered = len(filtered) != len(table)
+    data['table'] = filtered
+    if was_filtered:
+        data['access_filtered'] = True
+        data = _apply_post_access_filter(report, data, context)
+    return data

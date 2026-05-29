@@ -327,3 +327,15 @@ msgstr "Σημειώσεις"
 #: ckanext/qa/templates/report/metadata_quality.html:155
 msgid "Summary"
 msgstr "Περίληψη"
+
+msgid "No metadata quality results were found for this organization."
+msgstr "Δεν βρέθηκαν αποτελέσματα ποιότητας μεταδεδομένων για αυτόν τον οργανισμό."
+
+msgid "No metadata quality results were found."
+msgstr "Δεν βρέθηκαν αποτελέσματα ποιότητας μεταδεδομένων."
+
+msgid "No openness score results were found for this organization."
+msgstr "Δεν βρέθηκαν αποτελέσματα βαθμολογίας ανοικτότητας για αυτόν τον οργανισμό."
+
+msgid "No openness score results were found."
+msgstr "Δεν βρέθηκαν αποτελέσματα βαθμολογίας ανοικτότητας."

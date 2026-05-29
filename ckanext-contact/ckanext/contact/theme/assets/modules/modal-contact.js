@@ -19,15 +19,29 @@ ckan.module('modal-contact', function ($, _) {
       self = this;
       self.modal = null;
       self.messages = {
-        onSuccess: _(
-          'Thank you for contacting us, and we will try and reply as soon ' +
-            'as possible.<br />Unfortunately due to the number of enquiries ' +
-            'received, we cannot always reply in person to every one.',
-        ),
-        onError: _(
-          'Sorry, there was an error sending the email. Please try again later.',
-        ),
+        onSuccess:
+          self.options.successMessage ||
+          self.i18n(
+            _(
+              'Thank you for contacting us, and we will try and reply as soon ' +
+                'as possible.<br />Unfortunately due to the number of enquiries ' +
+                'received, we cannot always reply in person to every one.',
+            ),
+          ),
+        onError:
+          self.options.errorMessage ||
+          self.i18n(
+            _(
+              'Sorry, there was an error sending the email. Please try again later.',
+            ),
+          ),
+        closeLabel: self.options.closeLabel || self.i18n(_('Close')),
       };
+      self.options.scrollOnFlash =
+        self.options.scrollOnFlash === true ||
+        self.options.scrollOnFlash === 'true' ||
+        self.options.scrollOnFlash === 1 ||
+        self.options.scrollOnFlash === '1';
       // define the template if it is not passed
       self.options.template = self.options.template || 'contact_form.html';
       self.el.on('click', self._onClick);
@@ -118,7 +132,7 @@ ckan.module('modal-contact', function ($, _) {
           if (results.success) {
             // it worked, woo!
             self.hide();
-            self.flash_success(self.i18n(self.messages.onSuccess));
+            self.flash_success(self.messages.onSuccess);
           } else if (!$.isEmptyObject(results.errors)) {
             // there were errors in the inputs from the user, likely missing values
             self.processFormError(form, results.errors);
@@ -130,7 +144,7 @@ ckan.module('modal-contact', function ($, _) {
             // if we get here then something went wrong server side, probably when
             // sending the email
             self.hide();
-            self.flash_error(self.i18n(self.messages.onError));
+            self.flash_error(self.messages.onError);
           }
         },
       });
@@ -143,12 +157,39 @@ ckan.module('modal-contact', function ($, _) {
       // remove all errors & classes
       form.find('.error-block').remove();
       form.find('.error').removeClass('error');
+      form.find('.is-invalid').removeClass('is-invalid');
 
       // loop through all the errors, adding the error message and error classes
       for (let k in errors) {
-        let controls = form.find("[name='" + k + "']").parent('.controls');
-        controls.append('<span class="error-block">' + errors[k] + '</span>');
-        controls.parent('.control-group').addClass('error');
+        if (!Object.prototype.hasOwnProperty.call(errors, k)) {
+          continue;
+        }
+
+        const field = form.find("[name='" + k + "']").first();
+        if (!field.length) {
+          continue;
+        }
+
+        const rawMessage = errors[k];
+        const message = Array.isArray(rawMessage)
+          ? rawMessage.join(', ')
+          : String(rawMessage || '');
+
+        const group = field.closest('.form-group, .control-group');
+        const target = group.length ? group : field.parent();
+
+        field.addClass('is-invalid');
+        if (group.length) {
+          group.addClass('error');
+        }
+
+        $('<div class="error-block"></div>').text(message).appendTo(target);
+      }
+
+      // Focus first invalid field so the user immediately sees what to fix.
+      const firstInvalid = form.find('.is-invalid').first();
+      if (firstInvalid.length) {
+        firstInvalid.trigger('focus');
       }
     },
 
@@ -186,9 +227,33 @@ ckan.module('modal-contact', function ($, _) {
      * @param category the type of flash to show, this is used as the css class
      */
     flash: function (message, category) {
-      $('.flash-messages').append(
-        '<div class="alert ' + category + '">' + message + '</div>',
+      const flash = $('<div class="alert alert-dismissible fade show" role="alert"></div>');
+      flash.addClass(category);
+      flash.html(message);
+      flash.append(
+        $('<button type="button" class="btn-close close" data-bs-dismiss="alert"></button>')
+          .attr('aria-label', self.messages.closeLabel),
       );
+      $('.flash-messages').append(flash);
+      if (self.options.scrollOnFlash) {
+        self.scrollToFlashMessages();
+      }
+    },
+
+    scrollToFlashMessages: function () {
+      const container = $('.flash-messages');
+      if (!container.length) {
+        return;
+      }
+      const targetTop = Math.max(container.first().offset().top - 16, 0);
+      const prefersReducedMotion =
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) {
+        window.scrollTo(0, targetTop);
+        return;
+      }
+      $('html, body').stop(true).animate({ scrollTop: targetTop }, 250);
     },
 
     /**

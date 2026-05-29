@@ -5,6 +5,7 @@ Stale datasets report - identifies datasets that haven't been updated according 
 from ckan import model
 from datetime import date, datetime
 from ckan.plugins import toolkit
+import six
 
 try:
     from collections import OrderedDict  # from python 2.7
@@ -268,6 +269,7 @@ def stale_datasets_report(organization=None):
         # If no frequency, categorize as "M/Δ" (N/A)
         
         # Handle datasets without frequency or with unmapped frequency
+        is_stale = False
         if not frequency or frequency not in FREQUENCY_MAP:
             # No frequency data - categorize as "M/Δ" 
             threshold_days = None
@@ -296,6 +298,7 @@ def stale_datasets_report(organization=None):
                 if days_since_update > threshold_days:
                     status = toolkit._("STALE")
                     stale_count += 1
+                    is_stale = True
                 else:
                     status = toolkit._("OK")
         
@@ -326,6 +329,7 @@ def stale_datasets_report(organization=None):
             ('last_modified', str(last_modified_date) if 'last_modified_date' in locals() else toolkit._('N/A')),
             ('days_since_update', days_since_update),
             ('status', status),
+            ('is_stale', is_stale),
             ('notes', notes),
         ]))
     
@@ -347,6 +351,46 @@ def stale_datasets_option_combinations():
         yield {'organization': organization}
 
 
+def stale_datasets_post_access_filter(data, context):
+    table = data.get('table', [])
+    visible_rows = len(table)
+
+    def _as_float(value):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    def _row_is_stale(row):
+        if not isinstance(row, dict):
+            return False
+
+        # Preferred marker for newly generated rows.
+        if row.get('is_stale') is True:
+            return True
+        if row.get('is_stale') is False:
+            return False
+
+        # Locale-agnostic fallback for legacy cached rows.
+        frequency_raw = normalize_frequency(row.get('frequency_raw'))
+        threshold_days = FREQUENCY_MAP.get(frequency_raw)
+        days_since_update = _as_float(row.get('days_since_update'))
+        if threshold_days is not None and days_since_update is not None:
+            return days_since_update > threshold_days
+
+        # Last-resort compatibility fallback.
+        status = row.get('status')
+        return isinstance(status, six.string_types) and status.strip().upper() == 'STALE'
+
+    num_stale = sum(1 for row in table if _row_is_stale(row))
+
+    data['num_packages'] = visible_rows
+    data['num_stale'] = num_stale
+    data['stale_percentage'] = lib.percent(num_stale, visible_rows)
+    data['total_datasets'] = visible_rows
+    return data
+
+
 # Report configuration
 stale_datasets_report_info = {
     'name': 'stale-datasets',
@@ -357,5 +401,6 @@ stale_datasets_report_info = {
     )),
     'option_combinations': stale_datasets_option_combinations,
     'generate': stale_datasets_report,
+    'post_access_filter': stale_datasets_post_access_filter,
     'template': 'report/stale-datasets.html',
 }

@@ -1,7 +1,10 @@
 import click
 import ckan.plugins as p
 
+import logging
 from typing import Any, Callable
+
+from flask import make_response
 
 from ckan.plugins import toolkit
 from ckan.types import Context, CKANApp
@@ -11,6 +14,18 @@ from .cli.tracking import tracking
 from .helpers import popular
 from .middleware import track_request
 from .model import TrackingSummary
+
+log = logging.getLogger(__name__)
+
+
+def _tracking_pixel():
+    # Το `ckanext.tracking` αποθηκεύει τα πραγματικά tracking δεδομένα σε
+    # `after_request` hook (βλ. `ckanext.tracking.middleware.track_request`).
+    # Παρ' όλα αυτά χρειαζόμαστε ένα κανονικό endpoint εδώ, αλλιώς το static
+    # catch-all route του Flask (στο CKAN ισχύει `static_url_path=''`) θα
+    # επιστρέφει 405 για POST requests στο `/_tracking` και θα γεμίζει η κονσόλα
+    # του browser με σφάλματα.
+    return make_response("", 204)
 
 
 class TrackingPlugin(p.SingletonPlugin):
@@ -31,6 +46,19 @@ class TrackingPlugin(p.SingletonPlugin):
 
     # IMiddleware
     def make_middleware(self, app: CKANApp, config: CKANConfig) -> Any:
+        if "tracking._tracking_pixel" not in app.view_functions:
+            app.add_url_rule(
+                "/_tracking",
+                endpoint="tracking._tracking_pixel",
+                view_func=_tracking_pixel,
+                methods=(u"POST",),
+            )
+            try:
+                from ckan.config.middleware.flask_app import csrf
+                csrf.exempt(_tracking_pixel)
+            except Exception:
+                log.exception("Failed to exempt /_tracking from CSRF protection")
+
         app.after_request(track_request)
         return app
 

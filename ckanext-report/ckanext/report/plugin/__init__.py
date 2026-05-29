@@ -85,4 +85,3 @@ class TaglessReportPlugin(p.SingletonPlugin):
         import ckanext.report.stale_datasets_report as stale_report
         return [reports.tagless_report_info, stale_report.stale_datasets_report_info]
 
-

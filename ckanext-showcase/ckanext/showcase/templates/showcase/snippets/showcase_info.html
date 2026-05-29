@@ -17,9 +17,17 @@ Example:
                         {% block heading %}
                             <h1 class="heading">{{ pkg.title or pkg.name }}</h1>
                         {% endblock %}
-                        {% if pkg.author %}
+                        {% set submitter_organization = pkg.submitter_organization %}
+                        {% set submitter_author = pkg.author %}
+                        {% if submitter_organization or submitter_author %}
                             <span class="smallest">{{_('Submitted by')}}</span>
-                            <p>{{ pkg.author }}</p>
+                            <p>
+                              {% if submitter_organization and submitter_author %}
+                                {{ submitter_organization }} | {{ submitter_author }}
+                              {% else %}
+                                {{ submitter_organization or submitter_author }}
+                              {% endif %}
+                            </p>
                         {% endif %}
                         {% if pkg.url %}
                             <div class="info">
@@ -34,10 +42,10 @@ Example:
         </section>
 
         <section class="module module-narrow">
-            <h3 class="module-heading"><i class="fa fa-sitemap icon-medium icon-sitemap"></i> {{ _('Datasets in Showcase') }}</h2>
-                {% if showcase_pkgs %}
+            <h3 class="module-heading"><i class="fa fa-sitemap icon-medium icon-sitemap"></i> {{ _('Datasets in Showcase') }}</h3>
+                {% if showcase_datasets %}
                     <ul class="nav nav-simple">
-                        {% for package in showcase_pkgs %}
+                        {% for package in showcase_datasets %}
                             {% set truncate_title = truncate_title or 80 %}
                             {% set title = package.title or package.name %}
                             <li class="nav-item">{{ h.link_to(title|truncate(truncate_title), h.url_for('dataset.read', id=package.name)) }}</li>
@@ -45,6 +53,21 @@ Example:
                     </ul>
                 {% else %}
                     <p class="module-content empty">{{_('There are no Datasets in this Showcase')}}</p>
+                {% endif %}
+        </section>
+
+        <section class="module module-narrow">
+            <h3 class="module-heading"><i class="fa fa-plug icon-medium"></i> {{ _('APIs στην Εφαρμογή') }}</h3>
+                {% if showcase_apis %}
+                    <ul class="nav nav-simple">
+                        {% for package in showcase_apis %}
+                            {% set truncate_title = truncate_title or 80 %}
+                            {% set title = package.title or package.name %}
+                            <li class="nav-item">{{ h.link_to(title|truncate(truncate_title), h.url_for('data-service.read', id=package.name)) }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="module-content empty">{{_('Δεν υπάρχουν APIs σε αυτήν την Εφαρμογή')}}</p>
                 {% endif %}
         </section>
     {% endif %}

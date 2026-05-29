@@ -1,24 +1,40 @@
-{% extends "admin/base.html" %}
+{% extends "admin/base_vocabulary.html" %}
 
 {% block primary_content_inner %}
+  {% set is_active_checked = requested_is_active if requested_is_active is not none else true %}
+  {% set selected_vocabulary_id = selected_vocabulary_id if selected_vocabulary_id is not none else request.form.get('vocabulary_id', '') %}
   <h1 class="page-heading">{{ _('Δημιουργία Νέας Ετικέτας') }}</h1>
 
   <form method="post" action="{{ h.url_for('vocabularyadmin.tag_create') }}" class="form-horizontal">
     {{ h.csrf_input() }}
 
-      <div class="control-group form-field-wrapper pb-2">
+    <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="is_active">{{ _('Ενεργή') }}</label>
-      <div class="controls">
-        <input type="checkbox" id="is_active" name="is_active" value="true" checked>
-        <span class="info-block"></span>
+      <div class="controls" data-protected-message="{{ protected_is_active_error_message }}">
+        <input type="hidden" id="is_active_hidden" name="is_active" value="{{ 'true' if is_protected_vocabulary and is_active_checked else 'false' }}">
+        <input type="checkbox"
+               id="is_active"
+               name="is_active"
+               value="true"
+               data-protected-current="true"
+               {% if is_active_checked %}checked{% endif %}
+               {% if is_protected_vocabulary %}disabled{% endif %}>
+        <span class="info-block" id="is_active_info">
+          {% if is_protected_vocabulary %}{{ protected_is_active_error_message }}{% endif %}
+        </span>
+        {% if is_active_error_message %}
+          <div class="vocabularyadmin-error-box" role="alert">
+            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+            {{ is_active_error_message }}
+          </div>
+        {% endif %}
       </div>
     </div>
-
 
     <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="name">{{ _('Όνομα') }}</label>
       <div class="controls">
-        <input type="text" id="name" name="name" class="form-control" required>
+        <input type="text" id="name" name="name" class="form-control" value="{{ request.form.get('name', '') }}" required>
         <span class="info-block">{{ _('Το όνομα της ετικέτας ') }}</span>
       </div>
     </div>
@@ -29,7 +45,13 @@
         <select id="vocabulary_id" name="vocabulary_id" class="form-control" required>
           <option value="">{{ _('Επιλέξτε λεξιλόγιο...') }}</option>
           {% for vocabulary in vocabularies %}
-            <option value="{{ vocabulary.id }}">{{ vocabulary.name }}</option>
+            {% set vocabulary_is_protected = h.vocabularyadmin_is_protected_vocabulary(vocabulary.name) %}
+            <option value="{{ vocabulary.id }}"
+                    data-protected="{{ 'true' if vocabulary_is_protected else 'false' }}"
+                    {% if vocabulary_is_protected %}disabled{% endif %}
+                    {% if vocabulary.id == selected_vocabulary_id %}selected{% endif %}>
+              {{ vocabulary.name }}{% if vocabulary_is_protected %} {{ _('(κλειδωμένο)') }}{% endif %}
+            </option>
           {% endfor %}
         </select>
         <span class="info-block">{{ _('Το λεξιλόγιο στο οποίο θα ανήκει η ετικέτα') }}</span>
@@ -39,7 +61,7 @@
     <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="order_index">{{ _('Σειρά εμφάνισης / Order index') }}</label>
       <div class="controls">
-        <input type="number" id="order_index" name="order_index" class="form-control" min="0">
+        <input type="number" id="order_index" name="order_index" class="form-control" min="0" value="{{ request.form.get('order_index', '') }}">
         <span class="info-block">
           {{ _('Μικρότερη τιμή = εμφανίζεται πιο ψηλά στη λίστα. Προαιρετικό.') }}
         </span>
@@ -49,15 +71,15 @@
     <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="value_uri">{{ _('URI Τιμής') }}</label>
       <div class="controls">
-        <input type="text" id="value_uri" name="value_uri" class="form-control">
-        <span class="info-block">{{ _('Το URI της τιμής (προαιρετικό)') }}</span>
+        <input type="text" id="value_uri" name="value_uri" class="form-control" value="{{ request.form.get('value_uri', '') }}" required>
+        <span class="info-block">{{ _('Το URI της τιμής') }}</span>
       </div>
     </div>
 
     <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="label_el">{{ _('Ετικέτα (Ελληνικά)') }}</label>
       <div class="controls">
-        <input type="text" id="label_el" name="label_el" class="form-control">
+        <input type="text" id="label_el" name="label_el" class="form-control" value="{{ request.form.get('label_el', '') }}">
         <span class="info-block">{{ _('Η ετικέτα στα ελληνικά (προαιρετικό)') }}</span>
       </div>
     </div>
@@ -65,7 +87,7 @@
     <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="label_en">{{ _('Ετικέτα (Αγγλικά)') }}</label>
       <div class="controls">
-        <input type="text" id="label_en" name="label_en" class="form-control">
+        <input type="text" id="label_en" name="label_en" class="form-control" value="{{ request.form.get('label_en', '') }}">
         <span class="info-block">{{ _('Η ετικέτα στα αγγλικά (προαιρετικό)') }}</span>
       </div>
     </div>
@@ -73,7 +95,7 @@
     <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="description_el">{{ _('Περιγραφή (Ελληνικά)') }}</label>
       <div class="controls">
-        <textarea id="description_el" name="description_el" class="form-control" rows="3"></textarea>
+        <textarea id="description_el" name="description_el" class="form-control" rows="3">{{ request.form.get('description_el', '') }}</textarea>
         <span class="info-block">{{ _('Η περιγραφή στα ελληνικά (προαιρετικό)') }}</span>
       </div>
     </div>
@@ -81,12 +103,10 @@
     <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="description_en">{{ _('Περιγραφή (Αγγλικά)') }}</label>
       <div class="controls">
-        <textarea id="description_en" name="description_en" class="form-control" rows="3"></textarea>
+        <textarea id="description_en" name="description_en" class="form-control" rows="3">{{ request.form.get('description_en', '') }}</textarea>
         <span class="info-block">{{ _('Η περιγραφή στα αγγλικά (προαιρετικό)') }}</span>
       </div>
     </div>
-
-
 
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">{{ _('Δημιουργία') }}</button>

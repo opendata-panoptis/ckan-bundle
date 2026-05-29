@@ -25,6 +25,140 @@ create, populate and maintain showcases.
 ckanext-showcase is intended to be a more powerful replacement for the
 'Related Item' feature.
 
+---
+
+Συγκεκριμένη υλοποίηση στο plugin επεκτείνει τον μηχανισμό αποστολής email ειδοποιήσεων που εκτελείται **αποκλειστικά κατά τη δημιουργία νέας Showcase εφαρμογής** (`showcase_create`) και εισάγει παραμετρική διαχείριση παραληπτών μέσω ρυθμίσεων στο `ckan.ini`.
+
+Πιο συγκεκριμένα, δίνεται η δυνατότητα επιλογής του τρόπου υπολογισμού των παραληπτών των ειδοποιήσεων κατά το create, με υποστήριξη των εξής περιπτώσεων:
+
+* αποστολή στο σύνολο των `sysadmins` και `showcase admins`
+* αποστολή μόνο στους `showcase admins`
+* αποστολή μόνο σε ένα συγκεκριμένο email που ορίζεται παραμετρικά
+
+Επιπλέον, προστέθηκε δυνατότητα ορισμού ενός σταθερού email παραλήπτη, το οποίο μπορεί να συμμετέχει στις αποστολές όταν είναι δηλωμένο, καθώς και δυνατότητα ορισμού λίστας εξαιρούμενων email, ώστε συγκεκριμένοι χρήστες να αποκλείονται από τις ειδοποιήσεις ακόμα και αν ανήκουν στο σύνολο των υποψήφιων παραληπτών.
+
+Η ανάκτηση των email δεν βασίζεται πλέον στα CKAN actions `user_list` / `user_show`, τα οποία ενδέχεται να μην επιστρέφουν email πεδία λόγω authorization ή privacy restrictions του τρέχοντος context. Αντί αυτού, η υλοποίηση χρησιμοποιεί απευθείας ανάκτηση από τη βάση για μεγαλύτερη αξιοπιστία και σταθερότητα.
+
+Η αλλαγή αυτή **αφορά μόνο τη ροή δημιουργίας Showcase** και δεν επεκτείνεται σε άλλες ενέργειες του plugin, όπως ενημέρωση, έγκριση ή διαγραφή.
+
+**Σημείωση:** Η παραπάνω παραμετροποίηση αφορά τους recipients των ειδοποιήσεων προς διαχειριστές / configured email. Η αποστολή email προς τον δημιουργό του Showcase **παραμένει κανονικά ενεργή**, ανεξάρτητα από αυτή την παραμετροποίηση, όπως ήδη προβλέπεται στην υφιστάμενη ροή δημιουργίας.
+
+## Properties στο `ckan.ini`
+
+Η παραμετροποίηση γίνεται μέσω των παρακάτω properties:
+
+```ini
+ckanext.showcase.notification_recipients_mode = all_admins
+ckanext.showcase.notification_email = showcase-notify@example.gr
+ckanext.showcase.notification_exclude_emails = a@example.gr, b@example.gr
+```
+
+Το prefix που εμφανίζεται στα subjects των email ειδοποιήσεων διαβάζεται από
+την υπάρχουσα ρύθμιση του CKAN:
+
+```ini
+ckan.site_title = Data.gov.gr
+```
+
+Αν το `ckan.site_title` δεν έχει οριστεί ή είναι κενό, τα email subjects
+αποστέλλονται χωρίς prefix.
+
+## Περιγραφή properties
+
+### `ckanext.showcase.notification_recipients_mode`
+
+Καθορίζει τον βασικό τρόπο επιλογής των παραληπτών. Υποστηρίζονται οι τιμές:
+
+* `all_admins`
+  Αποστολή σε όλους τους `sysadmins` και `showcase admins`
+
+* `showcase_admins`
+  Αποστολή μόνο στους `showcase admins`
+
+* `configured_email_only`
+  Αποστολή μόνο στο email που έχει δηλωθεί στο `ckanext.showcase.notification_email`
+
+### `ckanext.showcase.notification_email`
+
+Ορίζει ένα συγκεκριμένο email παραλήπτη. Όταν είναι δηλωμένο:
+
+* προστίθεται επιπλέον στους παραλήπτες όταν το mode είναι `all_admins` ή `showcase_admins`
+* χρησιμοποιείται ως μοναδικός παραλήπτης όταν το mode είναι `configured_email_only`
+
+Αν το property είναι κενό ή δεν έχει οριστεί, τότε αγνοείται.
+Στην περίπτωση `configured_email_only`, αν δεν έχει δηλωθεί τιμή, δεν θα προστεθεί configured recipient.
+
+### `ckanext.showcase.notification_exclude_emails`
+
+Λίστα από email διευθύνσεις που θα εξαιρούνται από την αποστολή, ακόμα κι αν προκύπτουν από το επιλεγμένο mode ή από το configured email.
+
+Η λίστα μπορεί να δοθεί ως comma-separated τιμές, π.χ.:
+
+```ini
+ckanext.showcase.notification_exclude_emails = user1@example.gr, user2@example.gr
+```
+
+## Default συμπεριφορά
+
+Αν δεν οριστεί καμία από τις σχετικές παραμέτρους στο ckan.ini, εφαρμόζεται η προεπιλεγμένη συμπεριφορά του μηχανισμού, δηλαδή αποστολή ειδοποίησης στους sysadmins και showcase admins, χωρίς configured email και χωρίς exclude list. Η αποστολή email προς τον δημιουργό του Showcase παραμένει επίσης ενεργή κανονικά.
+
+## Παραδείγματα χρήσης
+
+### 1. Αποστολή σε sysadmins και showcase admins
+
+```ini
+ckanext.showcase.notification_recipients_mode = all_admins
+ckanext.showcase.notification_email =
+ckanext.showcase.notification_exclude_emails =
+```
+
+### 2. Αποστολή μόνο σε showcase admins
+
+```ini
+ckanext.showcase.notification_recipients_mode = showcase_admins
+ckanext.showcase.notification_email =
+ckanext.showcase.notification_exclude_emails =
+```
+
+### 3. Αποστολή μόνο σε ένα συγκεκριμένο email
+
+```ini
+ckanext.showcase.notification_recipients_mode = configured_email_only
+ckanext.showcase.notification_email = showcase-notify@example.gr
+ckanext.showcase.notification_exclude_emails =
+```
+
+### 4. Αποστολή σε sysadmins και showcase admins, με επιπλέον σταθερό παραλήπτη
+
+```ini
+ckanext.showcase.notification_recipients_mode = all_admins
+ckanext.showcase.notification_email = showcase-notify@example.gr
+ckanext.showcase.notification_exclude_emails =
+```
+
+### 5. Αποστολή μόνο σε showcase admins, με αποκλεισμό συγκεκριμένων email
+
+```ini
+ckanext.showcase.notification_recipients_mode = showcase_admins
+ckanext.showcase.notification_email =
+ckanext.showcase.notification_exclude_emails = admin1@example.gr, admin2@example.gr
+```
+
+### 6. Αποστολή σε sysadmins και showcase admins, με configured email και exclude list
+
+```ini
+ckanext.showcase.notification_recipients_mode = all_admins
+ckanext.showcase.notification_email = showcase-notify@example.gr
+ckanext.showcase.notification_exclude_emails = admin2@example.gr, showcase-notify@example.gr
+```
+
+Στο παραπάνω παράδειγμα:
+
+* θα υπολογιστούν οι παραλήπτες από `sysadmins + showcase admins`
+* θα προστεθεί και το `showcase-notify@example.gr`
+* στο τέλος θα αφαιρεθούν όσα emails υπάρχουν στη λίστα αποκλεισμού
+
+---
 
 ------------
 Requirements
@@ -259,4 +393,3 @@ See: "Internationalizing strings in extensions" : http://docs.ckan.org/en/latest
 3. Compile your language catalog ( You can force pybabel compile to compile messages marked as fuzzy with the -f)
 
        python setup.py compile_catalog -f -l es
-

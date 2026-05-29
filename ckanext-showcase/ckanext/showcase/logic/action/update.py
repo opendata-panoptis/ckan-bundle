@@ -1,21 +1,49 @@
-import logging
-
 import ckan.lib.uploader as uploader
 import ckan.plugins.toolkit as toolkit
-from ckan.lib.mailer import mail_recipient
+from ckanext.showcase.logic.notifications import (
+    send_showcase_status_change_notifications,
+)
 
-from ckanext.showcase.views import send_approved_showcase_email
 
-log = logging.getLogger(__name__)
+def _build_updated_showcase_for_notifications(context, existing_pkg, data_dict, pkg):
+    showcase_id = None
+    if isinstance(pkg, dict):
+        showcase_id = pkg.get('id')
+    else:
+        showcase_id = pkg or data_dict.get('id')
+
+    if showcase_id:
+        try:
+            updated_showcase = toolkit.get_action('ckanext_showcase_show')(
+                context,
+                {'id': showcase_id},
+            )
+            if data_dict.get('approval_status') and not updated_showcase.get('approval_status'):
+                updated_showcase['approval_status'] = data_dict.get('approval_status')
+            return updated_showcase
+        except Exception:
+            pass
+
+    updated_showcase = dict(existing_pkg or {})
+    updated_showcase.update(data_dict or {})
+
+    if not updated_showcase.get('id'):
+        updated_showcase['id'] = showcase_id
+
+    return updated_showcase
 
 
 def showcase_update(context, data_dict):
     # Ανάκτηση του υφιστάμενου showcase για να πάρουμε το πραγματικό παλιό image_url
     try:
-        existing_pkg = toolkit.get_action('package_show')(context, {'id': data_dict['id']})
+        existing_pkg = toolkit.get_action('ckanext_showcase_show')(
+            context,
+            {'id': data_dict['id']},
+        )
         old_image_url = existing_pkg.get('image_url', '')
     except Exception:
         # Αν αποτύχει η ανάκτηση, δεν περνάμε παλιό filename
+        existing_pkg = {}
         old_image_url = ''
 
     # Περνάμε το πραγματικό παλιό image_url ως old_filename
@@ -41,45 +69,24 @@ def showcase_update(context, data_dict):
     #   ορίζουμε την προεπιλεγμένη τιμή
     if 'approval_status' not in data_dict:
         data_dict['approval_status'] = 'pending'
-    elif ('approval_status' in data_dict) and (data_dict['approval_status'] == 'approved'):
-
-        #result = toolkit.get_action('showcase_package_list')(context, data_dict)
-        packages = toolkit.get_action('ckanext_showcase_package_list')(context, {'showcase_id': data_dict['id']})
-        #org_ids = [pkg['organization']['id'] for pkg in packages]
-
-        #organizations = [
-        #    toolkit.get_action('organization_show')(context, {'id': oid})
-        #    for oid in org_ids
-        #]
-
-        for pkg in packages:
-
-            org_id = pkg['organization']['id']
-
-            org = toolkit.get_action('organization_show')(context, {'id': org_id})
-
-            receive_dataset_showcase_emails = org.get('receive_dataset_email_updates', '')
-
-            if receive_dataset_showcase_emails == True:
-                org_email = org.get('email', '')
-
-                from ckan.common import config
-                site_url = config.get('ckan.site_url', 'http://localhost:5000')
-                showcase_url = f"{site_url}/showcase/{pkg['name']}"
-
-                dataset_name = pkg.get('title', '')
-                send_approved_showcase_dataset_email(context, org_email, data_dict, showcase_url, dataset_name)
 
     # Κάνουμε skip τους ελέγχους για την αποθήκευση των πακέτων
     context['ignore_auth'] = True
     pkg = toolkit.get_action('package_update')(context, data_dict)
+    updated_showcase = _build_updated_showcase_for_notifications(
+        context,
+        existing_pkg,
+        data_dict,
+        pkg,
+    )
+
+    try:
+        send_showcase_status_change_notifications(
+            context,
+            existing_pkg,
+            updated_showcase,
+        )
+    except Exception as e:
+        toolkit.error_shout(f"Email sending failed: {e}")
 
     return pkg
-
-def send_approved_showcase_dataset_email(context, recipient, data_dict, showcase_url, dataset_name):
-    mail_recipient(
-            recipient_name="",
-            recipient_email=recipient,
-            subject=f"DATA GOV GR: Σύνολο Δεδομένων σε εγκεκριμένη εφαρμογή: '{dataset_name}'",
-            body=f"Η Εφαρμογή '{data_dict['title']}' εγκρίθηκε για το Σύνολο Δεδομένων '{dataset_name}'. Η εφαρμογή είναι διαθέσιμη εδώ. URL: '{showcase_url}'"
-    )

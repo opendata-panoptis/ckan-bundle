@@ -65,6 +65,12 @@ Optional settings:
     # (optional, default: yes)
     ckanext.data_gov_gr.data_service.hide_resources_section = yes
 
+    # Εμφάνιση/απόκρυψη του ενημερωτικού κειμένου για την άδεια μεταδεδομένων
+    # στο κάτω μέρος της φόρμας δημιουργίας/επεξεργασίας dataset.
+    # (προαιρετικό, default: no)
+    # Αν λείπει από το ckan.ini, το κείμενο δεν εμφανίζεται.
+    ckanext.data_gov_gr.dataset.show_metadata_license_disclaimer = no
+
 **TODO:** Document any optional config settings here. For example:
 
 	# The minimum number of hours to wait before re-checking a resource

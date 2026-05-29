@@ -6,10 +6,13 @@ import logging
 
 from ckan.common import request, current_user, config
 from ckan.lib.base import render, abort
-from ckan.lib.helpers import lang
+from ckan.lib.helpers import lang, Page
+from ckan.lib.helpers import helper_functions as h
 from ckan.plugins import toolkit
 from ckan.logic import NotFound, NotAuthorized, get_action
+from ckan.views.user import _extra_template_variables
 from ckanext.data_gov_gr.helpers import get_config_as_bool, get_powerbi_embed_url
+from ckan import model
 
 from ckanext.data_gov_gr.logic.mqa_calculator import MQACalculator
 from ckanext.data_gov_gr.stats import DataGovStats
@@ -23,6 +26,21 @@ blueprint = Blueprint('dataset_type', __name__)
 
 GITBOOK_PDF_ENDPOINT = 'https://api.gitbook.com/v1/spaces/{space_id}/pdf'
 GITBOOK_PDF_TIMEOUT = 60
+
+
+def _require_sysadmin_for_stats():
+    if not current_user.is_authenticated:
+        return redirect(toolkit.url_for('user.login', came_from=request.full_path))
+
+    context = {
+        'user': current_user.name,
+        'auth_user_obj': current_user,
+    }
+    try:
+        toolkit.check_access('sysadmin', context, {})
+    except NotAuthorized:
+        abort(403, toolkit._('User not authorized to view page'))
+    return None
 
 
 @blueprint.route('/guides/pdf')
@@ -386,6 +404,9 @@ def stats_top_tags():
 
 @blueprint.route('/stats/top-creators')
 def stats_top_creators():
+    auth_response = _require_sysadmin_for_stats()
+    if auth_response:
+        return auth_response
     stats = DataGovStats()
     extra_vars = {
         'top_package_creators': stats.top_package_creators()
@@ -512,6 +533,54 @@ def more_page():
 
 # Add the /more route
 blueprint.add_url_rule("/more", view_func=more_page, endpoint='more_page')
+
+
+@blueprint.route('/dashboard/showcases')
+def dashboard_applications():
+    if not current_user.is_authenticated:
+        return redirect(toolkit.url_for('user.login', came_from=request.full_path))
+
+    page = h.get_page_number(request.args)
+    limit = int(config.get('ckan.datasets_per_page'))
+    offset = (page - 1) * limit
+
+    showcase_query = (
+        model.Session.query(model.Package.id)
+        .filter(model.Package.type == 'showcase')
+        .filter(model.Package.state == 'active')
+        .filter(model.Package.creator_user_id == current_user.id)
+        .order_by(model.Package.metadata_modified.desc())
+    )
+
+    showcase_ids = [
+        showcase_id for showcase_id, in showcase_query.limit(limit).offset(offset).all()
+    ]
+
+    context = {
+        'for_view': True,
+        'user': current_user.name,
+        'auth_user_obj': current_user,
+    }
+
+    showcases = [
+        get_action('ckanext_showcase_show')(context, {'id': showcase_id})
+        for showcase_id in showcase_ids
+    ]
+
+    page_obj = Page(
+        collection=showcases,
+        page=page,
+        presliced_list=True,
+        url=h.pager_url,
+        item_count=showcase_query.count(),
+        items_per_page=limit,
+    )
+    page_obj.items = showcases
+
+    extra_vars = _extra_template_variables(context, {'user_obj': current_user})
+    extra_vars['page'] = page_obj
+
+    return render('user/dashboard_showcases.html', extra_vars)
 
 def get_blueprint():
     return [blueprint, admin_blueprint]

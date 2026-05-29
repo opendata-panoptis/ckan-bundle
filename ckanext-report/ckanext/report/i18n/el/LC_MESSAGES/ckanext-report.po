@@ -288,3 +288,14 @@ msgstr "Συνεχώς ενημερωμένη"
 msgid "M/Δ"
 msgstr "Μ/Δ"
 
+msgid "No datasets without tags were found for this organization."
+msgstr "Δεν βρέθηκαν σύνολα δεδομένων χωρίς ετικέτες για αυτόν τον οργανισμό."
+
+msgid "No datasets without tags were found."
+msgstr "Δεν βρέθηκαν σύνολα δεδομένων χωρίς ετικέτες."
+
+msgid "No stale datasets were found for this organization."
+msgstr "Δεν βρέθηκαν μη επικαιροποιημένα σύνολα δεδομένων για αυτόν τον οργανισμό."
+
+msgid "No stale datasets were found."
+msgstr "Δεν βρέθηκαν μη επικαιροποιημένα σύνολα δεδομένων."

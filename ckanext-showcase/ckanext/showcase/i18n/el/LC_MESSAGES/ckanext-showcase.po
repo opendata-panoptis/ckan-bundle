@@ -472,6 +472,14 @@ msgstr "Εξωτερικός σύνδεσμος"
 msgid "http://www.example.com"
 msgstr "http://www.example.com"
 
+#: ckanext/showcase/templates/showcase/new_package_form.html:91
+msgid "Organization"
+msgstr "Οργανισμός"
+
+#: ckanext/showcase/templates/showcase/new_package_form.html:91
+msgid "eg. OTS"
+msgstr "π.χ. OTS"
+
 #: ckanext/showcase/templates/showcase/new_package_form.html:83
 msgid "Submitted By"
 msgstr "Υποβλήθηκε από"
@@ -528,6 +536,10 @@ msgstr "Προσθήκη Εφαρμογής"
 #: ckanext/showcase/templates/showcase/search.html:41
 msgid "Search showcases..."
 msgstr "Αναζήτηση εφαρμογών..."
+
+#: ckanext/showcase/templates/showcase/search.html:48
+msgid "There are currently no showcases for this site"
+msgstr "Αυτή τη στιγμή δεν υπάρχουν εφαρμογές για αυτόν τον ιστότοπο"
 
 #: ckanext/showcase/templates/showcase/snippets/helper.html:6
 msgid "What are Showcases?"
@@ -609,3 +621,60 @@ msgstr[1] "Βρέθηκαν {number} εφαρμογές"
 #: ckanext/showcase/templates/showcase/snippets/showcase_search_result_text.html:10
 msgid "No showcases found"
 msgstr "Δεν βρέθηκαν εφαρμογές"
+
+msgid "Showcase email notifications"
+msgstr "Ειδοποιήσεις email για τις Εφαρμογές"
+
+msgid "Showcase email notifications and configuration"
+msgstr "Ειδοποιήσεις email και παραμετροποίηση Εφαρμογών"
+
+msgid "Email notifications are sent only when a new Showcase is created."
+msgstr "Οι ειδοποιήσεις email αποστέλλονται μόνο κατά τη δημιουργία νέας Εφαρμογής."
+
+msgid "The notification recipients can be configured through the ckan.ini file."
+msgstr "Οι παραλήπτες των ειδοποιήσεων μπορούν να παραμετροποιηθούν μέσω του αρχείου ckan.ini."
+
+msgid "Default behavior:"
+msgstr "Προεπιλεγμένη συμπεριφορά:"
+
+msgid "If no relevant configuration is provided, notifications are sent to all sysadmins and showcase admins."
+msgstr "Αν δεν οριστεί σχετική παραμετροποίηση, οι ειδοποιήσεις αποστέλλονται σε όλους τους sysadmins και στους διαχειριστές εφαρμογών."
+
+msgid "Supported recipient modes are: all sysadmins and showcase admins, showcase admins only, or one configured email only."
+msgstr "Οι υποστηριζόμενοι τρόποι επιλογής παραληπτών είναι: όλοι οι sysadmins και οι διαχειριστές εφαρμογών, μόνο οι διαχειριστές εφαρμογών ή μόνο ένα συγκεκριμένο παραμετρικό email."
+
+msgid "When configured, an additional email address can also be included in the notification recipients."
+msgstr "Όταν έχει οριστεί, μπορεί να συμπεριληφθεί και μία επιπλέον διεύθυνση email στους παραλήπτες των ειδοποιήσεων."
+
+msgid "Specific email addresses can be excluded from notifications through configuration."
+msgstr "Συγκεκριμένες διευθύνσεις email μπορούν να εξαιρούνται από τις ειδοποιήσεις μέσω παραμετροποίησης."
+
+msgid "The Showcase creator continues to receive an email independently of this configuration."
+msgstr "Ο δημιουργός της Εφαρμογής συνεχίζει να λαμβάνει email ανεξάρτητα από αυτή την παραμετροποίηση."
+
+msgid "Configuration properties:"
+msgstr "Ιδιότητες παραμετροποίησης:"
+
+msgid "Notifications are configurable through ckan.ini and apply only on Showcase creation."
+msgstr "Οι ειδοποιήσεις παραμετροποιούνται μέσω του ckan.ini και εφαρμόζονται μόνο κατά τη δημιουργία Εφαρμογής."
+
+msgid "By default, notifications are sent to all sysadmins and showcase admins."
+msgstr "Προεπιλεγμένα, οι ειδοποιήσεις αποστέλλονται σε όλους τους sysadmins και στους διαχειριστές εφαρμογών."
+
+msgid "The Showcase creator still receives an email."
+msgstr "Ο δημιουργός της Εφαρμογής εξακολουθεί να λαμβάνει email."
+
+msgid "Additional notification cases:"
+msgstr "Επιπλέον περιπτώσεις ειδοποιήσεων:"
+
+msgid "When a Showcase is approved, an email is sent to its creator."
+msgstr "Όταν μια Εφαρμογή εγκρίνεται, αποστέλλεται email στον δημιουργό της."
+
+msgid "When a Showcase is approved, notification emails may also be sent to the organizations of the datasets used in the Showcase, if email updates are enabled for the organization."
+msgstr "Όταν μια Εφαρμογή εγκρίνεται, μπορούν επίσης να αποσταλούν emails ειδοποίησης στους φορείς των συνόλων δεδομένων που αξιοποιούνται στην Εφαρμογή, εφόσον είναι ενεργοποιημένες οι σχετικές ειδοποιήσεις email για τον φορέα."
+
+msgid "Additional emails may be sent on Showcase approval."
+msgstr "Ενδέχεται να αποσταλούν επιπλέον emails κατά την έγκριση της Εφαρμογής."
+
+msgid "Showcase administrators may be users other than system administrators who need management rights for Showcase applications."
+msgstr "Οι διαχειριστές εφαρμογών μπορεί να είναι και χρήστες διαφορετικοί από τους διαχειριστές συστήματος, όταν χρειάζονται δικαιώματα διαχείρισης των Εφαρμογών."

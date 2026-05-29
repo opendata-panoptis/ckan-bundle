@@ -1,0 +1,15 @@
+{% extends "package/read_base.html" %}
+
+{% block subtitle %}{{ _('Εφαρμογές') }} - {{ super() }}{% endblock %}
+
+{% block primary_content_inner %}
+    <h2>{% block page_heading %}{{ _('Εφαρμογές που χρησιμοποιούν αυτό το API') }}{% endblock %}</h2>
+    {% if showcase_list %}
+        {% snippet "showcase/snippets/showcase_list.html", packages=showcase_list, pkg_id=pkg_dict.name, show_remove=False %}
+    {% else %}
+        <p class="empty">{{ _('Δεν υπάρχουν εφαρμογές που χρησιμοποιούν αυτό το API') }}</p>
+    {% endif %}
+    <div class="note">
+        <strong>{{ _('Note') }} :</strong> {{ _('Only') }} <em> {{ _('approved showcases')}} </em> {{ _('are displayed in the list above.') }}
+    </div>
+{% endblock %}

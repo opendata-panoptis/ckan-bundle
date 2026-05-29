@@ -8,40 +8,92 @@ truncate_title - The length to truncate the title to (default: 80).
 show_remove    - If True, show the remove button to remove showcase/dataset association.
 
 #}
-{% set truncate = truncate or 180 %}
+{% set truncate = truncate or 80 %}
 {% set truncate_title = truncate_title or 80 %}
 {% set title = package.title or package.name %}
-{% set notes = h.markdown_extract(package.notes, extract_length=truncate) %}
 
 {% set showcase_read_route = 'showcase_blueprint.read' %}
+{% set url = h.url_for(showcase_read_route, id=package.name) %}
 
 {% block package_item %}
 
 <li class="media-item">
   {% block item_inner %}
     {% block image %}
-      <img src="{{ package.image_display_url or h.url_for_static('/base/images/placeholder-group.png') }}" alt="{{ package.name }}" class="media-image img-fluid">
+      <img src="{{ package.image_display_url or h.url_for_static('/base/images/placeholder-group.png') }}" alt="{{ package.name }}" class="img-fluid media-image">
     {% endblock %}
     {% block title %}
-      <h3 class="media-heading">{{ h.link_to(title|truncate(truncate_title), h.url_for(showcase_read_route, id=package.name)) }}</h3>
+      <h2 class="media-heading">{{ title|truncate(truncate_title) }}</h2>
     {% endblock %}
-    {% block notes %}
-      {% if notes %}
-        <div>{{ notes|urlize }}</div>
-      {% else %}
-        <p class="empty">{{ _("This showcase has no description") }}</p>
+
+    {% block submitter %}
+      {% set ns = namespace(submitter_organization='') %}
+      {% if package.submitter_organization is defined and package.submitter_organization %}
+        {% set ns.submitter_organization = package.submitter_organization %}
+      {% elif package.extras is defined and package.extras %}
+        {% for extra in package.extras %}
+          {% if extra.key == 'submitter_organization' %}
+            {% set ns.submitter_organization = extra.value %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      {% set submitter_author = package.author %}
+      {% if ns.submitter_organization or submitter_author %}
+        <div class="showcase-card-submitter">
+          {% if ns.submitter_organization %}
+            <span class="showcase-card-submitter-item" title="{{ _('Organization') }}">
+              <i class="fa fa-building" aria-hidden="true"></i>
+              {{ ns.submitter_organization }}
+            </span>
+          {% endif %}
+          {% if ns.submitter_organization and submitter_author %}
+            <span class="showcase-card-submitter-sep" aria-hidden="true">|</span>
+          {% endif %}
+          {% if submitter_author %}
+            <span class="showcase-card-submitter-item" title="{{ _('Submitted By') }}">
+              <i class="fa fa-user" aria-hidden="true"></i>
+              {{ submitter_author }}
+            </span>
+          {% endif %}
+        </div>
       {% endif %}
     {% endblock %}
-    {% block datasets %}
-      {% if package.num_datasets %}
-        <strong class="count">{{ ungettext('{num} Dataset', '{num} Datasets', package.num_datasets).format(num=package.num_datasets) }}</strong>
-      {% elif package.num_datasets == 0 %}
-        <span class="count">{{ _('0 Datasets') }}</span>
+
+    {% block metrics %}
+      {% set datasets_total = package.num_datasets if package.num_datasets is defined else 0 %}
+      {% set apis_total = package.num_apis if package.num_apis is defined else none %}
+      {% set apis_count = apis_total | int if apis_total is not none else none %}
+      {% set views_total = none %}
+      {% if package.tracking_summary is defined %}
+        {% set views_total = package.tracking_summary.get('total', 0) if package.tracking_summary else 0 %}
+      {% elif package.views_total is defined %}
+        {% set views_total = package.views_total %}
       {% endif %}
+
+      <div class="showcase-card-metrics">
+        {% if views_total is not none %}
+          <span class="showcase-card-metric" title="{{ _('Views') }}">
+            <i class="fa fa-eye" aria-hidden="true"></i>
+            {{ h.localised_number(views_total) }}
+          </span>
+        {% endif %}
+        <span class="showcase-card-metric" title="{{ _('Datasets') }}">
+          <i class="fa fa-database" aria-hidden="true"></i>
+          {{ h.localised_number(datasets_total) }}
+        </span>
+        {% if apis_count is not none %}
+          <span class="showcase-card-metric" title="{{ _('APIs') }}">
+            <i class="fa fa-plug" aria-hidden="true"></i>
+            {{ h.localised_number(apis_count) }}
+          </span>
+        {% endif %}
+      </div>
     {% endblock %}
+
     {% block link %}
-      <a href="{{ h.url_for(showcase_read_route, id=package.name) }}" title="{{ _('View {showcase_title}').format(showcase_title=package.title) }}" class="media-view">
-        <span>{{ _('View {showcase_title}').format(showcase_title=package.title) }}</span>
+      <a href="{{ url }}" title="{{ _('View {showcase_title}').format(showcase_title=title) }}" class="media-view">
+        <span>{{ _('View {showcase_title}').format(showcase_title=title) }}</span>
       </a>
     {% endblock %}
     {% if show_remove and 'dataset' in request.path %}
@@ -54,6 +106,7 @@ show_remove    - If True, show the remove button to remove showcase/dataset asso
   {% endblock %}
 </li>
 {% endblock %}
-{# {% if position is divisibleby 3 %}
+
+{% if position is defined and position is divisibleby 3 %}
   <li class="clearfix js-hide"></li>
-{% endif %} #}
+{% endif %}

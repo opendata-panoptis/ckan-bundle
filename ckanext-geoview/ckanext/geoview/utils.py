@@ -12,6 +12,8 @@ from ckan.plugins import toolkit
 log = logging.getLogger(__name__)
 
 GEOJSON_MAX_FILE_SIZE = 25 * 1024 * 1024
+GEOJSON_MAX_FEATURES = 500
+GEOJSON_MAX_COORDINATES = 400000
 
 
 MAX_FILE_SIZE = 3 * 1024 * 1024  # 1MB
@@ -30,6 +32,28 @@ OGC_EXCLUDED_PARAMS = [
     "bbox",
     "maxfeatures",
 ]
+
+
+def _as_config_list(value):
+    if not value:
+        return []
+    if isinstance(value, (list, tuple)):
+        return value
+    return [item for item in value.replace(",", " ").split() if item]
+
+
+def _force_http_for_configured_hosts(parts):
+    hosts = [
+        host.lower()
+        for host in _as_config_list(
+            toolkit.config.get("ckanext.geoview.force_http_hosts")
+        )
+    ]
+    hostname = (parts.hostname or "").lower()
+    if hostname in hosts and parts.scheme == "https":
+        log.info("Forcing HTTP for proxied geoview service host %s", hostname)
+        return parts._replace(scheme="http")
+    return parts
 
 
 def proxy_service_resource(request, context, data_dict):
@@ -54,6 +78,7 @@ def proxy_service_url(req, url):
     try:
         method = req.environ["REQUEST_METHOD"]
 
+        parts = _force_http_for_configured_hosts(parts)
         params = parse_qs(parts.query)
 
         if not p.toolkit.asbool(
@@ -167,9 +192,34 @@ def get_shapefile_viewer_config():
 
 
 def get_max_file_size():
-    return toolkit.config.get(
+    return _get_positive_int_config(
         "ckanext.geoview.geojson.max_file_size", GEOJSON_MAX_FILE_SIZE
     )
+
+
+def get_max_features():
+    return _get_positive_int_config(
+        "ckanext.geoview.geojson.max_features", GEOJSON_MAX_FEATURES
+    )
+
+
+def get_max_coordinates():
+    return _get_positive_int_config(
+        "ckanext.geoview.geojson.max_coordinates", GEOJSON_MAX_COORDINATES
+    )
+
+
+def _get_positive_int_config(config_key, default):
+    value = toolkit.config.get(config_key)
+    if value is None or (hasattr(value, "strip") and not value.strip()):
+        return default
+
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        return default
+
+    return value if value > 0 else default
 
 
 def get_openlayers_viewer_config():

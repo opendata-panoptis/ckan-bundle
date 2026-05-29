@@ -31,13 +31,31 @@ def get_auth_functions():
 
 def _is_showcase_admin(context):
     '''
-    Determines whether user in context is in the showcase admin list.
+    Determines whether user in context can act as a showcase admin.
     '''
     user = context.get('user', '')
     userobj = model.User.get(user)
     if userobj == None:
         return False
+    if getattr(userobj, 'sysadmin', False):
+        return True
     return ShowcaseAdmin.is_user_showcase_admin(userobj)
+
+
+def _get_logged_user_id(context):
+    if '_showcase_logged_user_id' in context:
+        return context['_showcase_logged_user_id']
+
+    user_id = getattr(getattr(g, 'userobj', None), 'id', None)
+    if user_id:
+        context['_showcase_logged_user_id'] = user_id
+        return user_id
+
+    user = context.get('user', '')
+    userobj = model.User.get(user)
+    user_id = getattr(userobj, 'id', None)
+    context['_showcase_logged_user_id'] = user_id
+    return user_id
 
 
 def create(context, data_dict):
@@ -50,7 +68,9 @@ def create(context, data_dict):
         return {'success': True}
 
     # Αν είναι ο ιδιοκτήτης του συνόλου δεδομένων τοτε επέστρεψε true
-    logged_user_id = g.userobj.id
+    logged_user_id = _get_logged_user_id(context)
+    if not logged_user_id:
+        return {'success': False, 'msg': 'You must be logged in to create showcases'}
     is_logged_user_creator_of_showcase = is_user_creator_of_showcase(data_dict, logged_user_id)
     if is_logged_user_creator_of_showcase:
         return {'success': True}
@@ -86,7 +106,9 @@ def update(context, data_dict):
         approved = True
 
     # Αν είναι ο ιδιοκτήτης του συνόλου δεδομένων και το showcase είναι σε κατάσταση διαφορετική από approved τότε επέστρεψε true
-    logged_user_id = g.userobj.id
+    logged_user_id = _get_logged_user_id(context)
+    if not logged_user_id:
+        return {'success': False}
     is_logged_user_creator_of_showcase = is_user_creator_of_showcase(showcase_data_dict, logged_user_id)
     if is_logged_user_creator_of_showcase and not approved:
         return {'success': True}
@@ -94,6 +116,27 @@ def update(context, data_dict):
     # Αν δεν είναι ο ιδιοκτήτης και το showcase δεν είναι σε κατάσταση διαφορετική από approved,
     #   επέστρεψε true μόνο αν είναι admin
     return {'success': _is_showcase_admin(context)}
+
+
+def _can_manage_package_association(context, showcase_id):
+    if _is_showcase_admin(context):
+        return True
+
+    if not showcase_id:
+        return False
+
+    showcase_data_dict = read_showcase(showcase_id, context)
+    approved = showcase_data_dict.get('approval_status') == 'approved'
+
+    logged_user_id = _get_logged_user_id(context)
+    if not logged_user_id:
+        return False
+
+    is_logged_user_creator_of_showcase = is_user_creator_of_showcase(
+        showcase_data_dict,
+        logged_user_id,
+    )
+    return is_logged_user_creator_of_showcase and not approved
 
 
 @toolkit.auth_allow_anonymous_access
@@ -117,37 +160,18 @@ def package_association_create(context, data_dict):
        3. Δημιουργός της εφαρμογής
     '''
 
-    # Έλεγχος αν υπάρχει showcase_id στο data_dict
     showcase_id = data_dict.get('showcase_id')
-
-    # Αν υπάρχει showcase_id, κάνε τον έλεγχο για τον ιδιοκτήτη
-    if showcase_id:
-        # Το δικαίωμα ελέγχεται και κατά την φόρτωση της σελίδας των showcases στην καρτέλα του dataset,
-        #   με στόχο να κρύψει ή να εμφανίσει το κουμπί 'Add to showcase'.
-        #   Σε αυτήν την περίπτωση δεν περνιέται συγκεκριμένο id από showcase,
-        #   οπότε και βλέπει αυτό το κουμπί μόνο ο διαχειριστής και αυτός μπορεί να προχωρήσει σε προσθήκη dataset σε showcase,
-        #   από αυτό το σημείο
-
-        # Ανάκτηση αντικειμένου showcase
-        showcase_data_dict = read_showcase(showcase_id, context)
-
-        # Αν είναι ο ιδιοκτήτης του συνόλου δεδομένων τοτε επέστρεψε true
-        logged_user_id = g.userobj.id
-        is_logged_user_creator_of_showcase = is_user_creator_of_showcase(showcase_data_dict, logged_user_id)
-        if is_logged_user_creator_of_showcase:
-            return {'success': True}
-
-    # Αν είναι διαχειριστής τότε επέστρεψε true αλλιώς false
-    return {'success': _is_showcase_admin(context)}
+    return {'success': _can_manage_package_association(context, showcase_id)}
 
 
 def package_association_delete(context, data_dict):
     '''Delete a package showcase association.
 
-       Only sysadmins or user listed as Showcase Admins can delete a
-       package/showcase association.
+       Showcase admins μπορούν πάντα να αφαιρούν association.
+       Ο creator μπορεί μόνο όσο το showcase δεν είναι approved.
     '''
-    return {'success': _is_showcase_admin(context)}
+    showcase_id = data_dict.get('showcase_id')
+    return {'success': _can_manage_package_association(context, showcase_id)}
 
 
 @toolkit.auth_allow_anonymous_access

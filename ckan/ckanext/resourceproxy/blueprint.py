@@ -41,11 +41,13 @@ def proxy_resource(context: Context, data_dict: DataDict):
     max_file_size = config.get(u'ckan.resource_proxy.max_file_size')
     proxy = config.get('ckan.download_proxy')
     proxies = {'http': proxy, 'https': proxy} if proxy else None
+    user_agent = config.get('ckan.resource_proxy.user_agent')
+    headers = {'User-Agent': str(user_agent)} if user_agent else {}
     response = make_response()
     try:
         # first we try a HEAD request which may not be supported
         did_get = False
-        r = requests.head(url, timeout=timeout, proxies=proxies)
+        r = requests.head(url, timeout=timeout, proxies=proxies, headers=headers)
         # Servers can refuse HEAD requests. 405 is the appropriate
         # response, but 400 with the invalid method mentioned in the
         # text, or a 403 (forbidden) status is also possible (#2412,
@@ -55,7 +57,8 @@ def proxy_resource(context: Context, data_dict: DataDict):
                 url,
                 timeout=timeout,
                 stream=True,
-                proxies=proxies
+                proxies=proxies,
+                headers=headers,
             )
             did_get = True
         r.raise_for_status()
@@ -76,6 +79,7 @@ def proxy_resource(context: Context, data_dict: DataDict):
                 timeout=timeout,
                 stream=True,
                 proxies=proxies,
+                headers=headers,
             )
 
         response.headers[u'content-type'] = r.headers[u'content-type']

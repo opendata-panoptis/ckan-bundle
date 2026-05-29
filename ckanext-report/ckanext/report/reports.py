@@ -19,9 +19,9 @@ def tagless_report(organization):
         {
          'table': [
             {'name': 'river-levels', 'title': 'River levels', 'notes': 'Harvested',
-             'user': 'bob', 'created': '2008-06-13T10:24:59.435631'},
+             'created': '2008-06-13T10:24:59.435631'},
             {'name': 'co2-monthly', 'title' 'CO2 monthly', 'notes': '',
-             'user': 'bob', 'created': '2009-12-14T08:42:45.473827'},
+             'created': '2009-12-14T08:42:45.473827'},
             ],
          'num_packages': 56,
          'packages_without_tags_percent': 4,
@@ -43,7 +43,6 @@ def tagless_report(organization):
         ('name', pkg.name),
         ('title', lib.resolve_dataset_title(pkg)),
         ('notes', lib.dataset_notes(pkg)),
-        ('user', pkg.creator_user_id),
         ('created', pkg.metadata_created.isoformat()),
     )) for pkg in q.slice(0, 100)]  # First 100 only for this demo
 
@@ -75,6 +74,16 @@ def tagless_report_option_combinations():
         yield {'organization': organization}
 
 
+def tagless_post_access_filter(data, context):
+    table = data.get('table', [])
+    # The filtered output only contains tagless rows, so total dataset counts
+    # and ratio cannot be safely recomputed from this data alone.
+    data['num_packages'] = None
+    data['packages_without_tags_percent'] = None
+    data['average_tags_per_package'] = None
+    return data
+
+
 from ckan.plugins import toolkit
 
 tagless_report_info = {
@@ -85,5 +94,6 @@ tagless_report_info = {
                                     )),
     'option_combinations': tagless_report_option_combinations,
     'generate': tagless_report,
+    'post_access_filter': tagless_post_access_filter,
     'template': 'report/tagless-datasets.html',
 }

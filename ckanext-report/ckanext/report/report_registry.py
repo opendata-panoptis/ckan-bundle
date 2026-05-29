@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 REPORT_KEYS_REQUIRED = set(('name', 'generate', 'template', 'option_defaults',
                             'option_combinations'))
-REPORT_KEYS_OPTIONAL = set(('title', 'description', 'authorize'))
+REPORT_KEYS_OPTIONAL = set(('title', 'description', 'authorize', 'post_access_filter'))
 
 
 class Report(object):

@@ -16,6 +16,7 @@ import ckan.plugins as p
 from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format, DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.profiles import DCAT, DCT, FOAF
 from ckanext.dcat.exceptions import RDFProfileException, RDFParserException
+from ckanext.dcat.rdfxml import serialize_dcat_pretty_xml
 
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -306,6 +307,8 @@ class RDFSerializer(RDFProcessor):
                 auto_compact=True,
                 context=context
             )
+        elif _format == 'pretty-xml':
+            output = serialize_dcat_pretty_xml(self.g)
         else:
             output = self.g.serialize(format=_format)
 
@@ -367,7 +370,10 @@ class RDFSerializer(RDFProcessor):
         if not _format:
             _format = 'xml'
         _format = url_to_rdflib_format(_format)
-        output = self.g.serialize(format=_format)
+        if _format == 'pretty-xml':
+            output = serialize_dcat_pretty_xml(self.g)
+        else:
+            output = self.g.serialize(format=_format)
 
         return output
 

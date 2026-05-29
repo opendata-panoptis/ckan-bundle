@@ -26,6 +26,9 @@ import logging
 from ckanext.azurefilestore.uploader import AzureResourceUploader
 from ckanext.archiver import default_settings as settings
 
+from ckanext.archiver.resource_evaluation import \
+    get_non_evaluable_resource_reason
+
 log = logging.getLogger(__name__)
 
 toolkit = p.toolkit
@@ -250,6 +253,15 @@ def _update_resource(resource_id, queue, log):
             resource,
             queue,
             archive_result.get('cache_filename') if archive_result else None)
+
+    non_evaluable_reason = get_non_evaluable_resource_reason(resource)
+    if non_evaluable_reason:
+        log.info('Skipping non-evaluable resource: id=%s reason=%s',
+                 resource['id'], non_evaluable_reason)
+        _save(Status.by_text('Chose not to download'),
+              ChooseNotToDownload(non_evaluable_reason),
+              resource)
+        return
 
     # Download
     try_as_api = False

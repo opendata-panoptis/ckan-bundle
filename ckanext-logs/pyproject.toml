@@ -17,7 +17,7 @@ classifiers = [
 
 keywords = [ "CKAN", ]
 dependencies = [
-    "ckanext-tables>=1.5.1,<2.0.0"
+    "ckanext-tables==1.12.0"
 ]
 
 [project.urls]

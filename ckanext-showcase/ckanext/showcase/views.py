@@ -28,7 +28,6 @@ from ckan.lib.search import (
 )
 from ckan.types import Context, Response
 import logging
-import ckan.plugins.toolkit as toolkit
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +42,6 @@ tuplize_dict = dataset.tuplize_dict
 parse_params = dataset.parse_params
 flatten_to_string_key = dataset.flatten_to_string_key
 from ckan.views.home import CACHE_PARAMETERS
-from ckan.lib.mailer import mail_recipient
 from typing import Any, Iterable, Optional, Union
 def index():
     return search_showcases(utils.DATASET_TYPE_NAME)
@@ -68,6 +66,9 @@ def search_showcases(package_type: str) -> str:
     extra_vars[u'remove_field'] = partial(dataset.remove_field, package_type)
 
     sort_by = request.args.get(u'sort', None)
+    if not sort_by:
+        # Align default sorting with organization index (Name Ascending)
+        sort_by = u'title_string asc'
     params_nosort = [(k, v) for k, v in params_nopage if k != u'sort']
 
     extra_vars[u'sort_by'] = partial(dataset._sort_by, params_nosort, package_type)
@@ -344,6 +345,10 @@ def manage_datasets(id):
     return utils.manage_datasets_view(id)
 
 
+def manage_apis(id):
+    return utils.manage_apis_view(id)
+
+
 def delete(id):
     return utils.delete_view(id)
 
@@ -366,7 +371,11 @@ class EditView(dataset.EditView):
     def get(self, id, data=None, errors=None, error_summary=None):
 
         context = self._prepare()
-        package_type = 'showcase' #dataset._get_package_type(id) or package_type
+
+        # Κλείδωμα μόνο του GET ανοίγματος της φόρμας
+        utils.ensure_showcase_get_management_access(id, context)
+
+        package_type = 'showcase'  # dataset._get_package_type(id) or package_type
         try:
             view_context = context.copy()
             view_context['for_view'] = True
@@ -397,12 +406,11 @@ class EditView(dataset.EditView):
         pkg = context.get(u"package")
         rj = h.dump_json(data.get(u'resources', []))
         user = current_user.name
-        showcase_package = utils.read_showcase(pkg_dict.get('id'), context)
         try:
             check_access(
                 'ckanext_showcase_update',
                 context,
-                showcase_package
+                pkg_dict
             )
         except NotAuthorized:
             return base.abort(
@@ -476,37 +484,6 @@ class EditView(dataset.EditView):
 
         data_dict['id'] = id
         try:
-
-            # Ανάκτηση του υφιστάμενου showcase
-            pkg = utils.read_showcase(id, context)
-
-            # Το approval_status δεν υπάρχει στο data_dict όταν πολίτης τροποποιεί και υποβάλει δημιουργημένο showcase
-
-            # Safely get approval status with default values to prevent KeyError
-            current_approval_status = pkg.get('approval_status', '')
-            new_approval_status = data_dict.get('approval_status', '')
-
-            # Αν έχει γίνει μεταβολή έγκρισης από όχι εγκεκριμένο σε εγκεκριμένο θα πρέπει να γίνεται από admin
-            if current_approval_status != 'approved' and new_approval_status == 'approved':
-
-                # TODO: Validation οτι ο admin κάνει την έγκριση
-
-                try:
-                    # Αποστολή στον δημιουργό ότι έγινε έγκριση του showcase
-
-                    # Ανάκτηση ονόματος του δημιουργού του showcase
-                    creator_email = get_email_from_id(context, pkg['creator_user_id'])
-
-                    # Δημιουργία του URL του showcase
-                    from ckan.common import config
-                    site_url = config.get('ckan.site_url', 'http://localhost:5000')
-                    showcase_url = f"{site_url}/showcase/{pkg['name']}"
-
-                    send_approved_showcase_email(context, creator_email, data_dict, showcase_url)
-
-                except Exception as e:
-                    tk.error_shout(f"Email sending failed: {e}")
-
             pkg = tk.get_action('ckanext_showcase_update')(context, data_dict)
         except tk.ValidationError as e:
             errors = e.error_dict
@@ -519,24 +496,13 @@ class EditView(dataset.EditView):
         url = h.url_for('showcase_blueprint.read', id=pkg['name'])
         return h.redirect_to(url)
 
-def send_approved_showcase_email(context, recipient, data_dict, showcase_url):
-    mail_recipient(
-        recipient_name="",
-        recipient_email=recipient,
-        subject=f"DATA GOV GR: Εγκεκριμένη Εφαρμογή: '{data_dict['title']}'",
-        body=f"Η εφαρμογή '{data_dict['title']}' εγκρίθηκε. Η εφαρμογή είναι διαθέσιμη εδώ. URL: '{showcase_url}'"
-    )
-
-def get_email_from_id(context, user_id):
-    try:
-        user = toolkit.get_action('user_show')(context, {'id': user_id})
-        return user.get('email')  # or 'fullname' if you want full name
-    except toolkit.ObjectNotFound:
-        return None
-
 
 def dataset_showcase_list(id):
     return utils.dataset_showcase_list(id)
+
+
+def data_service_showcase_list(id):
+    return utils.data_service_showcase_list(id)
 
 
 def admins():
@@ -566,10 +532,18 @@ showcase.add_url_rule('/showcase/manage_datasets/<id>',
                       view_func=manage_datasets,
                       methods=['GET', 'POST'],
                       endpoint="manage_datasets")
+showcase.add_url_rule('/showcase/manage_apis/<id>',
+                      view_func=manage_apis,
+                      methods=['GET', 'POST'],
+                      endpoint="manage_apis")
 showcase.add_url_rule('/dataset/showcases/<id>',
                       view_func=dataset_showcase_list,
                       methods=['GET', 'POST'],
                       endpoint="dataset_showcase_list")
+showcase.add_url_rule('/data-service/applications/<id>',
+                      view_func=data_service_showcase_list,
+                      methods=['GET'],
+                      endpoint="data_service_showcase_list")
 showcase.add_url_rule('/ckan-admin/showcase_admins',
                       view_func=admins,
                       methods=['GET', 'POST'],

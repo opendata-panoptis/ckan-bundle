@@ -51,7 +51,7 @@ Public
 .announcement-date { 
     margin-left: auto; 
     font-size: 0.96em; 
-    color: #8fa3b8;
+    color: #566b85;
     padding-right: 30px; /* Add padding to prevent overlap with close button */
 }
 
@@ -59,6 +59,17 @@ Public
     color: #393e46; 
     line-height: 1.5; 
     font-size: 1em;
+}
+
+.announcement-body a {
+    color: #0f4a94;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+}
+
+.announcement-body a:hover,
+.announcement-body a:focus {
+    color: #0d4285;
 }
 
 .announcement-close {

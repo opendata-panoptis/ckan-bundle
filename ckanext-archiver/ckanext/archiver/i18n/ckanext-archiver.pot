@@ -226,3 +226,18 @@ msgstr ""
 #: ckanext/archiver/templates/report/broken_links.html:52
 msgid "Last success"
 msgstr ""
+
+msgid "Non-evaluable"
+msgstr ""
+
+msgid "Non-evaluable resources"
+msgstr ""
+
+msgid "Resource is a Table Designer resource"
+msgstr ""
+
+msgid "Resource has no URL"
+msgstr ""
+
+msgid "Resource is a Download All ZIP resource"
+msgstr ""

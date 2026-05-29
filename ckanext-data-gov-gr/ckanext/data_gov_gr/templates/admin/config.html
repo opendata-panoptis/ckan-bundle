@@ -755,6 +755,22 @@
         </p>
       </section>
 
+      <section id="dg-config-contact" class="dg-config-section" data-dg-section="dg-config-contact">
+        <h3>{{ _('Επικοινωνία') }}</h3>
+
+        {{ form.input(
+          'ckanext.contact.external_contact_url',
+          id='field-ckanext.contact.external_contact_url',
+          label=_('Σύνδεσμος εξωτερικής σελίδας επικοινωνίας'),
+          value=data['ckanext.contact.external_contact_url'],
+          error=errors['ckanext.contact.external_contact_url'],
+          placeholder='https://...'
+        ) }}
+        <p class="help-block">
+          {{ _('Αν συμπληρωθεί, η φόρμα στη σελίδα /contact αντικαθίσταται με σύνδεσμο προς αυτή τη σελίδα. Αφήστε κενό για εμφάνιση της κανονικής φόρμας.') }}
+        </p>
+      </section>
+
       <section id="dg-config-survey" class="dg-config-section" data-dg-section="dg-config-survey">
         <h3>{{ _('Έρευνα') }}</h3>
 
@@ -932,6 +948,7 @@
       {% if show_guides_section %}<li><a href="#dg-config-guides">{{ _('Οδηγοί (GitBook)') }}</a></li>{% endif %}
       {% if show_stats_powerbi_section %}<li><a href="#dg-config-powerbi">{{ _('Power BI') }}</a></li>{% endif %}
       <li><a href="#dg-config-footer">{{ _('Footer') }}</a></li>
+      <li><a href="#dg-config-contact">{{ _('Επικοινωνία') }}</a></li>
       <li><a href="#dg-config-survey">{{ _('Έρευνα') }}</a></li>
       <li><a href="#dg-config-showcases">{{ _('Showcases') }}</a></li>
     </ul>
@@ -1014,6 +1031,13 @@
       <h4>{{ _('Footer') }}</h4>
       <ul>
         <li><strong>{{ _('Σύνδεσμος Ψηφιακού Βοηθού Athens Gov') }}:</strong> {{ _('Εμφανίζεται στη στήλη «Σχετικά» του footer και ανοίγει σε νέα καρτέλα. Αφήστε κενό για απόκρυψη.') }}</li>
+      </ul>
+    </div>
+
+    <div class="dg-help-section" data-dg-help="dg-config-contact">
+      <h4>{{ _('Επικοινωνία') }}</h4>
+      <ul>
+        <li><strong>{{ _('Σύνδεσμος εξωτερικής σελίδας επικοινωνίας') }}:</strong> {{ _('Αντικαθιστά τη φόρμα στη σελίδα /contact με σύνδεσμο στην εξωτερική σελίδα. Αφήστε κενό για κανονική φόρμα.') }}</li>
       </ul>
     </div>
 

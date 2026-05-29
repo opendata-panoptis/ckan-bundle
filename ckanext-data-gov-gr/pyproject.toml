@@ -29,6 +29,7 @@ ekan_dcat_harvester = "ckanext.data_gov_gr.harvesters.ekan_dcat_harvester:EkanDc
 dkan_ckan_harvester = "ckanext.data_gov_gr.harvesters.dkan_ckan_harvester:DkanCkanHarvester"
 bank_of_greece_harvester = "ckanext.data_gov_gr.harvesters.bank_of_greece_harvester:BankOfGreeceHarvester"
 apd_kritis_harvester = "ckanext.data_gov_gr.harvesters.apd_kritis_harvester:ApdKritisHarvester"
+wms_capabilities_harvester = "ckanext.data_gov_gr.harvesters.wms_harvester:WmsCapabilitiesHarvester"
 data_gov_gr_spatial="ckanext.data_gov_gr.plugin:DataGovGrSpatialHarvesterPlugin"
 
 [project.entry-points."ckan.harvesters"]
@@ -38,6 +39,7 @@ EkanDcatHarvester = "ckanext.data_gov_gr.harvesters.ekan_dcat_harvester:EkanDcat
 DkanCkanHarvester = "ckanext.data_gov_gr.harvesters.dkan_ckan_harvester:DkanCkanHarvester"
 BankOfGreeceHarvester = "ckanext.data_gov_gr.harvesters.bank_of_greece_harvester:BankOfGreeceHarvester"
 ApdKritisHarvester = "ckanext.data_gov_gr.harvesters.apd_kritis_harvester:ApdKritisHarvester"
+WmsCapabilitiesHarvester = "ckanext.data_gov_gr.harvesters.wms_harvester:WmsCapabilitiesHarvester"
 
 
 [build-system]

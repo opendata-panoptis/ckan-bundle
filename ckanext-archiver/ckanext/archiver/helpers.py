@@ -63,6 +63,7 @@ def archiver_status_label(status):
         'URL invalid': _('URL invalid'),
         'URL request failed': _('URL request failed'),
         'Download error': _('Download error'),
+        'Non-evaluable': _('Non-evaluable'),
         'Chose not to download': _('Chose not to download'),
         'Download failure': _('Download failure'),
         'System error during archival': _('System error during archival'),
@@ -134,6 +135,11 @@ def archiver_reason_label(reason):
         'Too many redirects': _('Too many redirects'),
         'Missing downloaded file information': _('Missing downloaded file information'),
         'Azure upload failed': _('Azure upload failed'),
+        'Resource is a Download All ZIP resource': _(
+            'Resource is a Download All ZIP resource'),
+        'Resource is a Table Designer resource': _(
+            'Resource is a Table Designer resource'),
+        'Resource has no URL': _('Resource has no URL'),
         'No value for ckanext-archiver.cache_url_root in config': _(
             'No value for ckanext-archiver.cache_url_root in config'),
     }

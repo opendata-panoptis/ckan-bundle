@@ -11,6 +11,7 @@ from ckan.logic import validate, ValidationError, NotFound
 import ckan.logic.schema as schema_
 from ckan.common import _
 
+from ckanext.vocabulary_admin.cache import invalidate_vocabulary_cache
 from ckanext.vocabulary_admin.model.tag_metadata import VocabularyTagMetadata
 from ckanext.vocabulary_admin.model.vocabulary_description import VocabularyDescription
 from ckanext.vocabulary_admin.model import tag_metadata as tag_metadata_model
@@ -74,6 +75,8 @@ def tag_update(context, data_dict):
     if not context.get('defer_commit'):
         model.repo.commit()
 
+    invalidate_vocabulary_cache()
+
     log.info("Updated tag '%s'", tag)
     return model_dictize.tag_dictize(tag, context)
 
@@ -132,6 +135,7 @@ def vocabularyadmin_vocabulary_delete(context, data_dict):
 
     # Αποθηκεύουμε όλες τις αλλαγές στη βάση δεδομένων
     model.Session.commit()
+    invalidate_vocabulary_cache()
 
     return {'success': True}
 
@@ -184,6 +188,7 @@ def vocabularyadmin_tag_delete(context, data_dict):
     # 3. Κάνουμε commit ΜΙΑ φορά στο τέλος, για να γίνουν όλες οι αλλαγές μαζί.
     try:
         model.Session.commit()
+        invalidate_vocabulary_cache()
         log.info(f"Successfully deleted tag {tag_obj.id} and its metadata.")
     except Exception as e:
         model.Session.rollback()

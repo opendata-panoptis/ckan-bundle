@@ -4,16 +4,22 @@
   {{ super() }}
 
 {% set params = {"var" : "hello"} %}
+{% set current_dataset_type = dataset_type or (pkg.type if pkg else 'dataset') %}
+{% set feedback_subject = _('Data Service Feedback') if current_dataset_type == 'data-service' else _('Dataset Feedback') %}
 
 <a class="btn btn-primary"
    data-module="modal-contact"
    data-module-template="contact_form.html"
    data-module-key="{{ config.get('ckanext.contact.recaptcha_v3_key') }}"
    data-module-action="contact"
+   data-module-success-message="{{ _('Your comment has been sent and we will answer you as soon as possible.') }}"
+   data-module-error-message="{{ _('Sorry, there was an error sending the email. Please try again later.') }}"
+   data-module-close-label="{{ _('Close') }}"
+   data-module-scroll-on-flash="true"
    data-module-data-name="{{ c.userobj.fullname }}"
    data-module-data-email="{{ c.userobj.email }}"
-   data-module-data-subject="Dataset Feedback"
-   data-module-data-content="Hi, I wanted to ask about..."
+   data-module-data-subject="{{ feedback_subject }}"
+   data-module-data-content="{{ _('Hi, I wanted to ask about...') }}"
    data-module-package-id="{{ pkg.id }}"
    title="{{ _('Contact') }}">
    <i class="fas fa-envelope"></i>

@@ -1,0 +1,85 @@
+{% set title = package.title or package.name %}
+{% set url = h.url_for('showcase_blueprint.read', id=package.name) %}
+{% set datasets_total = package.num_datasets if package.num_datasets is defined else 0 %}
+{% set views_total = none %}
+{% if package.tracking_summary is defined %}
+  {% set views_total = package.tracking_summary.get('total', 0) if package.tracking_summary else 0 %}
+{% elif package.views_total is defined %}
+  {% set views_total = package.views_total %}
+{% endif %}
+{% set datasets_count = datasets_total | int %}
+{% set views_count = views_total | int if views_total is not none else none %}
+{% set description = package.notes if package.notes else '' %}
+{% set ns = namespace(submitter_organization='') %}
+{% if package.submitter_organization is defined and package.submitter_organization %}
+  {% set ns.submitter_organization = package.submitter_organization %}
+{% endif %}
+{% if not ns.submitter_organization and package.extras is defined and package.extras %}
+  {% for extra in package.extras %}
+    {% if extra.key == 'submitter_organization' %}
+      {% set ns.submitter_organization = extra.value %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{% if not ns.submitter_organization and package.organization is defined and package.organization %}
+  {% set ns.submitter_organization = package.organization.title or package.organization.name or '' %}
+{% endif %}
+{% set submitter_author = package.author if package.author is defined and package.author else (package.maintainer if package.maintainer is defined and package.maintainer else '') %}
+<li class="organizations-index-item">
+  <a href="{{ url }}" title="{{ _('View {showcase_title}').format(showcase_title=title) }}" class="organizations-index-card">
+    <div class="organizations-index-card-top" aria-hidden="true">
+      {% if package.image_display_url %}
+        <img
+          src="{{ package.image_display_url }}"
+          alt=""
+          class="showcase-cover-img"
+          loading="lazy">
+      {% else %}
+        <span class="showcase-cover-fallback">{{ (title[:1] if title else '?') | upper }}</span>
+      {% endif %}
+    </div>
+    <div class="organizations-index-card-main">
+      <h2 class="organizations-index-title">{{ title }}</h2>
+      {% if ns.submitter_organization or submitter_author %}
+        <div class="organizations-index-submitter" aria-label="{{ _('Αναρτητής εφαρμογής') }}">
+          {% if ns.submitter_organization %}
+            <span class="organizations-index-submitter-item">
+              <i class="fa fa-building" aria-hidden="true"></i>
+              <span class="organizations-index-submitter-text" title="{{ ns.submitter_organization }}">{{ ns.submitter_organization }}</span>
+            </span>
+          {% endif %}
+          {% if ns.submitter_organization and submitter_author %}
+            <span class="organizations-index-submitter-sep" aria-hidden="true">|</span>
+          {% endif %}
+          {% if submitter_author %}
+            <span class="organizations-index-submitter-item">
+              <i class="fa fa-user" aria-hidden="true"></i>
+              <span class="organizations-index-submitter-text" title="{{ submitter_author }}">{{ submitter_author }}</span>
+            </span>
+          {% endif %}
+        </div>
+      {% endif %}
+      <div class="organizations-index-stats" aria-label="{{ _('Στατιστικά εφαρμογής') }}">
+        {% if views_count is not none %}
+          <span class="organizations-index-stat"
+            aria-label="{{ _('{num} Προβολές').format(num=views_count) }}"
+            title="{{ _('{num} Προβολές').format(num=views_count) }}">
+            <i class="fa fa-eye" aria-hidden="true" title="{{ _('{num} Προβολές').format(num=views_count) }}"></i>
+            <span class="organizations-index-stat-value">{{ '{:,}'.format(views_count) | replace(',', ' ') }}</span>
+            <span class="organizations-index-visually-hidden">{{ _('Προβολές') }}</span>
+          </span>
+        {% endif %}
+        <span class="organizations-index-stat"
+          aria-label="{{ _('{num} Σύνολα Δεδομένων').format(num=datasets_count) }}"
+          title="{{ _('{num} Σύνολα Δεδομένων').format(num=datasets_count) }}">
+          <i class="fa fa-database" aria-hidden="true" title="{{ _('{num} Σύνολα Δεδομένων').format(num=datasets_count) }}"></i>
+          <span class="organizations-index-stat-value">{{ '{:,}'.format(datasets_count) | replace(',', ' ') }}</span>
+          <span class="organizations-index-visually-hidden">{{ _('Σύνολα Δεδομένων') }}</span>
+        </span>
+      </div>
+      {% if description %}
+        <p class="organizations-index-description">{{ h.markdown_extract(description, extract_length=170) }}</p>
+      {% endif %}
+    </div>
+  </a>
+</li>

@@ -10,7 +10,12 @@
 {% block secondary %}
 {% endblock %}
 
+{% block skip %}
+    <div class="visually-hidden-focusable"><a href="#main-content">{{ _('Skip to main content') }}</a></div>
+{% endblock %}
+
 {% block primary %}
+        <main id="main-content" class="primary col-12" role="main">
 		    <article class="module support-page">
 	        <div class="module-content">
 	            {% set site_title = (config.get('ckan.site_title') or '').strip() %}
@@ -141,7 +146,7 @@
               <div class="row">
                 <div class="col-md-3 col-sm-6">
                   <div class="module module-narrow module-shallow support-card"
-                       data-subject-type="general_question">
+                       data-subject-type="">
                     <h3 class="module-heading">💁‍♀️ Γενική ερώτηση</h3>
                     <div class="module-content">
                       <p>Γενικές ερωτήσεις για τα δεδομένα ή την πύλη.</p>
@@ -152,7 +157,7 @@
                             <input type="radio"
                                    name="support_subject_choice"
                                    value="specific_data"
-                                   data-subject-type="general_question">
+                                   data-subject-type="">
                             <span>Συγκεκριμένα δεδομένα ή σύνολο δεδομένων</span>
                           </label>
                         </li>
@@ -161,7 +166,7 @@
                             <input type="radio"
                                    name="support_subject_choice"
                                    value="procedure"
-                                   data-subject-type="general_question">
+                                   data-subject-type="">
                             <span>Μια διοικητική διαδικασία</span>
                           </label>
                         </li>
@@ -170,7 +175,7 @@
                             <input type="radio"
                                    name="support_subject_choice"
                                    value="portal_usage"
-                                   data-subject-type="general_question">
+                                   data-subject-type="">
                             <span>Τη χρήση του data.gov.gr</span>
                           </label>
                         </li>
@@ -181,11 +186,51 @@
 
                 <div class="col-md-3 col-sm-6">
                   <div class="module module-narrow module-shallow support-card"
-                       data-subject-type="open_new_data">
-                    <h3 class="module-heading">💡 Αίτημα για δεδομένα</h3>
+                       data-subject-type="api_or_technical">
+                    <h3 class="module-heading">🛠️ Τεχνικό πρόβλημα-σφάλμα με λογαριασμό/Εθνική Πύλη</h3>
                     <div class="module-content">
-                      <p>Θέλετε να ανοίξουν ή να ενημερωθούν δεδομένα;</p>
-                      <p class="mb-0">Συνηθισμένες περιπτώσεις</p>
+                      <p>Περιγράψτε πρόβλημα σύνδεσης, λογαριασμού ή δυσλειτουργία στην Εθνική Πύλη.</p>
+                      <p class="mb-0">Ενδεικτικά:</p>
+                      <ul class="support-scope-list">
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="account_issue"
+                                   data-subject-type="api_or_technical">
+                            <span>Πρόβλημα με λογαριασμό ή σύνδεση</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="portal_error"
+                                   data-subject-type="api_or_technical">
+                            <span>Σφάλμα ή δυσλειτουργία στην Εθνική Πύλη</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label class="support-scope-option">
+                            <input type="radio"
+                                   name="support_subject_choice"
+                                   value="service_issue"
+                                   data-subject-type="api_or_technical">
+                            <span>Τεχνικό πρόβλημα σε υπηρεσία ή σελίδα</span>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                  <div class="module module-narrow module-shallow support-card"
+                       data-subject-type="open_new_data">
+                    <h3 class="module-heading">📂 Αίτημα διάθεσης νέου ανοικτού συνόλου δεδομένων</h3>
+                    <div class="module-content">
+                      <p>Ζητήστε νέο ανοικτό σύνολο δεδομένων ή επέκταση διαθέσιμων δεδομένων.</p>
+                      <p class="mb-0">Συνηθισμένες περιπτώσεις:</p>
                       <ul class="support-scope-list">
                         <li>
                           <label class="support-scope-option">
@@ -209,49 +254,9 @@
                           <label class="support-scope-option">
                             <input type="radio"
                                    name="support_subject_choice"
-                                   value="licensing"
+                                   value="agency_data_request"
                                    data-subject-type="open_new_data">
-                            <span>Διευκρινίσεις για άδειες και όρους χρήσης</span>
-                          </label>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-md-3 col-sm-6">
-                  <div class="module module-narrow module-shallow support-card"
-                       data-subject-type="api_or_technical">
-                    <h3 class="module-heading">🐛 Αναφορά σφάλματος</h3>
-                    <div class="module-content">
-                      <p>Κάτι δεν λειτουργεί όπως θα έπρεπε στην πύλη ή στα δεδομένα;</p>
-                      <p class="mb-0">Παραδείγματα</p>
-                      <ul class="support-scope-list">
-                        <li>
-                          <label class="support-scope-option">
-                            <input type="radio"
-                                   name="support_subject_choice"
-                                   value="page_error"
-                                   data-subject-type="api_or_technical">
-                            <span>Σελίδα που εμφανίζει σφάλμα</span>
-                          </label>
-                        </li>
-                        <li>
-                          <label class="support-scope-option">
-                            <input type="radio"
-                                   name="support_subject_choice"
-                                   value="api_issue"
-                                   data-subject-type="api_or_technical">
-                            <span>API που δεν ανταποκρίνεται όπως αναμένεται</span>
-                          </label>
-                        </li>
-                        <li>
-                          <label class="support-scope-option">
-                            <input type="radio"
-                                   name="support_subject_choice"
-                                   value="data_inconsistency"
-                                   data-subject-type="api_or_technical">
-                            <span>Λανθασμένα ή ασυνεπή δεδομένα</span>
+                            <span>Αίτημα διάθεσης δεδομένων από φορέα</span>
                           </label>
                         </li>
                       </ul>
@@ -262,9 +267,10 @@
                 <div class="col-md-3 col-sm-6">
                   <div class="module module-narrow module-shallow support-card"
                        data-subject-type="general_feedback">
-                    <h3 class="module-heading">💬 Γενικό σχόλιο / βελτίωση</h3>
+                    <h3 class="module-heading">💡 Πρόταση βελτίωσης της Εθνικής Πύλης</h3>
                     <div class="module-content">
-                      <p>Σχόλια και προτάσεις για την πύλη data.gov.gr.</p>
+                      <p>Στείλτε προτάσεις για καλύτερη εμπειρία χρήσης και λειτουργίες της πύλης.</p>
+                      <p class="mb-0">Ενδεικτικά:</p>
                       <ul class="support-scope-list">
                         <li>
                           <label class="support-scope-option">
@@ -272,7 +278,7 @@
                                    name="support_subject_choice"
                                    value="feedback_usability"
                                    data-subject-type="general_feedback">
-                            <span>Εμπειρία χρήσης / ευχρηστία της πύλης</span>
+                            <span>Βελτίωση ευχρηστίας ή πλοήγησης</span>
                           </label>
                         </li>
                         <li>
@@ -281,7 +287,7 @@
                                    name="support_subject_choice"
                                    value="feedback_features"
                                    data-subject-type="general_feedback">
-                            <span>Προτάσεις για νέες λειτουργίες</span>
+                            <span>Πρόταση για νέα λειτουργία</span>
                           </label>
                         </li>
                         <li>
@@ -290,14 +296,13 @@
                                    name="support_subject_choice"
                                    value="feedback_content"
                                    data-subject-type="general_feedback">
-                            <span>Σχόλιο ή παρατήρηση για το περιεχόμενο</span>
+                            <span>Βελτίωση περιεχομένου ή πληροφόρησης</span>
                           </label>
                         </li>
                       </ul>
                     </div>
                   </div>
                 </div>
-
               </div>
             </section>
             {% endif %}
@@ -305,14 +310,23 @@
             <section class="support-form" id="support-contact-form">
               <h2>Επικοινωνήστε μαζί μας</h2>
               {% block contact_form_content %}
-                  {% set show_extended_contact_fields = true %}
-                  {% set contact_context = 'page' %}
-                  {% include "contact/snippets/form.html" %}
+                  {% set external_contact_url = (config.get('ckanext.contact.external_contact_url') or '')|trim %}
+                  {% if external_contact_url %}
+                    <p>
+                      Ρωτήστε μας στην ακόλουθη σελίδα:
+                      <a href="{{ external_contact_url }}" target="_blank" rel="noopener">{{ external_contact_url }}</a>
+                    </p>
+                  {% else %}
+                    {% set show_extended_contact_fields = true %}
+                    {% set contact_context = 'page' %}
+                    {% include "contact/snippets/form.html" %}
+                  {% endif %}
               {% endblock %}
             </section>
 
         </div>
     </article>
+    </main>
     <style>
       .support-faq .accordion {
         margin-left: 1.5rem;
@@ -493,7 +507,7 @@
                 scopeField.value = scope;
               }
 
-              var subjectType = radio.getAttribute('data-subject-type') || 'general_feedback';
+              var subjectType = radio.getAttribute('data-subject-type') || '';
               subjectSelect.value = subjectType;
               try {
                 var event = new Event('change', {bubbles: true});
@@ -506,7 +520,7 @@
 
               // Προσυμπλήρωση του πεδίου \"Θέμα\" με την υποκατηγορία,
               // αν είναι κενό ή αν είχε ήδη συμπληρωθεί αυτόματα.
-              if (subjectInput) {
+              if (subjectInput && radio.getAttribute('data-autofill-subject') !== 'false') {
                 var labelEl = radio.closest('.support-scope-option');
                 var labelText = '';
                 if (labelEl) {

@@ -24,9 +24,12 @@ msgstr ""
 msgid "Broken links"
 msgstr "Μη λειτουργικοί σύνδεσμοι"
 
+msgid "Resource Links Report"
+msgstr "Αναφορά Συνδέσμων Πόρων"
+
 #: ckanext/archiver/reports.py:240
 msgid "Dataset resource URLs that are found to result in errors when resolved."
-msgstr "URLs πόρων συνόλων δεδομένων που βρέθηκαν να προκαλούν σφάλματα κατά την επίλυση."
+msgstr "URLs πόρων συνόλων δεδομένων που βρέθηκαν να προκαλούν σφάλματα κατά τον έλεγχό τους."
 
 #: ckanext/archiver/tasks.py:409 ckanext/archiver/tasks.py:430
 #: ckanext/archiver/tasks.py:626
@@ -249,3 +252,24 @@ msgstr "δεν έχει καταγραφεί"
 
 msgid "Max retries exceeded with url"
 msgstr "Έγιναν υπερβολικά πολλές προσπάθειες για το URL"
+
+msgid "No broken links were found for this organization."
+msgstr "Δεν βρέθηκαν μη λειτουργικοί σύνδεσμοι για αυτόν τον οργανισμό."
+
+msgid "No broken links were found."
+msgstr "Δεν βρέθηκαν μη λειτουργικοί σύνδεσμοι."
+
+msgid "Non-evaluable"
+msgstr "Μη αξιολογήσιμο"
+
+msgid "Non-evaluable resources"
+msgstr "Μη αξιολογήσιμοι πόροι"
+
+msgid "Resource is a Table Designer resource"
+msgstr "Ο πόρος έχει δημιουργηθεί με Table Designer"
+
+msgid "Resource has no URL"
+msgstr "Ο πόρος δεν έχει URL"
+
+msgid "Resource is a Download All ZIP resource"
+msgstr "Ο πόρος είναι συνθετικό ZIP λήψης όλων των πόρων"

@@ -267,6 +267,18 @@ class AzureResourceUploader(BaseAzureUploader):
                 except Exception:
                     pass
             self.upload_file = _get_underlying_file(upload_field_storage)
+            # Εκθέτουμε το filesize μόνο όταν μπορεί να μετρηθεί με ασφάλεια.
+            # Αν το stream δεν υποστηρίζει seek/tell, δεν ορίζουμε καθόλου
+            # `filesize` ώστε να μη γραφτεί λανθασμένα size=0 στο resource.
+            measured_size = None
+            try:
+                self.upload_file.seek(0, os.SEEK_END)
+                measured_size = self.upload_file.tell()
+                self.upload_file.seek(0, os.SEEK_SET)
+            except Exception:
+                pass
+            if measured_size is not None:
+                self.filesize = measured_size
         elif self.clear and resource.get('id'):
             # New, not yet created resources can be marked for deletion if the
             # user cancels an upload and enters a URL instead.

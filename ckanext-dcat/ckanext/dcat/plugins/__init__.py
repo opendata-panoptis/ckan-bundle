@@ -210,29 +210,100 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
                     if field['field_name'] == 'spatial_coverage':
                         spatial = subfields
 
-        # Συνάρτηση που ελέγχει αν υπάρχει κάποιο έγκυρο γεωμετρικό αντικείμενο (σε GeoJSON μορφή)
-        def _check_for_a_geom(spatial_dict):
+        polygon_field_groups = (
+            ('geom', 'Geometry'),
+            ('bbox', 'Bounding Box'),
+            ('centroid', 'Centroid'),
+        )
+        fallback_fields = (
+            'geom',
+            'Geometry',
+            'bbox',
+            'Bounding Box',
+            'centroid',
+            'Centroid',
+        )
 
-            # Αναζητούμε πιθανά πεδία που μπορεί να περιέχουν γεωμετρία μέσα στο spatial_dict
-            for field in ('geom', 'bbox', 'centroid', 'Geometry', 'Bounding Box', 'Centroid'):
-                value = spatial_dict.get(field)
-                if value:
-                    # Αν η τιμή είναι dictionary (π.χ. ένα GeoJSON object), την μετατρέπουμε σε συμβολοσειρά
-                    value = spatial_dict[field]
-                    if isinstance(value, dict):
-                        try:
-                            return json.dumps(value)
-                        except ValueError:
-                            continue
-                    # Αν είναι ήδη συμβολοσειρά, ελέγχουμε αν είναι έγκυρο JSON
-                    elif isinstance(value, str):
-                        try:
-                            json.loads(value)
-                            return value
-                        except ValueError:
-                            continue
-            # Αν δεν βρεθεί έγκυρη γεωμετρία, επιστρέφουμε None
+        def _parse_geojson_value(value):
+            if isinstance(value, dict):
+                try:
+                    return value, json.dumps(value)
+                except (TypeError, ValueError):
+                    return None
+
+            if isinstance(value, str):
+                try:
+                    geojson = json.loads(value)
+                except ValueError:
+                    return None
+                if isinstance(geojson, dict):
+                    return geojson, value
+
             return None
+
+        def _geojson_candidates(spatial_items, fields):
+            for item in spatial_items:
+                if not isinstance(item, dict):
+                    continue
+
+                for field in fields:
+                    value = item.get(field)
+                    if not value:
+                        continue
+
+                    parsed = _parse_geojson_value(value)
+                    if parsed:
+                        yield parsed
+
+        def _select_geojson_for_spatial(spatial_items):
+            # Για τη χωρική αναζήτηση στο Solr προτιμάμε πολύγωνα. Σε
+            # εγγραφές GeoNames μπορεί το geom να είναι Point και το bbox
+            # Polygon, οπότε δεν πρέπει να σταματάμε στο πρώτο έγκυρο Point.
+            # Αν υπάρχει λεπτομερές geom Polygon, αυτό προηγείται του bbox.
+            for fields in polygon_field_groups:
+                for geojson, geojson_string in _geojson_candidates(
+                    spatial_items, fields
+                ):
+                    if geojson.get('type') in ('Polygon', 'MultiPolygon'):
+                        return geojson, geojson_string
+
+            for geojson, geojson_string in _geojson_candidates(
+                spatial_items, fallback_fields
+            ):
+                if geojson:
+                    return geojson, geojson_string
+
+            return None
+
+        def _coordinate_extents(coordinates):
+            lons = []
+            lats = []
+
+            def collect(value):
+                if not isinstance(value, (list, tuple)):
+                    return
+
+                if (
+                    len(value) >= 2
+                    and not isinstance(value[0], (list, tuple))
+                    and not isinstance(value[1], (list, tuple))
+                ):
+                    try:
+                        lons.append(float(value[0]))
+                        lats.append(float(value[1]))
+                    except (TypeError, ValueError):
+                        pass
+                    return
+
+                for child in value:
+                    collect(child)
+
+            collect(coordinates)
+
+            if not lons or not lats:
+                return None
+
+            return min(lons), max(lons), min(lats), max(lats)
 
         # Ελέγχουμε αν υπάρχουν spatial δεδομένα στο dataset
         if spatial:
@@ -243,38 +314,20 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
                 except ValueError:
                     spatial = []
 
-            # Διατρέχουμε κάθε αντικείμενο (dict) στον πίνακα spatial
-            for item in spatial:
-                # Κάνουμε έλεγχο για την πρώτη διαθέσιμη γεωμετρία στο αντικείμενο
-                geojson_string = _check_for_a_geom(item)
-                if geojson_string:
-                    # Αν βρέθηκε έγκυρη γεωμετρία, την καταχωρούμε στα indexable πεδία
-                    dataset_dict['spatial'] = geojson_string
-                    dataset_dict['extras_spatial'] = geojson_string
+            selected = _select_geojson_for_spatial(spatial)
+            if selected:
+                geojson, geojson_string = selected
+                dataset_dict['spatial'] = geojson_string
+                dataset_dict['extras_spatial'] = geojson_string
 
-                    try:
-                        # Κάνουμε parse το GeoJSON string
-                        geojson = json.loads(geojson_string)
-
-                        # Αν είναι τύπου "Polygon", εξάγουμε τις συντεταγμένες για υπολογισμό bounding box
-                        if geojson.get("type") == "Polygon":
-                            coords = geojson.get("coordinates", [])
-                            if coords and coords[0]:
-                                # Παίρνουμε όλα τα γεωγραφικά πλάτη και μήκη
-                                lons = [pt[0] for pt in coords[0]]
-                                lats = [pt[1] for pt in coords[0]]
-
-                                # Υπολογίζουμε min/max τιμές για να δημιουργήσουμε bounding box (extents)
-                                dataset_dict['minx'] = min(lons)
-                                dataset_dict['maxx'] = max(lons)
-                                dataset_dict['miny'] = min(lats)
-                                dataset_dict['maxy'] = max(lats)
-
-                    except Exception:
-                        # Σε περίπτωση σφάλματος (π.χ. κακό format), συνεχίζουμε χωρίς να διακόψουμε τη ροή
-                        pass
-                    # Μόλις βρεθεί και καταχωρηθεί η πρώτη έγκυρη γεωμετρία, σταματάμε την αναζήτηση
-                    break
+                if geojson.get('type') in ('Polygon', 'MultiPolygon'):
+                    extents = _coordinate_extents(geojson.get('coordinates', []))
+                    if extents:
+                        minx, maxx, miny, maxy = extents
+                        dataset_dict['minx'] = minx
+                        dataset_dict['maxx'] = maxx
+                        dataset_dict['miny'] = miny
+                        dataset_dict['maxy'] = maxy
         # Επιστρέφουμε το τελικό dataset_dict για index στο CKAN
         return dataset_dict
 

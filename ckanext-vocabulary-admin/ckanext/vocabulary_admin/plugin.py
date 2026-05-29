@@ -114,6 +114,13 @@ class VocabularyAdminPlugin(plugins.SingletonPlugin):
             'vocabularyadmin_get_tag_metadata': helpers.get_tag_metadata,
             'vocabularyadmin_get_vocabulary_description': helpers.get_vocabulary_description,
             'vocabularyadmin_get_tags_for_scheming': helpers.vocabularyadmin_get_tags_for_scheming,
+            'vocabularyadmin_is_vocabulary_delete_enabled': helpers.vocabularyadmin_is_vocabulary_delete_enabled,
+            'vocabularyadmin_is_tag_delete_enabled': helpers.vocabularyadmin_is_tag_delete_enabled,
+            'vocabularyadmin_is_vocabulary_name_readonly': helpers.vocabularyadmin_is_vocabulary_name_readonly,
+            'vocabularyadmin_is_tag_name_readonly': helpers.vocabularyadmin_is_tag_name_readonly,
+            'vocabularyadmin_is_tag_vocabulary_readonly': helpers.vocabularyadmin_is_tag_vocabulary_readonly,
+            'vocabularyadmin_is_tag_uri_readonly': helpers.vocabularyadmin_is_tag_uri_readonly,
+            'vocabularyadmin_is_protected_vocabulary': helpers.vocabularyadmin_is_protected_vocabulary,
         }
 
     # IActions

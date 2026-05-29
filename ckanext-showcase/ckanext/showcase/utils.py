@@ -21,6 +21,8 @@ abort = tk.abort
 
 log = logging.getLogger(__name__)
 DATASET_TYPE_NAME = 'showcase'
+SHOWCASE_DATASET_PACKAGE_TYPE = 'dataset'
+SHOWCASE_API_PACKAGE_TYPE = 'data-service'
 
 
 def check_edit_view_auth(id):
@@ -73,29 +75,36 @@ def read_view(id):
     }
     pkg_dict = read_showcase(id, context)
 
-    # get showcase packages
-    showcase_pkgs = tk.get_action('ckanext_showcase_package_list')(
-        context, {
-            'showcase_id': pkg_dict['id']
-        })
+    showcase_datasets = tk.get_action('ckanext_showcase_package_list')(
+        context,
+        {
+            'showcase_id': pkg_dict['id'],
+            'package_type': SHOWCASE_DATASET_PACKAGE_TYPE,
+        },
+    )
+    showcase_apis = tk.get_action('ckanext_showcase_package_list')(
+        context,
+        {
+            'showcase_id': pkg_dict['id'],
+            'package_type': SHOWCASE_API_PACKAGE_TYPE,
+        },
+    )
 
     package_type = DATASET_TYPE_NAME
     return tk.render('showcase/read.html',
                      extra_vars={'dataset_type': package_type,
                                  'pkg_dict': pkg_dict,
-                                 'showcase_pkgs': showcase_pkgs})
+                                 'showcase_datasets': showcase_datasets,
+                                 'showcase_apis': showcase_apis})
 
 def read_showcase(id, context):
-
     data_dict = {'id': id}
-
-
-    pkg_dict = None
 
     # check if showcase exists
     try:
-        context['ignore_auth'] = True
-        pkg_dict = tk.get_action('ckanext_showcase_show')(context, data_dict)
+        show_context = context.copy()
+        show_context['ignore_auth'] = True
+        pkg_dict = tk.get_action('ckanext_showcase_show')(show_context, data_dict)
     except tk.ObjectNotFound:
         return tk.abort(404, _('Showcase not found'))
     except tk.NotAuthorized:
@@ -142,142 +151,278 @@ def is_user_creator_of_showcase(pkg_dict, logged_user_id):
         return False
 
 
-def manage_datasets_view(id):
+def ensure_showcase_get_management_access(id, context):
+    """
+    Access gate μόνο για GET των management pages.
 
-    context = {
-        'model': model,
-        'session': model.Session,
-        'user': tk.g.user or tk.g.author
-    }
-
-    data_dict = read_showcase(id, context)
+    Επιτρέπεται μόνο σε:
+    1. sysadmin
+    2. showcase admin
+    3. creator μόνο όταν το showcase ΔΕΝ είναι approved
+    """
+    data_dict = {'id': id}
 
     try:
-        tk.check_access('ckanext_showcase_update', context, data_dict)
-    except tk.NotAuthorized:
-        return tk.abort(
-            401,
-            _('User not authorized to edit {showcase_id}').format(
-                showcase_id=id))
-
-    # check if showcase exists
-    try:
-        pkg_dict = tk.get_action('package_show')(context, data_dict)
+        show_context = context.copy()
+        show_context['ignore_auth'] = True
+        pkg_dict = tk.get_action('ckanext_showcase_show')(
+            show_context,
+            data_dict
+        )
     except tk.ObjectNotFound:
         return tk.abort(404, _('Showcase not found'))
     except tk.NotAuthorized:
         return tk.abort(401, _('Unauthorized to read showcase'))
 
+    from ckanext.showcase.logic.auth import _is_showcase_admin
+
+    # sysadmin
+    if is_sysadmin(tk.g.user):
+        return pkg_dict
+
+    # showcase admin
+    if _is_showcase_admin(context):
+        return pkg_dict
+
+    # creator μόνο αν δεν είναι approved
+    logged_user_id = getattr(getattr(g, 'userobj', None), 'id', None)
+    if logged_user_id and is_user_creator_of_showcase(pkg_dict, logged_user_id):
+        if not is_showcase_approved(pkg_dict):
+            return pkg_dict
+
+    return tk.abort(403, _('You do not have access to this page'))
+
+
+def manage_datasets_view(id):
+    return _manage_associated_packages_view(
+        id=id,
+        package_type=SHOWCASE_DATASET_PACKAGE_TYPE,
+        form_prefix='dataset_',
+        manage_route='showcase_blueprint.manage_datasets',
+        add_success_singular="The dataset has been added to the showcase.",
+        add_success_plural="The datasets have been added to the showcase.",
+        remove_success_singular="The dataset has been removed from the showcase.",
+        remove_success_plural="The datasets have been removed from the showcase.",
+        template='showcase/manage_datasets.html',
+        required_fq='+private:false +state:active',
+        always_filter_by_type=True,
+    )
+
+
+def manage_apis_view(id):
+    return _manage_associated_packages_view(
+        id=id,
+        package_type=SHOWCASE_API_PACKAGE_TYPE,
+        form_prefix='api_',
+        manage_route='showcase_blueprint.manage_apis',
+        add_success_singular="Το API προστέθηκε στην εφαρμογή.",
+        add_success_plural="Τα APIs προστέθηκαν στην εφαρμογή.",
+        remove_success_singular="Το API αφαιρέθηκε από την εφαρμογή.",
+        remove_success_plural="Τα APIs αφαιρέθηκαν από την εφαρμογή.",
+        template='showcase/manage_apis.html',
+        required_fq='+owner_org:[* TO *] +private:false +state:active',
+        always_filter_by_type=True,
+    )
+
+
+def _management_context():
+    return {
+        'model': model,
+        'session': model.Session,
+        'user': tk.g.user or tk.g.author,
+        'auth_user_obj': tk.g.userobj,
+    }
+
+
+def _get_selected_package_ids(form_data, form_prefix):
+    selected_ids = []
+    for param in form_data:
+        if param.startswith(form_prefix):
+            selected_ids.append(param[len(form_prefix):])
+    return selected_ids
+
+
+def _partition_package_ids_by_type(package_ids, expected_package_type, context):
+    valid_package_ids = []
+    invalid_package_ids = []
+
+    for package_id in package_ids:
+        try:
+            show_context = context.copy()
+            show_context['ignore_auth'] = True
+            package_dict = tk.get_action('package_show')(
+                show_context,
+                {'id': package_id},
+            )
+        except (tk.ObjectNotFound, tk.NotAuthorized):
+            invalid_package_ids.append(package_id)
+            continue
+
+        if package_dict.get('type') == expected_package_type:
+            valid_package_ids.append(package_id)
+        else:
+            invalid_package_ids.append(package_id)
+
+    return valid_package_ids, invalid_package_ids
+
+
+def _load_manage_showcase(id, context):
+    if tk.request.method == 'GET':
+        ensure_showcase_get_management_access(id, context)
+
+    pkg_dict = read_showcase(id, context)
+    try:
+        tk.check_access('ckanext_showcase_update', context, pkg_dict)
+    except tk.NotAuthorized:
+        tk.abort(
+            401,
+            _('User not authorized to edit {showcase_id}').format(
+                showcase_id=id))
+
+    return pkg_dict
+
+
+def _manage_associated_packages_view(
+    id,
+    package_type,
+    form_prefix,
+    manage_route,
+    add_success_singular,
+    add_success_plural,
+    remove_success_singular,
+    remove_success_plural,
+    template,
+    required_fq='',
+    always_filter_by_type=False,
+):
+    context = _management_context()
+    pkg_dict = _load_manage_showcase(id, context)
+
     form_data = tk.request.form
-    manage_route = 'showcase_blueprint.manage_datasets'
 
-    # Αν γίνεται διαγραφή της συσχέτισης showcase-dataset
-    if (tk.request.method == 'POST' and 'bulk_action.showcase_remove' in form_data):
-
-        # Αν η εφαρμογή είναι εγκεκριμένη δεν επιτρέπεται η αφαίρεση σύνδεσης
-        if is_showcase_approved(pkg_dict):
-            return tk.abort(403, _('Removing the relation of an approved showcase is not permitted.'))
-
-        # Find the datasets to perform the action on, they are prefixed by
-        # dataset_ in the form data
-        dataset_ids = []
-        for param in form_data:
-            if param.startswith('dataset_'):
-                dataset_ids.append(param[8:])
-        if dataset_ids:
-            for dataset_id in dataset_ids:
+    if tk.request.method == 'POST' and 'bulk_action.showcase_remove' in form_data:
+        package_ids = _get_selected_package_ids(form_data, form_prefix)
+        package_ids, invalid_package_ids = _partition_package_ids_by_type(
+            package_ids,
+            package_type,
+            context,
+        )
+        if invalid_package_ids:
+            h.flash_notice(
+                _('Τα επιλεγμένα στοιχεία που δεν αντιστοιχούν σε αυτήν τη σελίδα αγνοήθηκαν.'),
+            )
+        if package_ids:
+            for package_id in package_ids:
                 tk.get_action('ckanext_showcase_package_association_delete')(
-                    context, {
+                    context,
+                    {
                         'showcase_id': pkg_dict['id'],
-                        'package_id': dataset_id
-                    })
+                        'package_id': package_id,
+                    },
+                )
             h.flash_success(
                 tk.ungettext(
-                    "The dataset has been removed from the showcase.",
-                    "The datasets have been removed from the showcase.",
-                    len(dataset_ids)))
-            url = h.url_for(manage_route, id=id)
-            return h.redirect_to(url)
+                    remove_success_singular,
+                    remove_success_plural,
+                    len(package_ids),
+                )
+            )
+            return h.redirect_to(h.url_for(manage_route, id=id))
 
-    # Are we creating a showcase/dataset association?
-    elif (tk.request.method == 'POST'
-          and 'bulk_action.showcase_add' in form_data):
-
-        if is_showcase_approved(pkg_dict):
-            return tk.abort(403, _('Adding relation of an approved showcase is not permitted.'))
-
-        # Find the datasets to perform the action on, they are prefixed by
-        # dataset_ in the form data
-        dataset_ids = []
-        for param in form_data:
-            if param.startswith('dataset_'):
-                dataset_ids.append(param[8:])
-        if dataset_ids:
+    elif tk.request.method == 'POST' and 'bulk_action.showcase_add' in form_data:
+        package_ids = _get_selected_package_ids(form_data, form_prefix)
+        package_ids, invalid_package_ids = _partition_package_ids_by_type(
+            package_ids,
+            package_type,
+            context,
+        )
+        if invalid_package_ids:
+            h.flash_notice(
+                _('Τα επιλεγμένα στοιχεία που δεν αντιστοιχούν σε αυτήν τη σελίδα αγνοήθηκαν.'),
+            )
+        if package_ids:
             successful_adds = []
-            for dataset_id in dataset_ids:
+            for package_id in package_ids:
                 try:
-                    tk.get_action(
-                        'ckanext_showcase_package_association_create')(
-                            context, {
-                                'showcase_id': pkg_dict['id'],
-                                'package_id': dataset_id
-                            })
+                    tk.get_action('ckanext_showcase_package_association_create')(
+                        context,
+                        {
+                            'showcase_id': pkg_dict['id'],
+                            'package_id': package_id,
+                        },
+                    )
                 except tk.ValidationError as e:
                     h.flash_notice(e.error_summary)
                 else:
-                    successful_adds.append(dataset_id)
+                    successful_adds.append(package_id)
             if successful_adds:
                 h.flash_success(
                     tk.ungettext(
-                        "The dataset has been added to the showcase.",
-                        "The datasets have been added to the showcase.",
-                        len(successful_adds)))
-            url = h.url_for(manage_route, id=id)
-            return h.redirect_to(url)
+                        add_success_singular,
+                        add_success_plural,
+                        len(successful_adds),
+                    )
+                )
+            return h.redirect_to(h.url_for(manage_route, id=id))
 
-    extra_vars = _add_dataset_search(pkg_dict['id'], pkg_dict['name'])
-
-    # get showcase packages
-    showcase_pkgs = tk.get_action('ckanext_showcase_package_list')(
-        context, {
-            'showcase_id': pkg_dict['id']
-        })
+    extra_vars = _add_package_search(
+        showcase_id=pkg_dict['id'],
+        showcase_name=pkg_dict['name'],
+        package_type=package_type,
+        manage_route=manage_route,
+        required_fq=required_fq,
+        always_filter_by_type=always_filter_by_type,
+    )
+    associated_packages = tk.get_action('ckanext_showcase_package_list')(
+        context,
+        {
+            'showcase_id': pkg_dict['id'],
+            'package_type': package_type,
+        },
+    )
 
     extra_vars['pkg_dict'] = pkg_dict
-    extra_vars['showcase_pkgs'] = showcase_pkgs
+    extra_vars['showcase_pkgs'] = associated_packages
 
-    return tk.render('showcase/manage_datasets.html',
-                     extra_vars=extra_vars)
+    return tk.render(template, extra_vars=extra_vars)
 
 
 def _add_dataset_search(showcase_id, showcase_name):
+    return _add_package_search(
+        showcase_id=showcase_id,
+        showcase_name=showcase_name,
+        package_type=SHOWCASE_DATASET_PACKAGE_TYPE,
+        manage_route='showcase_blueprint.manage_datasets',
+    )
+
+
+def _add_package_search(showcase_id, showcase_name, package_type,
+                        manage_route, required_fq='',
+                        always_filter_by_type=False):
     '''
-    Search logic for discovering datasets to add to a showcase.
+    Search logic for discovering packages to add to a showcase.
     '''
 
     from ckan.lib.search import SearchError
 
-    package_type = 'dataset'
     extra_vars = {}
 
-    # unicode format (decoded from utf8)
     extra_vars['q'] = q = tk.request.args.get('q', '')
     extra_vars['query_error'] = False
     page = h.get_page_number(tk.request.args)
 
     limit = int(tk.config.get('ckan.datasets_per_page', 20))
 
-    # most search operations should reset the page counter:
     params_nopage = [(k, v) for k, v in tk.request.args.items()
                      if k != 'page']
 
     def remove_field(key, value=None, replace=None):
-        return h.remove_url_param(key,
-                                  value=value,
-                                  replace=replace,
-                                  controller='dataset' if
-                                  tk.check_ckan_version('2.9') else 'package',
-                                  action='search')
+        return h.remove_url_param(
+            key,
+            value=value,
+            replace=replace,
+            alternative_url=h.url_for(manage_route, id=showcase_name),
+        )
 
     extra_vars['remove_field'] = remove_field
 
@@ -285,39 +430,29 @@ def _add_dataset_search(showcase_id, showcase_name):
     params_nosort = [(k, v) for k, v in params_nopage if k != 'sort']
 
     def _sort_by(fields):
-        """
-        Sort by the given list of fields.
-
-        Each entry in the list is a 2-tuple: (fieldname, sort_order)
-
-        eg - [('metadata_modified', 'desc'), ('name', 'asc')]
-
-        If fields is empty, then the default ordering is used.
-        """
         params = params_nosort[:]
-
         if fields:
             sort_string = ', '.join('%s %s' % f for f in fields)
             params.append(('sort', sort_string))
-        return _search_url(params, showcase_name)
+        return _search_url(params, showcase_name, manage_route)
 
     extra_vars['sort_by'] = _sort_by
     if sort_by is None:
         extra_vars['sort_by_fields'] = []
     else:
-        extra_vars['sort_by_fields'] = [field.split()[0] for field in sort_by.split(',')]
+        extra_vars['sort_by_fields'] = [
+            field.split()[0] for field in sort_by.split(',')
+        ]
 
     def pager_url(q=None, page=None):
         params = list(params_nopage)
         params.append(('page', page))
-        return _search_url(params, showcase_name)
+        return _search_url(params, showcase_name, manage_route)
 
     extra_vars['search_url_params'] = urlencode(_encode_params(params_nopage))
 
     try:
         fields = []
-        # fields_grouped will contain a dict of params containing
-        # a list of values eg {'tags':['tag1', 'tag2']}
         fields_grouped = {}
         search_extras = {}
         fq = ''
@@ -345,38 +480,31 @@ def _add_dataset_search(showcase_id, showcase_name):
             'auth_user_obj': tk.g.userobj
         }
 
-        # Unless changed via config options, don't show other dataset
-        # types any search page. Potential alternatives are do show them
-        # on the default search page (dataset) or on one other search page
         search_all_type = tk.config.get('ckan.search.show_all_types')
         search_all = False
 
         try:
-            # If the "type" is set to True or False, convert to bool
-            # and we know that no type was specified, so use traditional
-            # behaviour of applying this only to dataset type
             search_all = tk.asbool(search_all_type)
-            search_all_type = 'dataset'
-        # Otherwise we treat as a string representing a type
+            search_all_type = SHOWCASE_DATASET_PACKAGE_TYPE
         except ValueError:
             search_all = True
 
-        if not search_all or package_type != search_all_type:
-            # Only show datasets of this particular type
+        if always_filter_by_type or not search_all or package_type != search_all_type:
             fq += ' +dataset_type:{type}'.format(type=package_type)
 
-        # Only search for packages that aren't already associated with the
-        # Showcase
-        associated_package_ids = ShowcasePackageAssociation.get_package_ids_for_showcase(
-            showcase_id)
-        # flatten resulting list to space separated string
+        if required_fq:
+            fq += ' {0}'.format(required_fq)
+
+        associated_package_ids = (
+            ShowcasePackageAssociation.get_package_ids_for_showcase(showcase_id)
+        )
         if associated_package_ids:
-            associated_package_ids_str = \
-                ' OR '.join([id[0] for id in associated_package_ids])
+            associated_package_ids_str = ' OR '.join(
+                [pkg_id[0] for pkg_id in associated_package_ids]
+            )
             fq += ' !id:({0})'.format(associated_package_ids_str)
 
         facets = OrderedDict()
-
         default_facet_titles = {
             'organization': _('Organizations'),
             'groups': _('Groups'),
@@ -385,8 +513,6 @@ def _add_dataset_search(showcase_id, showcase_name):
             'license_id': _('Licenses'),
         }
 
-        # for CKAN-Versions that do not provide the facets-method from
-        # helper-context, import facets from ckan.common
         if hasattr(h, 'facets'):
             current_facets = h.facets()
         else:
@@ -399,7 +525,6 @@ def _add_dataset_search(showcase_id, showcase_name):
             else:
                 facets[facet] = facet
 
-        # Facet titles
         for plugin in p.PluginImplementations(p.IFacets):
             facets = plugin.dataset_facets(facets, package_type)
 
@@ -412,17 +537,19 @@ def _add_dataset_search(showcase_id, showcase_name):
             'rows': limit,
             'start': (page - 1) * limit,
             'sort': sort_by,
-            'extras': search_extras
+            'extras': search_extras,
         }
 
         query = tk.get_action('package_search')(context, data_dict)
         extra_vars['sort_by_selected'] = query['sort']
-
-        extra_vars['page'] = h.Page(collection=query['results'],
-                        page=page,
-                        url=pager_url,
-                        item_count=query['count'],
-                        items_per_page=limit)
+        extra_vars['page'] = h.Page(
+            collection=query['results'],
+            page=page,
+            presliced_list=True,
+            url=pager_url,
+            item_count=query['count'],
+            items_per_page=limit,
+        )
         extra_vars['facets'] = query['facets']
         extra_vars['search_facets'] = query['search_facets']
         extra_vars['page.items'] = query['results']
@@ -448,8 +575,8 @@ def _add_dataset_search(showcase_id, showcase_name):
     return extra_vars
 
 
-def _search_url(params, name):
-    url = h.url_for('showcase_blueprint.manage_datasets', id=name)
+def _search_url(params, name, manage_route):
+    url = h.url_for(manage_route, id=name)
     return url_with_params(url, params)
 
 
@@ -496,15 +623,19 @@ def delete_view(id):
                      extra_vars={'dataset_type': DATASET_TYPE_NAME,
                                  'pkg_dict': pkg_dict})
 
-# Ανάκτητη των showcases με βάση το id του συνόλου δεδομένων
-def dataset_showcase_list(id):
-    context = {
+def _package_read_context():
+    return {
         'model': model,
         'session': model.Session,
         'user': tk.g.user or tk.g.author,
         'for_view': True,
         'auth_user_obj': tk.g.userobj
     }
+
+
+# Ανάκτητη των showcases με βάση το id του συνόλου δεδομένων
+def dataset_showcase_list(id):
+    context = _package_read_context()
     data_dict = {'id': id}
 
     try:
@@ -517,9 +648,7 @@ def dataset_showcase_list(id):
     try:
         pkg_dict = tk.get_action('package_show')(context, data_dict)
         showcase_list = tk.get_action('ckanext_package_showcase_list')(
-            context, {
-                'package_id': pkg_dict['id']
-            })
+            context, {'package_id': pkg_dict['id']})
     except tk.ObjectNotFound:
         return tk.abort(404, _('Dataset not found'))
     except tk.NotAuthorized:
@@ -528,19 +657,16 @@ def dataset_showcase_list(id):
     list_route = 'showcase_blueprint.dataset_showcase_list'
 
     if tk.request.method == 'POST':
-        # Are we adding the dataset to a showcase?
         form_data = tk.request.form
-
         showcase_id = form_data.get('showcase_added')
 
-        showcase = read_showcase(showcase_id, context)
-
-        # Δεν μπορεί να γίνει αφαίρεση διασύνδεσης μη εγκεκριμένης εφαρμογής με σύνολο δεδομένων.
-        if not showcase['approval_status'] == 'approved':
-            return tk.abort(403, _('Δεν μπορεί να γίνει αφαίρεση διασύνδεσης μη εγκεκριμένης εφαρμογής με σύνολο δεδομένων.'))
-
-
         if showcase_id:
+            showcase = read_showcase(showcase_id, context)
+            if not showcase['approval_status'] == 'approved':
+                return tk.abort(
+                    403,
+                    _('Δεν μπορεί να γίνει αφαίρεση διασύνδεσης μη εγκεκριμένης εφαρμογής με σύνολο δεδομένων.'),
+                )
             data_dict = {
                 "showcase_id": showcase_id,
                 "package_id": pkg_dict['id']
@@ -550,11 +676,12 @@ def dataset_showcase_list(id):
                     context, data_dict)
             except tk.ObjectNotFound:
                 return tk.abort(404, _('Showcase not found'))
+            except tk.ValidationError as e:
+                h.flash_notice(e.error_summary)
             else:
                 h.flash_success(
                     _("The dataset has been added to the showcase."))
 
-        # Are we removing a dataset from a showcase?
         showcase_to_remove = form_data.get('remove_showcase_id')
         if showcase_to_remove:
             data_dict = {
@@ -575,18 +702,13 @@ def dataset_showcase_list(id):
     pkg_showcase_ids = [showcase['id'] for showcase in showcase_list]
     site_showcases = tk.get_action('ckanext_showcase_list')(context, {})
 
-
     showcase_dropdown = [
         [showcase['id'], showcase['title']]
         for showcase in site_showcases
-            # Φιλτράρουμε τα showcases τα οποία
-            # 1. δεν είναι ηδη στο σύνολο δεδομένων
-            # 2. Είναι εγκεκριμένα
-            if showcase['id'] not in pkg_showcase_ids and any(
-                extra['key'] == 'approval_status' and extra['value'] == 'approved'
-                for extra in showcase.get('extras', [])
-            )
-
+        if showcase['id'] not in pkg_showcase_ids and any(
+            extra['key'] == 'approval_status' and extra['value'] == 'approved'
+            for extra in showcase.get('extras', [])
+        )
     ]
 
     extra_vars = {
@@ -597,6 +719,39 @@ def dataset_showcase_list(id):
 
     return tk.render("package/dataset_showcase_list.html",
                      extra_vars=extra_vars)
+
+
+def data_service_showcase_list(id):
+    context = _package_read_context()
+    data_dict = {'id': id}
+
+    try:
+        tk.check_access('package_show', context, data_dict)
+    except tk.ObjectNotFound:
+        return tk.abort(404, _('Δεν βρέθηκε API'))
+    except tk.NotAuthorized:
+        return tk.abort(401, _('Not authorized to see this page'))
+
+    try:
+        pkg_dict = tk.get_action('package_show')(context, data_dict)
+        showcase_list = tk.get_action('ckanext_package_showcase_list')(
+            context, {'package_id': pkg_dict['id']})
+    except tk.ObjectNotFound:
+        return tk.abort(404, _('Δεν βρέθηκε API'))
+    except tk.NotAuthorized:
+        return tk.abort(401, _('Unauthorized to read package'))
+
+    if pkg_dict.get('type') != SHOWCASE_API_PACKAGE_TYPE:
+        return tk.abort(404, _('Δεν βρέθηκε API'))
+
+    return tk.render(
+        "package/data_service_showcase_list.html",
+        extra_vars={
+            'pkg_dict': pkg_dict,
+            'showcase_list': showcase_list,
+            'dataset_type': SHOWCASE_API_PACKAGE_TYPE,
+        },
+    )
 
 
 def manage_showcase_admins():

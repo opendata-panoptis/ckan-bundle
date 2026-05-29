@@ -277,7 +277,7 @@ class SpatialHarvester(HarvesterBase):
             # Extract and store landing page URL from resource locators - FIXED INTEGRATION
             landing_page_url = self._extract_landing_page(iso_values)
             if landing_page_url:
-                package_dict['landing_page'] = landing_page_url
+                package_dict['landing_page'] = [landing_page_url]
                 log.info('Extracted landing page URL: %s for GUID: %s',
                          landing_page_url, iso_values.get('guid', 'unknown'))
             else:

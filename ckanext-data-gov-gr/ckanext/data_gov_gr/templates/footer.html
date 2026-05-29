@@ -93,8 +93,10 @@
 
   <!-- accessibility widget -->
   {% if h.get_config_as_bool('accessibility.widget.enabled') %}
-<!--    <script src="https://website-widgets.pages.dev/dist/sienna.min.js" defer></script>-->
-    <script src="https://cdn.jsdelivr.net/gh/Arafeek/AccessWidget/dist/accesswidget.min.js" defer></script>
+    {% set userway_account = config.get('userway.account.key') %}
+    {% if userway_account %}
+      <script src="https://cdn.userway.org/widget.js" data-account="{{ userway_account }}" defer></script>
+    {% endif %}
   {% endif %}
 
   {# Optional user satisfaction survey popup (shown only when URL is set) #}

@@ -45,13 +45,17 @@ msgstr "Δεν υπάρχουν υφιστάμενες διασυνδέσεις.
 msgid "Create relationship"
 msgstr "Δημιουργία διασύνδεσης"
 
+#: ckanext/relationships/templates/package/relationships.html:79
+msgid "CKAN Dataset"
+msgstr "Σύνολο δεδομένων του συστήματος"
+
 #: ckanext/relationships/templates/package/relationships.html:47
 msgid "CKAN dataset to dataset relationship"
-msgstr "Σχέση μεταξύ συνόλων δεδομένων CKAN"
+msgstr "Σχέση μεταξύ συνόλων δεδομένων του συστήματος"
 
 #: ckanext/relationships/templates/package/relationships.html:77
 msgid "CKAN dataset to external URI relationship"
-msgstr "Σχέση μεταξύ συνόλου δεδομένων CKAN και εξωτερικού URI"
+msgstr "Σχέση μεταξύ συνόλου δεδομένων του συστήματος και εξωτερικού URI"
 
 #: ckanext/relationships/templates/package/snippets/relationship_list.html:3
 msgid "Relationships"

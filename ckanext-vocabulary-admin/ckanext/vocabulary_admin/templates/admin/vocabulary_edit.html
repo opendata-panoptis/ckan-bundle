@@ -1,4 +1,4 @@
-{% extends "admin/base.html" %}
+{% extends "admin/base_vocabulary.html" %}
 
 {% block primary_content_inner %}
   <div class="vocabulary-admin-page">
@@ -9,7 +9,7 @@
     <div class="control-group form-field-wrapper pb-2">
       <label class="control-label" for="name">{{ _('Όνομα') }}</label>
       <div class="controls">
-        <input type="text" id="name" name="name" class="form-control" value="{{ vocabulary.name }}" required>
+        <input type="text" id="name" name="name" class="form-control" value="{{ vocabulary.name }}" required {{ 'readonly' if h.vocabularyadmin_is_vocabulary_name_readonly() else '' }}>
         <span class="info-block">{{ _('Το όνομα του λεξιλογίου') }}</span>
       </div>
     </div>
@@ -71,9 +71,11 @@
             <a href="{{ h.url_for('vocabularyadmin.tag_edit', tag_id=tag.id) }}" class="btn btn-default tag-edit-button" title="{{ _('Επεξεργασία') }}">
               <i class="fa fa-edit"></i>
             </a>
+            {% if h.vocabularyadmin_is_tag_delete_enabled() %}
             <a href="{{ h.url_for('vocabularyadmin.tag_delete', tag_id=tag.id) }}" class="btn btn-danger tag-edit-button" title="{{ _('Διαγραφή') }}" onclick="return confirm('{{ _('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την ετικέτα; Αυτή η ενέργεια δεν αναιρείται.') }}');">
               <i class="fa fa-trash-alt"></i>
             </a>
+            {% endif %}
           </div>
         {% endfor %}
       {% else %}

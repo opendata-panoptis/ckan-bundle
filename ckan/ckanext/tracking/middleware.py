@@ -1,9 +1,6 @@
 import hashlib
 import logging
 
-from urllib.parse import unquote
-
-
 from ckan.common import request
 from ckan.types import Response
 
@@ -17,13 +14,13 @@ def track_request(response: Response) -> Response:
     path = request.environ.get('PATH_INFO')
     method = request.environ.get('REQUEST_METHOD')
     if path == '/_tracking' and method == 'POST':
-        # wsgi.input is a BytesIO object
-        payload = request.environ['wsgi.input'].read().decode()
-        parts = payload.split('&')
-        data = {}
-        for part in parts:
-            k, v = part.split('=')
-            data[k] = unquote(v)
+        # Μαζεύουμε ό,τι χρειαζόμαστε όσο υπάρχει ακόμη request context.
+        # Το callback εκτελείται αφού κλείσει το response iterable, οπότε τότε
+        # το request context δεν θα είναι πλέον διαθέσιμο.
+        url = request.form.get("url")
+        tracking_type = request.form.get("type")
+        if not url or not tracking_type:
+            return response
 
         # we want a unique anonomized key for each user so that we do
         # not count multiple clicks from the same user.
@@ -36,16 +33,23 @@ def track_request(response: Response) -> Response:
         # raises a type error on python<3.9
         h = hashlib.new('md5', usedforsecurity=False)
         h.update(key.encode())
-        key = h.hexdigest()
-        # store key/data here
-        try:
-            logger.debug(f"Tracking {data.get('type')} for {data.get('url')}")
-            TrackingRaw.create(
-                user_key=key,
-                url=data.get("url"),
-                tracking_type=data.get("type")
-            )
-        except Exception as e:
-            logger.error("Error tracking request", e)
+        user_key = h.hexdigest()
+
+        def _store_tracking() -> None:
+            try:
+                logger.debug("Tracking %s for %s", tracking_type, url)
+                TrackingRaw.create(
+                    user_key=user_key,
+                    url=url,
+                    tracking_type=tracking_type,
+                )
+            except Exception:
+                logger.exception("Error tracking request")
+
+        # Αναβάλουμε το DB write μέχρι να έχει σταλεί η απόκριση.
+        if hasattr(response, "call_on_close"):
+            response.call_on_close(_store_tracking)
+        else:
+            _store_tracking()
 
     return response

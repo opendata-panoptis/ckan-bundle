@@ -1,12 +1,5 @@
 {#
-Displays a tree of organzations
-
-NB This template can be slow because it is recursive and uses link_for. At
-DGU we speeded up display of the tree 10 times (necessary as we have 1000
-organizations) by replacing this template with a recursive code routine:
-https://github.com/datagovuk/ckanext-dgu/blob/5fb78b354517c2198245bdc9c98fb5d6c82c6bcc/ckanext/dgu/lib/helpers.py#L140
-
-orgs    - List of organizations
+Displays a tree of organizations
 
 Example:
 
@@ -18,38 +11,7 @@ Example:
 {% set file_type = 'asset' if ckan_min_ver|int >= 9 else 'resource' %}
 {% include 'hierarchy/snippets/hierarchy_' ~ file_type ~ '.html' %}
 
-<nav class="org-tree-wrap" aria-label="Φορείς">
-  <ul class="org-tree org-tree--top">
-    {% for node in top_nodes recursive %}
-      {% set longname = h.group_tree_get_longname(node.name, type_='organization') %}
-      {% set display_text = node.title %}
-      {% if use_longnames and longname %}
-        {% set display_text = longname + " (" + display_text + ")" %}
-      {% endif %}
-
-      <li class="org-tree-item {% if node.highlighted %}is-active{% endif %}" id="node_{{ node.name }}">
-        {% if node.children %}
-          <details class="org-tree-branch" {% if node.highlighted %}open{% endif %}>
-            <summary class="org-tree-row org-tree-summary">
-              <span class="org-tree-toggle" aria-hidden="true"></span>
-              <span class="org-tree-label">
-                {% link_for display_text, controller='organization', action='read', id=node.name %}
-              </span>
-            </summary>
-
-            <ul class="org-tree org-tree--nested">
-              {{ loop(node.children) }}
-            </ul>
-          </details>
-        {% else %}
-          <div class="org-tree-row org-tree-leaf">
-            {% link_for display_text, controller='organization', action='read', id=node.name %}
-          </div>
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-</nav>
+{{ h.render_athens_tree_html(top_nodes, use_longnames=use_longnames|default(false)) }}
 
 <script type="text/javascript">
   // Όταν υπάρχει ενεργός κόμβος, άνοιξε όλους τους γονείς του (details) ώστε να φαίνεται άμεσα.

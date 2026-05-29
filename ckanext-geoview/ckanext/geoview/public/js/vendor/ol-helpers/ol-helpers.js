@@ -1926,7 +1926,7 @@ ol.proj.addProjection(createEPSG4326Proj('EPSG:4326:LONLAT', 'enu'));
 
 
 
-    OL_HELPERS.withWMSLayers = function (capaUrl, getMapUrl, layerProcessor, layerNames, useTiling, map) {
+    OL_HELPERS.withWMSLayers = function (capaUrl, getMapUrl, layerProcessor, layerNames, useTiling, map, options) {
 
         var deferredResult = $.Deferred()
 
@@ -1943,6 +1943,9 @@ ol.proj.addProjection(createEPSG4326Proj('EPSG:4326:LONLAT', 'enu'));
         // remove namespaces from layer names
         // name coming from ISO md is sometimes namespaced, while actual layer ID is not
         layerNames && (layerNames = layerNames.map(unnamespace));
+
+        var wmsExceptions = options && options.exceptions || "INIMAGE";
+        var logTileErrors = options && options.logTileErrors;
 
         parseWMSCapas(
             capaUrl,
@@ -1965,32 +1968,51 @@ ol.proj.addProjection(createEPSG4326Proj('EPSG:4326:LONLAT', 'enu'));
 
                         try {
                             var mapLayer;
+                            var source;
                             if (useTiling) {
+                                source = new ol.source.TileWMS({
+                                    url: getMapUrl,
+                                    params: {LAYERS: candidate.Name,
+                                        TRANSPARENT: true,
+                                        VERSION: ver,
+                                        EXCEPTIONS: wmsExceptions}
+                                });
+                                if (logTileErrors && source.on) {
+                                    source.on('tileloaderror', function () {
+                                        console.warn('WMS tile failed', {
+                                            layer: candidate.Name,
+                                            url: getMapUrl
+                                        });
+                                    });
+                                }
                                 mapLayer = new ol.layer.Tile({
                                     title: candidate.Title || candidate.Name,
                                     visible: isFirst || layerNames != undefined, // if explicit layer list was passed, enable all
                                     //extent: ,
-                                    source: new ol.source.TileWMS({
-                                        url: getMapUrl,
-                                        params: {LAYERS: candidate.Name,
-                                            TRANSPARENT: true,
-                                            VERSION: ver,
-                                            EXCEPTIONS: "INIMAGE"}
-                                    })
+                                    source: source
                                 })
                             } else {
+                                source = new ol.source.ImageWMS({
+                                    url: getMapUrl,
+                                    params: {LAYERS: candidate.Name,
+                                        TRANSPARENT: true,
+                                        VERSION: ver,
+                                        EXCEPTIONS: wmsExceptions},
+                                    ratio: 1
+                                });
+                                if (logTileErrors && source.on) {
+                                    source.on('imageloaderror', function () {
+                                        console.warn('WMS image failed', {
+                                            layer: candidate.Name,
+                                            url: getMapUrl
+                                        });
+                                    });
+                                }
                                 mapLayer = new ol.layer.Image({
                                     title: candidate.Name,
                                     visible: isFirst || layerNames!= undefined, // if explicit layer list was passed, enable all,
                                     //extent: ,
-                                    source: new ol.source.ImageWMS({
-                                        url: getMapUrl,
-                                        params: {LAYERS: candidate.Name,
-                                            TRANSPARENT: true,
-                                            VERSION: ver,
-                                            EXCEPTIONS: "INIMAGE"},
-                                        ratio: 1
-                                    })
+                                    source: source
                                 })
                             }
                             isFirst = false;
@@ -3234,5 +3256,3 @@ ol.proj.addProjection(createEPSG4326Proj('EPSG:4326:LONLAT', 'enu'));
       }
 
 }) ();
-
-

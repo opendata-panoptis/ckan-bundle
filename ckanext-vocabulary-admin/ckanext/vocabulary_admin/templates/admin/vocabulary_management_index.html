@@ -1,4 +1,4 @@
-{% extends "admin/base.html" %}
+{% extends "admin/base_vocabulary.html" %}
 
 {% block page_primary_action %}
   <div class="vocab-admin-actions">
@@ -42,9 +42,11 @@
                     <a href="{{ h.url_for('vocabularyadmin.vocabulary_edit', vocabulary_id=vocabulary.id) }}" class="btn btn-xs btn-default vocab-action-btn" title="{{ _('Edit') }}">
                       <i class="fa fa-edit"></i>
                     </a>
+                    {% if h.vocabularyadmin_is_vocabulary_delete_enabled() %}
                     <a href="{{ h.url_for('vocabularyadmin.vocabulary_delete', vocabulary_id=vocabulary.id) }}" class="btn btn-danger vocab-action-btn" title="{{ _('Delete') }}" onclick="return confirm('{{ _('Are you sure you want to delete this vocabulary and all its tags? This action cannot be undone.') }}');">
                       <i class="fa fa-trash-alt"></i>
                     </a>
+                    {% endif %}
                   </div>
                   {% set description = h.vocabularyadmin_get_vocabulary_description(vocabulary.id) %}
                   <div class="vocabulary-description text-muted">
@@ -90,9 +92,11 @@
                           <a href="{{ h.url_for('vocabularyadmin.tag_edit', tag_id=tag.id) }}" class="btn btn-default tag-edit-button" title="{{ _('Edit') }}">
                             <i class="fa fa-edit"></i>
                           </a>
+                          {% if h.vocabularyadmin_is_tag_delete_enabled() %}
                           <a href="{{ h.url_for('vocabularyadmin.tag_delete', tag_id=tag.id) }}" class="btn btn-danger tag-edit-button" title="{{ _('Delete') }}" onclick="return confirm('{{ _('Are you sure you want to delete this tag? This action cannot be undone.') }}');">
                             <i class="fa fa-trash-alt"></i>
                           </a>
+                          {% endif %}
                         </div>
                       {% endfor %}
                     {% else %}

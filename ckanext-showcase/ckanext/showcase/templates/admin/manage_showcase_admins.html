@@ -7,9 +7,56 @@
 
 
 {% block primary_content_inner %}
+  <details class="module module-narrow module-shallow" open>
+    <summary class="module-content" style="cursor: pointer; font-weight: bold; background: #f5f5f5; border-left: 4px solid #005d7a;">
+      {{ _('Showcase email notifications and configuration') }}
+    </summary>
+    <div class="module-content" style="border-left: 4px solid #005d7a; background: #fcfcfc;">
+      <p>
+        {{ _('Email notifications are sent only when a new Showcase is created.') }}
+      </p>
+      <p>
+        {{ _('The notification recipients can be configured through the ckan.ini file.') }}
+      </p>
+      <p>
+        <strong>{{ _('Default behavior:') }}</strong>
+        {{ _('If no relevant configuration is provided, notifications are sent to all sysadmins and showcase admins.') }}
+      </p>
+      <ul>
+        <li>{{ _('Supported recipient modes are: all sysadmins and showcase admins, showcase admins only, or one configured email only.') }}</li>
+        <li>{{ _('When configured, an additional email address can also be included in the notification recipients.') }}</li>
+        <li>{{ _('Specific email addresses can be excluded from notifications through configuration.') }}</li>
+        <li>{{ _('The Showcase creator continues to receive an email independently of this configuration.') }}</li>
+      </ul>
+      <p>
+        <strong>{{ _('Configuration properties:') }}</strong>
+      </p>
+      <ul>
+        <li><code>ckanext.showcase.notification_recipients_mode</code></li>
+        <li><code>ckanext.showcase.notification_email</code></li>
+        <li><code>ckanext.showcase.notification_exclude_emails</code></li>
+      </ul>
+
+      <p>
+        <strong>{{ _('Additional notification cases:') }}</strong>
+      </p>
+      <ul>
+        <li>{{ _('When a Showcase is approved, an email is sent to its creator.') }}</li>
+        <li>{{ _('When a Showcase is approved, notification emails may also be sent to the organizations of the datasets used in the Showcase, if email updates are enabled for the organization.') }}</li>
+      </ul>
+    </div>
+  </details>
+
+  <div style="margin: 20px 0 15px 0; border-top: 1px solid #d9d9d9;"></div>
+
   <h1 class="page-heading">
-    {% block page_heading %}{{  _('Manage Showcase Admins') }}{% endblock %}
+    {% block page_heading %}{{ _('Manage Showcase Admins') }}{% endblock %}
   </h1>
+
+  <p class="muted">
+    {{ _('Showcase administrators may be users other than system administrators who need management rights for Showcase applications.') }}
+  </p>
+
   {% block form %}
     <form class="dataset-form form-horizontal add-member-form" method='post'>
       {{ h.csrf_input() if 'csrf_input' in h }}
@@ -23,7 +70,7 @@
           </span>
 
           <div class="controls">
-            <input id="username" type="text" name="username" placeholder="{{_('Username')}}"
+            <input id="username" type="text" name="username" placeholder="{{ _('Username') }}"
             value="" class="control-medium" data-module="autocomplete"
             data-module-source="/api/2/util/user/autocomplete?q=?">
           </div>
@@ -31,7 +78,7 @@
       </div>
 
       <div class="form-actions margin-top">
-        <button class="btn btn-primary" type="submit" name="submit" >
+        <button class="btn btn-primary" type="submit" name="submit">
           {{ _('Add User') }}
         </button>
       </div>
@@ -72,6 +119,16 @@
       {% trans %}
          <p><strong>Showcase Admin:</strong> Can create and remove showcases. Can add and remove datasets from showcases.</p>
       {% endtrans %}
+    </div>
+  </div>
+
+  <div class="module module-narrow module-shallow">
+    <div class="module-content">
+      <p><strong>{{ _('Showcase email notifications') }}</strong></p>
+      <p>{{ _('Notifications are configurable through ckan.ini and apply only on Showcase creation.') }}</p>
+      <p>{{ _('By default, notifications are sent to all sysadmins and showcase admins.') }}</p>
+      <p>{{ _('The Showcase creator still receives an email.') }}</p>
+      <p>{{ _('Additional emails may be sent on Showcase approval.') }}</p>
     </div>
   </div>
 {% endblock %}

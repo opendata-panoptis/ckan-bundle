@@ -180,3 +180,18 @@ msgstr "Reason"
 #: ckanext/archiver/templates/report/broken_links.html:41
 msgid "Attempt"
 msgstr "Attempt"
+
+msgid "Non-evaluable"
+msgstr "Non-evaluable"
+
+msgid "Non-evaluable resources"
+msgstr "Non-evaluable resources"
+
+msgid "Resource is a Table Designer resource"
+msgstr "Resource is a Table Designer resource"
+
+msgid "Resource has no URL"
+msgstr "Resource has no URL"
+
+msgid "Resource is a Download All ZIP resource"
+msgstr "Resource is a Download All ZIP resource"

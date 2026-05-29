@@ -4,9 +4,17 @@
 # This file is part of ckanext-contact
 # Created by the Natural History Museum in London, UK
 import logging
+import mimetypes
+import re
+import smtplib
 import socket
 from datetime import datetime, timezone
+from email import utils
+from email.message import EmailMessage
+from time import time
 
+import ckan
+import ckan.model as model
 from ckan import logic
 from ckan.common import asbool, config
 from ckan.lib import mailer
@@ -86,8 +94,9 @@ def validate(data_dict):
         and data_dict['email']
     ):
         if not is_email(data_dict['email'], check_dns=True):
-            errors['email'] = ['Email address appears to be invalid']
-            error_summary['email'] = 'Email address appears to be invalid'
+            invalid_email_message = toolkit._('Email address appears to be invalid')
+            errors['email'] = [invalid_email_message]
+            error_summary['email'] = invalid_email_message
 
     # only check the recaptcha if there are no errors
     if not errors:
@@ -131,8 +140,256 @@ def build_subject(
     prefix = toolkit.config.get('ckanext.contact.subject_prefix', '')
 
     return f'{prefix}{" " if prefix else ""}{subject}'
-from flask import jsonify
-import ckan.model as model   # 👈 import model explicitly
+
+
+def _dedupe_emails(emails):
+    unique_emails = []
+    seen_emails = set()
+
+    for email in emails:
+        normalized_email = (email or '').strip()
+        if not normalized_email or normalized_email in seen_emails:
+            continue
+        unique_emails.append(normalized_email)
+        seen_emails.add(normalized_email)
+
+    return unique_emails
+
+
+def parse_recipient_emails(value):
+    if value is None:
+        return []
+
+    if isinstance(value, str):
+        values = [value]
+    elif isinstance(value, (list, tuple, set)):
+        values = list(value)
+    else:
+        values = [value]
+
+    emails = []
+    for item in values:
+        if item is None:
+            continue
+        if not isinstance(item, str):
+            item = str(item)
+        emails.extend(re.split(r'[\n,]+', item))
+
+    return _dedupe_emails(emails)
+
+
+def get_central_recipient_emails():
+    recipient_value = toolkit.config.get('ckanext.contact.mail_to') or toolkit.config.get(
+        'email_to'
+    )
+    return parse_recipient_emails(recipient_value)
+
+
+def get_dataset_recipient_emails(context, data_dict):
+    if not data_dict.get('package_id'):
+        return None, []
+
+    pkg_dict = toolkit.get_action('package_show')(
+        context, {'id': data_dict['package_id']}
+    )
+
+    dataset_url = None
+    site_url = (config.get('ckan.site_url') or '').rstrip('/')
+    if site_url and pkg_dict.get('name'):
+        dataset_url = f'{site_url}/dataset/{pkg_dict["name"]}'
+
+    recipients = []
+
+    send_to_author = asbool(
+        toolkit.config.get('ckanext.contact.send_to_author_email', False)
+    )
+    publishers = pkg_dict.get('publisher') or []
+    if send_to_author and publishers and isinstance(publishers[0], dict):
+        recipients.append(publishers[0].get('email'))
+
+    org_summary = pkg_dict.get('organization')
+    if org_summary and org_summary.get('id'):
+        org_dict = toolkit.get_action('organization_show')(
+            context, {'id': org_summary['id']}
+        )
+        recipients.append(org_dict.get('email'))
+
+    return dataset_url, _dedupe_emails(recipients)
+
+
+def _format_recipient_header(emails, recipient_name=None):
+    if not emails:
+        return None
+    if len(emails) == 1 and recipient_name:
+        return utils.formataddr((recipient_name, emails[0]))
+    return ', '.join(emails)
+
+
+def send_grouped_email(
+    to_emails,
+    cc_emails,
+    subject,
+    body,
+    recipient_name=None,
+    body_html=None,
+    headers=None,
+    attachments=None,
+):
+    to_emails = parse_recipient_emails(to_emails)
+    cc_emails = [
+        email for email in parse_recipient_emails(cc_emails) if email not in to_emails
+    ]
+
+    if not to_emails and cc_emails:
+        to_emails = cc_emails[:1]
+        cc_emails = cc_emails[1:]
+
+    envelope_recipients = _dedupe_emails(to_emails + cc_emails)
+    if not envelope_recipients:
+        raise mailer.MailerException('No recipient email address available!')
+
+    if not headers:
+        headers = {}
+
+    if not attachments:
+        attachments = []
+
+    mail_from = config.get('smtp.mail_from')
+    reply_to = config.get('smtp.reply_to')
+
+    msg = EmailMessage()
+    msg.set_content(body, cte='base64')
+
+    if body_html:
+        msg.add_alternative(body_html, subtype='html', cte='base64')
+
+    for k, v in headers.items():
+        if k in msg.keys():
+            msg.replace_header(k, v)
+        else:
+            msg.add_header(k, v)
+
+    msg['Subject'] = subject
+    msg['From'] = utils.formataddr((config.get('ckan.site_title') or '', mail_from))
+
+    to_header = _format_recipient_header(to_emails, recipient_name=recipient_name)
+    if to_header:
+        msg['To'] = to_header
+
+    cc_header = _format_recipient_header(cc_emails)
+    if cc_header:
+        msg['Cc'] = cc_header
+
+    msg['Date'] = utils.formatdate(time())
+    if not config.get('ckan.hide_version'):
+        msg['X-Mailer'] = f'CKAN {ckan.__version__}'
+
+    if reply_to and reply_to != '' and not msg['Reply-to']:
+        msg['Reply-to'] = reply_to
+
+    for attachment in attachments:
+        if len(attachment) == 3:
+            name, _file, media_type = attachment
+        else:
+            name, _file = attachment
+            media_type = None
+
+        if not media_type:
+            media_type, _encoding = mimetypes.guess_type(name)
+        if media_type:
+            main_type, sub_type = media_type.split('/')
+        else:
+            main_type = sub_type = None
+
+        msg.add_attachment(
+            _file.read(), filename=name, maintype=main_type, subtype=sub_type
+        )
+
+    smtp_server = config.get('smtp.server')
+    smtp_starttls = config.get('smtp.starttls')
+    smtp_user = config.get('smtp.user')
+    smtp_password = config.get('smtp.password')
+
+    try:
+        smtp_connection = smtplib.SMTP(smtp_server)
+    except (socket.error, smtplib.SMTPConnectError) as e:
+        log.exception(e)
+        raise mailer.MailerException(
+            'SMTP server could not be connected to: "%s" %s' % (smtp_server, e)
+        )
+
+    try:
+        smtp_connection.ehlo()
+
+        if smtp_starttls:
+            if smtp_connection.has_extn('STARTTLS'):
+                smtp_connection.starttls()
+                smtp_connection.ehlo()
+            else:
+                raise mailer.MailerException('SMTP server does not support STARTTLS')
+
+        if smtp_user:
+            assert smtp_password, (
+                'If smtp.user is configured then '
+                'smtp.password must be configured as well.'
+            )
+            smtp_connection.login(smtp_user, smtp_password)
+
+        refused_recipients = smtp_connection.sendmail(
+            mail_from, envelope_recipients, msg.as_string()
+        )
+        if refused_recipients:
+            refused_addresses = set(refused_recipients.keys())
+            accepted_addresses = [
+                email for email in envelope_recipients if email not in refused_addresses
+            ]
+            log.warning(
+                'Grouped email accepted for %s and refused for %s',
+                ', '.join(accepted_addresses) or 'no recipients',
+                ', '.join(sorted(refused_addresses)),
+            )
+        else:
+            log.info('Sent grouped email to %s', ', '.join(envelope_recipients))
+    except smtplib.SMTPException as e:
+        error_message = '%r' % e
+        log.exception(error_message)
+        raise mailer.MailerException(error_message)
+    finally:
+        smtp_connection.quit()
+
+
+def _pop_grouped_recipient_fields(mail_dict):
+    to_emails = parse_recipient_emails(mail_dict.pop('to_emails', []))
+    cc_emails = parse_recipient_emails(mail_dict.pop('cc_emails', []))
+    legacy_emails = parse_recipient_emails(mail_dict.pop('recipient_email', []))
+    default_legacy_emails = parse_recipient_emails(
+        mail_dict.pop('_default_recipient_email', [])
+    )
+    recipient_name = mail_dict.pop('recipient_name', None)
+
+    legacy_override = legacy_emails != default_legacy_emails
+
+    if legacy_override:
+        # Preserve the long-standing mail_alter contract: replacing
+        # recipient_email overrides the default recipients entirely.
+        to_emails = legacy_emails
+        cc_emails = []
+    elif not to_emails and not cc_emails:
+        to_emails = legacy_emails
+    elif legacy_emails:
+        known_recipients = set(to_emails + cc_emails)
+        to_emails.extend(
+            email for email in legacy_emails if email not in known_recipients
+        )
+
+    cc_emails = [email for email in cc_emails if email not in to_emails]
+
+    if not to_emails and cc_emails:
+        to_emails = cc_emails[:1]
+        cc_emails = cc_emails[1:]
+
+    return recipient_name, to_emails, cc_emails
+
 
 def submit():
     """
@@ -205,9 +462,9 @@ def submit():
         # Ανθρώπινα labels για τις βασικές κατηγορίες θέματος
         subject_type_labels = {
             'general_question': 'Γενική ερώτηση',
-            'open_new_data': 'Αίτημα για δεδομένα',
-            'api_or_technical': 'Αναφορά σφάλματος',
-            'general_feedback': 'Γενικό σχόλιο / βελτίωση',
+            'open_new_data': 'Αίτημα διάθεσης νέου ανοικτού συνόλου δεδομένων',
+            'api_or_technical': 'Τεχνικό πρόβλημα-σφάλμα με λογαριασμό/Εθνική Πύλη',
+            'general_feedback': 'Πρόταση βελτίωσης της Εθνικής Πύλης',
             'account': 'Πρόβλημα με λογαριασμό / σύνδεση',
             'dataset_publication': 'Δημοσίευση / ενημέρωση συνόλου δεδομένων',
             'other': 'Άλλο',
@@ -217,15 +474,15 @@ def submit():
             'specific_data': 'Συγκεκριμένα δεδομένα ή σύνολο δεδομένων',
             'procedure': 'Μια διοικητική διαδικασία',
             'portal_usage': 'Τη χρήση του data.gov.gr',
+            'account_issue': 'Πρόβλημα με λογαριασμό ή σύνδεση',
+            'portal_error': 'Σφάλμα ή δυσλειτουργία στην Εθνική Πύλη',
+            'service_issue': 'Τεχνικό πρόβλημα σε υπηρεσία ή σελίδα',
             'new_datasets': 'Νέα σύνολα δεδομένων που δεν βρίσκετε',
             'update_existing': 'Ενημέρωση ή διόρθωση υπαρχόντων δεδομένων',
-            'licensing': 'Διευκρινίσεις για άδειες και όρους χρήσης',
-            'page_error': 'Σελίδα που εμφανίζει σφάλμα',
-            'api_issue': 'API που δεν ανταποκρίνεται όπως αναμένεται',
-            'data_inconsistency': 'Λανθασμένα ή ασυνεπή δεδομένα',
-            'feedback_usability': 'Εμπειρία χρήσης / ευχρηστία της πύλης',
-            'feedback_features': 'Προτάσεις για νέες λειτουργίες',
-            'feedback_content': 'Σχόλιο ή παρατήρηση για το περιεχόμενο',
+            'agency_data_request': 'Αίτημα διάθεσης δεδομένων από φορέα',
+            'feedback_usability': 'Βελτίωση ευχρηστίας ή πλοήγησης',
+            'feedback_features': 'Πρόταση για νέα λειτουργία',
+            'feedback_content': 'Βελτίωση περιεχομένου ή πληροφόρησης',
         }
 
         subject_type = data_dict.get('subject_type')
@@ -243,84 +500,57 @@ def submit():
             body_parts.append(f'  Υποκατηγορία αιτήματος: {scope_label}')
 
 
-        # -------------- Ανάκτηση στοιχείων Υπεύθυνου Επικοινωνίας από ini------
-        # Email Αποστολέα ορίζεται αυτόματα από smtp.mail_from = avadrachanis@ots.gr
-        # Email Παραλήπτη ορίζεται από ckanext.contact.mail_to = ckardamanidis@ots.gr
-
-        recipient_email = toolkit.config.get('ckanext.contact.mail_to') or toolkit.config.get('email_to')
-        # Όνομα Παραλήπτη ορίζεται από ckanext.contact.recipient_name Data.gov.gr
+        # Email παραληπτών από ckanext.contact.mail_to / email_to.
+        central_recipient_emails = get_central_recipient_emails()
+        # Όνομα παραλήπτη χρησιμοποιείται μόνο όταν υπάρχει ένα κεντρικό To recipient.
         recipient_name = toolkit.config.get('ckanext.contact.recipient_name') or toolkit.config.get('ckan.site_title')
 
-        author_email = None
-        org_email = None
-
         # --------------Ανάκτηση Στοιχείων Συντάκτη--------
-        if "package_id" in data_dict:
-
-            # Ανάκτηση συνόλου δεδομένων
-            pkg_dict = toolkit.get_action('package_show')(context, {'id': data_dict["package_id"]})
-
-            site_url = config.get('ckan.site_url')
-            dataset_url = f'{site_url}/dataset/{pkg_dict["name"]}'
-
-            # Στοιχεία Συντάκτη
-            author_email = pkg_dict.get("publisher")[0].get('email')
-
+        dataset_url, dataset_recipient_emails = get_dataset_recipient_emails(
+            context, data_dict
+        )
+        if dataset_url:
             body_parts.append(f'  Dataset URL : {dataset_url}')
 
-            # --------------Ανάκτηση email Οργανισμού--------
-            org_summary = pkg_dict.get('organization')
-            if not org_summary:
-                return jsonify({'error': 'Package has no organization'}), 404
-
-            org_id = org_summary['id']
-            org_dict = toolkit.get_action('organization_show')(context, {'id': org_id})
-            org_email = org_dict.get('email')
-
-
-        # Δημιουργία Λίστας από παραλήπτες = Υπεύθυνος Επικοινωνίας + Συντάκτης + Λίστα από Διαχειριστών οργανισμού συνόλου δεδομένων
-        recipients = []
-
-        if recipient_email:
-            recipients.append(recipient_email)
-
-        if author_email:
-            recipients.append(author_email)
-
-        if org_email:
-            recipients.append(org_email)
-
-        # Ανάκτηση στοιχείων χρήστη
-        user, fullname, email = get_current_user_info(context)
+        if dataset_recipient_emails:
+            to_emails = dataset_recipient_emails
+            cc_emails = central_recipient_emails
+            to_recipient_name = None
+        else:
+            to_emails = central_recipient_emails
+            cc_emails = []
+            to_recipient_name = recipient_name
 
         mail_dict = {
-            'recipient_email': recipients,
-            'recipient_name': recipient_name,
+            'recipient_email': _dedupe_emails(to_emails + cc_emails),
+            '_default_recipient_email': _dedupe_emails(to_emails + cc_emails),
+            'recipient_name': to_recipient_name,
+            'to_emails': to_emails,
+            'cc_emails': cc_emails,
             # κρατάμε τη συμπεριφορά του extension: είτε το subject που πληκτρολόγησε
             # ο χρήστης, είτε το default από build_subject
             'subject': build_subject(subject=data_dict.get('subject')),
             'body': '\n'.join(body_parts),
-            'headers': {'reply-to': email},
+            'headers': {'reply-to': data_dict.get('email')},
         }
 
         # allow other plugins to modify the mail_dict
         for plugin in PluginImplementations(IContact):
             plugin.mail_alter(mail_dict, data_dict)
 
-        # note the pop here so that we don't get parameter clashes when we call
-        # mail_recipient below
-        emails = mail_dict.pop('recipient_email')
-        names = mail_dict.pop('recipient_name')
-        if isinstance(emails, str):
-            emails = [emails]
-            names = [names]
+        recipient_name, to_emails, cc_emails = _pop_grouped_recipient_fields(
+            mail_dict
+        )
 
-        # send the email to each name/email pair
-        for name, email in zip(names, emails):
-            try:
-                mailer.mail_recipient(name, email, **mail_dict)
-            except (mailer.MailerException, socket.error):
-                email_success = False
+        try:
+            send_grouped_email(
+                to_emails=to_emails,
+                cc_emails=cc_emails,
+                recipient_name=recipient_name,
+                **mail_dict,
+            )
+        except (mailer.MailerException, socket.error):
+            email_success = False
 
     return {
         'success': recaptcha_error is None and len(errors) == 0 and email_success,
@@ -329,20 +559,3 @@ def submit():
         'error_summary': error_summary,
         'recaptcha_error': recaptcha_error,
     }
-
-def get_current_user_info(context):
-    """
-    Returns (username, fullname, email) of the current CKAN user
-    from the context dict.
-    """
-    user_name = context.get('user')
-    if not user_name:
-        return None, None, None
-
-    # Fetch the user object from CKAN model
-    user_obj = model.User.get(user_name)
-
-    if not user_obj:
-        return None, None, None
-
-    return user_obj.name, user_obj.fullname, user_obj.email

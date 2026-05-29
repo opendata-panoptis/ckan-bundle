@@ -103,6 +103,14 @@ For example at data.gov.uk we flag up if a dataset is 'unpublished', has been ha
 ckanext-report.notes.dataset = ' '.join(('Unpublished' if asbool(pkg.extras.get('unpublished')) else '', 'UKLP' if asbool(pkg.extras.get('UKLP')) else '', 'National Statistics Pub Hub' if pkg.extras.get('external_reference')=='ONSHUB' else ''))
 ```
 
+## Private datasets in reports
+
+By default, report data is cached and is not generated per-user. To ensure that
+reports do not expose details of private datasets to users who are not allowed
+to `package_show` them, ckanext-report filters report outputs at request time.
+Report outputs (HTML/CSV/JSON) filter out rows that reference datasets the
+current user is not authorized to view.
+
 # Creating a Report
 
 A report has three key elements:

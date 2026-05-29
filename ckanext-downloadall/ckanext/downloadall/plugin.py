@@ -117,15 +117,44 @@ class DownloadallPlugin(plugins.SingletonPlugin, DefaultTranslation):
         }
 
     # IPackageController
+    def before_dataset_index(self, data_dict):
+        return self.before_index(data_dict)
 
     def before_index(self, pkg_dict):
         try:
-            if u'All resource data' in pkg_dict['res_name']:
+            has_downloadall = False
+
+            # Primary check: parse validated_data_dict to look for the
+            # downloadall_metadata_modified marker on any resource.
+            # This is more reliable than checking the name.
+            import json
+            validated = pkg_dict.get('validated_data_dict')
+            if validated:
+                try:
+                    vd = json.loads(validated)
+                    for res in vd.get('resources', []):
+                        if res.get('downloadall_metadata_modified'):
+                            has_downloadall = True
+                            break
+                except (json.JSONDecodeError, TypeError):
+                    pass
+
+            # Fallback: also check res_name for known zip resource names
+            if not has_downloadall:
+                res_names = pkg_dict.get('res_name', [])
+                if res_names:
+                    downloadall_names = {u'All resource data', u'Όλα τα δεδομένα πόρων'}
+                    has_downloadall = any(
+                        name and any(dn in name for dn in downloadall_names)
+                        for name in res_names
+                    )
+
+            if has_downloadall:
                 # we've got a 'Download all zip', so remove it's ZIP from the
                 # SOLR facet of resource formats, as it's not really a data
                 # resource
                 pkg_dict['res_format'].remove('ZIP')
-        except KeyError:
+        except (KeyError, ValueError, TypeError):
             # this happens when you save a new package without a resource yet
             pass
         return pkg_dict
