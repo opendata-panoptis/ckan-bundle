@@ -541,6 +541,8 @@ def group_activity(id: str, group_type: str, is_organization: bool) -> str:
                 "activity_types": activity_types
             }
         )
+    except tk.NotAuthorized:
+        tk.abort(403, tk._("Not authorized to see this page"))
     except tk.ValidationError as error:
         tk.abort(400, error.message or "")
 
@@ -630,9 +632,12 @@ def group_changes(id: str, group_type: str, is_organization: bool) -> str:
         "organization_activity_list"
         if is_organization else "group_activity_list"
     )
-    group_activity_list = tk.get_action(action_name)(
-        context, {"id": group_id, "limit": 100}
-    )
+    try:
+        group_activity_list = tk.get_action(action_name)(
+            context, {"id": group_id, "limit": 100}
+        )
+    except tk.NotAuthorized:
+        return tk.abort(403, tk._("Unauthorized to view activity data"))
 
     extra_vars: dict[str, Any] = {
         "activity_diffs": [activity_diff],
@@ -734,9 +739,12 @@ def group_changes_multiple(is_organization: bool, group_type: str) -> str:
         "organization_activity_list"
         if is_organization else "group_activity_list"
     )
-    group_activity_list = tk.get_action(action_name)(
-        context, {"id": group_id, "limit": 100}
-    )
+    try:
+        group_activity_list = tk.get_action(action_name)(
+            context, {"id": group_id, "limit": 100}
+        )
+    except tk.NotAuthorized:
+        return tk.abort(403, tk._("Unauthorized to view activity data"))
 
     extra_vars: dict[str, Any] = {
         "activity_diffs": diff_list,

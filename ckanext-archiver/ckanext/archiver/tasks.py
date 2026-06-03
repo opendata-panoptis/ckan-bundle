@@ -37,6 +37,28 @@ ALLOWED_SCHEMES = set(('http', 'https', 'ftp'))
 
 USER_AGENT = 'ckanext-archiver'
 
+
+def _cleanup_temp_file(file_path, log, source='archiver'):
+    if not file_path:
+        return
+
+    temp_dir = os.path.realpath(tempfile.gettempdir())
+    saved_file = os.path.realpath(file_path)
+
+    if not saved_file.startswith(temp_dir + os.sep):
+        log.debug('Skipping %s cleanup for non-temp file: %s', source, saved_file)
+        return
+
+    if not os.path.exists(saved_file):
+        return
+
+    try:
+        os.remove(saved_file)
+        log.info('Removed %s temp file: %s', source, saved_file)
+    except OSError as e:
+        log.warning('Could not remove %s temp file %s: %s', source, saved_file, e)
+
+
 # CKAN 2.7 introduces new jobs system
 if p.toolkit.check_ckan_version(max_version='2.6.99'):
     from ckan.lib.celery_app import celery
@@ -370,10 +392,14 @@ def _update_resource(resource_id, queue, log):
         if not try_as_api or not Status.is_ok(download_status_id):
             extra_args = [err.args.url_redirected_to] if 'url_redirected_to' in err.args else []
             _save(download_status_id, err, resource, *extra_args)
+            if download_result:
+                _cleanup_temp_file(download_result.get('saved_file'), log)
             return
 
     if not requires_archive:
         # We don't need to archive if the remote content has not changed
+        if download_result:
+            _cleanup_temp_file(download_result.get('saved_file'), log)
         return None
 
     # Archival
@@ -383,11 +409,13 @@ def _update_resource(resource_id, queue, log):
     except ArchiveError as e:
         log.error('System error during archival: %r, %r', e, e.args)
         _save(Status.by_text('System error during archival'), e, resource, download_result['url_redirected_to'])
+        _cleanup_temp_file(download_result.get('saved_file'), log)
         return
 
     # Success
     _save(Status.by_text('Archived successfully'), '', resource,
           download_result['url_redirected_to'], download_result, archive_result)
+    _cleanup_temp_file(download_result.get('saved_file'), log)
 
     # The return value is only used by tests. Serialized for Celery.
     return json.dumps(dict(download_result, **archive_result))
@@ -708,20 +736,23 @@ def _save_resource(resource, response, max_file_size, chunk_size=1024*16):
     length = 0
 
     fd, tmp_resource_file_path = tempfile.mkstemp()
-
-    with open(tmp_resource_file_path, 'wb') as fp:
-        for chunk in response.iter_content(chunk_size=chunk_size,
-                                           decode_unicode=False):
-            fp.write(chunk)
-            length += len(chunk)
-            resource_hash.update(chunk)
-
-            if length >= max_file_size:
-                raise ChooseNotToDownload(
-                    _("Content-length %s exceeds maximum allowed value %s") %
-                    (length, max_file_size))
-
     os.close(fd)
+
+    try:
+        with open(tmp_resource_file_path, 'wb') as fp:
+            for chunk in response.iter_content(chunk_size=chunk_size,
+                                               decode_unicode=False):
+                fp.write(chunk)
+                length += len(chunk)
+                resource_hash.update(chunk)
+
+                if length >= max_file_size:
+                    raise ChooseNotToDownload(
+                        _("Content-length %s exceeds maximum allowed value %s") %
+                        (length, max_file_size))
+    except Exception:
+        _cleanup_temp_file(tmp_resource_file_path, log)
+        raise
 
     content_hash = str(resource_hash.hexdigest())
     return length, content_hash, tmp_resource_file_path

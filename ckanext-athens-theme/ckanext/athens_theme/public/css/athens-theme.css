@@ -645,6 +645,13 @@ li#simple-tab.active a, li#advanced-tab.active a {
   margin: 0;
 }
 
+@media (max-width: 480px) {
+  .hero-search .search-input::placeholder {
+    color: transparent;
+    opacity: 0;
+  }
+}
+
 /* Reset τα li για να μη φαίνονται διπλά */
 .tag-list li,
 .dataset-resources li {
@@ -915,7 +922,49 @@ li#simple-tab.active a, li#advanced-tab.active a {
   grid-column: 2;
   grid-row: 2;
   text-align: right;
-  white-space: nowrap;
+}
+
+.guide-action .btn {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  line-height: 1.25;
+}
+
+@media (max-width: 480px) {
+  .guides-section {
+    padding: 2.5rem 0;
+  }
+
+  .guides-section .section-title {
+    font-size: 1.5rem;
+  }
+
+  .guides-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+
+  .guide-card {
+    padding: 1.25rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 1.25rem;
+  }
+
+  .guide-content {
+    min-width: 0;
+  }
+
+  .guide-action {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .guide-action .btn {
+    display: block;
+    width: 100%;
+  }
 }
 
 /* -------------------------------------------------------------------- */

@@ -1,6 +1,6 @@
 let index;
 let selectedRow = null;
-let geonamesList = [];
+let geonamesById = new Map();
 
 // Άνοιγμα dialog
 function onOpenDialog(event, idx) {
@@ -12,7 +12,8 @@ function onOpenDialog(event, idx) {
   document.getElementById('dialogOverlay').style.display = 'flex';
 
   searchGeonames("Athens").then(result => {
-    loadGeonames(result.result.geonames);
+    const geonames = result?.result?.geonames || [];
+    loadGeonames(geonames);
   });
 }
 
@@ -33,26 +34,53 @@ function onCloseDialog(event) {
 
 // Καθαρισμός Πεδίων
 function clearSpecialCoverageFields(event, idx) {
-    uriId = `field-spatial_coverage-${index}-uri`;
-    uriValue = null;
-    document.getElementById(uriId).value = uriValue;
+    suppressEvent(event);
+    const parsedIndex = Number.parseInt(idx, 10);
+    const targetIndex = Number.isNaN(parsedIndex) ? index : parsedIndex;
+    if (targetIndex === undefined || targetIndex === null) {
+      return;
+    }
 
-    textId = `field-spatial_coverage-${index}-text`;
-    textValue = null;
-    document.getElementById(textId).value = textValue;
+    const uriInput = document.getElementById(`field-spatial_coverage-${targetIndex}-uri`);
+    const textInput = document.getElementById(`field-spatial_coverage-${targetIndex}-text`);
+    const geomInput = document.getElementById(`field-spatial_coverage-${targetIndex}-geom`);
+    const bboxInput = document.getElementById(`field-spatial_coverage-${targetIndex}-bbox`);
+    const centroidInput = document.getElementById(`field-spatial_coverage-${targetIndex}-centroid`);
+    const personInput = document.getElementById(`personInput-${targetIndex}`);
 
-    geomId = `field-spatial_coverage-${index}-geom`;
-    geomValue = null;
-    document.getElementById(geomId).value = geomValue;
+    if (uriInput) uriInput.value = "";
+    if (textInput) textInput.value = "";
+    if (geomInput) geomInput.value = "";
+    if (bboxInput) bboxInput.value = "";
+    if (centroidInput) centroidInput.value = "";
+    if (personInput) personInput.value = "";
+}
 
-    bboxId = `field-spatial_coverage-${index}-bbox`;
-    bboxValue = null;
-    document.getElementById(bboxId).value = bboxValue;
+/**
+ * Fetch detailed GeoNames info for a specific geonameId.
+ * @param {number|string} geonameId
+ * @returns {Promise<Object|null>}
+ */
+async function getGeonameDetails(geonameId) {
+  const endpoint = "/api/3/action/geonames_get";
+  const csrfValue = document.querySelector('meta[name="_csrf_token"]')?.getAttribute('content');
 
-    centroidId = `field-spatial_coverage-${index}-centroid`;
-    centroidValue = null;
-    document.getElementById(centroidId).value = centroidValue;
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfValue
+      },
+      body: JSON.stringify({ geonameId })
+    });
 
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error during GeoNames details API request:", error);
+    return null;
+  }
 }
 
 /**
@@ -98,7 +126,7 @@ function onSearch(event) {
 
   searchGeonames(query).then(result => {
     tableBody.innerHTML = "";
-    let geonames = result.result.geonames;
+    const geonames = result?.result?.geonames || [];
     if (geonames && geonames.length > 0) {
       loadGeonames(geonames);
     } else {
@@ -123,15 +151,23 @@ function onSearch(event) {
 function loadGeonames(geonames) {
   clearTableRows();
   const tableBody = document.getElementById("dataBody");
-  geonamesList = geonames;
+  geonamesById = new Map();
 
   geonames.forEach(location => {
+    const geonameId = String(location.geonameId || "");
+    const population = Number(location.population);
+    const populationDisplay = Number.isFinite(population) ? population.toLocaleString() : "";
+    if (geonameId) {
+      geonamesById.set(geonameId, location);
+    }
+
     const row = tableBody.insertRow();
+    row.dataset.geonameId = geonameId;
     row.innerHTML = `
       <td>${location.name}</td>
       <td>${location.countryName}</td>
       <td>${location.adminName1}</td>
-      <td>${location.population.toLocaleString()}</td>
+      <td>${populationDisplay}</td>
       <td>${location.lat}</td>
       <td>${location.lng}</td>
     `;
@@ -167,33 +203,40 @@ function clearSelection() {
  * Οτάν εκτελείται η επιβεβαίωση
  * @returns {void}
  */
-function onConfirmSelection(event) {
+async function onConfirmSelection(event) {
   suppressEvent(event);
 
-  if (selectedRow) {
-    const name = selectedRow.getElementsByTagName('td')[0].innerText;
-    const geoname = getGeonameIdByName(name);
-
-    uriId = `field-spatial_coverage-${index}-uri`;
-    uriValue = composeGeonamesUri(geoname.geonameId);
-    document.getElementById(uriId).value = uriValue;
-
-    textId = `field-spatial_coverage-${index}-text`;
-    textValue = name;
-    document.getElementById(textId).value = textValue;
-
-    geomId = `field-spatial_coverage-${index}-geom`;
-    geomValue = composeGeometry(geoname.lng, geoname.lat);
-    document.getElementById(geomId).value = geomValue;
-
-    centroidId = `field-spatial_coverage-${index}-centroid`;
-    centroidValue = composeGeometry(geoname.lng, geoname.lat);
-    document.getElementById(centroidId).value = centroidValue;
-
-    onCloseDialog();
-  } else {
+  if (!selectedRow) {
     alert("Παρακαλώ επιλέξτε μια σειρά πρώτα.");
+    return;
   }
+
+  const geonameId = selectedRow.dataset.geonameId;
+  const geoname = geonameId ? geonamesById.get(geonameId) : null;
+  if (!geoname) {
+    alert("Δεν ήταν δυνατή η ανάκτηση στοιχείων τοποθεσίας.");
+    return;
+  }
+
+  const name = selectedRow.getElementsByTagName('td')[0].innerText;
+  const detailsResult = await getGeonameDetails(geoname.geonameId);
+  const bboxFromDetails = detailsResult?.result?.bbox || "";
+
+  const uriInput = document.getElementById(`field-spatial_coverage-${index}-uri`);
+  const textInput = document.getElementById(`field-spatial_coverage-${index}-text`);
+  const geomInput = document.getElementById(`field-spatial_coverage-${index}-geom`);
+  const bboxInput = document.getElementById(`field-spatial_coverage-${index}-bbox`);
+  const centroidInput = document.getElementById(`field-spatial_coverage-${index}-centroid`);
+  const personInput = document.getElementById(`personInput-${index}`);
+
+  if (uriInput) uriInput.value = composeGeonamesUri(geoname.geonameId);
+  if (textInput) textInput.value = name;
+  if (geomInput) geomInput.value = composeGeometry(geoname.lng, geoname.lat);
+  if (bboxInput) bboxInput.value = bboxFromDetails;
+  if (centroidInput) centroidInput.value = composeGeometry(geoname.lng, geoname.lat);
+  if (personInput) personInput.value = name;
+
+  onCloseDialog(event);
 }
 
 /**
@@ -203,17 +246,6 @@ function onConfirmSelection(event) {
 function clearTableRows() {
   const dataBody = document.getElementById('dataBody');
   if (dataBody) dataBody.innerHTML = '';
-}
-
-/**
- * Ανάκτηση geoname ID με βάση ονομα τοπονύμιου
- * @param {string} name
- * @returns {number|null}
- */
-function getGeonameIdByName(name) {
-  const match = geonamesList.find(item => item.name === name);
-  console.log(match)
-  return match ? match : null;
 }
 
 /**

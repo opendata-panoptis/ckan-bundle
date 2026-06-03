@@ -10,6 +10,30 @@
 #}
 
 <div id="activity_types_filter" style="margin-bottom: 15px;" data-module="activity-stream">
+  {% set current_lang = h.lang() or 'en' %}
+  {% set activity_type_labels = {
+    'new package': {'en': 'Created dataset', 'el': 'Δημιουργήθηκε σύνολο δεδομένων'},
+    'changed package': {'en': 'Updated dataset', 'el': 'Ενημερώθηκε σύνολο δεδομένων'},
+    'deleted package': {'en': 'Deleted dataset', 'el': 'Διαγράφηκε σύνολο δεδομένων'},
+    'follow dataset': {'en': 'Started following dataset', 'el': 'Έναρξη παρακολούθησης συνόλου δεδομένων'},
+    'new resource': {'en': 'Added resource', 'el': 'Προστέθηκε αρχείο'},
+    'changed resource': {'en': 'Updated resource', 'el': 'Ενημερώθηκε αρχείο'},
+    'deleted resource': {'en': 'Deleted resource', 'el': 'Διαγράφηκε αρχείο'},
+    'new resource view': {'en': 'Created resource view', 'el': 'Δημιουργήθηκε προβολή πόρου'},
+    'changed resource view': {'en': 'Updated resource view', 'el': 'Ενημερώθηκε προβολή πόρου'},
+    'deleted resource view': {'en': 'Deleted resource view', 'el': 'Διαγράφηκε προβολή πόρου'},
+    'new group': {'en': 'Created group', 'el': 'Δημιουργήθηκε ομάδα'},
+    'changed group': {'en': 'Updated group', 'el': 'Ενημερώθηκε ομάδα'},
+    'deleted group': {'en': 'Deleted group', 'el': 'Διαγράφηκε ομάδα'},
+    'follow group': {'en': 'Started following group', 'el': 'Έναρξη παρακολούθησης ομάδας'},
+    'new organization': {'en': 'Created organization', 'el': 'Δημιουργήθηκε οργανισμός'},
+    'changed organization': {'en': 'Updated organization', 'el': 'Ενημερώθηκε οργανισμός'},
+    'deleted organization': {'en': 'Deleted organization', 'el': 'Διαγράφηκε οργανισμός'},
+    'follow organization': {'en': 'Started following organization', 'el': 'Έναρξη παρακολούθησης οργανισμού'},
+    'new user': {'en': 'Created user', 'el': 'Δημιουργήθηκε χρήστης'},
+    'changed user': {'en': 'Updated user', 'el': 'Ενημερώθηκε χρήστης'},
+    'follow user': {'en': 'Started following user', 'el': 'Έναρξη παρακολούθησης χρήστη'}
+  } %}
   <label for="activity_types_filter_select" class="form-label">
     {{ _('Activity type') }}
   </label>
@@ -18,9 +42,9 @@
       {{ _('All activity types') }}
     </option>
     {% for type_ in activity_types %}
+      {% set label = activity_type_labels.get(type_) %}
       <option {% if activity_type == type_ %}selected{% endif %} data-url="{{ h.url_for(blueprint, id=id, activity_type=type_) }}">
-        {# TODO: Calling humanize gets complex when displaying orgs/groups since the activities also contains dataset activities #}
-        {{ type_ | title }}
+        {{ label.get('el') if label and current_lang.startswith('el') else (label.get('en') if label else type_ | title) }}
       </option>
     {% endfor %}
   </select>

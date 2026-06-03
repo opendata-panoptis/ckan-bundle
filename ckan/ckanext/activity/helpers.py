@@ -46,14 +46,17 @@ def dashboard_activity_stream(
             "organization": "organization_activity_list",
         }
         action_function = tk.get_action(action_functions[filter_type])
-        return action_function(
-            context, {
-                "id": filter_id,
-                "limit": limit,
-                "offset": offset,
-                "before": before,
-                "after": after
-                })
+        try:
+            return action_function(
+                context, {
+                    "id": filter_id,
+                    "limit": limit,
+                    "offset": offset,
+                    "before": before,
+                    "after": after
+                    })
+        except tk.NotAuthorized:
+            return []
     else:
         return tk.get_action("dashboard_activity_list")(
             context, {

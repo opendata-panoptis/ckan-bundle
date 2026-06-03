@@ -1,4 +1,4 @@
-{% extends "package/base.html" %}
+{% ckan_extends %}
 
 {# Έλεγχος αν θέλουμε να μην εμφανίζεται το tab των groups από το ckan.ini #}
 {% set hide_group_tabs = h.asbool(config.get('ckanext.data_gov_gr.user.hide_group_tabs', False)) %}
@@ -22,21 +22,25 @@
 {% endblock %}
 
 {% block content_primary_nav %}
+  {% set primary_nav = super() %}
+  {% set default_read_nav = h.build_nav_icon(dataset_type ~ '.read', _('Dataset'), id=pkg.name, icon='sitemap') %}
+
   {% if dataset_type == 'data-service' %}
-    {{ h.build_nav_icon(dataset_type ~ '.read', _('API'),  id=pkg.name, icon='sitemap') }}
+    {% set primary_nav = primary_nav|replace(default_read_nav, h.build_nav_icon(dataset_type ~ '.read', _('API'), id=pkg.name, icon='sitemap')) %}
   {% elif dataset_type == 'decision' %}
-    {{ h.build_nav_icon(dataset_type ~ '.read', _('Decision'),  id=pkg.name, icon='sitemap') }}
-  {% else %}
-    {{ h.build_nav_icon(dataset_type ~ '.read', _('Dataset'),  id=pkg.name, icon='sitemap') }}
+    {% set primary_nav = primary_nav|replace(default_read_nav, h.build_nav_icon(dataset_type ~ '.read', _('Decision'), id=pkg.name, icon='sitemap')) %}
   {% endif %}
 
-  {% if not hide_group_tabs %}
-    {{ h.build_nav_icon(dataset_type ~ '.groups', h.humanize_entity_type('group', default_group_type, 'content tab') or _('Groups'), id=pkg.name, icon='users') }}
+  {% if hide_group_tabs %}
+    {% set default_groups_nav = h.build_nav_icon(dataset_type ~ '.groups', h.humanize_entity_type('group', default_group_type, 'content tab') or _('Groups'), id=pkg.name, icon='users') %}
+    {% set primary_nav = primary_nav|replace(default_groups_nav, '') %}
   {% endif %}
 
-    {% if dataset_type == 'dataset' and not h.should_hide_mqa_tab() %}
-      {{ h.build_mqa_nav_icon(pkg.name, dataset_type) }}
-    {% endif %}
+  {{ primary_nav }}
+
+  {% if dataset_type == 'dataset' and not h.should_hide_mqa_tab() %}
+    {{ h.build_mqa_nav_icon(pkg.name, dataset_type) }}
+  {% endif %}
 {% endblock %}
 
 {% block secondary_content %}

@@ -826,3 +826,9 @@ msgstr "Σύνολα δεδομένων (σύνολο)"
 
 msgid "Source Code"
 msgstr "Πηγαίος κώδικας"
+
+msgid "The dataset activity stream is restricted to authorized users."
+msgstr "Η ροή δραστηριότητας του συνόλου δεδομένων είναι διαθέσιμη μόνο σε εξουσιοδοτημένους χρήστες."
+
+msgid "The organization activity stream is restricted to organization admins and sysadmins."
+msgstr "Η ροή δραστηριότητας του φορέα είναι διαθέσιμη μόνο σε διαχειριστές φορέα και κεντρικούς διαχειριστές."

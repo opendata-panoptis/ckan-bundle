@@ -79,42 +79,53 @@ def update_zip(package_id, user, skip_if_no_changes=True):
             return
 
         prefix = "{}-".format(dataset[u'name'])
-        with tempfile.NamedTemporaryFile(prefix=prefix, suffix='.zip') as fp:
-            filesize = write_zip(fp, datapackage, ckan_and_datapackage_resources, user=user)
-            log.info('Zip file created with size: {} bytes'.format(filesize))
+        fd, tmp_zip_path = tempfile.mkstemp(prefix=prefix, suffix='.zip')
+        os.close(fd)
 
-            # Rewind the file pointer to the beginning of the file
-            fp.seek(0)
+        try:
+            with open(tmp_zip_path, 'w+b') as fp:
+                filesize = write_zip(fp, datapackage, ckan_and_datapackage_resources, user=user)
+                log.info('Zip file created with size: {} bytes'.format(filesize))
 
-            # Upload resource to CKAN as a new/updated resource
-            # Use the authenticated user for the LocalCKAN instance if available
-            # Στο format το ZIP που καταχωρείται τελικά αφαιρείται πριν γίνει Ιndex οπότε και δεν φαίνεται στα φίλτρα
-            local_ckan = ckanapi.LocalCKAN(username=user) if user else ckanapi.LocalCKAN()
-            fp.seek(0)
-            resource = dict(
-                package_id=dataset['id'],
-                url='dummy-value',
-                upload=fp,
-                name=u'All resource data',
-                name_translated={
-                    'en': u'All resource data',
-                    'el': u'Όλα τα δεδομένα πόρων',
-                },
-                format=u'ZIP',
-                downloadall_metadata_modified=dataset['metadata_modified'],
-                downloadall_datapackage_hash=hash_datapackage(datapackage)
-            )
+                # Rewind the file pointer to the beginning of the file
+                fp.seek(0)
 
-            if not existing_zip_resource:
-                log.info('Creating new zip resource for dataset: {}'.format(dataset['name']))
-                result = local_ckan.action.resource_create(**resource)
-                log.info('New zip resource created with ID: {}'.format(result.get('id', 'unknown')))
-            else:
-                log.info('Updating existing zip resource ID: {}'.format(existing_zip_resource['id']))
-                result = local_ckan.action.resource_patch(
-                    id=existing_zip_resource['id'],
-                    **resource)
-                log.info('Zip resource updated successfully')
+                # Upload resource to CKAN as a new/updated resource
+                # Use the authenticated user for the LocalCKAN instance if available
+                # Στο format το ZIP που καταχωρείται τελικά αφαιρείται πριν γίνει Ιndex οπότε και δεν φαίνεται στα φίλτρα
+                local_ckan = ckanapi.LocalCKAN(username=user) if user else ckanapi.LocalCKAN()
+                fp.seek(0)
+                resource = dict(
+                    package_id=dataset['id'],
+                    url='dummy-value',
+                    upload=fp,
+                    name=u'All resource data',
+                    name_translated={
+                        'en': u'All resource data',
+                        'el': u'Όλα τα δεδομένα πόρων',
+                    },
+                    format=u'ZIP',
+                    downloadall_metadata_modified=dataset['metadata_modified'],
+                    downloadall_datapackage_hash=hash_datapackage(datapackage)
+                )
+
+                if not existing_zip_resource:
+                    log.info('Creating new zip resource for dataset: {}'.format(dataset['name']))
+                    result = local_ckan.action.resource_create(**resource)
+                    log.info('New zip resource created with ID: {}'.format(result.get('id', 'unknown')))
+                else:
+                    log.info('Updating existing zip resource ID: {}'.format(existing_zip_resource['id']))
+                    result = local_ckan.action.resource_patch(
+                        id=existing_zip_resource['id'],
+                        **resource)
+                    log.info('Zip resource updated successfully')
+        finally:
+            if os.path.exists(tmp_zip_path):
+                try:
+                    os.remove(tmp_zip_path)
+                    log.info('Removed downloadall temp zip: {}'.format(tmp_zip_path))
+                except OSError as e:
+                    log.warning('Could not remove downloadall temp zip {}: {}'.format(tmp_zip_path, e))
     except Exception as e:
         log.error('Error in update_zip for dataset {}: {}'.format(package_id, str(e)))
         import traceback

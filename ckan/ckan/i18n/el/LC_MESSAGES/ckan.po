@@ -4032,7 +4032,7 @@ msgstr ""
 #: ckanext/activity/views.py:384 ckanext/activity/views.py:462
 #: ckanext/activity/views.py:608 ckanext/activity/views.py:701
 msgid "Unauthorized to view activity data"
-msgstr ""
+msgstr "Δεν επιτρέπεται να δείτε τα δεδομένα δραστηριότητας"
 
 #: ckanext/activity/views.py:252
 msgid "The detail of this dataset activity is not available"
@@ -4111,11 +4111,11 @@ msgstr ""
 #: ckanext/activity/templates/package/activity_stream.html:15
 #: ckanext/activity/templates/snippets/stream.html:62
 msgid "No activity found for this type"
-msgstr ""
+msgstr "Δεν βρέθηκε δραστηριότητα για αυτόν τον τύπο"
 
 #: ckanext/activity/templates/package/activity_stream.html:17
 msgid "No activity found"
-msgstr ""
+msgstr "Δεν βρέθηκε δραστηριότητα"
 
 #: ckanext/activity/templates/package/history.html:6
 #: ckanext/activity/templates/package/resource_history.html:10
@@ -4128,7 +4128,7 @@ msgstr ""
 
 #: ckanext/activity/templates/snippets/activity_type_selector.html:18
 msgid "All activity types"
-msgstr ""
+msgstr "Όλοι οι τύποι δραστηριότητας"
 
 #: ckanext/activity/templates/snippets/pagination.html:7
 msgid "Newer activities"
@@ -4152,18 +4152,18 @@ msgstr "ο {actor} ενημέρωσε το φορέα {organization}"
 
 #: ckanext/activity/templates/snippets/activities/changed_package.html:7
 msgid "{actor} updated the {dataset_type} {dataset}"
-msgstr ""
+msgstr "{actor} ενημέρωσε το {dataset_type} {dataset}"
 
 #: ckanext/activity/templates/snippets/activities/changed_package.html:9
 #: ckanext/activity/templates/snippets/activities/deleted_package.html:10
 #: ckanext/activity/templates/snippets/activities/new_package.html:9
 msgid "dataset"
-msgstr "Σύνολο Δεδομένων"
+msgstr "σύνολο δεδομένων"
 
 #: ckanext/activity/templates/snippets/activities/changed_package.html:18
 #: ckanext/activity/templates/snippets/activities/new_package.html:18
 msgid "View this version"
-msgstr ""
+msgstr "Προβολή αυτής της έκδοσης"
 
 #: ckanext/activity/templates/snippets/activities/changed_resource.html:6
 msgid "{actor} updated the resource {resource} in the dataset {dataset}"
@@ -4183,7 +4183,7 @@ msgstr "ο {actor} διέγραψε το φορέα {organization}"
 
 #: ckanext/activity/templates/snippets/activities/deleted_package.html:8
 msgid "{actor} deleted the {dataset_type} {dataset}"
-msgstr ""
+msgstr "{actor} διέγραψε το {dataset_type} {dataset}"
 
 #: ckanext/activity/templates/snippets/activities/deleted_resource.html:6
 msgid "{actor} deleted the resource {resource} from the dataset {dataset}"
@@ -4196,7 +4196,7 @@ msgstr ""
 
 #: ckanext/activity/templates/snippets/activities/follow_dataset.html:6
 msgid "{actor} started following {dataset}"
-msgstr "{actor} άρχισε να ακολουθεί το {dataset}"
+msgstr "{actor} ξεκίνησε να παρακολουθεί το {dataset}"
 
 #: ckanext/activity/templates/snippets/activities/follow_group.html:6
 msgid "{actor} started following {group}"
@@ -4216,11 +4216,23 @@ msgstr "{actor} δημιούργησε το φορέα {organization}"
 
 #: ckanext/activity/templates/snippets/activities/new_package.html:7
 msgid "{actor} created the {dataset_type} {dataset}"
-msgstr ""
+msgstr "{actor} δημιούργησε το {dataset_type} {dataset}"
 
 #: ckanext/activity/templates/snippets/activities/new_resource.html:6
 msgid "{actor} added the resource {resource} to the dataset {dataset}"
 msgstr "{actor} πρόσθεσε τον πόρο {resource} στο σύνολο δεδομένων {dataset}"
+
+#: ckanext/activity/templates/snippets/activities/new_resource_view.html:9
+msgid "{actor} created resource view {view_link}"
+msgstr "{actor} δημιούργησε την προβολή πόρου {view_link}"
+
+#: ckanext/activity/templates/snippets/activities/changed_resource_view.html:9
+msgid "{actor} updated resource view {view_link}"
+msgstr "{actor} ενημέρωσε την προβολή πόρου {view_link}"
+
+#: ckanext/activity/templates/snippets/activities/deleted_resource_view.html:9
+msgid "{actor} deleted resource view \"{view_title}\" for resource {resource_link}"
+msgstr "{actor} διέγραψε την προβολή πόρου \"{view_title}\" για τον πόρο {resource_link}"
 
 #: ckanext/activity/templates/snippets/activities/new_user.html:6
 msgid "{actor} signed up"
