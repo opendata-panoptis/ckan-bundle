@@ -124,3 +124,46 @@
     color: white;
     background-color: #00285c !important; /* Πιο σκούρο μπλε στο hover */
 }
+
+/* ----------------------------------------------------------------------- */
+
+@media (max-width: 767.98px) {
+    .js body.filters-modal .secondary .filters > section.module.module-narrow.module-shallow {
+        background-color: #fff;
+        border-radius: 4px;
+        margin-bottom: 0;
+        overflow: hidden;
+    }
+
+    .js body.filters-modal .secondary .filters > section.module.module-narrow.module-shallow .module-content.module-content--search {
+        padding-bottom: 0;
+    }
+
+    .js body.filters-modal .secondary .filters > section.module.module-narrow.module-shallow #map {
+        border-left: 0;
+        border-right: 0;
+        border-radius: 0;
+        margin-bottom: 0;
+    }
+
+    .js body.filters-modal .secondary .filters > section.module.module-narrow.module-shallow .map-search-controls {
+        background-color: #fff;
+        margin-bottom: 0;
+        padding: 12px;
+    }
+
+    .js body.filters-modal .secondary .filters > section.module.module-narrow.module-shallow .map-search-button-wrapper {
+        align-items: center;
+    }
+
+    .js body.filters-modal .secondary .filters > section.module.module-narrow.module-shallow .map-search-text-container {
+        justify-content: flex-start;
+        min-width: 0;
+        text-align: left;
+    }
+
+    .js body.filters-modal .secondary .filters > section.module.module-narrow.module-shallow .map-search-label {
+        overflow-wrap: anywhere;
+        text-align: left;
+    }
+}

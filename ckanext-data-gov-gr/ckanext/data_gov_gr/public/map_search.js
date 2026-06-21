@@ -17,6 +17,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let map;
 
+  function refreshMapSize() {
+    if (!map) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
+    });
+  }
+
   try {
     if (savedCenter && savedZoom) {
       const centerCoords = savedCenter.split(',').map(parseFloat);
@@ -30,6 +42,8 @@ document.addEventListener('DOMContentLoaded', function () {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
+
+    refreshMapSize();
 
     console.log('Map initialized successfully');
 
@@ -73,6 +87,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
     }
+
+    const filtersModalObserver = new MutationObserver(() => {
+      if (document.body.classList.contains('filters-modal')) {
+        refreshMapSize();
+      }
+    });
+    filtersModalObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    window.addEventListener('resize', refreshMapSize);
 
   } catch (error) {
     console.error('Error initializing map:', error);

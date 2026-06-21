@@ -306,6 +306,29 @@ li#simple-tab:hover, li#advanced-tab:hover {
     background-color: var(--color-primary-light);
 }
 
+@media (max-width: 767.98px) {
+    .js body.filters-modal .main .secondary .filters {
+        z-index: 2147483646;
+    }
+
+    .js body.filters-modal .secondary .filters .module-heading {
+        padding-right: 48px;
+    }
+
+    .js body.filters-modal .main .primary {
+        z-index: 0;
+    }
+
+    .js body.filters-modal .masthead,
+    .js body.filters-modal .masthead .logo {
+        z-index: 0 !important;
+    }
+
+    .js body.filters-modal .uwy {
+        display: none !important;
+    }
+}
+
 .account-masthead .fa {
     color: white;
 }
