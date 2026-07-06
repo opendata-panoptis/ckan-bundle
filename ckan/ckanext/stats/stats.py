@@ -5,7 +5,7 @@ import datetime
 import logging
 from typing import Any, ClassVar, Optional, Union
 
-from sqlalchemy import Table, select, join, func, and_
+from sqlalchemy import Table, select, join, outerjoin, func, and_
 
 import ckan.model as model
 from ckan.plugins import toolkit as tk
@@ -469,6 +469,7 @@ class Stats(object):
             current_lang = tk.h.lang()
             label_field = f'label_{current_lang}'
 
+            counts_by_uri = self._organization_publisher_type_counts()
             results = []
 
             for tag in vocab_data.get('tags', []):
@@ -482,18 +483,12 @@ class Stats(object):
                 if tag.get(label_field) is None:
                     publisher_type_label = publisher_type_code
 
-                # Get organizations that have this publisher type
-                organizations = tk.get_action('organization_list')({}, {
-                    'all_fields': True,
-                    'include_extras': True
-                })
-
-                # Count organizations with this publisher type
-                count = sum(1 for org in organizations
-                            if org.get('publishertype') == publisher_type_uri)
-
                 # Return tuple with (code, label, count)
-                results.append((publisher_type_code, publisher_type_label, count))
+                results.append((
+                    publisher_type_code,
+                    publisher_type_label,
+                    counts_by_uri.get(publisher_type_uri, 0),
+                ))
 
             # Sort in descending order by count
             return sorted(results, key=lambda x: -x[2])
@@ -503,3 +498,90 @@ class Stats(object):
         except Exception as e:
             log.error(f'Error in organizations_by_publisher_type: {str(e)}')
             return []
+
+    @classmethod
+    def _organization_publisher_type_counts(cls) -> dict[str, int]:
+        group = model.group_table
+        group_extra = model.group_extra_table
+
+        j = join(group, group_extra, group.c["id"] == group_extra.c["group_id"])
+
+        s = (
+            select(
+                group_extra.c["value"],
+                func.count(func.distinct(group.c["id"])),
+            )
+            .select_from(j)
+            .where(
+                and_(
+                    group.c["state"] == "active",
+                    group.c["is_organization"].is_(True),
+                    group.c["type"] == "organization",
+                    group_extra.c["state"] == "active",
+                    group_extra.c["key"] == "publishertype",
+                    group_extra.c["value"].isnot(None),
+                    group_extra.c["value"] != "",
+                )
+            )
+            .group_by(group_extra.c["value"])
+        )
+
+        return {
+            str(publisher_type_uri): int(count)
+            for publisher_type_uri, count in model.Session.execute(s).fetchall()
+        }
+
+    @classmethod
+    def organization_publisher_type_summary(cls) -> dict[str, Union[int, float]]:
+        group = model.group_table
+        group_extra = model.group_extra_table
+
+        valid_publisher_type = and_(
+            group_extra.c["state"] == "active",
+            group_extra.c["key"] == "publishertype",
+            group_extra.c["value"].isnot(None),
+            group_extra.c["value"] != "",
+        )
+        j = outerjoin(
+            group,
+            group_extra,
+            and_(
+                group.c["id"] == group_extra.c["group_id"],
+                valid_publisher_type,
+            ),
+        )
+
+        summary_query = (
+            select(
+                func.count(func.distinct(group.c["id"])),
+                func.count(func.distinct(group_extra.c["group_id"])),
+            )
+            .select_from(j)
+            .where(
+                and_(
+                    group.c["state"] == "active",
+                    group.c["is_organization"].is_(True),
+                    group.c["type"] == "organization",
+                )
+            )
+        )
+        total_orgs, orgs_with_type = model.Session.execute(
+            summary_query
+        ).fetchone()
+        total_orgs = int(total_orgs or 0)
+        orgs_with_type = int(orgs_with_type or 0)
+
+        if total_orgs == 0:
+            return {
+                "total": 0,
+                "with_type": 0,
+                "without_type": 0,
+                "type_percentage": 0,
+            }
+
+        return {
+            "total": total_orgs,
+            "with_type": orgs_with_type,
+            "without_type": total_orgs - orgs_with_type,
+            "type_percentage": round((orgs_with_type / total_orgs * 100), 1),
+        }

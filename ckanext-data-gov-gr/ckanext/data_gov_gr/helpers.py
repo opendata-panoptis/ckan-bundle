@@ -502,21 +502,7 @@ def fluent_language_is_required(field, lang):
 def get_organizations_stats():
     """Returns statistics about organizations and their publisher types"""
     try:
-        organizations = toolkit.get_action('organization_list')({}, {
-            'all_fields': True,
-            'include_extras': True
-        })
-
-        total_orgs = len(organizations)
-        orgs_with_type = sum(1 for org in organizations
-                             if org.get('publishertype'))
-
-        return {
-            'total': total_orgs,
-            'with_type': orgs_with_type,
-            'without_type': total_orgs - orgs_with_type,
-            'type_percentage': round((orgs_with_type / total_orgs * 100) if total_orgs > 0 else 0, 1)
-        }
+        return DataGovStats.organization_publisher_type_summary()
     except Exception as e:
         log.error(f'Error getting organizations statistics: {str(e)}')
         return {

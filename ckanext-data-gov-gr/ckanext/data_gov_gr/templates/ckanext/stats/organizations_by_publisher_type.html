@@ -6,19 +6,20 @@
 {% endblock %}
 
 {% block primary_content %}
+  {% set organization_stats = organizations_stats if organizations_stats is defined else h.get_organizations_stats() %}
   <article class="module">
     <section id="stats-organizations-per-type" class="module-content">
       <h2>{{ _('Organizations Per Publisher Type') }}</h2>
       <div class="total-orgs-counter">
         <div class="stats-grid">
           <div class="counter-box total">
-            <span class="counter-number">{{ h.get_organizations_stats().total }}</span>
+            <span class="counter-number">{{ organization_stats.total }}</span>
             <span class="counter-label">{{ _('Total Organizations') }}</span>
           </div>
           <div class="counter-box with-type">
-            <span class="counter-number">{{ h.get_organizations_stats().with_type }}</span>
+            <span class="counter-number">{{ organization_stats.with_type }}</span>
             <span class="counter-label">{{ _('With Publisher Type') }}</span>
-            <span class="percentage">({{ h.get_organizations_stats().type_percentage }}%)</span>
+            <span class="percentage">({{ organization_stats.type_percentage }}%)</span>
           </div>
         </div>
       </div>
