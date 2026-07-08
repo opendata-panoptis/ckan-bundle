@@ -105,8 +105,18 @@ div.DTFC_LeftBodyWrapper {
 }
 
 div.resourceinfo {
-  display: inline;
+  display: block;
   font-weight: bold;
+}
+
+div.resourceinfo,
+div.sortinfo {
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+  padding-right: 22rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 div.sortinfo {
@@ -174,7 +184,9 @@ div.sortinfo {
   div.sortinfo {
     display: block;
     overflow-wrap: anywhere;
+    padding-right: 0;
     text-align: center;
+    white-space: normal;
   }
 }
 

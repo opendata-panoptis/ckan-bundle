@@ -1,0 +1,163 @@
+{% set extended_robots = h.asbool(config.get(
+    'ckanext.athens_theme.robots.extended',
+    'true'
+)) %}
+{% if extended_robots %}
+# AI / LLM Crawlers
+
+# --- OpenAI ---
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+Disallow: /
+
+# --- Anthropic ---
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: Claude-Web
+User-agent: anthropic-ai
+Disallow: /
+
+# --- Meta ---
+User-agent: FacebookBot
+User-agent: meta-externalagent
+Disallow: /
+
+# --- Amazon ---
+User-agent: Amazonbot
+Disallow: /
+
+# --- Apple ---
+User-agent: Applebot
+User-agent: Applebot-Extended
+Disallow: /
+
+# --- Google AI, not search ---
+User-agent: Google-Extended
+Disallow: /
+
+# --- Other AI bots ---
+User-agent: CCBot
+User-agent: Diffbot
+User-agent: Bytespider
+User-agent: PerplexityBot
+User-agent: Cohere-ai
+User-agent: YouBot
+User-agent: PetalBot
+Disallow: /
+
+# --- Chinese bots ---
+User-agent: Baiduspider
+User-agent: Baiduspider-image
+User-agent: Baiduspider-video
+User-agent: Baiduspider-news
+User-agent: Baiduspider-favo
+User-agent: Baiduspider-cpro
+User-agent: Baiduspider-ads
+User-agent: Baidu-YunGuanCe
+User-agent: YisouSpider
+User-agent: Sogou web spider
+User-agent: Sogou inst spider
+User-agent: Sogou spider
+User-agent: 360Spider
+User-agent: HaoSouSpider
+User-agent: Qihoobot
+User-agent: AlibabaBot
+User-agent: Alibaba.Security.Heimdall
+User-agent: AliyunSecBot
+User-agent: TencentTraveler
+Disallow: /
+
+# --- SEO crawlers / scrapers ---
+User-agent: AhrefsBot
+User-agent: SemrushBot
+User-agent: DotBot
+User-agent: MJ12bot
+User-agent: BLEXBot
+User-agent: DataForSeoBot
+User-agent: MegaIndex.ru
+User-agent: SEOkicks
+User-agent: seoscanners.net
+User-agent: Rogerbot
+User-agent: Screaming Frog SEO Spider
+Disallow: /
+
+# --- Archivers / mirroring / scripting tools ---
+User-agent: HTTrack
+User-agent: Wget
+User-agent: curl
+User-agent: libwww-perl
+User-agent: Nutch
+User-agent: Scrapy
+User-agent: Java
+User-agent: python-requests
+User-agent: Go-http-client
+Disallow: /
+
+# --- Yandex ---
+User-agent: Yandex
+User-agent: YandexBot
+User-agent: YandexImages
+User-agent: YandexMobileBot
+Disallow: /
+
+# --- Search bots ---
+User-agent: *
+
+# --- CKAN internal paths ---
+Disallow: /dataset/rate/
+Disallow: /revision/
+Disallow: /dataset/*/history
+Disallow: /api/
+Disallow: /stats/
+Disallow: /_tracking
+
+# --- Faceted search trap: /dataset/ ---
+Disallow: */dataset/*?*tags=
+Disallow: */dataset/*?*organization=
+Disallow: */dataset/*?*res_format=
+Disallow: */dataset/*?*license_id=
+Disallow: */dataset/*?*is_hvd=
+Disallow: */dataset/*?*is_nsip=
+Disallow: */dataset/*?*qa_mqa_rating=
+Disallow: */dataset/*?*qa_openness_score=
+Disallow: */dataset/*?*dataset_type=
+Disallow: */dataset/*?*frequency=
+Disallow: */dataset/*?*publishertype=
+Disallow: */dataset/*?*_tags_limit=
+Disallow: */dataset/*?*_organization_limit=
+Disallow: */dataset/*?*_res_format_limit=
+Disallow: */dataset/*?*q=
+Allow: /dataset/?page=
+Allow: /en/dataset/?page=
+Allow: /el/dataset/?page=
+
+# --- Faceted search trap: /organization/ ---
+Disallow: */organization/*?*tags=
+Disallow: */organization/*?*organization=
+Disallow: */organization/*?*res_format=
+Disallow: */organization/*?*license_id=
+Disallow: */organization/*?*q=
+Allow: /organization/?page=
+Allow: /en/organization/?page=
+Allow: /el/organization/?page=
+
+# --- Faceted search trap: /group/ ---
+Disallow: */group/*?*tags=
+Disallow: */group/*?*organization=
+Disallow: */group/*?*q=
+Allow: /group/?page=
+Allow: /en/group/?page=
+Allow: /el/group/?page=
+
+# --- Rate limiting ---
+Crawl-delay: 10
+{% else %}
+User-agent: *
+Disallow: /dataset/rate/
+Disallow: /revision/
+Disallow: /dataset/*/history
+Disallow: /api/
+Crawl-Delay: 10
+{% endif %}

@@ -19,6 +19,11 @@ ckan.plugins = ... athens_theme ...
 # Athens Theme Settings
 ckan.site_title = Opendata.cityofathens
 ckan.site_description = Πύλη Ανοικτών Δεδομένων Δήμου Αθηναίων
-```
 
+# Robots.txt
+# Default: true. Ενεργοποιεί το εκτεταμένο robots.txt με αποκλεισμό
+# AI/LLM crawlers, scrapers και CKAN faceted-search traps.
+# Αν οριστεί σε false, χρησιμοποιείται το απλό CKAN-style robots.txt.
+ckanext.athens_theme.robots.extended = true
+```
 
