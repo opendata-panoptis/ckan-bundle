@@ -49,6 +49,76 @@ If set to `False`, resources created by ckanext-downloadall (identified by the
 Set to `True` to include them.
 
 
+#### ckanext.dcat.datastore_access_services.enabled
+
+Προεπιλεγμένη τιμή: `True`
+
+Κατά την παραγωγή του RDF, αν ένας πόρος έχει ενεργό DataStore (το
+`datastore_active` είναι true) αλλά δεν έχει access service στα μεταδεδομένα
+του (το πεδίο `access_services` λείπει, είναι κενό, ή περιέχει μόνο εγγραφές
+με κενό `uri`), τότε παράγεται αυτόματα ένα `dcat:DataService` για το
+distribution, με τυποποιημένο τίτλο και `dcat:endpointURL` που δείχνει στο
+`datastore_search` API endpoint του πόρου.
+
+Ο κόμβος του service (τόσο του αυτόματα παραγόμενου όσο και του
+εμπλουτισμένου από δηλωμένο data service) εκδίδεται με σταθερό IRI της μορφής
+`{ckan.site_url}/dataset/{dataset_id}/resource/{resource_id}/access-service`
+αντί για blank node, όπως απαιτούν τα SHACL shapes του DCAT-AP HVD
+(`sh:nodeKind sh:IRI` στο `dcat:accessService`).
+
+Αν το σύνολο δεδομένων είναι HVD (έχει μη κενό `hvd_category`), το παραγόμενο
+service εμπλουτίζεται επιπλέον με τα πεδία που απαιτεί το προφίλ DCAT-AP HVD:
+
+* `dcatap:applicableLegislation`: λαμβάνεται από το `applicable_legislation`
+  του πόρου, με fallback σε αυτό του συνόλου δεδομένων και τελικά στη ρύθμιση
+  `ckanext.data_gov_gr.hvd.applicable_legislation.default`
+  (προεπιλογή: `http://data.europa.eu/eli/reg_impl/2023/138/oj`).
+* `dcat:contactPoint`: κληρονομείται από το πεδίο `contact` του συνόλου
+  δεδομένων.
+* `foaf:page` (τεκμηρίωση): σύνδεσμοι προς τους οδηγούς του DataStore Data
+  API.
+* `dcatap:hvdCategory`: κληρονομείται από το πεδίο `hvd_category` του συνόλου
+  δεδομένων.
+* `dct:license` και `dct:rights`: κληρονομούνται από τον πόρο.
+
+Τα access services που έχουν δηλωθεί ρητά σε έναν πόρο έχουν πάντα
+προτεραιότητα και δεν τροποποιούνται. Ορίστε το σε `False` για να
+απενεργοποιήσετε την αυτόματη παραγωγή.
+
+
+#### ckanext.dcat.access_services_hvd_enrichment.enabled
+
+Προεπιλεγμένη τιμή: `True`
+
+Κατά την παραγωγή του RDF, αν ένας πόρος έχει δηλωμένο access service (είτε
+με inline στοιχεία είτε μέσω αναφοράς σε data-service dataset) και το σύνολο
+δεδομένων είναι HVD (έχει μη κενό `hvd_category`), το εκδιδόμενο
+`dcat:DataService` εμπλουτίζεται με τα πεδία που απαιτεί το προφίλ DCAT-AP
+HVD, όπως και τα αυτόματα παραγόμενα services του DataStore.
+
+Για κάθε πεδίο προτιμάται η τιμή του ίδιου του data-service (αν η αναζήτησή
+του πέτυχε), με fallback στα αντίστοιχα πεδία του πόρου / συνόλου δεδομένων:
+
+* `dcatap:applicableLegislation`: `applicable_legislation` του data-service →
+  του πόρου → του συνόλου δεδομένων → ρύθμιση
+  `ckanext.data_gov_gr.hvd.applicable_legislation.default`
+  (προεπιλογή: `http://data.europa.eu/eli/reg_impl/2023/138/oj`). Αν η HVD
+  νομοθεσία από τη ρύθμιση λείπει από τις τιμές που επιλέχθηκαν, προστίθεται
+  συμπληρωματικά στο access service.
+* `dcatap:hvdCategory`: `hvd_category` του data-service → του συνόλου
+  δεδομένων.
+* `dcat:contactPoint`: `contact` του data-service → του συνόλου δεδομένων.
+* `dct:license` και `dct:rights`: του data-service → του πόρου.
+* `foaf:page` (τεκμηρίωση): μόνο από το `documentation` του ίδιου του
+  data-service — δεν γίνεται fallback, καθώς οι οδηγοί του DataStore Data API
+  δεν περιγράφουν δηλωμένα services.
+
+Τα δηλωμένα μεταδεδομένα του access service (τίτλος, περιγραφή, endpoint) δεν
+τροποποιούνται. Ορίστε το σε `False` για να απενεργοποιήσετε τον εμπλουτισμό
+των δηλωμένων services (τα αυτόματα παραγόμενα από το DataStore ελέγχονται
+από το `ckanext.dcat.datastore_access_services.enabled`).
+
+
 #### ckanext.dcat.normalize_ckan_format
 
 Default value: `True`
@@ -181,5 +251,4 @@ ckanext.dcat.croissant.profiles = my_custom_croissant_profile
 Default value: `croissant`
 
 Profiles to use when creating the [Croissant](croissant.md) serializations
-
 

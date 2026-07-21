@@ -1,4 +1,5 @@
 import json
+import logging
 from decimal import Decimal, DecimalException
 from urllib.parse import urlparse
 
@@ -16,12 +17,32 @@ from .base import (
     SCHEMA,
     RDFS,
     ADMS,
+    FOAF,
+    VCARD,
 )
 
-from .euro_dcat_ap_base import BaseEuropeanDCATAPProfile
+from .euro_dcat_ap_base import (
+    BaseEuropeanDCATAPProfile,
+    INCLUDE_DOWNLOADALL_RESOURCE_CONFIG,
+)
 
+
+log = logging.getLogger(__name__)
 
 ELI = Namespace("http://data.europa.eu/eli/ontology#")
+
+DATASTORE_ACCESS_SERVICES_CONFIG = "ckanext.dcat.datastore_access_services.enabled"
+ACCESS_SERVICES_HVD_ENRICHMENT_CONFIG = (
+    "ckanext.dcat.access_services_hvd_enrichment.enabled"
+)
+HVD_APPLICABLE_LEGISLATION_CONFIG = (
+    "ckanext.data_gov_gr.hvd.applicable_legislation.default"
+)
+DEFAULT_HVD_APPLICABLE_LEGISLATION = "http://data.europa.eu/eli/reg_impl/2023/138/oj"
+DATASTORE_ACCESS_SERVICE_DOCUMENTATION = [
+    "https://docs.ckan.org/en/2.11/maintaining/datastore.html#the-data-api",
+    "https://data-gov-gr.gitbook.io/guides/texnika-egxeiridia/data.gov.gr/dedomena",
+]
 
 
 class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
@@ -305,7 +326,15 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                     )
 
         # Resources
+        include_downloadall_resource = toolkit.asbool(
+            toolkit.config.get(INCLUDE_DOWNLOADALL_RESOURCE_CONFIG, False)
+        )
         for resource_dict in dataset_dict.get("resources", []):
+            if (
+                not include_downloadall_resource
+                and "downloadall_metadata_modified" in resource_dict
+            ):
+                continue
 
             distribution_ref = CleanedURIRef(resource_uri(resource_dict))
 
@@ -383,14 +412,16 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
 
             updated_access_services = []
 
-            for access_service_dict in access_service_list:
+            for index, access_service_dict in enumerate(access_service_list):
 
-                enriched = self._enrich_access_service_from_data_service(
+                enriched, data_service = self._enrich_access_service_from_data_service(
                     access_service_dict
                 )
 
                 if enriched:
-                    access_service_node = BNode()
+                    access_service_node = self._access_service_iri(
+                        dataset_dict, resource_dict, index
+                    ) or BNode()
                     access_service_dict["access_service_ref"] = str(access_service_node)
 
                     self.g.add((distribution_ref, DCAT.accessService, access_service_node))
@@ -418,6 +449,16 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                         access_service_dict, access_service_node, endpoint_items
                     )
 
+                    # For HVD datasets add the DCAT-AP HVD properties,
+                    # preferring the data-service's own values over the
+                    # resource/dataset fallbacks
+                    self._add_access_service_hvd_enrichment(
+                        dataset_dict,
+                        resource_dict,
+                        access_service_node,
+                        data_service,
+                    )
+
                     updated_access_services.append(access_service_dict)
 
                 else:
@@ -432,15 +473,27 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
 
             if updated_access_services:
                 resource_dict["access_services"] = json.dumps(updated_access_services)
-            elif resource_dict.get("access_services"):
-                resource_dict.pop("access_services", None)
+            else:
+                if resource_dict.get("access_services"):
+                    resource_dict.pop("access_services", None)
+
+                # No access service was emitted for this distribution: for
+                # datastore-enabled resources generate one pointing to the
+                # datastore_search API endpoint
+                self._add_datastore_access_service(
+                    dataset_dict, resource_dict, distribution_ref
+                )
 
     def _enrich_access_service_from_data_service(self, access_service_dict):
         """
         Populate access service metadata from a referenced data-service dataset, if available.
+
+        Returns a tuple ``(enriched, data_service)`` where ``data_service`` is
+        the referenced data-service dataset dict, or None if no lookup was
+        made or it failed.
         """
         if not isinstance(access_service_dict, dict):
-            return False
+            return False, None
 
         def has_details():
             if access_service_dict.get("title") or access_service_dict.get("description"):
@@ -449,23 +502,23 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
             return bool(urls)
 
         if has_details():
-            return True
+            return True, None
 
         data_service_id = self._resolve_data_service_identifier(access_service_dict)
         if not data_service_id:
-            return False
+            return False, None
 
         try:
             package_show = toolkit.get_action("package_show")
             data_service = package_show({"ignore_auth": True}, {"id": data_service_id})
         except (toolkit.ObjectNotFound, toolkit.NotAuthorized, toolkit.ValidationError):
-            return False
+            return False, None
         except Exception:
             # Any other unexpected error should not break serialization
-            return False
+            return False, None
 
         if data_service.get("type") != "data-service":
-            return False
+            return False, None
 
         def _translated_value(field, default_field=None):
             translated = data_service.get(f"{field}_translated")
@@ -498,7 +551,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
             if urls:
                 access_service_dict["endpoint_url"] = urls
 
-        return has_details()
+        return has_details(), data_service
 
     @staticmethod
     def _ensure_list(value):
@@ -551,6 +604,275 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
             return segments[-1]
 
         return uri or None
+
+    def _access_service_iri(self, dataset_dict, resource_dict, index=0):
+        """
+        Mint a stable IRI for an access service of a distribution, so that it
+        is serialized as an IRI node instead of a blank node (the DCAT-AP HVD
+        SHACL shapes require sh:nodeKind sh:IRI on dcat:accessService values).
+
+        Returns None if the required ids are missing (callers fall back to a
+        blank node).
+        """
+        dataset_id = dataset_dict.get("id")
+        resource_id = resource_dict.get("id")
+        if not dataset_id or not resource_id:
+            return None
+
+        site_url = (toolkit.config.get("ckan.site_url") or "").rstrip("/")
+        iri = (
+            f"{site_url}/dataset/{dataset_id}"
+            f"/resource/{resource_id}/access-service"
+        )
+        if index:
+            iri = f"{iri}-{index}"
+        return CleanedURIRef(iri)
+
+    def _add_datastore_access_service(
+        self, dataset_dict, resource_dict, distribution_ref
+    ):
+        """
+        Generate a dcat:DataService for datastore-enabled resources that have
+        no access service, pointing to the datastore_search API endpoint.
+
+        For HVD datasets (non-empty ``hvd_category``) the service is enriched
+        with the additional properties required by the DCAT-AP HVD profile:
+        applicable legislation, contact points, documentation, HVD category,
+        license and rights.
+
+        Never raises: any failure is logged and serialization continues.
+        """
+        try:
+            if not toolkit.asbool(
+                toolkit.config.get(DATASTORE_ACCESS_SERVICES_CONFIG, True)
+            ):
+                return
+
+            if not toolkit.asbool(resource_dict.get("datastore_active") or False):
+                return
+
+            resource_id = resource_dict.get("id")
+            if not resource_id:
+                return
+
+            site_url = (toolkit.config.get("ckan.site_url") or "").rstrip("/")
+            endpoint_url = (
+                f"{site_url}/api/action/datastore_search"
+                f"?resource_id={resource_id}&limit=5"
+            )
+
+            access_service_node = (
+                self._access_service_iri(dataset_dict, resource_dict) or BNode()
+            )
+            self.g.add((distribution_ref, DCAT.accessService, access_service_node))
+            self.g.add((access_service_node, RDF.type, DCAT.DataService))
+            self.g.add(
+                (
+                    access_service_node,
+                    DCT.title,
+                    Literal(f"Υπηρεσία διάθεσης δεδομένων πόρου {resource_id}"),
+                )
+            )
+            self.g.add(
+                (access_service_node, DCAT.endpointURL, CleanedURIRef(endpoint_url))
+            )
+
+            hvd_categories = self._ensure_list(dataset_dict.get("hvd_category"))
+            if not hvd_categories:
+                return
+
+            self._add_hvd_fields_to_access_service(
+                dataset_dict,
+                resource_dict,
+                access_service_node,
+                hvd_categories,
+                datastore_documentation=True,
+            )
+        except Exception:
+            log.warning(
+                "Could not generate datastore access service for resource %s",
+                resource_dict.get("id"),
+                exc_info=True,
+            )
+
+    def _add_access_service_hvd_enrichment(
+        self, dataset_dict, resource_dict, access_service_node, data_service=None
+    ):
+        """
+        For HVD datasets (non-empty ``hvd_category``) add the DCAT-AP HVD
+        properties to a declared access service, preferring the values of the
+        referenced data-service dataset (if available) and falling back to
+        the resource/dataset ones, mirroring the datastore-generated services.
+
+        Never raises: any failure is logged and serialization continues.
+        """
+        try:
+            if not toolkit.asbool(
+                toolkit.config.get(ACCESS_SERVICES_HVD_ENRICHMENT_CONFIG, True)
+            ):
+                return
+
+            hvd_categories = self._ensure_list(dataset_dict.get("hvd_category"))
+            if not hvd_categories:
+                return
+
+            self._add_hvd_fields_to_access_service(
+                dataset_dict,
+                resource_dict,
+                access_service_node,
+                hvd_categories,
+                service_source=data_service,
+            )
+        except Exception:
+            log.warning(
+                "Could not add HVD properties to access service for resource %s",
+                resource_dict.get("id"),
+                exc_info=True,
+            )
+
+    def _add_hvd_fields_to_access_service(
+        self,
+        dataset_dict,
+        resource_dict,
+        access_service_node,
+        hvd_categories,
+        service_source=None,
+        datastore_documentation=False,
+    ):
+        """
+        Add the DCAT-AP HVD properties to an access service node.
+
+        Each value is taken from ``service_source`` (the referenced
+        data-service dataset, when available) first, falling back to the
+        resource/dataset ones. ``datastore_documentation`` selects the fixed
+        DataStore API guides as the documentation fallback and is only set
+        for the datastore-generated services.
+        """
+        service_source = service_source if isinstance(service_source, dict) else {}
+
+        applicable_legislation = (
+            self._ensure_list(service_source.get("applicable_legislation"))
+            or self._ensure_list(resource_dict.get("applicable_legislation"))
+            or self._ensure_list(dataset_dict.get("applicable_legislation"))
+        )
+        default_legislation = (
+            toolkit.config.get(HVD_APPLICABLE_LEGISLATION_CONFIG)
+            or DEFAULT_HVD_APPLICABLE_LEGISLATION
+        )
+        if isinstance(default_legislation, str):
+            default_legislation = default_legislation.strip()
+        if not applicable_legislation:
+            if default_legislation:
+                applicable_legislation = [default_legislation]
+        elif default_legislation and default_legislation not in applicable_legislation:
+            applicable_legislation.append(default_legislation)
+
+        # The documentation of a declared service can only come from the
+        # service itself: the datastore API guides do not describe it
+        documentation = self._ensure_list(service_source.get("documentation"))
+        if not documentation and datastore_documentation:
+            documentation = DATASTORE_ACCESS_SERVICE_DOCUMENTATION
+
+        service_dict = {
+            "applicable_legislation": applicable_legislation,
+            "hvd_category": self._ensure_list(service_source.get("hvd_category"))
+            or hvd_categories,
+            "documentation": documentation,
+            "license": service_source.get("license")
+            or resource_dict.get("license"),
+            "rights": service_source.get("rights") or resource_dict.get("rights"),
+        }
+
+        self._add_triples_from_dict(
+            service_dict,
+            access_service_node,
+            [
+                ("license", DCT.license, None, URIRefOrLiteral, DCT.LicenseDocument),
+            ],
+        )
+
+        self._add_statement_to_graph(
+            service_dict,
+            "rights",
+            access_service_node,
+            DCT.rights,
+            DCT.RightsStatement,
+        )
+
+        self._add_list_triples_from_dict(
+            service_dict,
+            access_service_node,
+            [
+                (
+                    "applicable_legislation",
+                    DCATAP.applicableLegislation,
+                    None,
+                    URIRefOrLiteral,
+                    ELI.LegalResource,
+                ),
+                ("hvd_category", DCATAP.hvdCategory, None, URIRefOrLiteral),
+                (
+                    "documentation",
+                    FOAF.page,
+                    None,
+                    URIRefOrLiteral,
+                    FOAF.Document,
+                ),
+            ],
+        )
+
+        # Contact points from the data-service itself, falling back to the
+        # dataset ones
+        contacts = self._contact_list(
+            service_source.get("contact")
+        ) or self._contact_list(dataset_dict.get("contact"))
+        for item in contacts:
+            contact_uri = item.get("uri")
+            if contact_uri:
+                contact_details = CleanedURIRef(contact_uri)
+            else:
+                contact_details = BNode()
+
+            self.g.add((contact_details, RDF.type, VCARD.Kind))
+            self.g.add(
+                (access_service_node, DCAT.contactPoint, contact_details)
+            )
+
+            self._add_triple_from_dict(
+                item, contact_details, VCARD.fn, "name"
+            )
+            self._add_triple_from_dict(
+                item,
+                contact_details,
+                VCARD.hasEmail,
+                "email",
+                _type=URIRef,
+                value_modifier=self._add_mailto,
+            )
+            self._add_triple_from_dict(
+                item,
+                contact_details,
+                VCARD.hasURL,
+                "url",
+                _type=URIRef,
+            )
+
+    @staticmethod
+    def _contact_list(value):
+        """
+        Normalize a contact field value (list or JSON string) to a list of
+        non-empty contact dicts.
+        """
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except ValueError:
+                return []
+        if not isinstance(value, list):
+            return []
+        return [
+            item for item in value if isinstance(item, dict) and any(item.values())
+        ]
 
     def _graph_from_dataset_v2_only(self, dataset_dict, dataset_ref):
         """

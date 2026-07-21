@@ -684,6 +684,157 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         self._assert_values_list(g, access_service_object, DCAT.servesDataset,
                             self._get_typed_list(access_services[0].get('serves_dataset'), URIRef))
 
+    @pytest.mark.ckan_config('ckan.site_url', 'https://data.gov.gr')
+    @pytest.mark.ckan_config(
+        'ckanext.data_gov_gr.hvd.applicable_legislation.default',
+        'http://example.com/hvd-legislation',
+    )
+    @pytest.mark.parametrize(
+        'data_service_legislation,expected_legislation',
+        [
+            (
+                ['https://eur-lex.europa.eu/eli/dir/2019/1024/oj/eng'],
+                [
+                    'https://eur-lex.europa.eu/eli/dir/2019/1024/oj/eng',
+                    'http://example.com/hvd-legislation',
+                ],
+            ),
+            (
+                ['http://example.com/hvd-legislation'],
+                ['http://example.com/hvd-legislation'],
+            ),
+        ],
+    )
+    def test_hvd_access_service_ensures_default_applicable_legislation(
+        self, monkeypatch, data_service_legislation, expected_legislation
+    ):
+
+        def get_action(action_name):
+            assert action_name == 'package_show'
+
+            def package_show(context, data_dict):
+                assert data_dict['id'] == 'cityofathens-ds-415dd022213b'
+                return {
+                    'type': 'data-service',
+                    'title': 'Athens Smart Neighbourhood CKAN DataStore API',
+                    'notes': 'CKAN DataStore API service',
+                    'endpoint_url': [
+                        'https://opendata.cityofathens.gr/api/3/action/datastore_search'
+                    ],
+                    'applicable_legislation': data_service_legislation,
+                }
+
+            return package_show
+
+        monkeypatch.setattr(
+            'ckanext.dcat.profiles.euro_dcat_ap_2.toolkit.get_action',
+            get_action,
+        )
+
+        resource = {
+            'id': '02bf465b-39b2-4127-95a6-8213f17e103f',
+            'package_id': 'b68edf2a-083e-44da-a071-610991730c8d',
+            'name': 'Distribution name',
+            'applicable_legislation': ['http://example.com/hvd-legislation'],
+            'access_services': json.dumps([
+                {
+                    'uri': 'https://data.gov.gr/data-service/cityofathens-ds-415dd022213b'
+                }
+            ]),
+        }
+        dataset = {
+            'id': 'b68edf2a-083e-44da-a071-610991730c8d',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'hvd_category': ['http://data.europa.eu/bna/c_dd313021'],
+            'resources': [resource],
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        access_service = self._triple(g, distribution, DCAT.accessService, None)[2]
+
+        self._assert_values_list(
+            g,
+            access_service,
+            DCATAP.applicableLegislation,
+            self._get_typed_list(expected_legislation, URIRef),
+        )
+
+    @pytest.mark.ckan_config('ckan.site_url', 'https://data.gov.gr')
+    def test_downloadall_resource_is_fully_excluded_by_default(self):
+
+        normal_resource = {
+            'id': 'normal-resource',
+            'package_id': 'test-dataset-id',
+            'name': 'Normal distribution',
+            'url': 'https://example.com/normal.csv',
+            'applicable_legislation': ['http://example.com/normal-legislation'],
+        }
+        downloadall_resource = {
+            'id': 'downloadall-resource',
+            'package_id': 'test-dataset-id',
+            'name': 'All resource data',
+            'url': 'https://example.com/downloadall.zip',
+            'downloadall_metadata_modified': '2026-07-20T10:00:00',
+            'applicable_legislation': ['http://example.com/downloadall-legislation'],
+        }
+        dataset = {
+            'id': 'test-dataset-id',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [normal_resource, downloadall_resource],
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+        downloadall_ref = URIRef(utils.resource_uri(downloadall_resource))
+
+        assert len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]) == 1
+        assert not list(g.triples((downloadall_ref, None, None)))
+
+    @pytest.mark.ckan_config('ckan.site_url', 'https://data.gov.gr')
+    @pytest.mark.ckan_config('ckanext.dcat.include_downloadall_resource', 'True')
+    def test_downloadall_resource_is_enriched_when_included(self):
+
+        downloadall_resource = {
+            'id': 'downloadall-resource',
+            'package_id': 'test-dataset-id',
+            'name': 'All resource data',
+            'url': 'https://example.com/downloadall.zip',
+            'downloadall_metadata_modified': '2026-07-20T10:00:00',
+            'applicable_legislation': ['http://example.com/downloadall-legislation'],
+        }
+        dataset = {
+            'id': 'test-dataset-id',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [downloadall_resource],
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+        downloadall_ref = URIRef(utils.resource_uri(downloadall_resource))
+
+        assert self._triple(g, dataset_ref, DCAT.distribution, downloadall_ref)
+        assert self._triple(g, downloadall_ref, RDF.type, DCAT.Distribution)
+        self._assert_values_list(
+            g,
+            downloadall_ref,
+            DCATAP.applicableLegislation,
+            self._get_typed_list(
+                downloadall_resource['applicable_legislation'],
+                URIRef,
+            ),
+        )
+
     def _assert_simple_value(self, graph, object, predicate, value):
         """
         Checks if a triple with the given value is present in the graph
