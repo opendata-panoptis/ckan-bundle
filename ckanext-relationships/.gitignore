@@ -40,3 +40,9 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+.vscode
+
+# IDE files
+.idea/
+*.iml

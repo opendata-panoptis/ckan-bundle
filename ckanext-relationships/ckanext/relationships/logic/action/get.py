@@ -29,14 +29,17 @@ def package_relationships_list(original_action, context, data_dict):
                 for relationship in relationships:
                     if not relationship.object_package_id:
                         relationship_dicts.append(
-                            {'subject': id,
+                            {'id': relationship.id,
+                             'subject': id,
                              'type': relationship.type,
                              'object': None,
                              'comment': relationship.comment}
                         )
                     else:
                         # Normal CKAN package to package relationship
-                        relationship_dicts.append(relationship.as_dict(pkg_obj))
+                        relationship_dict = relationship.as_dict(pkg_obj)
+                        relationship_dict['id'] = relationship.id
+                        relationship_dicts.append(relationship_dict)
             else:
                 log.debug('>>> NO Relationships found for package ID: {0} <<<'.format(id))
         except Exception as e:

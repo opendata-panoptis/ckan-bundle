@@ -42,3 +42,9 @@ coverage.xml
 docs/_build/
 
 .coveralls.yml
+
+# Ignore IDE files
+.idea/
+*.iml
+modules.xml
+profiles_settings.xml

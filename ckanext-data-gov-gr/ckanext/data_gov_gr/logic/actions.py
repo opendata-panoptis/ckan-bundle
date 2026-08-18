@@ -48,6 +48,22 @@ def user_delete(original_action, context, data_dict):
 
     return original_action(context, data_dict)
 
+
+def _drop_read_only_relationship_fields(data_dict: Dict[str, Any]) -> None:
+    """
+    Relationships are exposed in package_show for API visibility, but they are
+    managed by the dedicated package relationship actions, not package_update.
+    """
+    data_dict.pop('relationships_as_subject', None)
+    data_dict.pop('relationships_as_object', None)
+
+
+@toolkit.chained_action
+def package_update(original_action, context, data_dict):
+    _drop_read_only_relationship_fields(data_dict)
+    return original_action(context, data_dict)
+
+
 # ----------------------------------------------------------------------------------------------
 
 # Define some shortcuts

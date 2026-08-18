@@ -51,7 +51,7 @@ class BaseAzureUploader(object):
         return directory
 
     def get_blob_service_client(self):
-        log.debug('connect_str: ' + self.connect_str)
+        log.debug('Initializing Azure BlobServiceClient from configured connection string')
         return BlobServiceClient.from_connection_string(self.connect_str)
 
     def get_container_client(self, container_name):

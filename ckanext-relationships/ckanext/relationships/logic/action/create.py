@@ -74,15 +74,25 @@ def package_relationship_create(original_action, context, data_dict):
         # Αν δημιουργούμε διασύνδεση σύνολων δεδομένων
         log.info('*** Reverting to core CKAN package_relationship_create for:')
         log.info(data_dict)
+        original_defer_commit = context.get('defer_commit')
+        action_context = context
+
+        if not original_defer_commit:
+            action_context = dict(context)
+            action_context['defer_commit'] = True
+
         try:
 
             if not pkg2:
                 raise NotFound('>>> Object package {0} was not found.'.format(object_id))
 
-            result = original_action(context, data_dict)
+            result = original_action(action_context, data_dict)
+
+            if action_context.get('relationship') is not None:
+                context['relationship'] = action_context['relationship']
 
             # Optional: Commit if not deferred
-            if not context.get('defer_commit'):
+            if not original_defer_commit:
                 model.repo.commit_and_remove()
 
             log.info('>>> Core relationship created successfully.')
@@ -94,6 +104,8 @@ def package_relationship_create(original_action, context, data_dict):
 
         except Exception as ex:
             log.error('>>> Unexpected error in fallback relationship creation: %s', ex)
+            if not original_defer_commit:
+                model.Session.rollback()
             raise
 
     # return True

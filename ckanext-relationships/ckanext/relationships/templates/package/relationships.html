@@ -33,10 +33,12 @@
                                 <a href="{{ h.url_for('dataset.read', id=relationship.object) }}" class="text-primary fw-semibold">
                                     {{ relationship.title }}
                                 </a>
-                            {% else %}
+                            {% elif relationship.comment %}
                                 <a href="{{ relationship.comment }}" target="_blank" class="text-primary">
                                     {{ relationship.comment }}
                                 </a>
+                            {% else %}
+                                <span class="text-muted">{{ _('Missing relationship target') }}</span>
                             {% endif %}
                         </td>
                         {% if h.check_access('package_update', {'id':pkg.id }) %}
@@ -46,12 +48,14 @@
                                    class="btn btn-outline-danger btn-sm">
                                     {{ _('Delete') }}
                                 </a>
-                            {% else %}
+                            {% elif relationship.comment %}
                                 {% set uri = h.quote_uri(relationship.comment) %}
                                 <a href="{{ h.url_for('relationships.delete', id=pkg_dict['name'], type=relationship.type, rel_by='uri', reference=uri) }}"
                                    class="btn btn-outline-danger btn-sm">
                                     {{ _('Delete') }}
                                 </a>
+                            {% else %}
+                                <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         {% endif %}

@@ -15,6 +15,21 @@ from . import action
 log = __import__('logging').getLogger(__name__)
 
 
+def _request_queued_dataset_ids():
+    """Return the per-request set of datasets already handled, if available."""
+    try:
+        queued_dataset_ids = getattr(
+            toolkit.g, '_downloadall_queued_dataset_ids', None)
+    except RuntimeError:
+        return None
+
+    if queued_dataset_ids is None:
+        queued_dataset_ids = set()
+        toolkit.g._downloadall_queued_dataset_ids = queued_dataset_ids
+
+    return queued_dataset_ids
+
+
 class DownloadallPlugin(plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.ITranslation)
     plugins.implements(plugins.IConfigurer)
@@ -173,6 +188,12 @@ class DownloadallPlugin(plugins.SingletonPlugin, DefaultTranslation):
 def enqueue_update_zip(dataset_name, dataset_id, operation,user=None ):
     # skip task if the dataset is already queued
     queue = 'bulk'
+    request_dataset_ids = _request_queued_dataset_ids()
+    if request_dataset_ids is not None and dataset_id in request_dataset_ids:
+        log.debug('Already handled downloadall queue check for dataset in '
+                  'this request: {} {}'.format(dataset_name, dataset_id))
+        return
+
     jobs = toolkit.get_action('job_list')(
         {'ignore_auth': True}, {'queues': [queue]})
     if jobs:
@@ -186,6 +207,8 @@ def enqueue_update_zip(dataset_name, dataset_id, operation,user=None ):
                 if dataset_id == queued_dataset_id:
                     log.info('Already queued dataset: {} {}'
                              .format(dataset_name, dataset_id))
+                    if request_dataset_ids is not None:
+                        request_dataset_ids.add(dataset_id)
                     return
 
     # add this dataset to the queue
@@ -198,6 +221,8 @@ def enqueue_update_zip(dataset_name, dataset_id, operation,user=None ):
         title=u'DownloadAll {} "{}" {}'.format(operation, dataset_name,
                                                dataset_id),
         queue=queue)
+    if request_dataset_ids is not None:
+        request_dataset_ids.add(dataset_id)
 
 
 def purge_downloadall_zip(dataset_id, user=None):

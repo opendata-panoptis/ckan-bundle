@@ -668,6 +668,7 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
             'organization_list_with_user_extras': actions.organization_list_with_user_extras,
             'user_organization_capacity': actions.user_organization_capacity,
             'user_delete': actions.user_delete,
+            'package_update': actions.package_update,
             'geonames_get': self.geonames_get_action,
             'geonames_search': self.geonames_search_action # Κλήση για ανάκτηση αποτελεσμάτων σε geoname
         }

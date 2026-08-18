@@ -16,8 +16,10 @@
                 <td>
                     {% if relationship.object %}
                         <a href="{{ h.url_for('dataset_read', id=relationship.object) }}">{{ relationship.title }}</a>
-                    {% else %}
+                    {% elif relationship.comment %}
                         <a href="{{ relationship.comment }}">{{ relationship.comment }}</a>
+                    {% else %}
+                        <span class="text-muted">{{ _('Missing relationship target') }}</span>
                     {% endif %}
                     {% if relationship.type == 'derives_from' %}
                         <h4>Lineage notes:</h4>

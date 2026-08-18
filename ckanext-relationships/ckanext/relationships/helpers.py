@@ -27,6 +27,8 @@ def get_relationships(id, context=None):
         context = {u'model': model, u'session': model.Session,
                    u'user': user[u'name']}
 
+    relationships = []
+
     try:
         relationships = get_action('package_relationships_list')(context, {'id': id})
     except Exception as e:
@@ -35,21 +37,31 @@ def get_relationships(id, context=None):
         # @TODO: why does it not throw an exception here?
 
     if relationships:
+        valid_relationships = []
+
         try:
             for relationship in relationships:
                 # log.debug(relationship)
-                if relationship['object']:
+                if relationship.get('object'):
                     # QDES: handle standard CKAN dataset to dataset relationships
                     package = get_action('package_show')(context, {'id': relationship['object']})
                     if package:
                         relationship['title'] = package['title']
-                else:
+                    valid_relationships.append(relationship)
+                elif relationship.get('comment'):
                     # QDES: handle CKAN dataset to EXTERNAL URI relationships
                     relationship['title'] = relationship['comment']
+                    valid_relationships.append(relationship)
+                else:
+                    log.warning(
+                        'Skipping package relationship without object or URI comment for package %s: %s',
+                        id,
+                        relationship
+                    )
         except Exception as e:
-            print(str(e))
+            log.error(str(e))
 
-        return relationships
+        return valid_relationships
     else:
         return []
 
@@ -226,7 +238,9 @@ def get_relationship_types(field=None):
 
 def quote_uri(uri):
     from urllib.parse import quote
-    return quote(uri, safe='')
+    if uri is None:
+        return ''
+    return quote(str(uri), safe='')
 
 
 def unquote_uri(uri):

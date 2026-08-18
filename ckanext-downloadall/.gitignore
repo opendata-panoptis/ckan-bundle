@@ -42,3 +42,7 @@ coverage.xml
 docs/_build/
 
 .vscode
+
+# IDE files
+.idea/
+*.iml
