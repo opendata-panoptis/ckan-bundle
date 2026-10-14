@@ -1,9 +1,17 @@
 import logging
+import re
 from ckan.plugins import toolkit
 from ckan.lib.helpers import lang
 from markupsafe import Markup, escape
 
 log = logging.getLogger(__name__)
+
+# Κείμενα αναφοράς, ένα ανά γλώσσα, επεξεργάσιμα από το /ckan-admin/config
+CITATION_LANGUAGES = ('el', 'en')
+CITATION_TEMPLATE_OPTION = 'ckanext.athens_theme.citation.template_{}'
+_CITATION_PLACEHOLDER_RE = re.compile(r'\{(title|url)\}')
+# Κάθε ζεύγος αγκίστρων ή μεμονωμένο άγκιστρο, για τον έλεγχο του κειμένου
+_CITATION_BRACES_RE = re.compile(r'\{[^{}]*\}|[{}]')
 
 def get_municipality_name():
     """Returns the municipality name based on the current language."""
@@ -80,6 +88,58 @@ def get_site_statistics():
             'organization_count': 0,
             'resource_count': 0
         }
+
+def citation_template_validator(value):
+    """Δέχεται άγκιστρα μόνο στις μεταβλητές {title} και {url}."""
+    invalid = list(dict.fromkeys(
+        token for token in _CITATION_BRACES_RE.findall(value)
+        if not _CITATION_PLACEHOLDER_RE.fullmatch(token)))
+    if invalid:
+        raise toolkit.Invalid(
+            toolkit._('Invalid placeholders: %(placeholders)s. Use exactly {title} '
+                      'and {url}; curly braces are not allowed anywhere else.')
+            % {'placeholders': ', '.join(invalid)})
+    return value
+
+def get_dataset_citation(pkg_dict):
+    """Επιστρέφει το κείμενο αναφοράς ενός dataset ή None αν δεν εμφανίζεται.
+
+    Εμφανίζεται μόνο σε δημόσια, ενεργά datasets τύπου dataset, γιατί στα
+    υπόλοιπα ο σύνδεσμος δεν ανοίγει για όλους. Χρησιμοποιεί το κείμενο της
+    γλώσσας της σελίδας· αν είναι κενό, το ελληνικό και μετά το αγγλικό.
+    Συμπληρώνει τον τίτλο του dataset και τον μόνιμο σύνδεσμό του.
+    """
+    try:
+        if (pkg_dict.get('type') != 'dataset' or pkg_dict.get('private')
+                or pkg_dict.get('state') != 'active'):
+            return None
+
+        # Πρώτα η γλώσσα της σελίδας και μετά οι υπόλοιπες με τη σειρά τους
+        current_lang = lang()
+        for citation_lang in sorted(CITATION_LANGUAGES, key=lambda code: code != current_lang):
+            template = toolkit.config.get(CITATION_TEMPLATE_OPTION.format(citation_lang)).strip()
+            if template:
+                break
+        else:
+            return None
+
+        titles = pkg_dict.get('title_translated')
+        if not isinstance(titles, dict):
+            titles = {}
+        title = (titles.get(citation_lang) or pkg_dict.get('title')
+                 or next((t for t in titles.values() if t), None)
+                 or pkg_dict['name'])
+
+        # Ο σύνδεσμος με το id λειτουργεί και αν αλλάξει το όνομα του dataset
+        url = toolkit.url_for('dataset.read', id=pkg_dict['id'], _external=True,
+                              locale='default')
+
+        values = {'title': title, 'url': url}
+        return _CITATION_PLACEHOLDER_RE.sub(lambda match: values[match.group(1)], template)
+
+    except Exception as e:
+        log.error(f"Error in get_dataset_citation: {str(e)}")
+        return None
 
 
 def _render_athens_nodes(parts, nodes, longnames, base_url, use_longnames,

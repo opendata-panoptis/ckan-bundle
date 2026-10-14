@@ -1,0 +1,8 @@
+citation-js:
+  filter: rjsmin
+  output: athens_theme/%(version)s_citation.js
+  contents:
+    - citation.js
+  extra:
+    preload:
+      - base/main

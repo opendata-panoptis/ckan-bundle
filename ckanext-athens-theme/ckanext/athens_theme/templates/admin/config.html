@@ -1,0 +1,36 @@
+{% ckan_extends %}
+
+{% import 'macros/form.html' as form %}
+
+{# Συμπληρώνει τα σημεία επέκτασης της σελίδας /ckan-admin/config του data_gov_gr #}
+
+{% block dg_config_extra_sections %}
+  {{ super() }}
+  <section id="dg-config-citation" class="dg-config-section" data-dg-section="dg-config-citation">
+    <h3>{{ _('Dataset citation') }}</h3>
+
+    {% for language, label, placeholder in [
+      ('el', _('Citation text (Greek)'), 'Το σύνολο δεδομένων «{title}» δημοσιεύτηκε στην Πύλη Ανοικτών Δεδομένων του Δήμου Αθηναίων. Διαθέσιμο στο: {url}'),
+      ('en', _('Citation text (English)'), 'The dataset "{title}" was published on the City of Athens Open Data Portal. Available at: {url}'),
+    ] %}
+      {% set key = 'ckanext.athens_theme.citation.template_' ~ language %}
+      {{ form.textarea(key, id='field-' ~ key, label=label, value=data[key], error=errors[key], placeholder=placeholder) }}
+    {% endfor %}
+  </section>
+{% endblock %}
+
+{% block dg_config_extra_nav %}
+  {{ super() }}
+  <li><a href="#dg-config-citation">{{ _('Dataset citation') }}</a></li>
+{% endblock %}
+
+{% block dg_config_extra_help %}
+  {{ super() }}
+  <div class="dg-help-section" data-dg-help="dg-config-citation">
+    <h4>{{ _('Dataset citation') }}</h4>
+    <ul>
+      <li><strong>{{ _('Citation text') }}:</strong> {{ _('Shown on public datasets (not on data services), with a copy button. {title} is replaced by the title of the dataset and {url} by its permanent link.') }}</li>
+      <li>{{ _('When one of the two texts is empty, the other one is used. When both are empty, the citation is not shown.') }}</li>
+    </ul>
+  </div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% ckan_extends %}
+
+{# Η αναφορά μπαίνει μετά τις «Επιπρόσθετες πληροφορίες» και πριν από την
+   ανατροφοδότηση και τα σχόλια (ckanext-comments). Γίνεται εδώ και όχι στο
+   package/read.html, γιατί το scheming αντικαθιστά το package_additional_info
+   χωρίς super(). Το ποια datasets έχουν αναφορά το αποφασίζει το helper. #}
+{% block package_additional_info %}
+  {{ super() }}
+  {% snippet 'package/snippets/citation.html', pkg_dict=pkg %}
+{% endblock %}

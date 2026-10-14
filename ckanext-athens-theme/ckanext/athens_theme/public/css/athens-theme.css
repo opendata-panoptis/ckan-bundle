@@ -1044,3 +1044,40 @@ details[open] > .org-tree-summary .org-tree-toggle::before{
 .org-tree a:hover{ text-decoration: underline; }
 
 /* -------------------------------------------------------------------- */
+
+/* Βιβλιογραφική αναφορά dataset (package/snippets/citation.html) */
+.athens-citation {
+  margin: 30px 0 12px;
+}
+
+/* Μικρότερη επικεφαλίδα από τις άλλες ενότητες: η αναφορά είναι βοηθητική */
+.athens-citation h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Η διάταξη (flex, gap) γίνεται με κλάσεις του Bootstrap στο template */
+.athens-citation-body {
+  padding: 8px 10px;
+  background: var(--light-bg);
+  border: 1px solid var(--light-gray);
+  border-radius: 4px;
+}
+
+.athens-citation-text {
+  margin: 0;
+  color: #495057;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* Σταθερό ύψος, ώστε το μήνυμα αντιγραφής να μη μετακινεί τη σελίδα */
+.athens-citation-status {
+  min-height: 1.25rem;
+  margin-top: 4px;
+  color: var(--athens-gray);
+  font-size: 0.8rem;
+}

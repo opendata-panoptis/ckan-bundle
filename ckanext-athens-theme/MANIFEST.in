@@ -4,6 +4,8 @@ include requirements.txt
 
 recursive-include ckanext/athens_theme/templates *
 recursive-include ckanext/athens_theme/public *
+recursive-include ckanext/athens_theme/assets *
+include ckanext/athens_theme/config_declaration.yaml
 
 recursive-include ckanext/athens_theme/i18n *
 

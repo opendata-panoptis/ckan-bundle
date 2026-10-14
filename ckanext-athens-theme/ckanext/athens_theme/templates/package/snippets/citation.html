@@ -1,0 +1,30 @@
+{#
+Εμφανίζει την αναφορά ενός dataset με κουμπί αντιγραφής. Δεν εμφανίζει τίποτα
+αν δεν έχει οριστεί κείμενο αναφοράς στο /ckan-admin/config (ή στο ini) ή αν το
+dataset δεν είναι δημόσιο και ενεργό.
+
+pkg_dict - το dict του dataset
+
+Παράδειγμα:
+
+  {% snippet 'package/snippets/citation.html', pkg_dict=pkg %}
+
+#}
+{% set citation = h.athens_theme_dataset_citation(pkg_dict) %}
+{% if citation %}
+  <section class="athens-citation" data-module="athens-citation"
+           data-module-copied-text="{{ _('Citation copied') }}"
+           data-module-failed-text="{{ _('Copy failed. Select the text and copy it manually.') }}">
+    <h3>{{ _('Suggested citation') }}</h3>
+    <div class="athens-citation-body d-flex flex-column flex-sm-row align-items-start gap-3">
+      <p class="athens-citation-text flex-grow-1">{{ citation }}</p>
+      <button type="button" class="btn btn-default btn-sm athens-citation-copy flex-shrink-0"
+              aria-label="{{ _('Copy citation') }}" hidden>
+        <i class="fa fa-copy" aria-hidden="true"></i>
+        {{ _('Copy') }}
+      </button>
+    </div>
+    <div class="athens-citation-status" role="status" aria-live="polite"></div>
+  </section>
+  {% asset 'athens_theme_citation/citation-js' %}
+{% endif %}

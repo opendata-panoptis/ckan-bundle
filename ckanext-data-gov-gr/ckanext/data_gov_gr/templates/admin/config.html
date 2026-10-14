@@ -797,6 +797,10 @@
         ) }}
       </section>
 
+      {# Σημεία επέκτασης για ενότητες άλλων plugins (π.χ. athens_theme):
+         dg_config_extra_sections, dg_config_extra_nav και dg_config_extra_help. #}
+      {% block dg_config_extra_sections %}{% endblock %}
+
 	      <style>
 	        /* When showing all sections, keep spacing between them. */
 	        #dg-config-content:not(.dg-config-enhanced) .dg-config-section + .dg-config-section { margin-top: 2rem; }
@@ -951,6 +955,7 @@
       <li><a href="#dg-config-contact">{{ _('Επικοινωνία') }}</a></li>
       <li><a href="#dg-config-survey">{{ _('Έρευνα') }}</a></li>
       <li><a href="#dg-config-showcases">{{ _('Showcases') }}</a></li>
+      {% block dg_config_extra_nav %}{% endblock %}
     </ul>
   </div>
 
@@ -1054,6 +1059,8 @@
         <li><strong>{{ _('Κείμενο αποποίησης ευθύνης') }}:</strong> {{ _('Κείμενο που εμφανίζεται στη σελίδα εφαρμογών (showcases). Υποστηρίζει απλό HTML.') }}</li>
       </ul>
     </div>
+
+    {% block dg_config_extra_help %}{% endblock %}
   </div>
 
   <style>

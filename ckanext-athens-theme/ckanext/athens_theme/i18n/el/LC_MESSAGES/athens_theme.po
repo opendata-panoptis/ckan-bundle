@@ -115,3 +115,53 @@ msgstr "Με την υποστήριξη του"
 
 msgid "Showcases"
 msgstr "Εφαρμογές"
+
+msgid "Dataset citation"
+msgstr "Βιβλιογραφική αναφορά"
+
+msgid "Suggested citation"
+msgstr "Προτεινόμενη αναφορά"
+
+msgid "Copy citation"
+msgstr "Αντιγραφή αναφοράς"
+
+msgid "Copy"
+msgstr "Αντιγραφή"
+
+msgid "Citation copied"
+msgstr "Η αναφορά αντιγράφηκε"
+
+msgid "Copy failed. Select the text and copy it manually."
+msgstr "Η αντιγραφή απέτυχε. Επιλέξτε το κείμενο και αντιγράψτε το χειροκίνητα."
+
+msgid "Citation text"
+msgstr "Κείμενο αναφοράς"
+
+msgid "Citation text (Greek)"
+msgstr "Κείμενο αναφοράς (Ελληνικά)"
+
+msgid "Citation text (English)"
+msgstr "Κείμενο αναφοράς (Αγγλικά)"
+
+msgid ""
+"Shown on public datasets (not on data services), with a copy button. {title} "
+"is replaced by the title of the dataset and {url} by its permanent link."
+msgstr ""
+"Εμφανίζεται στα δημόσια σύνολα δεδομένων (όχι στις υπηρεσίες δεδομένων), μαζί "
+"με κουμπί αντιγραφής. Το {title} αντικαθίσταται από τον τίτλο του συνόλου "
+"δεδομένων και το {url} από τον μόνιμο σύνδεσμό του."
+
+msgid ""
+"When one of the two texts is empty, the other one is used. When both are "
+"empty, the citation is not shown."
+msgstr ""
+"Αν ένα από τα δύο κείμενα είναι κενό, χρησιμοποιείται το άλλο. Αν είναι κενά "
+"και τα δύο, η αναφορά δεν εμφανίζεται."
+
+#, python-format
+msgid ""
+"Invalid placeholders: %(placeholders)s. Use exactly {title} and {url}; curly "
+"braces are not allowed anywhere else."
+msgstr ""
+"Μη έγκυρες μεταβλητές: %(placeholders)s. Χρησιμοποιήστε ακριβώς {title} και "
+"{url}· τα άγκιστρα δεν επιτρέπονται πουθενά αλλού."

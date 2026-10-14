@@ -1,0 +1,20 @@
+version: 1
+groups:
+  - annotation: ckanext-athens-theme βιβλιογραφική αναφορά dataset
+    options:
+      - key: ckanext.athens_theme.citation.template_el
+        default: ''
+        description: |
+          Ελληνικό κείμενο αναφοράς που εμφανίζεται στα δημόσια σύνολα δεδομένων
+          (όχι στις υπηρεσίες δεδομένων), με κουμπί αντιγραφής. Το {title}
+          αντικαθίσταται από τον τίτλο του dataset και το {url} από τον μόνιμο
+          σύνδεσμό του. Επεξεργάσιμο από το /ckan-admin/config· αν μείνει κενό,
+          χρησιμοποιείται το αγγλικό κείμενο.
+        example: 'Το σύνολο δεδομένων «{title}» δημοσιεύτηκε στην Πύλη Ανοικτών Δεδομένων του Δήμου Αθηναίων. Διαθέσιμο στο: {url}'
+
+      - key: ckanext.athens_theme.citation.template_en
+        default: ''
+        description: |
+          Αγγλικό κείμενο αναφοράς. Αν μείνει κενό, χρησιμοποιείται το ελληνικό
+          κείμενο. Αν είναι κενά και τα δύο, η αναφορά δεν εμφανίζεται.
+        example: 'The dataset "{title}" was published on the City of Athens Open Data Portal. Available at: {url}'

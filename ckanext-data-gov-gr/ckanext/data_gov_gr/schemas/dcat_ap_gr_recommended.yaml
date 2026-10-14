@@ -339,8 +339,8 @@ dataset_fields:
   default_jinja2: "{{ h.get_dataset_legislation_default() }}"
   validators: ignore_missing scheming_multiple_text
   help_text:
-    el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση του συνόλου δεδομένων
-    en: The legislation that mandates the creation or management of the dataset
+    el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση του συνόλου δεδομένων. Συνιστάται, σύμφωνα με τα ευρωπαϊκά πρότυπα μεταδεδομένων, η χρήση URL/URI όπου εμφανίζεται η νομοθεσία αντί για απλή λεκτική αναφορά.
+    en: The legislation that mandates the creation or management of the dataset. In line with European metadata standards, prefer using a URL/URI where the legislation is available instead of a plain-text reference.
 
 - field_name: hvd_category
   label:
@@ -580,8 +580,8 @@ resource_fields:
   preset: multiple_text
   validators: ignore_missing scheming_multiple_text
   help_text:
-    el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση του συνόλου δεδομένων
-    en: The legislation that mandates the creation or management of the dataset
+    el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση του συνόλου δεδομένων. Συνιστάται, σύμφωνα με τα ευρωπαϊκά πρότυπα μεταδεδομένων, η χρήση URL/URI όπου εμφανίζεται η νομοθεσία αντί για απλή λεκτική αναφορά.
+    en: The legislation that mandates the creation or management of the dataset. In line with European metadata standards, prefer using a URL/URI where the legislation is available instead of a plain-text reference.
 
 - field_name: access_services
   label:

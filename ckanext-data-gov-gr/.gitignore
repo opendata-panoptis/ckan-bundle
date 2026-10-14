@@ -41,10 +41,6 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
-*.iml
-modules.xml
-profiles_settings.xml
-
 # Ignore IDE files
 *.iml
 modules.xml

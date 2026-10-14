@@ -132,8 +132,8 @@ dataset_fields:
   preset: multiple_text
   validators: ignore_missing scheming_multiple_text
   help_text:
-    en: The legislation that mandates the creation or management of the Data Service
-    el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση της Υπηρεσίας Δεδομένων
+    en: The legislation that mandates the creation or management of the Data Service. In line with European metadata standards, prefer using a URL/URI where the legislation is available instead of a plain-text reference.
+    el: Η νομοθεσία που επιβάλλει τη δημιουργία ή τη διαχείριση της Υπηρεσίας Δεδομένων. Συνιστάται, σύμφωνα με τα ευρωπαϊκά πρότυπα μεταδεδομένων, η χρήση URL/URI όπου εμφανίζεται η νομοθεσία αντί για απλή λεκτική αναφορά.
 
 # required in DCAT-AP-HVD
 - field_name: contact
