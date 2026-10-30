@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, redirect, stream_with_context
+from flask import Blueprint, redirect
 from flask.views import MethodView
 from typing import Dict, Any
 import time
@@ -16,7 +16,7 @@ from ckan import model
 
 from ckanext.data_gov_gr.logic.mqa_calculator import MQACalculator
 from ckanext.data_gov_gr.stats import DataGovStats
-import requests
+from ckanext.data_gov_gr import gitbook_print
 
 from ckanext.data_gov_gr.admin_views import admin_blueprint
 
@@ -24,8 +24,7 @@ log = logging.getLogger(__name__)
 
 blueprint = Blueprint('dataset_type', __name__)
 
-GITBOOK_PDF_ENDPOINT = 'https://api.gitbook.com/v1/spaces/{space_id}/pdf'
-GITBOOK_PDF_TIMEOUT = 60
+GITBOOK_PRINT_TEMPLATE = 'data_gov_gr/gitbook/print.html'
 
 
 def _require_sysadmin_for_stats():
@@ -45,111 +44,31 @@ def _require_sysadmin_for_stats():
 
 @blueprint.route('/guides/pdf')
 def download_guides_pdf():
-    space_id = config.get('ckanext.data_gov_gr.gitbook.space_id')
-    token = config.get('ckanext.data_gov_gr.gitbook.api_token')
-    inline_requested = (request.args.get('inline') or '').strip().lower() in {
-        '1', 'true', 'yes', 'on'
-    }
+    """
+    Σελίδα εκτύπωσης με όλους τους οδηγούς (το PDF βγαίνει από τον browser).
 
-    if not space_id or not token:
-        log.warning('GitBook PDF download requested without configured credentials')
+    Τη φτιάχνει το CKAN από το markdown του GitBook, με όλες τις ορατές σελίδες,
+    αφού το PDF export του GitBook θέλει πλέον πληρωμένο πλάνο.
+    """
+    settings = gitbook_print.get_settings()
+    if settings is None:
+        log.warning('GitBook guides requested without space_id/api_token/guides_base_url')
         abort(404)
 
-    api_url = GITBOOK_PDF_ENDPOINT.format(space_id=space_id.strip())
-    headers = {
-        'Authorization': f'Bearer {token.strip()}',
-        'Accept': 'application/json, application/pdf'
-    }
+    space_id, token, guides_url = settings
+    document = gitbook_print.get_document(space_id, token, guides_url)
+    if document is None:
+        log.error('GitBook guides print could not be built; redirecting to %s', guides_url)
+        return redirect(guides_url)
 
-    try:
-        response = requests.get(api_url, headers=headers, stream=True, timeout=GITBOOK_PDF_TIMEOUT)
-    except requests.RequestException as exc:
-        log.error('GitBook PDF request failed: %s', exc)
-        abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
+    # Τίτλος όπως στο PDF export του GitBook: ο τίτλος του space
+    title = document.get('title') or ('Οδηγοί' if lang() == 'el' else toolkit._('Guides'))
+    return render(GITBOOK_PRINT_TEMPLATE, {
+        'title': title,
+        'content': document['html'],
+        'guides_url': guides_url,
+    })
 
-    if response.status_code >= 400:
-        try:
-            error_preview = response.text[:500]
-        except Exception:
-            error_preview = '<binary>'
-        log.error('GitBook PDF request failed (%s): %s', response.status_code, error_preview)
-        abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
-
-    content_type = response.headers.get('Content-Type', '')
-    if 'application/json' in content_type.lower():
-        try:
-            payload = response.json()
-        except ValueError:
-            response.close()
-            log.error('GitBook PDF JSON response could not be decoded')
-            abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
-
-        download_url = payload.get('url')
-        if download_url:
-            # Για εμφάνιση σε iframe θέλουμε inline PDF από το δικό μας origin.
-            if not inline_requested:
-                response.close()
-                return redirect(download_url)
-
-            response.close()
-            try:
-                pdf_response = requests.get(
-                    download_url,
-                    stream=True,
-                    timeout=GITBOOK_PDF_TIMEOUT
-                )
-            except requests.RequestException as exc:
-                log.error('GitBook PDF download URL request failed: %s', exc)
-                abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
-
-            if pdf_response.status_code >= 400:
-                try:
-                    error_preview = pdf_response.text[:500]
-                except Exception:
-                    error_preview = '<binary>'
-                log.error(
-                    'GitBook PDF download URL request failed (%s): %s',
-                    pdf_response.status_code,
-                    error_preview
-                )
-                abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
-
-            def generate_pdf():
-                try:
-                    for chunk in pdf_response.iter_content(chunk_size=8192):
-                        if chunk:
-                            yield chunk
-                finally:
-                    pdf_response.close()
-
-            filename = f'guides-{space_id.strip()}.pdf'
-            response_headers = {
-                'Content-Type': pdf_response.headers.get('Content-Type', 'application/pdf') or 'application/pdf',
-                'Content-Disposition': f'inline; filename="{filename}"',
-            }
-
-            return Response(stream_with_context(generate_pdf()), headers=response_headers)
-
-        response.close()
-        log.error('GitBook PDF JSON response did not include a download URL: %s', payload)
-        abort(502, toolkit._('Δεν ήταν δυνατή η λήψη του PDF. Προσπαθήστε ξανά αργότερα.'))
-
-    def generate():
-        try:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    yield chunk
-        finally:
-            response.close()
-
-    filename = f'guides-{space_id.strip()}.pdf'
-    disposition = 'inline' if inline_requested else 'attachment'
-    response_headers = {
-        'Content-Type': content_type or 'application/pdf',
-        'Content-Disposition': f'{disposition}; filename="{filename}"',
-    }
-
-    return Response(stream_with_context(generate()), headers=response_headers)
 
 def redirect_to_dataset_type():
     current_lang = lang()

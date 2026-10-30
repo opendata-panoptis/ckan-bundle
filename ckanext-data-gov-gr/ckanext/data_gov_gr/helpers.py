@@ -16,6 +16,7 @@ from flask_login import current_user as _cu
 from typing import (cast, Union)
 from sqlalchemy import func
 
+from ckanext.data_gov_gr import gitbook_print
 from ckanext.data_gov_gr.stats import DataGovStats
 
 
@@ -795,11 +796,10 @@ def get_contact_gitbook_embed_items():
 
 def has_gitbook_pdf_export():
     """
-    Check whether the GitBook PDF export configuration is complete.
+    Check whether the GitBook guides PDF configuration is complete
+    (space_id, api_token και guides_base_url, όπως τα θέλουν τα views).
     """
-    space_id = get_config_value('ckanext.data_gov_gr.gitbook.space_id')
-    token = get_config_value('ckanext.data_gov_gr.gitbook.api_token')
-    return bool(space_id and token)
+    return gitbook_print.get_settings() is not None
 
 
 def _localize_data_service_label(text):

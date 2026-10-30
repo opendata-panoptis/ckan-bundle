@@ -75,7 +75,7 @@
           </aside>
           {% if h.has_gitbook_pdf_export() %}
             {% set pdf_module_title = 'Κατεβάστε τους οδηγούς (PDF)' if h.lang() == 'el' else _('Download guides (PDF)') %}
-            {% set pdf_module_description = 'Ανοίξτε σε νέα καρτέλα το αρχείο PDF που περιλαμβάνει όλους τους οδηγούς της πλατφόρμας.' if h.lang() == 'el' else _('Open in a new tab the PDF that contains all platform guides.') %}
+            {% set pdf_module_description = 'Ανοίξτε σε νέα καρτέλα όλους τους οδηγούς της πλατφόρμας, έτοιμους για εκτύπωση ή αποθήκευση ως PDF.' if h.lang() == 'el' else _('Open all platform guides in a new tab, ready to print or save as PDF.') %}
             {% set pdf_module_button = 'Λήψη PDF' if h.lang() == 'el' else _('Download PDF') %}
             <aside class="module module-narrow module-shallow pdf-guides-module">
               <h2 class="module-heading"><i class="fa fa-file-pdf-o"></i> {{ pdf_module_title }}</h2>

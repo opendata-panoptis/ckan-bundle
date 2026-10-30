@@ -229,6 +229,15 @@ class DataGovGrPlugin(plugins.SingletonPlugin):
         ], ensure_ascii=False)).set_description(
             "Contact page GitBook dropdown items as JSON list."
         )
+        declaration.declare(root.gitbook.space_id, "").set_description(
+            "GitBook space ID of the guides (structure/title for the guides print page)."
+        )
+        declaration.declare(root.gitbook.api_token, "").set_description(
+            "GitBook API token used to read the guides space."
+        )
+        declaration.declare(root.gitbook.pages_cache_ttl, 86400).set_description(
+            "Redis cache TTL (seconds) for the rendered guides print page. Default: 86400 (1 day)."
+        )
 
         declaration.annotate("Home page configuration")
         declaration.declare(home.portal_numbers.enabled, "no").set_description(
