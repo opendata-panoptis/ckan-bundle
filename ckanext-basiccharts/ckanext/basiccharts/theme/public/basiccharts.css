@@ -6,6 +6,15 @@
   display: none;
 }
 
+/* Το flot βάζει το legend με position:absolute μέσα στο γράφημα. Με πολλές
+   ομάδες (π.χ. 30 φέτες πίτας) ξεπερνά το ύψος του και πέφτει πάνω στο
+   υπόλοιπο περιεχόμενο της σελίδας, οπότε το κρατάμε μέσα και κυλά (OD-847) */
+.basicChart .legend table {
+  display: block;
+  max-height: calc(100% - 10px);
+  overflow-y: auto;
+}
+
 .dashboard-grid .basicChart {
   height: 100%;
   width: 95%;
